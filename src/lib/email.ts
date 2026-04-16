@@ -62,7 +62,7 @@ function emailLayout(title: string, body: string): string {
           <tr>
             <td style="padding:24px 40px 32px; border-top:1px solid #333;">
               <p style="margin:0; color:#666; font-size:12px;">
-                Demi's Restaurant · 141 Cricklewood Broadway, London NW2 3ED · 67 Streatham Hill, London SW2 4TX
+                Demi's Restaurant · 89 Cricklewood Broadway, London NW2 3JG · 67 Streatham Hill, London SW2 4TX
               </p>
               <p style="margin:8px 0 0; color:#555; font-size:11px;">
                 This is an automated message. Please do not reply directly to this email.

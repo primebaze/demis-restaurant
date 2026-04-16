@@ -4,6 +4,7 @@ import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { FloatingMenu } from "@/components/FloatingMenu";
 import { JsonLd } from "@/components/JsonLd";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -101,6 +102,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={jakarta.variable}>
       <body className="font-sans antialiased">
+        <ScrollToTop />
         <JsonLd />
         <main>{children}</main>
         <Footer />

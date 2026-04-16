@@ -34,7 +34,7 @@ export function JsonLd() {
           "Sunday",
         ],
         opens: "12:00",
-        closes: "23:00",
+        closes: "00:00",
       },
     ],
     servesCuisine: ["Nigerian", "African", "West African"],

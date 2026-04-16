@@ -36,7 +36,7 @@ interface Location {
   slug: string;
 }
 
-type Tab = "policies" | "addons" | "blackouts";
+type Tab = "policies" | "addons" | "blackouts" | "timeslots";
 
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState<Tab>("policies");
@@ -63,6 +63,7 @@ export default function AdminSettingsPage() {
 
   const TABS: { key: Tab; label: string }[] = [
     { key: "policies", label: "Booking Policies" },
+    { key: "timeslots", label: "Time Slots" },
     { key: "addons", label: "Add-ons" },
     { key: "blackouts", label: "Blackout Dates" },
   ];
@@ -98,6 +99,9 @@ export default function AdminSettingsPage() {
 
       {tab === "policies" && (
         <PoliciesPanel policies={policies} onRefresh={fetchSettings} />
+      )}
+      {tab === "timeslots" && (
+        <TimeSlotsPanel locations={locations} />
       )}
       {tab === "addons" && (
         <AddOnsPanel addOns={addOns} onRefresh={fetchSettings} />
@@ -491,6 +495,214 @@ function BlackoutsPanel({
             className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50"
           >
             {creating ? "Adding..." : "Add Blackout"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ──── Time Slots Panel ──── */
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+interface TimeSlotRow {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  maxCovers: number;
+  isActive: boolean;
+  location: { name: string; slug: string };
+}
+
+function TimeSlotsPanel({ locations }: { locations: Location[] }) {
+  const [slots, setSlots] = useState<TimeSlotRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterLoc, setFilterLoc] = useState(locations[0]?.id || "");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ startTime: "", endTime: "", maxCovers: 30 });
+
+  // New slot form
+  const [newDay, setNewDay] = useState(1);
+  const [newStart, setNewStart] = useState("12:00");
+  const [newEnd, setNewEnd] = useState("14:30");
+  const [newCovers, setNewCovers] = useState(30);
+  const [creating, setCreating] = useState(false);
+
+  const fetchSlots = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch(`/api/admin/settings/time-slots?location=${filterLoc}`);
+    const data = await res.json();
+    setSlots(data.slots || []);
+    setLoading(false);
+  }, [filterLoc]);
+
+  useEffect(() => {
+    if (filterLoc) fetchSlots();
+  }, [filterLoc, fetchSlots]);
+
+  async function toggleActive(id: string, isActive: boolean) {
+    await fetch("/api/admin/settings/time-slots", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, isActive: !isActive }),
+    });
+    fetchSlots();
+  }
+
+  async function saveEdit() {
+    await fetch("/api/admin/settings/time-slots", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editing, ...editForm }),
+    });
+    setEditing(null);
+    fetchSlots();
+  }
+
+  async function deleteSlot(id: string) {
+    await fetch("/api/admin/settings/time-slots", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    fetchSlots();
+  }
+
+  async function createSlot(e: React.FormEvent) {
+    e.preventDefault();
+    setCreating(true);
+    await fetch("/api/admin/settings/time-slots", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        locationId: filterLoc,
+        dayOfWeek: newDay,
+        startTime: newStart,
+        endTime: newEnd,
+        maxCovers: newCovers,
+      }),
+    });
+    setCreating(false);
+    fetchSlots();
+  }
+
+  // Group slots by day
+  const byDay: Record<number, TimeSlotRow[]> = {};
+  for (const s of slots) {
+    const d = s.dayOfWeek ?? 0;
+    if (!byDay[d]) byDay[d] = [];
+    byDay[d].push(s);
+  }
+
+  return (
+    <div>
+      {/* Location filter */}
+      <div className="flex gap-3 mb-6">
+        {locations.map((l) => (
+          <button
+            key={l.id}
+            onClick={() => setFilterLoc(l.id)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+              filterLoc === l.id ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-gray-400 border border-gray-800 hover:text-white"
+            }`}
+          >
+            {l.name}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="text-gray-500 py-8 text-center">Loading time slots...</div>
+      ) : (
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5, 6, 0].map((day) => {
+            const daySlots = byDay[day] || [];
+            return (
+              <div key={day} className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+                <div className="px-6 py-3 border-b border-gray-800 flex items-center justify-between">
+                  <h4 className="text-white font-semibold text-sm">{DAY_NAMES[day]}</h4>
+                  <span className="text-xs text-gray-500">{daySlots.length} slot{daySlots.length !== 1 ? "s" : ""}</span>
+                </div>
+                {daySlots.length === 0 ? (
+                  <div className="px-6 py-4 text-gray-600 text-sm">No slots</div>
+                ) : (
+                  <div className="divide-y divide-gray-800">
+                    {daySlots.map((s) => (
+                      <div key={s.id} className="px-6 py-3 flex items-center justify-between">
+                        {editing === s.id ? (
+                          <div className="flex items-center gap-3 flex-1">
+                            <input type="time" value={editForm.startTime} onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })} className="px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-sm [color-scheme:dark]" />
+                            <span className="text-gray-500">–</span>
+                            <input type="time" value={editForm.endTime} onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })} className="px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-sm [color-scheme:dark]" />
+                            <input type="number" value={editForm.maxCovers} onChange={(e) => setEditForm({ ...editForm, maxCovers: parseInt(e.target.value) || 0 })} className="px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-sm w-20" placeholder="Covers" />
+                            <button onClick={saveEdit} className="px-3 py-1 text-xs bg-gold-300 text-black rounded hover:bg-gold-400">Save</button>
+                            <button onClick={() => setEditing(null)} className="px-3 py-1 text-xs text-gray-400 hover:text-white">Cancel</button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-4">
+                              <span className={`text-sm font-medium ${s.isActive ? "text-white" : "text-gray-600 line-through"}`}>
+                                {s.startTime} – {s.endTime}
+                              </span>
+                              <span className="text-xs text-gray-500">{s.maxCovers} covers</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => { setEditing(s.id); setEditForm({ startTime: s.startTime, endTime: s.endTime, maxCovers: s.maxCovers }); }}
+                                className="px-2 py-1 text-xs text-gray-400 hover:text-white transition"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => toggleActive(s.id, s.isActive)}
+                                className={`px-2 py-1 text-xs rounded border transition ${s.isActive ? "text-green-400 border-green-400/30 hover:bg-green-400/10" : "text-gray-500 border-gray-700 hover:bg-white/5"}`}
+                              >
+                                {s.isActive ? "Active" : "Off"}
+                              </button>
+                              <button
+                                onClick={() => deleteSlot(s.id)}
+                                className="px-2 py-1 text-xs text-red-400 hover:text-red-300 transition"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Add new slot */}
+      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 mt-6">
+        <h3 className="text-white font-semibold mb-4">Add Time Slot</h3>
+        <form onSubmit={createSlot} className="flex flex-wrap gap-3 items-end">
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Day</label>
+            <select value={newDay} onChange={(e) => setNewDay(Number(e.target.value))} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm">
+              {[1, 2, 3, 4, 5, 6, 0].map((d) => <option key={d} value={d}>{DAY_NAMES[d]}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Start</label>
+            <input type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm [color-scheme:dark]" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">End</label>
+            <input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm [color-scheme:dark]" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Max Covers</label>
+            <input type="number" value={newCovers} onChange={(e) => setNewCovers(parseInt(e.target.value) || 0)} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm w-24" />
+          </div>
+          <button type="submit" disabled={creating} className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
+            {creating ? "Adding..." : "Add Slot"}
           </button>
         </form>
       </div>

@@ -55,15 +55,28 @@ function formatDateLong(d: string) {
   });
 }
 
-function getDates(days: number) {
-  const dates: string[] = [];
-  const start = new Date();
-  for (let i = 0; i < days; i++) {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    dates.push(d.toISOString().split("T")[0]);
+function getMonthDays(year: number, month: number) {
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startDow = firstDay.getDay(); // 0=Sun
+
+  // Build 6-row grid padded with nulls
+  const cells: (string | null)[] = [];
+  // Pad start (Mon-first: shift so Mon=0)
+  const startPad = (startDow + 6) % 7; // Monday-first offset
+  for (let i = 0; i < startPad; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    cells.push(iso);
   }
-  return dates;
+  return cells;
+}
+
+function getMaxDate(months: number) {
+  const d = new Date();
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().split("T")[0];
 }
 
 export default function BookingWidget() {
@@ -86,6 +99,25 @@ export default function BookingWidget() {
   const [guestPhone, setGuestPhone] = useState("");
   const [guestNotes, setGuestNotes] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  // ─── Calendar state ───
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+  const maxDate = getMaxDate(8);
+
+  function prevMonth() {
+    const now = new Date();
+    if (calYear === now.getFullYear() && calMonth === now.getMonth()) return;
+    if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); }
+    else setCalMonth(calMonth - 1);
+  }
+  function nextMonth() {
+    const max = new Date(maxDate + "T12:00:00");
+    if (calYear > max.getFullYear() || (calYear === max.getFullYear() && calMonth >= max.getMonth())) return;
+    if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); }
+    else setCalMonth(calMonth + 1);
+  }
 
   // Result
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
@@ -174,7 +206,6 @@ export default function BookingWidget() {
   }
 
   const depositRequired = policy && partySize >= policy.depositThreshold;
-  const dates = getDates(policy?.maxPartySize ? 30 : 30);
 
   // ─── Render step indicator ───
   function StepIndicator() {
@@ -231,8 +262,15 @@ export default function BookingWidget() {
     );
   }
 
-  // ─── STEP 1: Date ───
+  // ─── STEP 1: Date (Month Calendar) ───
   if (step === 1) {
+    const cells = getMonthDays(calYear, calMonth);
+    const monthLabel = new Date(calYear, calMonth).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    const now = new Date();
+    const canGoPrev = !(calYear === now.getFullYear() && calMonth === now.getMonth());
+    const maxD = new Date(maxDate + "T12:00:00");
+    const canGoNext = calYear < maxD.getFullYear() || (calYear === maxD.getFullYear() && calMonth < maxD.getMonth());
+
     return (
       <div>
         <StepIndicator />
@@ -241,31 +279,67 @@ export default function BookingWidget() {
           Booking at <span className="text-gold-300">{selectedLocation?.name}</span>
         </p>
 
-        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-          {dates.map((d) => (
-            <button
-              key={d}
-              onClick={() => {
-                setSelectedDate(d);
-                setStep(2);
-              }}
-              className={`p-3 rounded-xl text-center border transition-all ${
-                selectedDate === d
-                  ? "border-gold-300 bg-gold-300/10 text-gold-300"
-                  : "border-white/[0.06] bg-[#222] text-white hover:border-gold-300/20"
-              }`}
-            >
-              <p className="text-[10px] uppercase tracking-wider text-stone-500">
-                {new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short" })}
-              </p>
-              <p className="text-lg font-bold mt-0.5">
-                {new Date(d + "T12:00:00").getDate()}
-              </p>
-              <p className="text-[10px] text-stone-500">
-                {new Date(d + "T12:00:00").toLocaleDateString("en-GB", { month: "short" })}
-              </p>
-            </button>
+        {/* Month navigation */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={prevMonth}
+            disabled={!canGoPrev}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${canGoPrev ? "text-white hover:bg-white/10" : "text-stone-700 cursor-not-allowed"}`}
+          >
+            ‹
+          </button>
+          <h3 className="text-sm font-bold text-white tracking-wide">{monthLabel}</h3>
+          <button
+            onClick={nextMonth}
+            disabled={!canGoNext}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${canGoNext ? "text-white hover:bg-white/10" : "text-stone-700 cursor-not-allowed"}`}
+          >
+            ›
+          </button>
+        </div>
+
+        {/* Day headers (Mon-Sun) */}
+        <div className="grid grid-cols-7 gap-1 mb-1">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+            <div key={d} className="text-center text-[10px] font-semibold text-stone-600 uppercase py-1">
+              {d}
+            </div>
           ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {cells.map((dateStr, i) => {
+            if (!dateStr) return <div key={`pad-${i}`} />;
+            const isPast = dateStr < todayStr;
+            const isBeyond = dateStr > maxDate;
+            const disabled = isPast || isBeyond;
+            const isSelected = selectedDate === dateStr;
+            const dayNum = new Date(dateStr + "T12:00:00").getDate();
+            const isToday = dateStr === todayStr;
+
+            return (
+              <button
+                key={dateStr}
+                disabled={disabled}
+                onClick={() => {
+                  setSelectedDate(dateStr);
+                  setStep(2);
+                }}
+                className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-semibold transition-all ${
+                  disabled
+                    ? "text-stone-700 cursor-not-allowed"
+                    : isSelected
+                    ? "bg-gold-300 text-[#1a1a1a]"
+                    : isToday
+                    ? "border border-gold-300/40 text-gold-300 hover:bg-gold-300/10"
+                    : "text-white hover:bg-white/[0.06]"
+                }`}
+              >
+                {dayNum}
+              </button>
+            );
+          })}
         </div>
 
         <button onClick={() => setStep(0)} className="mt-6 text-sm text-stone-500 hover:text-white transition-colors">
@@ -345,9 +419,9 @@ export default function BookingWidget() {
                   <p className="text-sm font-bold">
                     {slot.startTime} – {slot.endTime}
                   </p>
-                  <p className={`text-[10px] mt-1 ${canFit ? "text-stone-400" : "text-stone-600"}`}>
-                    {canFit ? `${slot.remaining} covers left` : "Full"}
-                  </p>
+                  {!canFit && (
+                    <p className="text-[10px] mt-1 text-stone-600">Full</p>
+                  )}
                 </button>
               );
             })}

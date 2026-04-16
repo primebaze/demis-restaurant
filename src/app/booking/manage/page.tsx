@@ -52,9 +52,6 @@ function ManageContent() {
   const [booking, setBooking] = useState<BookingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [cancelling, setCancelling] = useState(false);
-  const [cancelled, setCancelled] = useState(false);
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const fetchBooking = useCallback(async () => {
     if (!code || !token) {
@@ -85,30 +82,6 @@ function ManageContent() {
     fetchBooking();
   }, [fetchBooking]);
 
-  async function handleCancel() {
-    if (!code || !token) return;
-    setCancelling(true);
-
-    try {
-      const res = await fetch(`/api/bookings/${code}?token=${token}`, { method: "DELETE" });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Failed to cancel");
-        setCancelling(false);
-        return;
-      }
-
-      setCancelled(true);
-      setShowCancelConfirm(false);
-      fetchBooking();
-    } catch {
-      setError("Failed to cancel booking");
-    } finally {
-      setCancelling(false);
-    }
-  }
-
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -136,12 +109,6 @@ function ManageContent() {
 
   return (
     <div>
-      {cancelled && (
-        <div className="mb-6 p-4 rounded-xl bg-red-900/20 border border-red-800/30 text-sm text-red-300 text-center">
-          Your booking has been cancelled.
-        </div>
-      )}
-
       {/* Status badge */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -204,37 +171,11 @@ function ManageContent() {
 
       {/* Actions */}
       {isActive && (
-        <div className="mt-6 space-y-3">
-          {!showCancelConfirm ? (
-            <button
-              onClick={() => setShowCancelConfirm(true)}
-              className="w-full py-3 rounded-full border border-red-800/30 text-sm font-semibold text-red-400 hover:bg-red-900/10 transition-all"
-            >
-              Cancel Booking
-            </button>
-          ) : (
-            <div className="p-4 rounded-xl border border-red-800/30 bg-red-900/10">
-              <p className="text-sm text-red-300 mb-3">
-                Are you sure you want to cancel? {booking.depositAmountPence > 0 && "Your hold fee may be forfeited if cancelled within 24 hours of your booking."}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowCancelConfirm(false)}
-                  className="flex-1 py-2.5 rounded-full border border-white/[0.1] text-sm text-stone-400 hover:text-white transition-all"
-                >
-                  Keep Booking
-                </button>
-                <button
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="flex-1 py-2.5 rounded-full bg-red-600 text-sm font-semibold text-white hover:bg-red-500 transition-all"
-                >
-                  {cancelling ? "Cancelling..." : "Yes, Cancel"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        <p className="mt-6 text-center text-xs text-stone-500">
+          Need to cancel?{" "}
+          <Link href="/contact" className="text-gold-300 hover:underline">Contact us</Link> or call{" "}
+          <a href="tel:02039046977" className="text-gold-300 hover:underline">020 3904 6977</a>
+        </p>
       )}
 
       {error && (

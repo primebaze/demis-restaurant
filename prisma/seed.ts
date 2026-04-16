@@ -18,7 +18,7 @@ async function main() {
     create: {
       name: "Cricklewood",
       slug: "cricklewood",
-      address: "141 Cricklewood Broadway, London NW2 3ED",
+      address: "89 Cricklewood Broadway, London NW2 3JG",
       phone: "020 3904 6977",
       isActive: true,
     },
@@ -39,12 +39,12 @@ async function main() {
   console.log("✅ Locations created");
 
   // ─── TIME SLOTS ───
-  // Both locations: Lunch (12:00-14:30) and Dinner (17:00-22:00) every day
+  // Open 12pm-12am, bookable 12pm-22:30
   const slotConfigs = [
     { startTime: "12:00", endTime: "14:30", maxCovers: 30 },
-    { startTime: "17:00", endTime: "19:00", maxCovers: 35 },
-    { startTime: "19:00", endTime: "21:00", maxCovers: 40 },
-    { startTime: "21:00", endTime: "22:30", maxCovers: 25 },
+    { startTime: "14:30", endTime: "17:00", maxCovers: 30 },
+    { startTime: "17:00", endTime: "19:30", maxCovers: 35 },
+    { startTime: "19:30", endTime: "22:30", maxCovers: 35 },
   ];
 
   for (const loc of [cricklewood, streatham]) {
@@ -77,7 +77,7 @@ async function main() {
       depositThreshold: 15,
       depositAmountPence: 2000, // £20
       cancellationWindowH: 24,
-      maxAdvanceDays: 30,
+      maxAdvanceDays: 240,
       autoCancelMinutes: 15,
     },
   });
@@ -92,7 +92,7 @@ async function main() {
       depositThreshold: 15,
       depositAmountPence: 2000,
       cancellationWindowH: 24,
-      maxAdvanceDays: 30,
+      maxAdvanceDays: 240,
       autoCancelMinutes: 15,
     },
   });
@@ -107,7 +107,7 @@ async function main() {
       depositThreshold: 15,
       depositAmountPence: 2000,
       cancellationWindowH: 24,
-      maxAdvanceDays: 30,
+      maxAdvanceDays: 240,
       autoCancelMinutes: 15,
     },
   });
