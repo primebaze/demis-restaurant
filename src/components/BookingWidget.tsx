@@ -55,6 +55,14 @@ function formatDateLong(d: string) {
   });
 }
 
+/** Convert 24h "13:30" → "1:30 PM" */
+function formatTime(t: string) {
+  const [hh, mm] = t.split(":").map(Number);
+  const ampm = hh >= 12 ? "PM" : "AM";
+  const h12 = hh % 12 || 12;
+  return `${h12}:${String(mm).padStart(2, "0")} ${ampm}`;
+}
+
 function getMonthDays(year: number, month: number) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -397,7 +405,7 @@ export default function BookingWidget() {
         ) : slots.length === 0 ? (
           <p className="text-sm text-stone-500">Loading time slots...</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
             {slots.map((slot) => {
               const canFit = slot.available && slot.remaining >= partySize;
               return (
@@ -408,7 +416,7 @@ export default function BookingWidget() {
                     setSelectedSlot(slot);
                     setStep(3);
                   }}
-                  className={`p-4 rounded-xl border text-center transition-all ${
+                  className={`px-3 py-3 rounded-xl border text-center transition-all ${
                     !canFit
                       ? "border-white/[0.04] bg-[#1e1e1e] text-stone-600 cursor-not-allowed"
                       : selectedSlot?.id === slot.id
@@ -417,7 +425,7 @@ export default function BookingWidget() {
                   }`}
                 >
                   <p className="text-sm font-bold">
-                    {slot.startTime} – {slot.endTime}
+                    {formatTime(slot.startTime)}
                   </p>
                   {!canFit && (
                     <p className="text-[10px] mt-1 text-stone-600">Full</p>
@@ -442,8 +450,7 @@ export default function BookingWidget() {
         <StepIndicator />
         <h2 className="text-xl font-bold text-white mb-2">Your details</h2>
         <p className="text-sm text-stone-400 mb-6">
-          {selectedLocation?.name} · {formatDate(selectedDate)} · {selectedSlot?.startTime} –{" "}
-          {selectedSlot?.endTime} · {partySize} {partySize === 1 ? "guest" : "guests"}
+          {selectedLocation?.name} · {formatDate(selectedDate)} · {selectedSlot ? formatTime(selectedSlot.startTime) : ""} · {partySize} {partySize === 1 ? "guest" : "guests"}
         </p>
 
         <div className="space-y-4">
@@ -586,7 +593,7 @@ export default function BookingWidget() {
             <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Date &amp; Time</p>
             <p className="text-sm font-semibold text-white">{formatDateLong(selectedDate)}</p>
             <p className="text-xs text-stone-400">
-              {selectedSlot?.startTime} – {selectedSlot?.endTime}
+              {selectedSlot ? formatTime(selectedSlot.startTime) : ""}
             </p>
           </div>
           <div className="p-5">

@@ -66,7 +66,7 @@ export async function GET(req: Request) {
       code: b.confirmationCode,
       guest: b.guest.name,
       partySize: b.partySize,
-      time: b.timeSlot ? `${b.timeSlot.startTime} – ${b.timeSlot.endTime}` : b.time,
+      time: b.timeSlot ? b.timeSlot.startTime : b.time,
       location: b.location.name,
       status: b.status,
     })),

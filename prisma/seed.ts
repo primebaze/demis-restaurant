@@ -39,24 +39,32 @@ async function main() {
   console.log("✅ Locations created");
 
   // ─── TIME SLOTS ───
-  // Open 12pm-12am, bookable 12pm-22:30
-  const slotConfigs = [
-    { startTime: "12:00", endTime: "14:30", maxCovers: 30 },
-    { startTime: "14:30", endTime: "17:00", maxCovers: 30 },
-    { startTime: "17:00", endTime: "19:30", maxCovers: 35 },
-    { startTime: "19:30", endTime: "22:30", maxCovers: 35 },
-  ];
+  // Open 12pm-12am, bookable every 30 mins from 12:00-22:30
+  const slotTimes: string[] = [];
+  for (let h = 12; h <= 22; h++) {
+    slotTimes.push(`${String(h).padStart(2, "0")}:00`);
+    if (h < 22 || true) slotTimes.push(`${String(h).padStart(2, "0")}:30`);
+  }
+  // Remove 23:00 — last bookable time is 22:30
+  // slotTimes: 12:00, 12:30, 13:00, ... 22:00, 22:30
+
+  function endTimeFor(start: string) {
+    const [hh, mm] = start.split(":").map(Number);
+    const totalMin = hh * 60 + mm + 30;
+    return `${String(Math.floor(totalMin / 60)).padStart(2, "0")}:${String(totalMin % 60).padStart(2, "0")}`;
+  }
 
   for (const loc of [cricklewood, streatham]) {
+    const covers = loc.slug === "cricklewood" ? 15 : 12;
     for (let day = 0; day <= 6; day++) {
-      for (const slot of slotConfigs) {
+      for (const time of slotTimes) {
         await prisma.timeSlot.create({
           data: {
             locationId: loc.id,
             dayOfWeek: day,
-            startTime: slot.startTime,
-            endTime: slot.endTime,
-            maxCovers: loc.slug === "cricklewood" ? slot.maxCovers : Math.round(slot.maxCovers * 0.8),
+            startTime: time,
+            endTime: endTimeFor(time),
+            maxCovers: covers,
             isActive: true,
           },
         });
@@ -64,7 +72,8 @@ async function main() {
     }
   }
 
-  console.log("✅ Time slots created (4 per day × 7 days × 2 locations = 56 slots)");
+  const totalSlots = slotTimes.length * 7 * 2;
+  console.log(`✅ Time slots created (${slotTimes.length} per day × 7 days × 2 locations = ${totalSlots} slots)`);
 
   // ─── BOOKING POLICIES ───
   await prisma.bookingPolicy.upsert({

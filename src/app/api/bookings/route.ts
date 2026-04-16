@@ -7,6 +7,14 @@ import {
 import { sendBookingConfirmation, sendAdminNewBooking, sendDepositPaymentLink } from "@/lib/email";
 import { createDepositIntent } from "@/lib/stripe";
 
+/** Convert 24h "13:30" → "1:30 PM" */
+function formatTime24(t: string) {
+  const [hh, mm] = t.split(":").map(Number);
+  const ampm = hh >= 12 ? "PM" : "AM";
+  const h12 = hh % 12 || 12;
+  return `${h12}:${String(mm).padStart(2, "0")} ${ampm}`;
+}
+
 /**
  * POST /api/bookings — Create a new booking
  *
@@ -233,7 +241,7 @@ export async function POST(req: Request) {
       location: booking.location.name,
       date: booking.date,
       time: booking.time,
-      slot: `${booking.timeSlot.startTime} – ${booking.timeSlot.endTime}`,
+      slot: formatTime24(booking.timeSlot.startTime),
       partySize,
       depositRequired: depositAmountPence > 0,
       depositAmountPence,
@@ -249,7 +257,7 @@ export async function POST(req: Request) {
         confirmationCode: booking.confirmationCode,
         location: booking.location.name,
         date: booking.date,
-        slot: `${booking.timeSlot.startTime} – ${booking.timeSlot.endTime}`,
+        slot: formatTime24(booking.timeSlot.startTime),
         partySize,
         depositAmountPence,
         paymentUrl: stripePaymentUrl,
@@ -263,7 +271,7 @@ export async function POST(req: Request) {
       guestEmail: email,
       location: booking.location.name,
       date: booking.date,
-      slot: `${booking.timeSlot.startTime} – ${booking.timeSlot.endTime}`,
+      slot: formatTime24(booking.timeSlot.startTime),
       partySize,
       depositRequired: depositAmountPence > 0,
       source: source || "website",
@@ -323,7 +331,7 @@ export async function GET(req: Request) {
       locationSlug: booking.location.slug,
       date: booking.date,
       time: booking.time,
-      slot: `${booking.timeSlot.startTime} – ${booking.timeSlot.endTime}`,
+      slot: formatTime24(booking.timeSlot.startTime),
       partySize: booking.partySize,
       status: booking.status,
       notes: booking.notes,
