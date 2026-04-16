@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── GUESTS (CRM) ───
+model Guest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  tags      String   @default("") // comma-separated: VIP,regular,birthday-april
+  notes     String   @default("") // internal staff notes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+  visits   Visit[]
+}
+
+// ─── LOCATIONS ───
+model Location {
+  id       String  @id @default(cuid())
+  name     String // "Cricklewood" or "Streatham Hill"
+  slug     String  @unique // "cricklewood" or "streatham"
+  address  String
+  phone    String?
+  isActive Boolean @default(true)
+
+  timeSlots     TimeSlot[]
+  bookings      Booking[]
+  blackoutDates BlackoutDate[]
+}
+
+// ─── TIME SLOTS (capacity per slot per location) ───
+model TimeSlot {
+  id           String  @id @default(cuid())
+  locationId   String
+  dayOfWeek    Int? // 0=Sun, 1=Mon, ... 6=Sat (null = use specificDate)
+  specificDate String? // "2026-12-25" for one-off overrides
+  startTime    String // "18:00"
+  endTime      String // "20:00"
+  maxCovers    Int     @default(40)
+  isActive     Boolean @default(true)
+
+  location Location  @relation(fields: [locationId], references: [id])
+  bookings Booking[]
+
+  @@index([locationId, dayOfWeek])
+}
+
+// ─── BOOKING POLICIES ───
+model BookingPolicy {
+  id                  String @id @default(cuid())
+  locationSlug        String @unique // "cricklewood", "streatham", or "default"
+  minPartySize        Int    @default(1)
+  maxPartySize        Int    @default(30)
+  depositThreshold    Int    @default(15) // party size that triggers deposit
+  depositAmountPence  Int    @default(2000) // £20.00
+  cancellationWindowH Int    @default(24) // hours before booking
+  maxAdvanceDays      Int    @default(30) // how far ahead guests can book
+  autoCancelMinutes   Int    @default(15) // no-show auto-cancel
+}
+
+// ─── BOOKINGS ───
+model Booking {
+  id                    String    @id @default(cuid())
+  confirmationCode      String    @unique // e.g. "DEM-4K7X"
+  guestId               String
+  locationId            String
+  timeSlotId            String
+  date                  String // "2026-04-20"
+  time                  String // "19:00"
+  partySize             Int
+  status                String    @default("confirmed") // pending_payment, confirmed, modified, cancelled_guest, cancelled_admin, no_show, completed
+  source                String    @default("website") // website, phone, walk-in, admin
+  notes                 String    @default("")
+  depositAmountPence    Int       @default(0)
+  depositStatus         String    @default("none") // none, pending, captured, refunded
+  stripePaymentIntentId String?
+  managementToken       String    @unique // for guest magic link access
+  reminderSent          Boolean   @default(false)
+  acceptedTermsAt       DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  guest    Guest          @relation(fields: [guestId], references: [id])
+  location Location       @relation(fields: [locationId], references: [id])
+  timeSlot TimeSlot       @relation(fields: [timeSlotId], references: [id])
+  changes  BookingChange[]
+  addOns   BookingAddOn[]
+
+  @@index([date, locationId])
+  @@index([guestId])
+  @@index([status])
+}
+
+// ─── BOOKING CHANGES (audit log) ───
+model BookingChange {
+  id           String   @id @default(cuid())
+  bookingId    String
+  changedBy    String // email or "admin" or "system"
+  fieldChanged String
+  oldValue     String
+  newValue     String
+  createdAt    DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+// ─── ADD-ONS ───
+model AddOn {
+  id          String  @id @default(cuid())
+  name        String // "Birthday Cake Setup"
+  description String  @default("")
+  pricePence  Int // 1500 = £15.00
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  bookings BookingAddOn[]
+}
+
+model BookingAddOn {
+  id        String @id @default(cuid())
+  bookingId String
+  addOnId   String
+  quantity  Int    @default(1)
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  addOn   AddOn   @relation(fields: [addOnId], references: [id])
+
+  @@unique([bookingId, addOnId])
+}
+
+// ─── BLACKOUT DATES ───
+model BlackoutDate {
+  id         String    @id @default(cuid())
+  locationId String?
+  date       String // "2026-12-25"
+  reason     String // "Christmas Day", "Private Hire"
+
+  location Location? @relation(fields: [locationId], references: [id])
+
+  @@index([date])
+}
+
+// ─── VISITS (CRM) ───
+model Visit {
+  id         String   @id @default(cuid())
+  guestId    String
+  bookingId  String?
+  spendPence Int      @default(0)
+  visitDate  String
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+
+  guest Guest @relation(fields: [guestId], references: [id])
+
+  @@index([guestId])
+}
+
+// ─── ADMIN USERS ───
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("staff") // staff, manager, owner
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}

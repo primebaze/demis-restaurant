@@ -1,0 +1,250 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+
+interface GuestRow {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  tags: string;
+  notes: string;
+  totalBookings: number;
+  totalVisits: number;
+  totalSpendPence: number;
+  lastBooking: { date: string; status: string } | null;
+  createdAt: string;
+}
+
+export default function AdminGuestsPage() {
+  const [guests, setGuests] = useState<GuestRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Editing
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTags, setEditTags] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+
+  const fetchGuests = useCallback(async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    params.set("page", String(page));
+
+    const res = await fetch(`/api/admin/guests?${params}`);
+    const data = await res.json();
+    setGuests(data.guests || []);
+    setTotal(data.total || 0);
+    setTotalPages(data.totalPages || 1);
+    setLoading(false);
+  }, [search, page]);
+
+  useEffect(() => {
+    fetchGuests();
+  }, [fetchGuests]);
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    setSearch(searchInput);
+    setPage(1);
+  }
+
+  function startEdit(guest: GuestRow) {
+    setEditingId(guest.id);
+    setEditTags(guest.tags || "");
+    setEditNotes(guest.notes || "");
+  }
+
+  async function saveEdit() {
+    if (!editingId) return;
+    await fetch("/api/admin/guests", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingId, tags: editTags, notes: editNotes }),
+    });
+    setEditingId(null);
+    fetchGuests();
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Guest CRM</h1>
+        <span className="text-sm text-gray-500">{total} guests</span>
+      </div>
+
+      {/* Search */}
+      <form onSubmit={handleSearch} className="mb-6">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search by name, email, or phone..."
+            className="flex-1 px-4 py-2.5 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2.5 bg-gold-300 text-black font-medium text-sm rounded-xl hover:bg-gold-400 transition"
+          >
+            Search
+          </button>
+          {search && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setSearchInput("");
+                setPage(1);
+              }}
+              className="px-3 py-2.5 text-sm text-gray-400 hover:text-white transition"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </form>
+
+      {/* Guest list */}
+      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-gray-500">Loading guests...</div>
+        ) : guests.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">No guests found</div>
+        ) : (
+          <div className="divide-y divide-gray-800">
+            {guests.map((g) => (
+              <div key={g.id} className="p-4 hover:bg-white/[0.02]">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/guests/${g.id}`}
+                        className="text-white font-medium hover:text-gold-300 transition"
+                      >
+                        {g.name}
+                      </Link>
+                      {g.tags && (
+                        <div className="flex gap-1">
+                          {g.tags.split(",").map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-1.5 py-0.5 bg-gold-300/10 text-gold-300 rounded text-[10px]"
+                            >
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {g.email} {g.phone && `· ${g.phone}`}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-6 text-xs text-gray-400 shrink-0">
+                    <div className="text-center">
+                      <p className="text-white font-medium text-sm">{g.totalBookings}</p>
+                      <p>Bookings</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white font-medium text-sm">{g.totalVisits}</p>
+                      <p>Visits</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white font-medium text-sm">
+                        £{(g.totalSpendPence / 100).toFixed(0)}
+                      </p>
+                      <p>Spend</p>
+                    </div>
+                    <button
+                      onClick={() => startEdit(g)}
+                      className="px-2 py-1 text-xs text-gray-400 hover:text-gold-300 border border-gray-700 rounded transition"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+
+                {g.lastBooking && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Last booking: {g.lastBooking.date} ({g.lastBooking.status})
+                  </p>
+                )}
+
+                {/* Inline edit */}
+                {editingId === g.id && (
+                  <div className="mt-3 p-3 bg-[#0f0f0f] rounded-xl space-y-2">
+                    <div>
+                      <label className="text-xs text-gray-500">Tags (comma-separated)</label>
+                      <input
+                        type="text"
+                        value={editTags}
+                        onChange={(e) => setEditTags(e.target.value)}
+                        placeholder="VIP, regular, birthday"
+                        className="w-full mt-1 px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">Notes</label>
+                      <textarea
+                        value={editNotes}
+                        onChange={(e) => setEditNotes(e.target.value)}
+                        rows={2}
+                        placeholder="Allergies, preferences..."
+                        className="w-full mt-1 px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={saveEdit}
+                        className="px-3 py-1.5 bg-gold-300 text-black font-medium text-xs rounded-lg hover:bg-gold-400 transition"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="px-3 py-1.5 text-gray-400 text-xs hover:text-white transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition"
+            >
+              ← Previous
+            </button>
+            <span className="text-sm text-gray-500">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition"
+            >
+              Next →
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
