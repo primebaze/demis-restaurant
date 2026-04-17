@@ -4,8 +4,7 @@ import {
   generateConfirmationCode,
   generateManagementToken,
 } from "@/lib/booking-utils";
-import { sendBookingConfirmation, sendAdminNewBooking, sendDepositPaymentLink } from "@/lib/email";
-import { createDepositIntent } from "@/lib/stripe";
+import { sendBookingConfirmation, sendAdminNewBooking } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
 
@@ -131,12 +130,10 @@ export async function POST(req: Request) {
     // ─── Deposit logic ───
     let depositAmountPence = 0;
     let depositStatus = "none";
-    let bookingStatus = "confirmed";
 
     if (policy && partySize >= policy.depositThreshold) {
       depositAmountPence = policy.depositAmountPence;
       depositStatus = "pending";
-      bookingStatus = "pending_payment";
     }
 
     // ─── Create or find guest ───
@@ -155,6 +152,19 @@ export async function POST(req: Request) {
         },
       });
     }
+
+    // ─── Calculate total payable ───
+    let addOnsTotalPence = 0;
+    if (addOnIds && Array.isArray(addOnIds) && addOnIds.length > 0) {
+      const addOnRecords = await prisma.addOn.findMany({
+        where: { id: { in: addOnIds } },
+        select: { pricePence: true },
+      });
+      addOnsTotalPence = addOnRecords.reduce((sum, a) => sum + a.pricePence, 0);
+    }
+
+    const totalPayable = addOnsTotalPence + depositAmountPence;
+    const bookingStatus = totalPayable > 0 ? "pending_payment" : "confirmed";
 
     // ─── Create booking ───
     const confirmationCode = generateConfirmationCode();
@@ -204,28 +214,28 @@ export async function POST(req: Request) {
       },
     });
 
-    // ─── Stripe deposit (if required) ───
-    let stripePaymentUrl: string | null = null;
-    if (depositAmountPence > 0) {
-      const result = await createDepositIntent({
+    // ─── Payment required → return bookingId so frontend can redirect to Stripe ───
+    if (bookingStatus === "pending_payment") {
+      return NextResponse.json({
+        success: true,
+        paymentRequired: true,
         bookingId: booking.id,
-        confirmationCode: booking.confirmationCode,
-        amountPence: depositAmountPence,
-        guestEmail: email,
-        guestName: name,
-        description: `Booking deposit — ${booking.confirmationCode} — ${partySize} guests at ${booking.location.name}`,
+        booking: {
+          id: booking.id,
+          confirmationCode: booking.confirmationCode,
+          location: booking.location.name,
+          date: booking.date,
+          time: booking.time,
+          partySize: booking.partySize,
+          status: booking.status,
+          depositRequired: depositAmountPence > 0,
+          depositAmountPence,
+          addOnsTotalPence,
+        },
       });
-
-      if (result) {
-        await prisma.booking.update({
-          where: { id: booking.id },
-          data: { stripePaymentIntentId: result.paymentIntentId },
-        });
-        stripePaymentUrl = result.paymentUrl;
-      }
     }
 
-    // ─── Fetch add-on details for email ───
+    // ─── No payment needed — send emails immediately ───
     const bookingAddOns = addOnIds && Array.isArray(addOnIds) && addOnIds.length > 0
       ? await prisma.bookingAddOn.findMany({
           where: { bookingId: booking.id },
@@ -233,12 +243,9 @@ export async function POST(req: Request) {
         })
       : [];
 
-    // ─── Send emails (awaited so Vercel doesn't kill the function early) ───
     const manageUrl = `/booking/manage?code=${booking.confirmationCode}&token=${booking.managementToken}`;
 
-    const emailPromises: Promise<unknown>[] = [];
-
-    emailPromises.push(
+    await Promise.allSettled([
       sendBookingConfirmation({
         guestName: name,
         guestEmail: email,
@@ -248,32 +255,11 @@ export async function POST(req: Request) {
         time: booking.time,
         slot: formatTime24(booking.timeSlot.startTime),
         partySize,
-        depositRequired: depositAmountPence > 0,
-        depositAmountPence,
+        depositRequired: false,
+        depositAmountPence: 0,
         addOns: bookingAddOns.map((ba) => ({ name: ba.addOn.name, pricePence: ba.addOn.pricePence })),
         manageUrl,
-      })
-    );
-
-    // ─── Send deposit payment link (if required) ───
-    if (stripePaymentUrl) {
-      emailPromises.push(
-        sendDepositPaymentLink({
-          guestName: name,
-          guestEmail: email,
-          confirmationCode: booking.confirmationCode,
-          location: booking.location.name,
-          date: booking.date,
-          slot: formatTime24(booking.timeSlot.startTime),
-          partySize,
-          depositAmountPence,
-          paymentUrl: stripePaymentUrl,
-        })
-      );
-    }
-
-    // ─── Notify admin ───
-    emailPromises.push(
+      }),
       sendAdminNewBooking({
         confirmationCode: booking.confirmationCode,
         guestName: name,
@@ -282,15 +268,14 @@ export async function POST(req: Request) {
         date: booking.date,
         slot: formatTime24(booking.timeSlot.startTime),
         partySize,
-        depositRequired: depositAmountPence > 0,
+        depositRequired: false,
         source: source || "website",
-      })
-    );
-
-    await Promise.allSettled(emailPromises);
+      }),
+    ]);
 
     return NextResponse.json({
       success: true,
+      paymentRequired: false,
       booking: {
         id: booking.id,
         confirmationCode: booking.confirmationCode,
@@ -299,8 +284,8 @@ export async function POST(req: Request) {
         time: booking.time,
         partySize: booking.partySize,
         status: booking.status,
-        depositRequired: depositAmountPence > 0,
-        depositAmountPence,
+        depositRequired: false,
+        depositAmountPence: 0,
         managementUrl: `/booking/manage?code=${booking.confirmationCode}&token=${booking.managementToken}`,
       },
     });

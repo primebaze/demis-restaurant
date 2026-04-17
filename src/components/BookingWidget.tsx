@@ -219,6 +219,28 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
         return;
       }
 
+      // Payment required → redirect to Stripe Checkout
+      if (data.paymentRequired) {
+        setError(""); // clear any previous error
+        const checkoutRes = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: data.bookingId }),
+        });
+        const checkoutData = await checkoutRes.json();
+
+        if (!checkoutRes.ok || !checkoutData.checkoutUrl) {
+          setError(checkoutData.error || "Failed to start payment. Please try again.");
+          setLoading(false);
+          return;
+        }
+
+        // Redirect to Stripe hosted Checkout page
+        window.location.href = checkoutData.checkoutUrl;
+        return; // keep loading spinner until redirect completes
+      }
+
+      // No payment → show confirmation step directly
       setBookingResult(data.booking);
       setStep(5); // confirmation step
     } catch {
@@ -611,6 +633,9 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
   // ─── STEP 4: Confirm ───
   if (step === 4) {
     const selectedAddOnDetails = addOns.filter((a) => selectedAddOns.includes(a.id));
+    const addOnsTotalPence = selectedAddOnDetails.reduce((sum, a) => sum + a.pricePence, 0);
+    const depositPence = depositRequired ? policy!.depositAmountPence : 0;
+    const totalPayable = addOnsTotalPence + depositPence;
 
     return (
       <div>
@@ -671,6 +696,17 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
               </p>
             </div>
           )}
+          {totalPayable > 0 && (
+            <div className="p-5 bg-gold-300/5 border-t border-gold-300/10">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-white">Total to Pay</p>
+                <p className="text-lg font-bold text-gold-300">{formatPence(totalPayable)}</p>
+              </div>
+              <p className="text-xs text-stone-500 mt-1">
+                You&apos;ll be redirected to our secure payment page.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Terms */}
@@ -713,7 +749,7 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
                 : "bg-white/5 text-stone-600 cursor-not-allowed"
             }`}
           >
-            {loading ? "Booking..." : depositRequired ? `Confirm & Pay ${formatPence(policy!.depositAmountPence)}` : "Confirm Booking"}
+            {loading ? "Processing..." : totalPayable > 0 ? `Pay ${formatPence(totalPayable)} & Confirm` : "Confirm Booking"}
           </button>
         </div>
       </div>
