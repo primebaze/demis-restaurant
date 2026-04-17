@@ -138,6 +138,11 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
   const [loading, setLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
 
+  // ─── Scroll to top of widget when step changes ───
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
   // ─── Load locations + add-ons (skip if server-provided) ───
   useEffect(() => {
     if (locations.length === 0) {
