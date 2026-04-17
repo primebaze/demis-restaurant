@@ -233,51 +233,61 @@ export async function POST(req: Request) {
         })
       : [];
 
-    // ─── Send confirmation email to guest ───
+    // ─── Send emails (awaited so Vercel doesn't kill the function early) ───
     const manageUrl = `/booking/manage?code=${booking.confirmationCode}&token=${booking.managementToken}`;
 
-    sendBookingConfirmation({
-      guestName: name,
-      guestEmail: email,
-      confirmationCode: booking.confirmationCode,
-      location: booking.location.name,
-      date: booking.date,
-      time: booking.time,
-      slot: formatTime24(booking.timeSlot.startTime),
-      partySize,
-      depositRequired: depositAmountPence > 0,
-      depositAmountPence,
-      addOns: bookingAddOns.map((ba) => ({ name: ba.addOn.name, pricePence: ba.addOn.pricePence })),
-      manageUrl,
-    });
+    const emailPromises: Promise<unknown>[] = [];
 
-    // ─── Send deposit payment link (if required) ───
-    if (stripePaymentUrl) {
-      sendDepositPaymentLink({
+    emailPromises.push(
+      sendBookingConfirmation({
         guestName: name,
         guestEmail: email,
         confirmationCode: booking.confirmationCode,
         location: booking.location.name,
         date: booking.date,
+        time: booking.time,
         slot: formatTime24(booking.timeSlot.startTime),
         partySize,
+        depositRequired: depositAmountPence > 0,
         depositAmountPence,
-        paymentUrl: stripePaymentUrl,
-      });
+        addOns: bookingAddOns.map((ba) => ({ name: ba.addOn.name, pricePence: ba.addOn.pricePence })),
+        manageUrl,
+      })
+    );
+
+    // ─── Send deposit payment link (if required) ───
+    if (stripePaymentUrl) {
+      emailPromises.push(
+        sendDepositPaymentLink({
+          guestName: name,
+          guestEmail: email,
+          confirmationCode: booking.confirmationCode,
+          location: booking.location.name,
+          date: booking.date,
+          slot: formatTime24(booking.timeSlot.startTime),
+          partySize,
+          depositAmountPence,
+          paymentUrl: stripePaymentUrl,
+        })
+      );
     }
 
     // ─── Notify admin ───
-    sendAdminNewBooking({
-      confirmationCode: booking.confirmationCode,
-      guestName: name,
-      guestEmail: email,
-      location: booking.location.name,
-      date: booking.date,
-      slot: formatTime24(booking.timeSlot.startTime),
-      partySize,
-      depositRequired: depositAmountPence > 0,
-      source: source || "website",
-    });
+    emailPromises.push(
+      sendAdminNewBooking({
+        confirmationCode: booking.confirmationCode,
+        guestName: name,
+        guestEmail: email,
+        location: booking.location.name,
+        date: booking.date,
+        slot: formatTime24(booking.timeSlot.startTime),
+        partySize,
+        depositRequired: depositAmountPence > 0,
+        source: source || "website",
+      })
+    );
+
+    await Promise.allSettled(emailPromises);
 
     return NextResponse.json({
       success: true,

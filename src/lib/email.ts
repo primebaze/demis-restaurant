@@ -8,6 +8,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER || "",
     pass: process.env.SMTP_PASS || "",
   },
+  pool: true,          // reuse connections for multiple emails
+  maxConnections: 3,   // up to 3 concurrent connections
+  maxMessages: 10,     // messages per connection before reconnect
 });
 
 const FROM_EMAIL =
