@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+export const dynamic = "force-dynamic";
+
 
 /**
  * GET /api/admin/guests — List guests with stats

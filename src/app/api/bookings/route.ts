@@ -6,6 +6,8 @@ import {
 } from "@/lib/booking-utils";
 import { sendBookingConfirmation, sendAdminNewBooking, sendDepositPaymentLink } from "@/lib/email";
 import { createDepositIntent } from "@/lib/stripe";
+export const dynamic = "force-dynamic";
+
 
 /** Convert 24h "13:30" → "1:30 PM" */
 function formatTime24(t: string) {

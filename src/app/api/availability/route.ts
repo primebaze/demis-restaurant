@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getDayOfWeek } from "@/lib/booking-utils";
+export const dynamic = "force-dynamic";
+
 
 /**
  * GET /api/availability?location=cricklewood&date=2026-04-20

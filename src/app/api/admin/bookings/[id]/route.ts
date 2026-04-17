@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { captureDeposit, cancelDeposit } from "@/lib/stripe";
+export const dynamic = "force-dynamic";
+
 
 /**
  * PATCH /api/admin/bookings/[id] — Admin updates a booking

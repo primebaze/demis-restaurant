@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { compareSync } from "bcryptjs";
 import { SignJWT } from "jose";
+export const dynamic = "force-dynamic";
+
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || "demis-admin-secret-change-me"

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendBookingModification, sendBookingCancellation } from "@/lib/email";
 import { cancelDeposit } from "@/lib/stripe";
+export const dynamic = "force-dynamic";
+
 
 /**
  * PATCH /api/bookings/[code] — Modify a booking (guest or admin)
