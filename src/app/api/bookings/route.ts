@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ─── Duplicate check ───
+    // ─── Duplicate check (auto-cancel stale pending_payment bookings) ───
     const existingForGuest = await prisma.booking.findFirst({
       where: {
         guest: { email },
@@ -120,11 +120,29 @@ export async function POST(req: Request) {
         status: { in: ["confirmed", "pending_payment", "modified"] },
       },
     });
+
     if (existingForGuest) {
-      return NextResponse.json(
-        { error: "You already have a booking at this time. Please modify your existing booking." },
-        { status: 400 }
-      );
+      // If the existing booking is stuck in pending_payment, auto-cancel it so they can rebook
+      if (existingForGuest.status === "pending_payment") {
+        await prisma.booking.update({
+          where: { id: existingForGuest.id },
+          data: { status: "cancelled_guest", depositStatus: "none" },
+        });
+        await prisma.bookingChange.create({
+          data: {
+            bookingId: existingForGuest.id,
+            changedBy: "system",
+            fieldChanged: "status",
+            oldValue: "pending_payment",
+            newValue: "cancelled_guest",
+          },
+        });
+      } else {
+        return NextResponse.json(
+          { error: "You already have a booking at this time. Please modify your existing booking." },
+          { status: 400 }
+        );
+      }
     }
 
     // ─── Deposit logic ───
