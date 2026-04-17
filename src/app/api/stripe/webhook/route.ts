@@ -93,6 +93,7 @@ export async function POST(req: Request) {
           guestEmail: booking.guest.email,
           confirmationCode: booking.confirmationCode,
           location: booking.location.name,
+          locationAddress: booking.location.address,
           date: booking.date,
           time: booking.time,
           slot: formatTime24(booking.timeSlot.startTime),

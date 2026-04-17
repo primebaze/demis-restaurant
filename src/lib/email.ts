@@ -35,7 +35,7 @@ function formatDate(dateStr: string): string {
 
 // ─── Shared email layout (SevenRooms-inspired) ───
 
-function emailLayout(body: string, reservationNumber?: string): string {
+function emailLayout(body: string, reservationNumber?: string, jsonLd?: Record<string, unknown>): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -43,6 +43,7 @@ function emailLayout(body: string, reservationNumber?: string): string {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Demi's Restaurant</title>
+  ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ""}
 </head>
 <body style="margin:0; padding:0; background-color:#f0f0f0; font-family:'Georgia','Times New Roman',serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f0f0; padding:40px 20px;">
@@ -127,6 +128,7 @@ export async function sendBookingConfirmation(data: {
   guestEmail: string;
   confirmationCode: string;
   location: string;
+  locationAddress: string;
   date: string;
   time: string;
   slot: string;
@@ -136,6 +138,36 @@ export async function sendBookingConfirmation(data: {
   addOns: { name: string; pricePence: number }[];
   manageUrl: string;
 }) {
+  // Build ISO datetime for the reservation (slot is like "7:30 PM", time is "19:30")
+  const startDateTime = `${data.date}T${data.time}:00`;
+
+  // JSON-LD structured data for Gmail auto-calendar event
+  const jsonLd = {
+    "@context": "http://schema.org",
+    "@type": "FoodEstablishmentReservation",
+    reservationNumber: data.confirmationCode,
+    reservationStatus: "http://schema.org/ReservationConfirmed",
+    underName: {
+      "@type": "Person",
+      name: data.guestName,
+      email: data.guestEmail,
+    },
+    reservationFor: {
+      "@type": "FoodEstablishment",
+      name: `Demi's Restaurant — ${data.location}`,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: data.locationAddress,
+        addressLocality: "London",
+        addressCountry: "GB",
+      },
+      url: "https://demisrestaurant.co.uk",
+    },
+    startDate: startDateTime,
+    partySize: data.partySize,
+    modifyReservationUrl: `${SITE_URL}${data.manageUrl}`,
+    cancelReservationUrl: `${SITE_URL}${data.manageUrl}`,
+  };
   const addOnsHtml = data.addOns.length > 0
     ? `<p style="margin:4px 0 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:13px;">
         Add-ons: ${data.addOns.map((a) => `${a.name} (${formatPence(a.pricePence)})`).join(", ")}
@@ -230,7 +262,7 @@ export async function sendBookingConfirmation(data: {
   await send(
     data.guestEmail,
     `Booking Confirmed — ${data.confirmationCode} | Demi's Restaurant`,
-    emailLayout(body, data.confirmationCode)
+    emailLayout(body, data.confirmationCode, jsonLd)
   );
 }
 
