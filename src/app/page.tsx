@@ -53,7 +53,7 @@ export default function HomePage() {
 
       {/* ─── ABOUT ─── */}
       <section className="py-16 sm:py-24">
-        <div className="mx-auto max-w-3xl px-6 text-center">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl px-6 text-center">
           <p className="section-label">Our Story</p>
           <h2 className="mt-4 heading-lg">
             A taste of Nigeria, in the heart of London.
@@ -350,7 +350,7 @@ export default function HomePage() {
             <h2 className="mt-3 heading-lg">Loved by our guests.</h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 sm:gap-10">
+          <div className="grid md:grid-cols-3 gap-8 sm:gap-10 lg:gap-14">
             <div>
               <div className="flex items-center gap-0.5 mb-4 text-gold-300 text-sm">
                 {[...Array(5)].map((_, i) => <span key={i}>&#9733;</span>)}
@@ -483,7 +483,7 @@ export default function HomePage() {
       {/* ─── RESERVATION CTA ─── */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="relative rounded-2xl overflow-hidden bg-white py-16 sm:py-20 px-6 text-center">
+          <div className="relative rounded-2xl overflow-hidden bg-white py-16 sm:py-20 lg:py-24 px-6 text-center">
             <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-gold-600">Ready?</p>
             <h2 className="mt-3 text-3xl sm:text-5xl font-bold text-stone-900 tracking-tight">Your table is waiting.</h2>
             <p className="mt-5 text-sm sm:text-base text-stone-500 max-w-lg mx-auto leading-relaxed">

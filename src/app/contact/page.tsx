@@ -25,12 +25,12 @@ export default function ContactPage() {
     <div className="">
       {/* Header */}
       <section className="px-6 pt-16 pb-10 sm:pt-24 sm:pb-14">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl text-center">
           <p className="section-label">Contact Us</p>
           <h1 className="mt-4 heading-display">
             We&apos;d love to hear from you.
           </h1>
-          <p className="mt-4 body-text max-w-xl mx-auto">
+          <p className="mt-4 body-text max-w-xl mx-auto lg:max-w-2xl">
             Whether you have a question, want to book a table, or need to arrange catering for an event &mdash; get in touch.
           </p>
         </div>
@@ -38,8 +38,8 @@ export default function ContactPage() {
 
       {/* Contact details */}
       <section className="pb-16 sm:pb-24">
-        <div className="mx-auto max-w-3xl px-6">
-          <div className="grid sm:grid-cols-2 gap-8">
+        <div className="mx-auto max-w-3xl lg:max-w-5xl px-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center sm:text-left">
               <h2 className="font-semibold text-white">Visit Us</h2>
               <address className="mt-2 text-sm text-stone-400 not-italic leading-relaxed">
@@ -81,7 +81,7 @@ export default function ContactPage() {
           </div>
 
           {/* WhatsApp + Booking */}
-          <div className="mt-12 grid sm:grid-cols-2 gap-6">
+          <div className="mt-12 grid sm:grid-cols-2 gap-6 lg:gap-8">
             <div className="rounded-xl border border-white/10 p-6 text-center">
               <h2 className="font-semibold text-white">WhatsApp</h2>
               <p className="mt-2 text-sm text-stone-400">Quick questions? Message us for a fast response.</p>
@@ -108,7 +108,7 @@ export default function ContactPage() {
           </div>
 
           {/* Map */}
-          <div className="mt-12 rounded-xl overflow-hidden h-72 sm:h-80 border border-white/10">
+          <div className="mt-12 rounded-xl overflow-hidden h-72 sm:h-80 lg:h-[420px] border border-white/10">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2481.2!2d-0.2136!3d51.555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s89+Cricklewood+Broadway+London+NW2+3JG!5e0!3m2!1sen!2suk!4v1"
               width="100%"

@@ -20,7 +20,7 @@ export default function EventsPage() {
   return (
     <>
       {/* ─── HERO ─── */}
-      <section className="relative h-[60vh] sm:h-[70vh] overflow-hidden">
+      <section className="relative h-[60vh] sm:h-[70vh] lg:h-[75vh] overflow-hidden">
         <img
           src="/events.jpeg"
           alt="Events at Demi's Restaurant"
@@ -29,10 +29,10 @@ export default function EventsPage() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
           <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-gold-300">What&apos;s On</p>
-          <h1 className="mt-3 text-4xl sm:text-6xl font-bold text-white tracking-tight">
+          <h1 className="mt-3 text-4xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight">
             Events at Demi&apos;s
           </h1>
-          <p className="mt-4 text-sm sm:text-base text-white/60 max-w-md">
+          <p className="mt-4 text-sm sm:text-base lg:text-lg text-white/60 max-w-md lg:max-w-lg">
             Live music, celebrations, and unforgettable nights out.
           </p>
         </div>
@@ -205,7 +205,7 @@ export default function EventsPage() {
 
       {/* ─── CTA ─── */}
       <section className="py-16 sm:py-24">
-        <div className="mx-auto max-w-3xl px-6 text-center">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl px-6 text-center">
           <p className="section-label">Don&apos;t Miss Out</p>
           <h2 className="mt-3 heading-lg">Follow us for updates.</h2>
           <p className="mt-5 body-text max-w-lg mx-auto">

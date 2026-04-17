@@ -19,12 +19,12 @@ export default function AboutPage() {
     <div className="">
       {/* Hero */}
       <section className="px-6 pt-16 pb-10 sm:pt-24 sm:pb-14">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl text-center">
           <p className="section-label">About Us</p>
           <h1 className="mt-4 heading-display">
             Bringing the flavours of Nigeria to London.
           </h1>
-          <p className="mt-6 body-text max-w-xl mx-auto text-base sm:text-lg leading-relaxed">
+          <p className="mt-6 body-text max-w-xl mx-auto lg:max-w-2xl text-base sm:text-lg leading-relaxed">
             At Demi&apos;s Restaurant, we believe food is more than sustenance &mdash; it&apos;s a connection to home,
             a celebration of culture, and an act of love.
           </p>
@@ -33,9 +33,9 @@ export default function AboutPage() {
 
       {/* Story */}
       <section className="py-16 sm:py-24">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl px-6">
           <h2 className="heading-lg text-center">Our Story</h2>
-          <div className="mt-8 space-y-5 body-text leading-relaxed">
+          <div className="mt-8 space-y-5 body-text leading-relaxed lg:text-base lg:columns-2 lg:gap-10 lg:space-y-0 [&>p]:lg:mb-5">
             <p>
               Demi&apos;s Restaurant was born from a deep love for Nigerian food and a desire to share it with London.
               Located at 89 Cricklewood Broadway in the heart of NW2, we&apos;ve become a destination for anyone craving
@@ -56,9 +56,9 @@ export default function AboutPage() {
 
       {/* Values */}
       <section className="py-16 sm:py-24 border-t border-white/10">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="mx-auto max-w-3xl lg:max-w-5xl px-6">
           <h2 className="heading-lg text-center">What makes us special</h2>
-          <div className="mt-12 grid sm:grid-cols-2 gap-10">
+          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
             <div className="text-center">
               <h3 className="font-semibold text-white">Authenticity</h3>
               <p className="mt-2 text-sm text-stone-400">Real Nigerian recipes, real ingredients, real flavour. No shortcuts.</p>
@@ -81,7 +81,7 @@ export default function AboutPage() {
 
       {/* Visit */}
       <section className="py-16 sm:py-24 border-t border-white/10">
-        <div className="mx-auto max-w-3xl px-6 text-center">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl px-6 text-center">
           <h2 className="heading-lg">Visit Us</h2>
           <div className="mt-6 space-y-2 text-sm text-stone-400">
             <address className="not-italic">89 Cricklewood Broadway, London NW2 3JG</address>
@@ -91,7 +91,7 @@ export default function AboutPage() {
           </div>
 
           {/* Map */}
-          <div className="mt-10 rounded-xl overflow-hidden h-72 sm:h-80 border border-white/10">
+          <div className="mt-10 rounded-xl overflow-hidden h-72 sm:h-80 lg:h-[420px] border border-white/10">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2481.2!2d-0.2136!3d51.555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s89+Cricklewood+Broadway+London+NW2+3JG!5e0!3m2!1sen!2suk!4v1"
               width="100%"

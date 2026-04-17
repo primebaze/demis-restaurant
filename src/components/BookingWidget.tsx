@@ -87,10 +87,15 @@ function getMaxDate(months: number) {
   return d.toISOString().split("T")[0];
 }
 
-export default function BookingWidget() {
+type BookingWidgetProps = {
+  initialLocations?: Location[];
+  initialAddOns?: AddOn[];
+};
+
+export default function BookingWidget({ initialLocations, initialAddOns }: BookingWidgetProps) {
   const [step, setStep] = useState(0);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [addOns, setAddOns] = useState<AddOn[]>([]);
+  const [locations, setLocations] = useState<Location[]>(initialLocations ?? []);
+  const [addOns, setAddOns] = useState<AddOn[]>(initialAddOns ?? []);
 
   // Selections
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -133,14 +138,19 @@ export default function BookingWidget() {
   const [loading, setLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
 
-  // ─── Load locations + add-ons ───
+  // ─── Load locations + add-ons (skip if server-provided) ───
   useEffect(() => {
-    fetch("/api/locations")
-      .then((r) => r.json())
-      .then((d) => setLocations(d.locations || []));
-    fetch("/api/addons")
-      .then((r) => r.json())
-      .then((d) => setAddOns(d.addOns || []));
+    if (locations.length === 0) {
+      fetch("/api/locations")
+        .then((r) => r.json())
+        .then((d) => setLocations(d.locations || []));
+    }
+    if (addOns.length === 0) {
+      fetch("/api/addons")
+        .then((r) => r.json())
+        .then((d) => setAddOns(d.addOns || []));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── Load availability when location + date selected ───
@@ -405,7 +415,7 @@ export default function BookingWidget() {
         ) : slots.length === 0 ? (
           <p className="text-sm text-stone-500">Loading time slots...</p>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
             {slots.map((slot) => {
               const canFit = slot.available && slot.remaining >= partySize;
               return (

@@ -3,9 +3,9 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="pb-28 pt-16 sm:pb-32">
-      <div className="mx-auto max-w-2xl px-6 text-center">
+      <div className="mx-auto max-w-2xl lg:max-w-4xl px-6 text-center">
         {/* Footer links */}
-        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-stone-500">
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-stone-500 lg:gap-x-8">
           <Link href="/menu" className="hover:text-white transition-colors">Menu</Link>
           <Link href="/bulk-orders" className="hover:text-white transition-colors">Bulk Order</Link>
           <Link href="/locations/cricklewood" className="hover:text-white transition-colors">Cricklewood</Link>

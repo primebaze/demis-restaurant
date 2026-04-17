@@ -122,20 +122,22 @@ function ManageContent() {
 
       {/* Booking details */}
       <div className="rounded-2xl border border-white/[0.06] bg-[#222] divide-y divide-white/[0.04]">
-        <div className="p-5">
-          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Location</p>
-          <p className="text-sm font-semibold text-white">{booking.location}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.04]">
+          <div className="p-5">
+            <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Location</p>
+            <p className="text-sm font-semibold text-white">{booking.location}</p>
+          </div>
+          <div className="p-5">
+            <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Party Size</p>
+            <p className="text-sm font-semibold text-white">
+              {booking.partySize} {booking.partySize === 1 ? "guest" : "guests"}
+            </p>
+          </div>
         </div>
         <div className="p-5">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Date &amp; Time</p>
           <p className="text-sm font-semibold text-white">{formatDateLong(booking.date)}</p>
           <p className="text-xs text-stone-400">{booking.slot}</p>
-        </div>
-        <div className="p-5">
-          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Party Size</p>
-          <p className="text-sm font-semibold text-white">
-            {booking.partySize} {booking.partySize === 1 ? "guest" : "guests"}
-          </p>
         </div>
         <div className="p-5">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Booked By</p>
@@ -198,18 +200,18 @@ export default function ManageBookingPage() {
   return (
     <>
       <section className="pt-20 pb-10 sm:pt-28 sm:pb-14">
-        <div className="mx-auto max-w-2xl px-6 text-center">
+        <div className="mx-auto max-w-2xl lg:max-w-3xl px-6 text-center">
           <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-gold-300">
             Your Booking
           </p>
-          <h1 className="mt-3 text-3xl sm:text-4xl font-bold text-white tracking-tight">
+          <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Manage Reservation
           </h1>
         </div>
       </section>
 
       <section className="pb-20 sm:pb-28">
-        <div className="mx-auto max-w-lg px-4 sm:px-6">
+        <div className="mx-auto max-w-lg md:max-w-xl lg:max-w-2xl px-4 sm:px-6">
           <div className="rounded-3xl border border-white/[0.06] bg-[#1f1f1f] p-6 sm:p-8">
             <Suspense fallback={<div className="text-center py-12"><div className="w-8 h-8 border-2 border-gold-300/30 border-t-gold-300 rounded-full animate-spin mx-auto" /></div>}>
               <ManageContent />

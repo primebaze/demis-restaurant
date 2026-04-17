@@ -89,12 +89,12 @@ export default function MenuPage() {
     <div className="">
       {/* Header */}
       <section className="px-6 pt-16 pb-10 sm:pt-24 sm:pb-14">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <p className="section-label">Our Menu</p>
           <h1 className="mt-4 heading-display">
             Authentic Nigerian flavours, fresh daily.
           </h1>
-          <p className="mt-4 body-text max-w-xl mx-auto">
+          <p className="mt-4 body-text max-w-xl mx-auto lg:max-w-2xl">
             Everything is prepared fresh using authentic Nigerian recipes.
             Dine in at 89 Cricklewood Broadway, NW2 3JG, or order bulk delivery across London.
           </p>
@@ -104,13 +104,13 @@ export default function MenuPage() {
       {/* Menu categories */}
       {menuCategories.map((category) => (
         <section key={category.name} className="py-10 sm:py-14">
-          <div className="mx-auto max-w-3xl px-6">
-            <h2 className="text-lg font-semibold text-white tracking-tight mb-6 pb-3 border-b border-white/10">
+          <div className="mx-auto max-w-5xl px-6">
+            <h2 className="text-lg font-semibold text-white tracking-tight mb-6 pb-3 border-b border-white/10 lg:text-xl">
               {category.name}
             </h2>
-            <div className="space-y-0 divide-y divide-white/10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0 divide-y md:divide-y-0 divide-white/10">
               {category.items.map((item) => (
-                <article key={item.name} className="py-4">
+                <article key={item.name} className="py-4 md:py-5 md:border-b md:border-white/10">
                   <h3 className="font-medium text-white">{item.name}</h3>
                   <p className="mt-1 text-sm text-stone-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: item.description }} />
                 </article>
@@ -122,7 +122,7 @@ export default function MenuPage() {
 
       {/* CTA */}
       <section className="px-6 py-16 sm:py-24">
-        <div className="mx-auto max-w-xl text-center">
+        <div className="mx-auto max-w-2xl text-center">
           <h2 className="heading-lg">Ready to order?</h2>
           <p className="mt-3 body-text">
             Dine in, book a table, or order in bulk for delivery across London.
