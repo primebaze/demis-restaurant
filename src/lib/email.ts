@@ -83,9 +83,7 @@ function emailLayout(body: string, reservationNumber?: string): string {
                 89 Cricklewood Broadway, London NW2 3JG<br/>
                 67 Streatham Hill, London SW2 4TX
               </p>
-              <p style="margin:12px 0 0;">
-                <a href="https://demisrestaurant.co.uk" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:11px; text-decoration:underline;">website</a>
-              </p>
+             
               <p style="margin:12px 0 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#bbb; font-size:10px;">
                 You are receiving this email from Demi&rsquo;s Restaurant.
               </p>
@@ -213,7 +211,7 @@ export async function sendBookingConfirmation(data: {
             Cancellation Policy
           </h3>
           <p style="margin:0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
-            We kindly ask for at least 24 hours notice for all cancellations. Late cancellations or no-shows may forfeit the hold fee. For any assistance, please don&rsquo;t hesitate to contact our team.
+            We kindly ask for at least 24 hours notice for all cancellations. Late cancellations or no-shows may forfeit an hold fee if applicable. For any assistance, please don&rsquo;t hesitate to contact our team.
           </p>
         </td>
       </tr>
@@ -221,10 +219,10 @@ export async function sendBookingConfirmation(data: {
 
     <!-- Contact -->
     <div style="margin-top:28px; text-align:center;">
-      <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#333;">Contact</p>
+      <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#333;">Location</p>
       <p style="margin:6px 0 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:12px; line-height:1.6;">
         ${data.location}<br/>
-        <a href="https://demisrestaurant.co.uk" style="color:#8b0000; text-decoration:none; font-size:12px;">website</a>
+        <a href="https://demisrestaurant.co.uk" style="color:#8b0000; text-decoration:none; font-size:12px;">Demi's Nigerian Restaurant</a>
       </p>
     </div>
   `;
