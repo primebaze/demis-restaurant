@@ -412,7 +412,7 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
           )}
         </div>
 
-        {/* Time slots */}
+        {/* Time slots grouped by period */}
         {availabilityError ? (
           <div className="p-4 rounded-xl bg-red-900/20 border border-red-800/30 text-sm text-red-300">
             {availabilityError}
@@ -420,32 +420,52 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
         ) : slots.length === 0 ? (
           <p className="text-sm text-stone-500">Loading time slots...</p>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-            {slots.map((slot) => {
-              const canFit = slot.available && slot.remaining >= partySize;
+          <div className="space-y-6">
+            {[
+              { label: "Lunch", icon: "☀️", from: "12:00", to: "14:59" },
+              { label: "Afternoon", icon: "🌤", from: "15:00", to: "17:59" },
+              { label: "Evening", icon: "🌙", from: "18:00", to: "20:59" },
+              { label: "Late", icon: "✨", from: "21:00", to: "23:59" },
+            ].map((period) => {
+              const periodSlots = slots.filter(
+                (s) => s.startTime >= period.from && s.startTime <= period.to
+              );
+              if (periodSlots.length === 0) return null;
               return (
-                <button
-                  key={slot.id}
-                  disabled={!canFit}
-                  onClick={() => {
-                    setSelectedSlot(slot);
-                    setStep(3);
-                  }}
-                  className={`px-3 py-3 rounded-xl border text-center transition-all ${
-                    !canFit
-                      ? "border-white/[0.04] bg-[#1e1e1e] text-stone-600 cursor-not-allowed"
-                      : selectedSlot?.id === slot.id
-                      ? "border-gold-300 bg-gold-300/10 text-gold-300"
-                      : "border-white/[0.06] bg-[#222] text-white hover:border-gold-300/20"
-                  }`}
-                >
-                  <p className="text-sm font-bold">
-                    {formatTime(slot.startTime)}
+                <div key={period.label}>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">
+                    {period.icon} {period.label}
                   </p>
-                  {!canFit && (
-                    <p className="text-[10px] mt-1 text-stone-600">Full</p>
-                  )}
-                </button>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+                    {periodSlots.map((slot) => {
+                      const canFit = slot.available && slot.remaining >= partySize;
+                      return (
+                        <button
+                          key={slot.id}
+                          disabled={!canFit}
+                          onClick={() => {
+                            setSelectedSlot(slot);
+                            setStep(3);
+                          }}
+                          className={`px-3 py-3 rounded-xl border text-center transition-all ${
+                            !canFit
+                              ? "border-white/[0.04] bg-[#1e1e1e] text-stone-600 cursor-not-allowed"
+                              : selectedSlot?.id === slot.id
+                              ? "border-gold-300 bg-gold-300/10 text-gold-300"
+                              : "border-white/[0.06] bg-[#222] text-white hover:border-gold-300/20"
+                          }`}
+                        >
+                          <p className="text-sm font-bold">
+                            {formatTime(slot.startTime)}
+                          </p>
+                          {!canFit && (
+                            <p className="text-[10px] mt-1 text-stone-600">Full</p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
