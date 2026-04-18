@@ -254,6 +254,8 @@ function AddOnsPanel({
   const [newDesc, setNewDesc] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [creating, setCreating] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", description: "", pricePence: 0 });
 
   async function createAddOn(e: React.FormEvent) {
     e.preventDefault();
@@ -284,6 +286,31 @@ function AddOnsPanel({
     onRefresh();
   }
 
+  function startEdit(a: AddOn) {
+    setEditId(a.id);
+    setEditForm({ name: a.name, description: a.description, pricePence: a.pricePence });
+  }
+
+  async function saveEdit() {
+    if (!editId) return;
+    await fetch("/api/admin/settings/addons", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editId, ...editForm }),
+    });
+    setEditId(null);
+    onRefresh();
+  }
+
+  async function deleteAddOn(id: string) {
+    await fetch("/api/admin/settings/addons", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    onRefresh();
+  }
+
   return (
     <div>
       {/* Existing add-ons */}
@@ -293,28 +320,81 @@ function AddOnsPanel({
         </div>
         <div className="divide-y divide-gray-800">
           {addOns.map((a) => (
-            <div key={a.id} className="px-6 py-4 flex items-center justify-between">
-              <div>
-                <p className={`font-medium ${a.isActive ? "text-white" : "text-gray-500 line-through"}`}>
-                  {a.name}
-                </p>
-                <p className="text-xs text-gray-500">{a.description}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gold-300">
-                  £{(a.pricePence / 100).toFixed(2)}
-                </span>
-                <button
-                  onClick={() => toggleActive(a.id, a.isActive)}
-                  className={`px-2 py-1 text-xs rounded border transition ${
-                    a.isActive
-                      ? "text-green-400 border-green-400/30 hover:bg-green-400/10"
-                      : "text-gray-500 border-gray-700 hover:bg-white/5"
-                  }`}
-                >
-                  {a.isActive ? "Active" : "Inactive"}
-                </button>
-              </div>
+            <div key={a.id} className="px-6 py-4">
+              {editId === a.id ? (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-3 items-end">
+                    <div className="flex-1 min-w-[140px]">
+                      <label className="text-xs text-gray-500 block mb-1">Name</label>
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[180px]">
+                      <label className="text-xs text-gray-500 block mb-1">Description</label>
+                      <input
+                        type="text"
+                        value={editForm.description}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                      />
+                    </div>
+                    <div className="w-28">
+                      <label className="text-xs text-gray-500 block mb-1">Price (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={(editForm.pricePence / 100).toFixed(2)}
+                        onChange={(e) => setEditForm({ ...editForm, pricePence: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                        className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <button onClick={saveEdit} className="px-3 py-1 text-xs bg-gold-300 text-black font-medium rounded-lg hover:bg-gold-400 transition">Save</button>
+                    <button onClick={() => setEditId(null)} className="px-3 py-1 text-xs text-gray-400 hover:text-white transition">Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`font-medium ${a.isActive ? "text-white" : "text-gray-500 line-through"}`}>
+                      {a.name}
+                    </p>
+                    <p className="text-xs text-gray-500">{a.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gold-300">
+                      £{(a.pricePence / 100).toFixed(2)}
+                    </span>
+                    <button
+                      onClick={() => startEdit(a)}
+                      className="px-2 py-1 text-xs text-gray-400 hover:text-white transition"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => toggleActive(a.id, a.isActive)}
+                      className={`px-2 py-1 text-xs rounded border transition ${
+                        a.isActive
+                          ? "text-green-400 border-green-400/30 hover:bg-green-400/10"
+                          : "text-gray-500 border-gray-700 hover:bg-white/5"
+                      }`}
+                    >
+                      {a.isActive ? "Active" : "Inactive"}
+                    </button>
+                    <button
+                      onClick={() => deleteAddOn(a.id)}
+                      className="px-2 py-1 text-xs text-red-400 hover:text-red-300 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

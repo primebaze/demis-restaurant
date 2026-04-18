@@ -20,6 +20,7 @@ type Policy = {
   cancellationWindowH: number;
 };
 type AddOn = { id: string; name: string; description: string; pricePence: number };
+type BlackoutDateEntry = { date: string; locationId: string | null; reason: string };
 type BookingResult = {
   confirmationCode: string;
   location: string;
@@ -90,12 +91,14 @@ function getMaxDate(months: number) {
 type BookingWidgetProps = {
   initialLocations?: Location[];
   initialAddOns?: AddOn[];
+  initialBlackoutDates?: BlackoutDateEntry[];
 };
 
-export default function BookingWidget({ initialLocations, initialAddOns }: BookingWidgetProps) {
+export default function BookingWidget({ initialLocations, initialAddOns, initialBlackoutDates }: BookingWidgetProps) {
   const [step, setStep] = useState(0);
   const [locations, setLocations] = useState<Location[]>(initialLocations ?? []);
   const [addOns, setAddOns] = useState<AddOn[]>(initialAddOns ?? []);
+  const blackoutDates = initialBlackoutDates ?? [];
 
   // Selections
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -358,7 +361,14 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
             if (!dateStr) return <div key={`pad-${i}`} />;
             const isPast = dateStr < todayStr;
             const isBeyond = dateStr > maxDate;
-            const disabled = isPast || isBeyond;
+            const isBlackout = selectedLocation
+              ? blackoutDates.some(
+                  (b) =>
+                    b.date === dateStr &&
+                    (b.locationId === null || b.locationId === selectedLocation.id)
+                )
+              : false;
+            const disabled = isPast || isBeyond || isBlackout;
             const isSelected = selectedDate === dateStr;
             const dayNum = new Date(dateStr + "T12:00:00").getDate();
             const isToday = dateStr === todayStr;
@@ -371,9 +381,12 @@ export default function BookingWidget({ initialLocations, initialAddOns }: Booki
                   setSelectedDate(dateStr);
                   setStep(2);
                 }}
+                title={isBlackout ? "Unavailable" : undefined}
                 className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-semibold transition-all ${
                   disabled
-                    ? "text-stone-700 cursor-not-allowed"
+                    ? isBlackout
+                      ? "text-stone-700 cursor-not-allowed line-through decoration-red-500/60"
+                      : "text-stone-700 cursor-not-allowed"
                     : isSelected
                     ? "bg-gold-300 text-[#1a1a1a]"
                     : isToday

@@ -47,3 +47,21 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ success: true, addOn });
 }
+
+/**
+ * DELETE /api/admin/settings/addons — Delete an add-on
+ */
+export async function DELETE(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id } = await req.json();
+
+  if (!id) {
+    return NextResponse.json({ error: "Add-on ID required" }, { status: 400 });
+  }
+
+  await prisma.addOn.delete({ where: { id } });
+
+  return NextResponse.json({ success: true });
+}

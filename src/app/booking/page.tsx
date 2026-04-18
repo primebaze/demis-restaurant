@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default async function BookingPage() {
-  // Server-side fetch — locations + add-ons arrive instantly with the HTML
-  const [locations, addOns] = await Promise.all([
+  // Server-side fetch — locations, add-ons & blackout dates arrive instantly with the HTML
+  const [locations, addOns, blackoutDates] = await Promise.all([
     prisma.location.findMany({
       where: { isActive: true },
       select: { id: true, name: true, slug: true, address: true },
@@ -21,6 +21,9 @@ export default async function BookingPage() {
       where: { isActive: true },
       select: { id: true, name: true, description: true, pricePence: true },
       orderBy: { pricePence: "asc" },
+    }),
+    prisma.blackoutDate.findMany({
+      select: { date: true, locationId: true, reason: true },
     }),
   ]);
 
@@ -46,7 +49,7 @@ export default async function BookingPage() {
       <section className="pb-20 sm:pb-28">
         <div className="mx-auto max-w-2xl lg:max-w-3xl px-4 sm:px-6">
           <div className="rounded-3xl border border-white/[0.06] bg-[#1f1f1f] p-6 sm:p-10">
-            <BookingWidget initialLocations={locations} initialAddOns={addOns} />
+            <BookingWidget initialLocations={locations} initialAddOns={addOns} initialBlackoutDates={blackoutDates} />
           </div>
 
           {/* Policies */}
