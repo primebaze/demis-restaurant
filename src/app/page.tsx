@@ -4,8 +4,8 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <>
-      {/* ─── TOP ANNOUNCEMENT BAR ─── */}
-      <div className="bg-white">
+      {/* ─── TOP ANNOUNCEMENT BAR (mobile only — desktop has the top nav) ─── */}
+      <div className="bg-white lg:hidden">
         <div className="py-3 sm:py-3.5 text-center">
           <p className="text-[11px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-stone-900">
             Dine With Us!
