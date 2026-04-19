@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ALL_CATEGORIES } from "@/data/menuData";
 
 /* ── Link sets ── */
 const DESKTOP_LINKS = [
@@ -27,24 +26,6 @@ const MOBILE_LINKS = [
   { label: "Sustainability", href: "/sustainability" },
   { label: "Privacy Policy", href: "/privacy" },
 ];
-
-/* ── Search highlight for desktop food menu ── */
-function SearchHighlight({ text, query }: { text: string; query: string }) {
-  if (!query.trim()) return <>{text}</>;
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
-  const parts = text.split(regex);
-  return (
-    <>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <mark key={i} className="bg-gold-300/25 text-white rounded-sm px-0.5">{part}</mark>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
-    </>
-  );
-}
 
 /* ── Scroll progress bar ──  */
 function ScrollProgress() {
@@ -85,13 +66,9 @@ export function FloatingMenu() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement>(null);
 
-  /* ── Desktop food menu state ── */
+  /* ── Desktop bottom nav state ── */
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(0);
-  const [menuSearch, setMenuSearch] = useState("");
   const desktopMenuRef = useRef<HTMLDivElement>(null);
-  const categoryTabsRef = useRef<HTMLDivElement>(null);
-  const itemsScrollRef = useRef<HTMLDivElement>(null);
 
   /* ── Desktop pill indicator ── */
   const desktopNavRef = useRef<HTMLDivElement>(null);
@@ -142,7 +119,6 @@ export function FloatingMenu() {
       }
       if (desktopMenuOpen && desktopMenuRef.current && !desktopMenuRef.current.contains(e.target as Node)) {
         setDesktopMenuOpen(false);
-        setMenuSearch("");
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -155,44 +131,11 @@ export function FloatingMenu() {
       if (e.key === "Escape") {
         setMobileOpen(false);
         setDesktopMenuOpen(false);
-        setMenuSearch("");
       }
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, []);
-
-  /* ── Desktop food menu: filtered items ── */
-  const filteredCategories = useMemo(() => {
-    if (!menuSearch.trim()) return ALL_CATEGORIES;
-    const q = menuSearch.toLowerCase();
-    return ALL_CATEGORIES.map((cat) => ({
-      ...cat,
-      items: cat.items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(q) ||
-          item.desc.toLowerCase().includes(q)
-      ),
-    })).filter((cat) => cat.items.length > 0);
-  }, [menuSearch]);
-
-  const isSearchingMenu = menuSearch.trim().length > 0;
-  const totalSearchResults = filteredCategories.reduce((sum, c) => sum + c.items.length, 0);
-
-  /* ── Reset category when closing desktop menu ── */
-  useEffect(() => {
-    if (!desktopMenuOpen) {
-      setMenuSearch("");
-      setActiveCategory(0);
-    }
-  }, [desktopMenuOpen]);
-
-  /* ── Scroll items to top when switching categories ── */
-  useEffect(() => {
-    if (itemsScrollRef.current) {
-      itemsScrollRef.current.scrollTop = 0;
-    }
-  }, [activeCategory]);
 
   /* ── Desktop pill: compute rect for a given href ── */
   const getPillRect = useCallback((href: string) => {
@@ -368,7 +311,7 @@ export function FloatingMenu() {
       </header>
 
       {/* ═══════════════════════════════════════════
-          DESKTOP FOOD MENU (lg+) — Floating bottom button
+          DESKTOP NAV (lg+) — Floating bottom button
           ═══════════════════════════════════════════ */}
       <div
         ref={desktopMenuRef}
@@ -378,201 +321,59 @@ export function FloatingMenu() {
             : "translate-y-24 opacity-0"
         }`}
       >
-        {/* Expanded food menu panel */}
+        {/* Expanded nav panel */}
         <div
-          className={`pointer-events-auto w-full max-w-2xl mx-auto rounded-[1.75rem] shadow-2xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`pointer-events-auto w-full max-w-xs rounded-[1.75rem] shadow-2xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             desktopMenuOpen
-              ? "max-h-[75vh] opacity-100 mb-3 scale-100"
-              : "max-h-0 opacity-0 mb-0 scale-95 !pointer-events-none"
+              ? "max-h-[70vh] opacity-100 mb-3 p-8 scale-100"
+              : "max-h-0 opacity-0 mb-0 p-0 scale-95 !pointer-events-none"
           }`}
           style={{
-            background: "rgba(26,26,26,0.97)",
+            background: "rgba(255,255,255,0.98)",
             backdropFilter: "blur(24px)",
           }}
         >
-          {desktopMenuOpen && (
-            <div className="flex flex-col max-h-[75vh]">
-              {/* Header */}
-              <div className="px-6 pt-6 pb-3 border-b border-white/[0.06]">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-[family-name:var(--font-display)] text-2xl font-bold text-white italic tracking-tight">
-                    Our Menu
-                  </h2>
-                  <Link
-                    href="/menu"
-                    onClick={() => setDesktopMenuOpen(false)}
-                    className="text-xs text-gold-300 hover:text-gold-200 font-medium tracking-wide transition-colors flex items-center gap-1"
-                  >
-                    View Full Menu
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </div>
-
-                {/* Search */}
-                <div className="relative mb-4">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Search dishes..."
-                    value={menuSearch}
-                    onChange={(e) => {
-                      setMenuSearch(e.target.value);
-                      setActiveCategory(0);
-                    }}
-                    className="w-full pl-10 pr-9 py-2.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-white text-sm placeholder:text-stone-500 focus:outline-none focus:border-gold-300/30 focus:ring-1 focus:ring-gold-300/20 transition-all"
-                  />
-                  {menuSearch && (
-                    <button
-                      onClick={() => setMenuSearch("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-white transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-
-                {/* Category tabs — only show when not searching */}
-                {!isSearchingMenu && (
-                  <div
-                    ref={categoryTabsRef}
-                    className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1"
-                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-                  >
-                    {ALL_CATEGORIES.map((cat, i) => (
-                      <button
-                        key={cat.title}
-                        onClick={() => setActiveCategory(i)}
-                        className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all duration-200 ${
-                          activeCategory === i
-                            ? "bg-gold-300 text-stone-900"
-                            : "bg-white/[0.06] text-stone-400 hover:text-white hover:bg-white/[0.1]"
-                        }`}
-                      >
-                        {cat.title}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Search result count */}
-                {isSearchingMenu && (
-                  <p className="text-xs text-stone-500 pb-1">
-                    {totalSearchResults} {totalSearchResults === 1 ? "dish" : "dishes"} found
-                  </p>
-                )}
-              </div>
-
-              {/* Items list */}
-              <div
-                ref={itemsScrollRef}
-                className="overflow-y-auto flex-1 px-6 py-2"
-                style={{ maxHeight: "calc(75vh - 200px)", scrollbarWidth: "thin", scrollbarColor: "rgba(232,204,156,0.2) transparent" }}
-              >
-                {isSearchingMenu ? (
-                  /* Search results - flat list grouped by category */
-                  filteredCategories.length > 0 ? (
-                    filteredCategories.map((cat) => (
-                      <div key={cat.title} className="mb-4 last:mb-2">
-                        <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-gold-300/70 italic mb-1">
-                          {cat.title}
-                        </h3>
-                        {cat.items.map((item) => (
-                          <div key={item.name} className="py-2.5 border-b border-white/[0.04] last:border-0 group">
-                            <div className="flex items-baseline justify-between gap-3">
-                              <span className="text-sm text-white font-medium leading-snug group-hover:text-gold-300 transition-colors">
-                                <SearchHighlight text={item.name} query={menuSearch} />
-                                {item.v && <span className="ml-1.5 text-[9px] font-bold text-emerald-400 align-super">V</span>}
-                                {item.spicy && <span className="ml-1 text-[9px] align-super">🌶</span>}
-                              </span>
-                              {item.price != null && (
-                                <span className="text-gold-300 font-semibold text-xs tabular-nums shrink-0">
-                                  £{item.price}
-                                </span>
-                              )}
-                            </div>
-                            <p className="mt-0.5 text-[11px] text-stone-500 leading-relaxed line-clamp-1">
-                              <SearchHighlight text={item.desc} query={menuSearch} />
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-12 text-center">
-                      <p className="text-stone-500 text-sm">No dishes found for &ldquo;{menuSearch}&rdquo;</p>
-                    </div>
-                  )
-                ) : (
-                  /* Category view */
-                  <>
-                    {ALL_CATEGORIES[activeCategory]?.subtitle && (
-                      <p className="text-[11px] text-stone-500 leading-relaxed mb-3 pb-2 border-b border-white/[0.04]">
-                        {ALL_CATEGORIES[activeCategory].subtitle}
-                      </p>
-                    )}
-                    {ALL_CATEGORIES[activeCategory]?.items.map((item, i) => (
-                      <div
-                        key={item.name}
-                        className="py-2.5 border-b border-white/[0.04] last:border-0 group"
-                        style={{
-                          animation: `fadeSlideIn 300ms ${i * 30}ms both`,
-                        }}
-                      >
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="text-sm text-white font-medium leading-snug group-hover:text-gold-300 transition-colors">
-                            {item.name}
-                            {item.v && <span className="ml-1.5 text-[9px] font-bold text-emerald-400 align-super">V</span>}
-                            {item.spicy && <span className="ml-1 text-[9px] align-super">🌶</span>}
-                          </span>
-                          {item.price != null && (
-                            <span className="text-gold-300 font-semibold text-xs tabular-nums shrink-0">
-                              £{item.price}
-                            </span>
-                          )}
-                        </div>
-                        <p className="mt-0.5 text-[11px] text-stone-500 leading-relaxed line-clamp-2 group-hover:text-stone-400 transition-colors">
-                          {item.desc}
-                        </p>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-
-              {/* Footer CTA */}
-              <div className="px-6 py-3 border-t border-white/[0.06] flex items-center justify-between">
-                <span className="text-[10px] text-stone-600 tracking-wide uppercase">
-                  <span className="text-emerald-400 font-bold">V</span> = Vegetarian &nbsp; 🌶 = Spicy
-                </span>
-                <Link
-                  href="/booking"
-                  onClick={() => setDesktopMenuOpen(false)}
-                  className="px-4 py-1.5 rounded-full bg-gold-300 text-stone-900 text-xs font-semibold tracking-wide hover:shadow-[0_0_16px_rgba(232,204,156,0.3)] transition-all"
+          <nav className="space-y-1">
+            {MOBILE_LINKS.map((link, i) => {
+              const isExternal = link.href.startsWith("http");
+              const LinkTag = isExternal ? "a" : Link;
+              const extraProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
+              return (
+                <LinkTag
+                  key={`desktop-${link.label}-${i}`}
+                  href={link.href}
+                  {...extraProps}
+                  {...(!isExternal ? { onClick: () => setDesktopMenuOpen(false) } : {})}
+                  className={`block py-3 px-2 text-lg font-light rounded-xl transition-all duration-300 ${
+                    isActive(link.href)
+                      ? "text-stone-900 bg-stone-100 font-normal"
+                      : "text-stone-700 hover:text-stone-900 hover:bg-stone-100"
+                  }`}
+                  style={{
+                    transitionDelay: desktopMenuOpen ? `${i * 30}ms` : "0ms",
+                    opacity: desktopMenuOpen ? 1 : 0,
+                    transform: desktopMenuOpen
+                      ? "translateX(0)"
+                      : "translateX(-12px)",
+                  }}
                 >
-                  Book a Table
-                </Link>
-              </div>
-            </div>
-          )}
+                  {link.label}
+                </LinkTag>
+              );
+            })}
+          </nav>
         </div>
 
         {/* Floating MENU button — Desktop */}
         <button
           type="button"
           onClick={() => setDesktopMenuOpen(!desktopMenuOpen)}
-          aria-label={desktopMenuOpen ? "Close food menu" : "Open food menu"}
+          aria-label={desktopMenuOpen ? "Close menu" : "Open menu"}
           aria-expanded={desktopMenuOpen}
           className={`pointer-events-auto w-full max-w-xs rounded-full shadow-lg flex items-center justify-center gap-3 py-4 transition-all duration-300 hover:shadow-xl active:scale-[0.98] cursor-pointer ${
             desktopMenuOpen ? "bg-stone-100" : "bg-white"
           }`}
         >
-          {/* Hamburger / X icon */}
           <div className="relative w-5 h-4 flex flex-col justify-between">
             <span
               className={`block h-[1.5px] w-full bg-stone-800 transition-all duration-300 origin-center ${
