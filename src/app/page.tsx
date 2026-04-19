@@ -400,28 +400,28 @@ export default function HomePage() {
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           {/* Header */}
-          <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 mb-5">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="1.5"/>
-                <circle cx="12" cy="12" r="5" stroke="white" strokeWidth="1.5"/>
-                <circle cx="17.5" cy="6.5" r="1.5" fill="white"/>
-              </svg>
+          <div className="mb-10 flex items-end justify-between">
+            <div>
+              <p className="section-label">@demisrestaurant</p>
+              <h2 className="mt-3 heading-lg">Catch the vibe.</h2>
             </div>
-            <p className="section-label">On Instagram</p>
-            <h2 className="mt-3 heading-lg">Behind the Scenes</h2>
-            <p className="mt-4 text-sm sm:text-base text-stone-400 max-w-md mx-auto leading-relaxed">
-              Kitchen stories, daily specials, and the bold flavours of Nigeria — straight from our pass to your feed.
-            </p>
+            <a
+              href="https://www.instagram.com/demisrestaurant/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-gold-300 hover:text-gold-200 transition-colors"
+            >
+              See more <span>&rarr;</span>
+            </a>
           </div>
 
           {/* Reel Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {[
-              { url: "https://www.instagram.com/reel/DXPgEe5jPji/", label: "Fresh from the kitchen", thumb: "/reel-1.jpg" },
-              { url: "https://www.instagram.com/reel/DXOygqKDM8D/", label: "Taste of Lagos", thumb: "/reel-2.jpg" },
-              { url: "https://www.instagram.com/reel/DXHCsjMDEog/", label: "Spice & fire", thumb: "/reel-3.jpg" },
-              { url: "https://www.instagram.com/reel/DXFF6f7jFEJ/", label: "The Demi's experience", thumb: "/reel-4.jpg" },
+              { url: "https://www.instagram.com/reel/DXPgEe5jPji/", label: "Afrobeats night — energy, vibes & music all night long", thumb: "/reel-1.jpg" },
+              { url: "https://www.instagram.com/reel/DXOygqKDM8D/", label: "Come spend your weekend with us", thumb: "/reel-2.jpg" },
+              { url: "https://www.instagram.com/reel/DXHCsjMDEog/", label: "Still serving the best Nigerian food in London", thumb: "/reel-3.jpg" },
+              { url: "https://www.instagram.com/reel/DXFF6f7jFEJ/", label: "The only place you need to be this Friday", thumb: "/reel-4.jpg" },
             ].map((reel, i) => (
               <a
                 key={i}
@@ -468,20 +468,15 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* CTA */}
-          <div className="mt-10 sm:mt-12 text-center">
+          {/* CTA — mobile only (desktop has "See more" in header) */}
+          <div className="mt-8 text-center sm:hidden">
             <a
               href="https://www.instagram.com/demisrestaurant/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 rounded-full border border-gold-300/30 px-7 py-3 text-sm font-semibold text-gold-300 hover:bg-gold-300/10 transition-all group"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-gold-300 hover:text-gold-200 transition-colors"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-70 group-hover:opacity-100 transition-opacity">
-                <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.5"/>
-                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.5"/>
-                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
-              </svg>
-              Follow @demisrestaurant <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+              Follow us on Instagram <span>&rarr;</span>
             </a>
           </div>
         </div>
