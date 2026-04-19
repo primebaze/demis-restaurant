@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ALL_CATEGORIES, type MenuItem, type MenuCategory } from "@/data/menuData";
+import { ALL_CATEGORIES, type MenuItem } from "@/data/menuData";
 
 /* ─────────── sub-components ─────────── */
 function ItemRow({ item, query }: { item: MenuItem; query: string }) {
