@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Menu | Nigerian Food in Cricklewood, London",
@@ -391,9 +390,9 @@ export default function MenuPage() {
             <a href="/booking" className="btn-gold text-xs">
               Book a Table
             </a>
-            <Link href="/bulk-orders" className="btn-outline-white text-xs">
+            <a href="https://dropoff.demisrestaurant.co.uk" target="_blank" rel="noopener noreferrer" className="btn-outline-white text-xs">
               Bulk Order
-            </Link>
+            </a>
           </div>
         </div>
       </section>

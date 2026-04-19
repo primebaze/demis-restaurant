@@ -10,14 +10,14 @@ const DESKTOP_LINKS = [
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
   { label: "Events", href: "/events" },
-  { label: "Bulk Order", href: "/bulk-orders" },
+  { label: "Bulk Order", href: "https://dropoff.demisrestaurant.co.uk" },
   { label: "Contact", href: "/contact" },
 ];
 
 const MOBILE_LINKS = [
   { label: "Home", href: "/" },
   { label: "Menu", href: "/menu" },
-  { label: "Bulk Order", href: "/bulk-orders" },
+  { label: "Bulk Order", href: "https://dropoff.demisrestaurant.co.uk" },
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
   { label: "Events", href: "/events" },
@@ -255,6 +255,9 @@ export function FloatingMenu() {
 
               {DESKTOP_LINKS.map((link) => {
                 const active = isActive(link.href);
+                const isExternal = link.href.startsWith("http");
+                const LinkTag = isExternal ? "a" : Link;
+                const extraProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
                 return (
                   <span
                     key={link.href}
@@ -263,8 +266,9 @@ export function FloatingMenu() {
                     }}
                     onMouseEnter={() => handleLinkHover(link.href)}
                   >
-                    <Link
+                    <LinkTag
                       href={link.href}
+                      {...extraProps}
                       className={`relative z-10 block px-4 py-2 text-[13px] font-medium tracking-[0.02em] transition-colors duration-200 ${
                         active
                           ? "text-gold-300"
@@ -276,7 +280,7 @@ export function FloatingMenu() {
                       {active && (
                         <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gold-300 shadow-[0_0_6px_rgba(232,204,156,0.6)]" />
                       )}
-                    </Link>
+                    </LinkTag>
                   </span>
                 );
               })}
@@ -315,27 +319,33 @@ export function FloatingMenu() {
           }`}
         >
           <nav className="space-y-1">
-            {MOBILE_LINKS.map((link, i) => (
-              <Link
-                key={`${link.label}-${i}`}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`block py-3 px-2 text-lg font-light rounded-xl transition-all duration-300 ${
-                  isActive(link.href)
-                    ? "text-stone-900 bg-stone-100 font-normal"
-                    : "text-stone-700 hover:text-stone-900 hover:bg-stone-100"
-                }`}
-                style={{
-                  transitionDelay: mobileOpen ? `${i * 30}ms` : "0ms",
-                  opacity: mobileOpen ? 1 : 0,
-                  transform: mobileOpen
-                    ? "translateX(0)"
-                    : "translateX(-12px)",
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {MOBILE_LINKS.map((link, i) => {
+              const isExternal = link.href.startsWith("http");
+              const LinkTag = isExternal ? "a" : Link;
+              const extraProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
+              return (
+                <LinkTag
+                  key={`${link.label}-${i}`}
+                  href={link.href}
+                  {...extraProps}
+                  {...(!isExternal ? { onClick: () => setMobileOpen(false) } : {})}
+                  className={`block py-3 px-2 text-lg font-light rounded-xl transition-all duration-300 ${
+                    isActive(link.href)
+                      ? "text-stone-900 bg-stone-100 font-normal"
+                      : "text-stone-700 hover:text-stone-900 hover:bg-stone-100"
+                  }`}
+                  style={{
+                    transitionDelay: mobileOpen ? `${i * 30}ms` : "0ms",
+                    opacity: mobileOpen ? 1 : 0,
+                    transform: mobileOpen
+                      ? "translateX(0)"
+                      : "translateX(-12px)",
+                  }}
+                >
+                  {link.label}
+                </LinkTag>
+              );
+            })}
           </nav>
         </div>
 
