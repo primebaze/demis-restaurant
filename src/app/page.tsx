@@ -418,10 +418,10 @@ export default function HomePage() {
           {/* Reel Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {[
-              { url: "https://www.instagram.com/reel/DXPgEe5jPji/", label: "Fresh from the kitchen", gradient: "from-amber-900/90 via-orange-800/80 to-red-900/70" },
-              { url: "https://www.instagram.com/reel/DXOygqKDM8D/", label: "Taste of Lagos", gradient: "from-red-900/90 via-rose-800/80 to-pink-900/70" },
-              { url: "https://www.instagram.com/reel/DXHCsjMDEog/", label: "Spice & fire", gradient: "from-stone-800/90 via-amber-900/80 to-yellow-900/70" },
-              { url: "https://www.instagram.com/reel/DXFF6f7jFEJ/", label: "The Demi's experience", gradient: "from-emerald-900/90 via-teal-800/80 to-stone-900/70" },
+              { url: "https://www.instagram.com/reel/DXPgEe5jPji/", label: "Fresh from the kitchen", thumb: "/reel-1.jpg" },
+              { url: "https://www.instagram.com/reel/DXOygqKDM8D/", label: "Taste of Lagos", thumb: "/reel-2.jpg" },
+              { url: "https://www.instagram.com/reel/DXHCsjMDEog/", label: "Spice & fire", thumb: "/reel-3.jpg" },
+              { url: "https://www.instagram.com/reel/DXFF6f7jFEJ/", label: "The Demi's experience", thumb: "/reel-4.jpg" },
             ].map((reel, i) => (
               <a
                 key={i}
@@ -430,12 +430,10 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="group relative aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer"
               >
-                {/* Gradient backdrop */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${reel.gradient}`} />
-                {/* Subtle texture pattern */}
-                <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-                {/* Animated shimmer on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                {/* Thumbnail image */}
+                <img src={reel.thumb} alt={reel.label} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                {/* Dark overlay on hover */}
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors duration-300" />
 
                 {/* Play button */}
                 <div className="absolute inset-0 flex items-center justify-center">
