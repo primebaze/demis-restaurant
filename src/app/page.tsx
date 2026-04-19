@@ -4,8 +4,8 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <>
-      {/* ─── TOP ANNOUNCEMENT BAR (mobile only — desktop has the top nav) ─── */}
-      <div className="bg-white lg:hidden">
+      {/* ─── TOP ANNOUNCEMENT BAR ─── */}
+      <div className="bg-white">
         <div className="py-3 sm:py-3.5 text-center">
           <p className="text-[11px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-stone-900">
             Dine With Us!
@@ -30,7 +30,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
           <h1 className="text-white">
             <span className="block text-[clamp(2.8rem,10vw,5.5rem)] font-bold uppercase tracking-[0.04em] leading-[1]">
-              DEMI{/* Chili pepper apostrophe — small, top-positioned */}<span className="inline-block relative -top-[0.38em] -mx-[0.01em]"><svg viewBox="0 0 24 44" className="h-[0.28em] w-auto inline-block" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C12 1,13 5,12 8" stroke="#2d7a2d" strokeWidth="2" strokeLinecap="round" fill="none"/><path d="M12 5C14 3,17 3.5,16 6C15 7.5,13 6.5,12 5Z" fill="#2d7a2d"/><path d="M7 10C4 12,3 20,5 28C6 32,8 37,10 41C11 43,13 43,13 41C15 35,19 26,19 20C19 14,16 9,12 9C10 9,8 9.5,7 10Z" fill="#d42c2c"/><path d="M9 14C8 17,7 23,8 29" stroke="#e85050" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/></svg></span>S
+              DEMI{/* Chili pepper apostrophe */}<span className="inline-block relative" style={{ top: '-0.38em', marginLeft: '-0.01em', marginRight: '-0.01em' }}><svg viewBox="0 0 24 44" style={{ height: '0.28em', width: 'auto' }} className="inline-block" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C12 1,13 5,12 8" stroke="#2d7a2d" strokeWidth="2" strokeLinecap="round" fill="none"/><path d="M12 5C14 3,17 3.5,16 6C15 7.5,13 6.5,12 5Z" fill="#2d7a2d"/><path d="M7 10C4 12,3 20,5 28C6 32,8 37,10 41C11 43,13 43,13 41C15 35,19 26,19 20C19 14,16 9,12 9C10 9,8 9.5,7 10Z" fill="#d42c2c"/><path d="M9 14C8 17,7 23,8 29" stroke="#e85050" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/></svg></span>S
             </span>
             <span className="block text-[clamp(0.65rem,1.6vw,0.8rem)] tracking-[0.45em] uppercase font-light mt-3 text-gold-300">
               Nigerian Restaurant
@@ -194,18 +194,18 @@ export default function HomePage() {
               <div>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <p className="text-4xl sm:text-5xl font-bold text-stone-900">4L</p>
-                    <p className="text-xs text-stone-500 mt-1">Small</p>
+                    <p className="text-4xl sm:text-5xl font-bold text-stone-900">Small</p>
+                    <p className="text-xs text-stone-500 mt-1">4l</p>
                     <p className="text-[11px] text-stone-400 mt-0.5">3–5 people</p>
                   </div>
                   <div>
-                    <p className="text-4xl sm:text-5xl font-bold text-gold-600">7L</p>
-                    <p className="text-xs text-stone-500 mt-1">Medium</p>
+                    <p className="text-4xl sm:text-5xl font-bold text-gold-600">Medium</p>
+                    <p className="text-xs text-stone-500 mt-1">7l</p>
                     <p className="text-[11px] text-stone-400 mt-0.5">6–10 people</p>
                   </div>
                   <div>
-                    <p className="text-4xl sm:text-5xl font-bold text-stone-900">14L</p>
-                    <p className="text-xs text-stone-500 mt-1">Large</p>
+                    <p className="text-4xl sm:text-5xl font-bold text-stone-900">Large</p>
+                    <p className="text-xs text-stone-500 mt-1">14l</p>
                     <p className="text-[11px] text-stone-400 mt-0.5">12–20+ people</p>
                   </div>
                 </div>
@@ -269,7 +269,7 @@ export default function HomePage() {
                 With Deejay Why on the decks spinning Amapiano bangers, Afrobeats &amp; Afro-fusion. Cocktails, the best jollof in town, and a dance floor that&apos;s always packed.
               </p>
               <p className="mt-5 text-xs font-semibold text-gold-300">
-                Both Locations &middot; 8 PM &ndash; Late
+                Cricklewood &middot; 8 PM &ndash; Late
               </p>
               <a
                 href="/booking"
@@ -282,15 +282,15 @@ export default function HomePage() {
             {/* Weekend Brunch */}
             <div className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-600/10 via-[#222]/80 to-[#1a1a1a] border border-white/[0.08] p-7 sm:p-9 transition-all duration-500 hover:border-gold-300/30 hover:shadow-[0_0_30px_rgba(232,204,156,0.08)]">
               <span className="text-4xl block mb-4">🍳</span>
-              <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gold-300">Saturdays &amp; Sundays</p>
+              <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gold-300">Saturdays</p>
               <h3 className="mt-2 text-xl sm:text-2xl font-extrabold text-white leading-tight">
-                Weekend Brunch
+                Lunch Menu
               </h3>
               <p className="mt-3 text-sm text-white/60 leading-relaxed">
                 Akara, plantain, eggs &amp; bottomless Chapman cocktails. Bring the whole crew.
               </p>
               <p className="mt-5 text-xs font-semibold text-gold-300">
-                Both Locations &middot; 11 AM &ndash; 3 PM
+                Both Locations &middot; 12 PM &ndash; 4 PM
               </p>
             </div>
 
@@ -299,10 +299,10 @@ export default function HomePage() {
               <span className="text-4xl block mb-4">🔥</span>
               <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gold-300">Every Sunday</p>
               <h3 className="mt-2 text-xl sm:text-2xl font-extrabold text-white leading-tight">
-                Suya Sundays
+                Buffet Sundays
               </h3>
               <p className="mt-3 text-sm text-white/60 leading-relaxed">
-                Char-grilled, perfectly spiced suya platters. Cold drinks. Good vibes only.
+                Full buffet menu from 1 PM.  All-you-can-eat! jollof, fried rice, and more. Start the week with a feast.
               </p>
               <p className="mt-5 text-xs font-semibold text-gold-300">
                 Cricklewood &middot; 4 PM &ndash; 10 PM
@@ -355,10 +355,9 @@ export default function HomePage() {
                 {[...Array(5)].map((_, i) => <span key={i}>&#9733;</span>)}
               </div>
               <p className="text-sm text-stone-400 leading-relaxed">
-                &ldquo;The jollof rice here is incredible. Smoky, perfectly spiced, and tastes exactly
-                like what you&apos;d get in Lagos. Best Nigerian food in North London.&rdquo;
+                &ldquo;I had the Demi’s Easter Menu and it was really nice. I really enjoyed the fish peppersoup, salad and the yamarita.&rdquo;
               </p>
-              <p className="mt-5 text-sm font-semibold text-white">Tunde A.</p>
+              <p className="mt-5 text-sm font-semibold text-white">Edward</p>
               <p className="text-xs text-stone-500">Google Review</p>
             </div>
 
@@ -367,10 +366,9 @@ export default function HomePage() {
                 {[...Array(5)].map((_, i) => <span key={i}>&#9733;</span>)}
               </div>
               <p className="text-sm text-stone-400 leading-relaxed">
-                &ldquo;We ordered bulk for my daughter&apos;s birthday &mdash; 14L of jollof.
-                Arrived fresh and on time. Every guest was asking where we got the food!&rdquo;
+                &ldquo;The restaurant was very nice and warm, they offered to take my jacket for me. One thing i love was Ada Service she as amazing and help Decided what I should have and she made a great recommendation I would recommend this restaurant for anyone looking to try good Nigeria food&rdquo;
               </p>
-              <p className="mt-5 text-sm font-semibold text-white">Ngozi M.</p>
+              <p className="mt-5 text-sm font-semibold text-white">Mariam Q.</p>
               <p className="text-xs text-stone-500">Google Review</p>
             </div>
 
@@ -379,101 +377,113 @@ export default function HomePage() {
                 {[...Array(5)].map((_, i) => <span key={i}>&#9733;</span>)}
               </div>
               <p className="text-sm text-stone-400 leading-relaxed">
-                &ldquo;Warm atmosphere, amazing suya, and the staff are so welcoming.
-                This is our go-to spot whenever we&apos;re in Cricklewood. Highly recommend.&rdquo;
+                &ldquo;The atmosphere feels consistent and thoughtfully arranged. The visit leaves a steady positive feeling.&rdquo;
               </p>
-              <p className="mt-5 text-sm font-semibold text-white">David O.</p>
+              <p className="mt-5 text-sm font-semibold text-white">Denise B.</p>
               <p className="text-xs text-stone-500">Google Review</p>
             </div>
+          </div>
+          <div className="mt-10 text-center">
+            <a
+              href="https://maps.app.goo.gl/Q8KryHAmAzV6wy3w5"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-gold-300/30 px-6 py-2.5 text-sm font-semibold text-gold-300 hover:bg-gold-300/10 transition-all"
+            >
+              Leave us a review <span>&rarr;</span>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* ─── INSTAGRAM REELS ─── */}
+      {/* ─── INSTAGRAM ─── */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 flex items-end justify-between">
-            <div>
-              <p className="section-label">Follow Us</p>
-              <h2 className="mt-3 heading-lg">Latest from Instagram.</h2>
+          {/* Header */}
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 mb-5">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="1.5"/>
+                <circle cx="12" cy="12" r="5" stroke="white" strokeWidth="1.5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="white"/>
+              </svg>
             </div>
-            <a
-              href="https://www.instagram.com/demisrestaurant/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-gold-300 hover:text-gold-200 transition-colors"
-            >
-              @demisrestaurant <span>&rarr;</span>
-            </a>
+            <p className="section-label">On Instagram</p>
+            <h2 className="mt-3 heading-lg">Behind the Scenes</h2>
+            <p className="mt-4 text-sm sm:text-base text-stone-400 max-w-md mx-auto leading-relaxed">
+              Kitchen stories, daily specials, and the bold flavours of Nigeria — straight from our pass to your feed.
+            </p>
           </div>
 
+          {/* Reel Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            <a
-              href="https://www.instagram.com/reel/DIfnx2dI7rq/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative aspect-[9/16] rounded-xl overflow-hidden bg-[#222]"
-            >
-              <iframe
-                src="https://www.instagram.com/reel/DIfnx2dI7rq/embed/"
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                loading="lazy"
-                title="Demi's Instagram Reel 1"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-            </a>
-            <a
-              href="https://www.instagram.com/reel/DITLcOqoGPt/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative aspect-[9/16] rounded-xl overflow-hidden bg-[#222]"
-            >
-              <iframe
-                src="https://www.instagram.com/reel/DITLcOqoGPt/embed/"
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                loading="lazy"
-                title="Demi's Instagram Reel 2"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-            </a>
-            <a
-              href="https://www.instagram.com/reel/DIGHCMzIRy7/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative aspect-[9/16] rounded-xl overflow-hidden bg-[#222]"
-            >
-              <iframe
-                src="https://www.instagram.com/reel/DIGHCMzIRy7/embed/"
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                loading="lazy"
-                title="Demi's Instagram Reel 3"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-            </a>
-            <a
-              href="https://www.instagram.com/reel/DH4U3mKoGqm/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative aspect-[9/16] rounded-xl overflow-hidden bg-[#222]"
-            >
-              <iframe
-                src="https://www.instagram.com/reel/DH4U3mKoGqm/embed/"
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                loading="lazy"
-                title="Demi's Instagram Reel 4"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-            </a>
+            {[
+              { url: "https://www.instagram.com/reel/DXPgEe5jPji/", label: "Fresh from the kitchen", gradient: "from-amber-900/90 via-orange-800/80 to-red-900/70" },
+              { url: "https://www.instagram.com/reel/DXOygqKDM8D/", label: "Taste of Lagos", gradient: "from-red-900/90 via-rose-800/80 to-pink-900/70" },
+              { url: "https://www.instagram.com/reel/DXHCsjMDEog/", label: "Spice & fire", gradient: "from-stone-800/90 via-amber-900/80 to-yellow-900/70" },
+              { url: "https://www.instagram.com/reel/DXFF6f7jFEJ/", label: "The Demi's experience", gradient: "from-emerald-900/90 via-teal-800/80 to-stone-900/70" },
+            ].map((reel, i) => (
+              <a
+                key={i}
+                href={reel.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer"
+              >
+                {/* Gradient backdrop */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${reel.gradient}`} />
+                {/* Subtle texture pattern */}
+                <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                {/* Animated shimmer on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+
+                {/* Play button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/20 group-hover:border-white/30 group-hover:scale-110 transition-all duration-300">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white" className="ml-1">
+                      <path d="M8 5.14v13.72a1 1 0 001.5.87l11.04-6.86a1 1 0 000-1.74L9.5 4.27a1 1 0 00-1.5.87z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Bottom label */}
+                <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 bg-gradient-to-t from-black/50 to-transparent">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="1.5" opacity="0.7"/>
+                      <circle cx="12" cy="12" r="5" stroke="white" strokeWidth="1.5" opacity="0.7"/>
+                    </svg>
+                    <span className="text-[10px] sm:text-xs text-white/60 font-medium tracking-wide uppercase">Reel</span>
+                  </div>
+                  <p className="text-xs sm:text-sm font-medium text-white/90 leading-snug">{reel.label}</p>
+                </div>
+
+                {/* Top-right reel icon */}
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" opacity="0.4">
+                    <rect x="2" y="4" width="20" height="16" rx="3"/>
+                    <path d="M12 4V20M2 10h20"/>
+                    <path d="M7 4l5 6M17 4l-5 6"/>
+                  </svg>
+                </div>
+              </a>
+            ))}
           </div>
 
-          <div className="mt-6 text-center sm:hidden">
+          {/* CTA */}
+          <div className="mt-10 sm:mt-12 text-center">
             <a
               href="https://www.instagram.com/demisrestaurant/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-gold-300 hover:text-gold-200 transition-colors"
+              className="inline-flex items-center gap-3 rounded-full border border-gold-300/30 px-7 py-3 text-sm font-semibold text-gold-300 hover:bg-gold-300/10 transition-all group"
             >
-              @demisrestaurant <span>&rarr;</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-70 group-hover:opacity-100 transition-opacity">
+                <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+              </svg>
+              Follow @demisrestaurant <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
             </a>
           </div>
         </div>
