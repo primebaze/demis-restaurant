@@ -411,7 +411,7 @@ export default function HomePage() {
             <p className="section-label">@demisrestaurant</p>
             <h2 className="mt-3 heading-lg">Catch the Vibe</h2>
             <p className="mt-4 text-sm sm:text-base text-stone-400 max-w-md mx-auto leading-relaxed">
-             Follow us on Instagram.
+             
             </p>
           </div>
 
