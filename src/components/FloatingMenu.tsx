@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 /* ── Link sets ── */
 const DESKTOP_LINKS = [
   { label: "Menu", href: "/menu" },
+  { label: "Buffet", href: "/buffet" },
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
   { label: "Events", href: "/events" },
@@ -17,6 +18,7 @@ const DESKTOP_LINKS = [
 const MOBILE_LINKS = [
   { label: "Home", href: "/" },
   { label: "Menu", href: "/menu" },
+  { label: "Buffet", href: "/buffet" },
   { label: "Bulk Order", href: "https://dropoff.demisrestaurant.co.uk" },
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
