@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Bulk Food Delivery | Nigerian Catering London",
   description:
-    "Order authentic Nigerian food in bulk for delivery across London. Jollof rice, egusi soup, suya, and more in 4L, 7L, and 14L portions. Perfect for parties, offices, and events. 24-hour advance ordering from Demi's Restaurant.",
+    "Order traditional Nigerian food in bulk for delivery across London. Jollof rice, egusi soup, suya, and more in 4L, 7L, and 14L portions. Perfect for parties, offices, and events. 24-hour advance ordering from Demi's Restaurant.",
   keywords: [
     "bulk Nigerian food delivery London",
     "Nigerian catering London",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Bulk Nigerian Food Delivery Across London | Demi's Restaurant",
-    description: "Order authentic Nigerian meals in bulk — jollof rice, egusi soup, suya, and more. Delivered fresh across London.",
+    description: "Order freshly made Nigerian meals in bulk — jollof rice, egusi soup, suya, and more. Delivered fresh across London.",
   },
   alternates: {
     canonical: "https://demisrestaurant.co.uk/bulk-orders",
@@ -34,7 +34,7 @@ export default function BulkOrdersPage() {
             Nigerian food, delivered in bulk.
           </h1>
           <p className="mt-6 body-text max-w-xl mx-auto text-base sm:text-lg leading-relaxed">
-            Feeding a crowd? Order authentic Nigerian meals in bulk from Demi&apos;s.
+            Feeding a crowd? Order proper Nigerian meals in bulk from Demi&apos;s.
             Perfect for offices, parties, family gatherings, and events.
             Delivered fresh across London with just 24 hours&apos; notice.
           </p>

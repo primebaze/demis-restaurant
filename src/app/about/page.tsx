@@ -4,10 +4,10 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About Us | Our Story",
   description:
-    "Learn about Demi's Restaurant — an authentic Nigerian restaurant at 89 Cricklewood Broadway, London NW2 3JG. Our story, our passion for Nigerian cuisine, and our commitment to quality.",
+    "Learn about Demi's Restaurant — a proudly Nigerian restaurant at 89 Cricklewood Broadway, London NW2 3JG. Our story, our passion for Nigerian cuisine, and our commitment to quality.",
   openGraph: {
-    title: "About Demi's Restaurant — Authentic Nigerian Cuisine in London",
-    description: "Our story, our passion for Nigerian food, and our commitment to bringing authentic West African flavours to London.",
+    title: "About Demi's Restaurant — Nigerian Cuisine in London",
+    description: "Our story, our passion for Nigerian food, and our commitment to bringing real West African flavours to London.",
   },
   alternates: {
     canonical: "https://demisrestaurant.co.uk/about",
@@ -39,7 +39,7 @@ export default function AboutPage() {
             <p>
               Demi&apos;s Restaurant was born from a deep love for Nigerian food and a desire to share it with London.
               Located at 89 Cricklewood Broadway in the heart of NW2, we&apos;ve become a destination for anyone craving
-              authentic West African flavours.
+              true West African flavours.
             </p>
             <p>
               Our kitchen is led by experienced Nigerian chefs who bring generations of culinary knowledge to every dish.

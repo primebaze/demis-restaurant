@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Cricklewood Broadway | Demi's Restaurant",
   description:
-    "Visit Demi's Nigerian Restaurant at 89 Cricklewood Broadway, London NW2 3JG. Authentic Nigerian cuisine in North West London. Directions, parking info and opening hours.",
+    "Visit Demi's Nigerian Restaurant at 89 Cricklewood Broadway, London NW2 3JG. Nigerian cuisine in North West London. Directions, parking info and opening hours.",
   keywords: [
     "Demi's Cricklewood",
     "Nigerian restaurant Cricklewood",
@@ -49,7 +49,7 @@ export default function CricklewoodPage() {
           <p className="mt-6 body-text leading-relaxed">
             Demi&apos;s Cricklewood is where our story started &mdash; a warm, welcoming
             space on one of North London&apos;s most vibrant high streets. Our Cricklewood
-            branch serves the full menu of authentic Nigerian dishes, from smoky jollof
+            branch serves the full menu of classic Nigerian dishes, from smoky jollof
             rice and perfectly grilled suya to rich egusi soup and fluffy pounded yam.
           </p>
           <p className="mt-4 body-text leading-relaxed">

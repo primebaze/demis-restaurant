@@ -29,10 +29,10 @@ export default function HomePage() {
 
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
           <h1 className="text-white">
-            <span className="block text-[clamp(2.8rem,10vw,5.5rem)] font-bold tracking-[0.04em] leading-[1]">
-              DEMI&apos;S
+            <span className="block text-[clamp(2.8rem,10vw,5.5rem)] font-bold uppercase tracking-[0.04em] leading-[1]">
+              DEMI{/* Chili pepper apostrophe — small, top-positioned */}<span className="inline-block relative -top-[0.38em] -mx-[0.01em]"><svg viewBox="0 0 24 44" className="h-[0.28em] w-auto inline-block" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C12 1,13 5,12 8" stroke="#2d7a2d" strokeWidth="2" strokeLinecap="round" fill="none"/><path d="M12 5C14 3,17 3.5,16 6C15 7.5,13 6.5,12 5Z" fill="#2d7a2d"/><path d="M7 10C4 12,3 20,5 28C6 32,8 37,10 41C11 43,13 43,13 41C15 35,19 26,19 20C19 14,16 9,12 9C10 9,8 9.5,7 10Z" fill="#d42c2c"/><path d="M9 14C8 17,7 23,8 29" stroke="#e85050" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/></svg></span>S
             </span>
-            <span className="block text-[clamp(0.65rem,2vw,0.95rem)] tracking-[0.45em] uppercase font-medium mt-3 text-gold-300">
+            <span className="block text-[clamp(0.65rem,1.6vw,0.8rem)] tracking-[0.45em] uppercase font-light mt-3 text-gold-300">
               Nigerian Restaurant
             </span>
           </h1>
@@ -84,8 +84,7 @@ export default function HomePage() {
                   Order bulk<br />meals.
                 </h3>
                 <p className="mt-4 text-sm text-stone-400 leading-relaxed max-w-[280px]">
-                  4L, 7L, or 14L portions delivered fresh across London. Perfect for parties, offices and events.
-                </p>
+                  Small, medium, or large portions delivered fresh to your home or office. Perfect for family dinners, parties, or work events.</p>
                 <a
                   href="https://dropoff.demisrestaurant.co.uk/menu"
                   className="mt-7 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-sm font-semibold text-stone-900 hover:bg-gold-200 transition-all"
@@ -106,7 +105,7 @@ export default function HomePage() {
                   Dine with us<br />in person.
                 </h3>
                 <p className="mt-4 text-sm text-stone-400 leading-relaxed max-w-[280px]">
-                  Visit Demi&apos;s Restaurant London for the full experience — authentic flavours, warm atmosphere.
+                  Visit Demi&apos;s Restaurant London for the full experience — rich flavours, warm atmosphere.
                 </p>
                 <a
                   href="/booking"
@@ -219,7 +218,7 @@ export default function HomePage() {
                   Catering for<br />any occasion.
                 </h2>
                 <p className="mt-4 text-sm text-stone-500 leading-relaxed">
-                  Order authentic Nigerian food in bulk. Minimum order &pound;30.
+                  Order traditional Nigerian food in bulk. Minimum order &pound;30.
                   Free delivery over &pound;100. 24-hour advance notice.
                 </p>
                 <div className="mt-6 flex items-center gap-3 flex-wrap">

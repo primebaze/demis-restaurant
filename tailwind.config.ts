@@ -38,6 +38,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-display)', 'Georgia', 'serif'],
       },
     },
   },

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { FloatingMenu } from "@/components/FloatingMenu";
@@ -12,10 +12,17 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
 const SITE_URL = "https://demisrestaurant.co.uk";
 const SITE_NAME = "Demi's Restaurant";
 const SITE_DESCRIPTION =
-  "Authentic Nigerian restaurant in Cricklewood, London. Enjoy jollof rice, suya, egusi soup, pounded yam and more. Dine in, takeaway, or bulk delivery across London. Book a table today.";
+  "Nigerian restaurant in Cricklewood, London. Enjoy jollof rice, suya, egusi soup, pounded yam and more. Dine in, takeaway, or bulk delivery across London. Book a table today.";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -26,7 +33,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} | Authentic Nigerian Cuisine in London`,
+    default: `${SITE_NAME} | Real Nigerian Cuisine in London`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -60,20 +67,20 @@ export const metadata: Metadata = {
     locale: "en_GB",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} | Authentic Nigerian Cuisine in London`,
+    title: `${SITE_NAME} | Real Nigerian Cuisine in London`,
     description: SITE_DESCRIPTION,
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Demi's Restaurant — Authentic Nigerian Cuisine in London",
+        alt: "Demi's Restaurant — Real Nigerian Cuisine in London",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} | Authentic Nigerian Cuisine in London`,
+    title: `${SITE_NAME} | Real Nigerian Cuisine in London`,
     description: SITE_DESCRIPTION,
     images: ["/og-image.jpg"],
   },
@@ -100,7 +107,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={jakarta.variable}>
+    <html lang="en" className={`${jakarta.variable} ${cormorant.variable}`}>
       <body className="font-sans antialiased">
         <ScrollToTop />
         <JsonLd />

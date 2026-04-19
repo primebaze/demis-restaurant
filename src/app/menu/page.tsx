@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Menu | Nigerian Food in Cricklewood, London",
   description:
-    "Explore our authentic Nigerian menu — jollof rice, egusi soup, suya, pounded yam, fried rice, pepper soup, asun, and more. Dine in at 89 Cricklewood Broadway, NW2 3JG or order bulk delivery across London.",
+    "Explore our full Nigerian menu — jollof rice, egusi soup, suya, pounded yam, fried rice, pepper soup, asun, and more. Dine in at 89 Cricklewood Broadway, NW2 3JG or order bulk delivery across London.",
   keywords: [
     "Nigerian food menu",
     "jollof rice Cricklewood",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     "Nigerian restaurant menu",
   ],
   openGraph: {
-    title: "Menu | Demi's Restaurant — Authentic Nigerian Cuisine",
+    title: "Menu | Demi's Restaurant — Traditional Nigerian Cuisine",
     description: "Browse our full Nigerian menu. From jollof rice to suya, egusi soup to pounded yam. Dine in or order bulk delivery.",
   },
   alternates: {
@@ -92,10 +92,10 @@ export default function MenuPage() {
         <div className="mx-auto max-w-5xl text-center">
           <p className="section-label">Our Menu</p>
           <h1 className="mt-4 heading-display">
-            Authentic Nigerian flavours, fresh daily.
+            Bold Nigerian flavours, made fresh daily.
           </h1>
           <p className="mt-4 body-text max-w-xl mx-auto lg:max-w-2xl">
-            Everything is prepared fresh using authentic Nigerian recipes.
+            Everything is prepared fresh using traditional Nigerian recipes.
             Dine in at 89 Cricklewood Broadway, NW2 3JG, or order bulk delivery across London.
           </p>
         </div>

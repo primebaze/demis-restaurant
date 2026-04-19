@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Streatham Hill | Demi's Restaurant",
   description:
-    "Visit Demi's Nigerian Restaurant at 67 Streatham Hill, London SW2 4TX. Authentic Nigerian cuisine in South London. Directions, parking info and opening hours.",
+    "Visit Demi's Nigerian Restaurant at 67 Streatham Hill, London SW2 4TX. Nigerian cuisine in South London. Directions, parking info and opening hours.",
   keywords: [
     "Demi's Streatham",
     "Nigerian restaurant Streatham",
@@ -30,7 +30,7 @@ export default function StreathamPage() {
             Streatham Hill
           </h1>
           <p className="mt-4 text-sm sm:text-base text-white/60 max-w-md">
-            Bringing authentic Nigerian flavours to South London.
+            Bringing real Nigerian flavours to South London.
           </p>
         </div>
       </section>
@@ -51,7 +51,7 @@ export default function StreathamPage() {
           </p>
           <p className="mt-4 body-text leading-relaxed">
             Whether you&apos;re a local looking for your new favourite spot or
-            travelling across London for the authentic taste, Streatham Hill has
+            travelling across London for the real thing, Streatham Hill has
             everything you love about Demi&apos;s. Dine in, take away, or book
             the space for private events and celebrations.
           </p>
