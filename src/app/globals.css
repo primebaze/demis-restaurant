@@ -91,3 +91,15 @@
     @apply rounded-[1.75rem] bg-white p-6 sm:p-8 text-stone-900;
   }
 }
+
+/* ── Desktop food menu item animation ── */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
