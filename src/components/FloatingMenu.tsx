@@ -325,15 +325,15 @@ export function FloatingMenu() {
         <div
           className={`pointer-events-auto w-full max-w-xs rounded-[1.75rem] shadow-2xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             desktopMenuOpen
-              ? "max-h-[70vh] opacity-100 mb-3 p-8 scale-100"
-              : "max-h-0 opacity-0 mb-0 p-0 scale-95 !pointer-events-none"
+              ? "max-h-[70vh] opacity-100 mb-3 scale-100"
+              : "max-h-0 opacity-0 mb-0 scale-95 !pointer-events-none"
           }`}
           style={{
             background: "rgba(255,255,255,0.98)",
             backdropFilter: "blur(24px)",
           }}
         >
-          <nav className="space-y-1">
+          <nav className="space-y-1 overflow-y-auto max-h-[calc(70vh-4rem)] p-8" style={{ scrollbarWidth: "thin" }}>
             {MOBILE_LINKS.map((link, i) => {
               const isExternal = link.href.startsWith("http");
               const LinkTag = isExternal ? "a" : Link;
@@ -412,11 +412,11 @@ export function FloatingMenu() {
         <div
           className={`pointer-events-auto bg-white rounded-[1.75rem] shadow-2xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             mobileOpen
-              ? "max-h-[70vh] opacity-100 mb-3 p-8 scale-100"
-              : "max-h-0 opacity-0 mb-0 p-0 scale-95 !pointer-events-none"
+              ? "max-h-[70vh] opacity-100 mb-3 scale-100"
+              : "max-h-0 opacity-0 mb-0 scale-95 !pointer-events-none"
           }`}
         >
-          <nav className="space-y-1">
+          <nav className="space-y-1 overflow-y-auto max-h-[calc(70vh-4rem)] p-8" style={{ scrollbarWidth: "thin" }}>
             {MOBILE_LINKS.map((link, i) => {
               const isExternal = link.href.startsWith("http");
               const LinkTag = isExternal ? "a" : Link;
