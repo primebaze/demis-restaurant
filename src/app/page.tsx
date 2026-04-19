@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <>
       {/* ─── TOP ANNOUNCEMENT BAR ─── */}
-      <div className="bg-white">
+      <div className="bg-white lg:hidden">
         <div className="py-3 sm:py-3.5 text-center">
           <p className="text-[11px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-stone-900">
             Dine With Us!

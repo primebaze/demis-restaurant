@@ -32,7 +32,7 @@ export default function MenuPage() {
         <div className="mx-auto max-w-7xl text-center">
           <p className="section-label">Our Menu</p>
           <h1 className="mt-4 heading-display">
-            Bold Nigerian flavours, made fresh daily.
+            Explore Our Delicious Nigerian Dishes
           </h1>
           <p className="mt-4 body-text max-w-xl mx-auto lg:max-w-2xl">
             Everything is prepared fresh using traditional Nigerian recipes.
