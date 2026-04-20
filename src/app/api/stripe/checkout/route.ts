@@ -102,7 +102,7 @@ export async function POST(req: Request) {
         confirmationCode: booking.confirmationCode,
         type: "booking_payment",
       },
-      success_url: `${SITE_URL}/booking/success?code=${booking.confirmationCode}&token=${booking.managementToken}`,
+      success_url: `${SITE_URL}/booking/success?code=${booking.confirmationCode}`,
       cancel_url: `${SITE_URL}/booking/pay?code=${booking.confirmationCode}&cancelled=true`,
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes
     });

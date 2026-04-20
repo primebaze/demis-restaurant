@@ -86,7 +86,7 @@ export async function PATCH(
     }
 
     // ─── Build audit log entries ───
-    const allowedFields = ["date", "time", "timeSlotId", "partySize", "notes", "status"];
+    const allowedFields = ["date", "time", "timeSlotId", "partySize", "notes"];
     const changes: { field: string; oldVal: string; newVal: string }[] = [];
 
     for (const field of allowedFields) {

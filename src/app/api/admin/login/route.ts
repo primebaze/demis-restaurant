@@ -5,6 +5,9 @@ import { SignJWT } from "jose";
 export const dynamic = "force-dynamic";
 
 
+if (!process.env.ADMIN_JWT_SECRET || process.env.ADMIN_JWT_SECRET === "demis-admin-secret-change-me") {
+  console.warn("⚠️  ADMIN_JWT_SECRET is missing or using the default — set a strong secret in production!");
+}
 const JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || "demis-admin-secret-change-me"
 );

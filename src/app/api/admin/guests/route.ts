@@ -17,6 +17,10 @@ export async function GET(req: Request) {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = 20;
 
+  if (search && search.length > 200) {
+    return NextResponse.json({ error: "Search query too long" }, { status: 400 });
+  }
+
   const where: Record<string, unknown> = {};
   if (search) {
     where.OR = [

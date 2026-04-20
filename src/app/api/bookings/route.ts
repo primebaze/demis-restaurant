@@ -46,6 +46,33 @@ export async function POST(req: Request) {
       );
     }
 
+    // ─── Type & format validation ───
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
+
+    const parsedPartySize = Number(partySize);
+    if (!Number.isInteger(parsedPartySize) || parsedPartySize < 1 || parsedPartySize > 100) {
+      return NextResponse.json({ error: "Party size must be between 1 and 100" }, { status: 400 });
+    }
+
+    if (typeof name !== "string" || name.length > 200) {
+      return NextResponse.json({ error: "Name must be under 200 characters" }, { status: 400 });
+    }
+
+    if (notes && typeof notes === "string" && notes.length > 1000) {
+      return NextResponse.json({ error: "Notes must be under 1000 characters" }, { status: 400 });
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    }
+
+    if (!/^\d{2}:\d{2}$/.test(time)) {
+      return NextResponse.json({ error: "Invalid time format" }, { status: 400 });
+    }
+
     // Get location
     const location = await prisma.location.findUnique({ where: { slug: locationSlug } });
     if (!location || !location.isActive) {

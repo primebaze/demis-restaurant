@@ -15,8 +15,7 @@ export async function GET() {
 
     return NextResponse.json({ locations });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("Locations API error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Locations API error:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Failed to fetch locations" }, { status: 500 });
   }
 }

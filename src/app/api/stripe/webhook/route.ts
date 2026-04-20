@@ -9,7 +9,10 @@ const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-03-25.dahlia" })
   : null;
 
-const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
+const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+if (!WEBHOOK_SECRET) {
+  console.warn("⚠️  STRIPE_WEBHOOK_SECRET is not set — webhook verification will fail");
+}
 
 /** Convert 24h "13:30" → "1:30 PM" */
 function formatTime24(t: string) {
@@ -26,6 +29,10 @@ function formatTime24(t: string) {
 export async function POST(req: Request) {
   if (!stripe) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
+  }
+
+  if (!WEBHOOK_SECRET) {
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
   }
 
   const body = await req.text();
