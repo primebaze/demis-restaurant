@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { compareSync } from "bcryptjs";
 import { SignJWT } from "jose";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 
 
@@ -12,11 +13,29 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || "demis-admin-secret-change-me"
 );
 
+// 5 login attempts per IP every 15 minutes
+const LOGIN_RATE_LIMIT = { maxRequests: 5, windowMs: 15 * 60 * 1000 };
+
 /**
  * POST /api/admin/login — Admin authentication
  */
 export async function POST(req: Request) {
   try {
+    // Rate limit check
+    const ip = getClientIp(req);
+    const limiter = rateLimit(`login:${ip}`, LOGIN_RATE_LIMIT);
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: "Too many login attempts. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(limiter.resetMs / 1000)),
+          },
+        }
+      );
+    }
+
     const { email, password } = await req.json();
 
     if (!email || !password) {

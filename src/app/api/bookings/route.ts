@@ -5,7 +5,11 @@ import {
   generateManagementToken,
 } from "@/lib/booking-utils";
 import { sendBookingConfirmation, sendAdminNewBooking } from "@/lib/email";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
+
+// 10 booking requests per IP per minute
+const BOOKING_RATE_LIMIT = { maxRequests: 10, windowMs: 60 * 1000 };
 
 
 /** Convert 24h "13:30" → "1:30 PM" */
@@ -23,6 +27,21 @@ function formatTime24(t: string) {
  */
 export async function POST(req: Request) {
   try {
+    // Rate limit check
+    const ip = getClientIp(req);
+    const limiter = rateLimit(`booking:${ip}`, BOOKING_RATE_LIMIT);
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment and try again." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(limiter.resetMs / 1000)),
+          },
+        }
+      );
+    }
+
     const body = await req.json();
     const {
       locationSlug,
