@@ -55,7 +55,14 @@ export async function POST(req: Request) {
       notes,
       addOnIds,
       source,
+      website,
     } = body;
+
+    // ─── Honeypot check (bots fill this hidden field) ───
+    if (website) {
+      // Silently return a fake success so bots think it worked
+      return NextResponse.json({ booking: { confirmationCode: "FAKE" } });
+    }
 
     // ─── Validation ───
     if (!locationSlug || !timeSlotId || !date || !time || !partySize || !name || !email) {

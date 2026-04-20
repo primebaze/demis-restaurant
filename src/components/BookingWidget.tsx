@@ -114,6 +114,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
   const [guestEmail, setGuestEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestNotes, setGuestNotes] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // ─── Calendar state ───
@@ -211,6 +212,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
           phone: guestPhone || undefined,
           notes: guestNotes || undefined,
           addOnIds: selectedAddOns.length > 0 ? selectedAddOns : undefined,
+          website: honeypot || undefined,
         }),
       });
 
@@ -524,6 +526,20 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
         </p>
 
         <div className="space-y-4">
+          {/* Honeypot — invisible to real users, bots auto-fill it */}
+          <div className="absolute opacity-0 -z-10 h-0 overflow-hidden" aria-hidden="true">
+            <label htmlFor="website">Website</label>
+            <input
+              type="text"
+              id="website"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+            />
+          </div>
+
           <div>
             <label className="text-xs font-semibold text-stone-400 uppercase tracking-wider block mb-1.5">
               Full name *
