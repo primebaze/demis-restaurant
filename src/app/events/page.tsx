@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     "Cricklewood events",
     "Streatham events",
   ],
+  openGraph: {
+    title: "Events | Demi's Restaurant",
+    description:
+      "Live music, Afrobeats nights, weekend brunch, private hire and celebrations at Demi's Nigerian Restaurant in London.",
+  },
+  alternates: {
+    canonical: "https://demisrestaurant.co.uk/events",
+  },
 };
 
 export default function EventsPage() {

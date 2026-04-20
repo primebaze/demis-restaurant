@@ -18,7 +18,7 @@ export const ALL_CATEGORIES: MenuCategory[] = [
   {
     title: "Starters",
     items: [
-      { name: "Assorted Goat Meat Peppersoup", price: 15, desc: "Tender assorted goat meat cooked in peppersoup spices and scent leaf", v: true, spicy: true },
+      { name: "Assorted Goat Meat Peppersoup", price: 15, desc: "Tender assorted goat meat cooked in peppersoup spices and scent leaf", spicy: true },
       { name: "Iseewu", price: 30, desc: "Full goat head slow cooked in a native palm oil base sauce garnished with utazi leaves and onions" },
       { name: "Peppered Snail", price: 30, desc: "Crunchy giant snails cooked in pepper sauce and mixed pepper" },
       { name: "Moimoi", price: 5, desc: "Slow cooked peeled beans blended with peppers and crayfish" },

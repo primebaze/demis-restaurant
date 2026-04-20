@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   title: "Book a Table | Demi's Restaurant",
   description:
     "Reserve your table at Demi's Nigerian Restaurant. Choose from our Cricklewood or Streatham Hill locations, pick your date and time, and confirm your booking in seconds.",
+  openGraph: {
+    title: "Book a Table | Demi's Restaurant",
+    description:
+      "Reserve your table at Demi's Nigerian Restaurant. Cricklewood or Streatham Hill — pick your date and time.",
+  },
+  alternates: {
+    canonical: "https://demisrestaurant.co.uk/booking",
+  },
 };
 
 export default async function BookingPage() {

@@ -7,16 +7,17 @@ export function Footer() {
         {/* Footer links */}
         <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-stone-500 lg:gap-x-8">
           <Link href="/menu" className="hover:text-white transition-colors">Menu</Link>
+          <Link href="/buffet" className="hover:text-white transition-colors">Buffet</Link>
           <a href="https://dropoff.demisrestaurant.co.uk" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Bulk Order</a>
           <Link href="/locations/cricklewood" className="hover:text-white transition-colors">Cricklewood</Link>
           <Link href="/locations/streatham" className="hover:text-white transition-colors">Streatham Hill</Link>
           <Link href="/events" className="hover:text-white transition-colors">Events</Link>
+          <Link href="/about" className="hover:text-white transition-colors">About</Link>
           <Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link>
-          <Link href="/booking" className="hover:text-white transition-colors">
-            Booking
-          </Link>
+          <Link href="/booking" className="hover:text-white transition-colors">Booking</Link>
           <Link href="/sustainability" className="hover:text-white transition-colors">Sustainability</Link>
           <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
         </nav>
 
         <p className="mt-8 text-xs text-stone-600">

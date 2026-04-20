@@ -11,6 +11,14 @@ export const metadata: Metadata = {
     "Cricklewood Broadway restaurant",
     "Nigerian food North West London",
   ],
+  openGraph: {
+    title: "Cricklewood Broadway | Demi's Restaurant",
+    description:
+      "Visit Demi's Nigerian Restaurant at 89 Cricklewood Broadway, London NW2 3JG. Nigerian cuisine in North West London.",
+  },
+  alternates: {
+    canonical: "https://demisrestaurant.co.uk/locations/cricklewood",
+  },
 };
 
 export default function CricklewoodPage() {
@@ -23,9 +31,11 @@ export default function CricklewoodPage() {
           muted
           loop
           playsInline
+          aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source src="/hero.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
         </video>
         <div className="absolute inset-0 bg-black/55" />
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">

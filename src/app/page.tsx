@@ -20,9 +20,11 @@ export default function HomePage() {
           muted
           loop
           playsInline
+          aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source src="/hero.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
         </video>
 
         <div className="absolute inset-0 bg-black/55" />
@@ -38,12 +40,12 @@ export default function HomePage() {
           </h1>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center gap-3">
-            <a
+            <Link
               href="/booking"
               className="btn-gold"
             >
               Reserve a Table
-            </a>
+            </Link>
             <Link href="/menu" className="btn-outline-white">
               View Menu
             </Link>
@@ -107,12 +109,12 @@ export default function HomePage() {
                 <p className="mt-4 text-sm text-stone-400 leading-relaxed max-w-[280px]">
                   Visit Demi&apos;s Restaurant London for the full experience — rich flavours, warm atmosphere.
                 </p>
-                <a
+                <Link
                   href="/booking"
                   className="mt-7 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-sm font-semibold text-stone-900 hover:bg-gold-200 transition-all"
                 >
                   Reserve a table <span>&rarr;</span>
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -271,12 +273,12 @@ export default function HomePage() {
               <p className="mt-5 text-xs font-semibold text-gold-300">
                 Cricklewood &middot; 8 PM &ndash; Late
               </p>
-              <a
+              <Link
                 href="/booking"
                 className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
               >
                 Book a Table &rarr;
-              </a>
+              </Link>
             </div>
 
             {/* Weekend Brunch */}
@@ -302,7 +304,7 @@ export default function HomePage() {
                 Buffet Sundays
               </h3>
               <p className="mt-3 text-sm text-white/60 leading-relaxed">
-                Full buffet menu from 1 PM.  All-you-can-eat! jollof, fried rice, and more. Start the week with a feast.
+                All-you-can-eat jollof, fried rice, and more. Start the week with a feast!
               </p>
               <p className="mt-5 text-xs font-semibold text-gold-300">
                 Cricklewood &middot; 4 PM &ndash; 10 PM
@@ -411,7 +413,7 @@ export default function HomePage() {
             <p className="section-label">@demisrestaurant</p>
             <h2 className="mt-3 heading-lg">Catch the Vibe</h2>
             <p className="mt-4 text-sm sm:text-base text-stone-400 max-w-md mx-auto leading-relaxed">
-             
+              Follow us for the latest events, behind-the-scenes and mouth-watering dishes.
             </p>
           </div>
 
@@ -498,12 +500,12 @@ export default function HomePage() {
               Open daily from 12:00 PM. Walk-ins welcome.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
-              <a
+              <Link
                 href="/booking"
                 className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-7 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition-all"
               >
                 Reserve a Table
-              </a>
+              </Link>
               <a href="tel:02039046977" className="inline-flex items-center gap-2 rounded-full border-2 border-stone-300 px-7 py-3 text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-all">
                 Call 020 3904 6977
               </a>

@@ -98,6 +98,7 @@ export default function MenuContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search the menu…"
+              aria-label="Search the menu"
               className="w-full rounded-full border border-white/10 bg-white/[0.04] pl-11 pr-10 py-3 text-sm text-white placeholder:text-stone-500 focus:outline-none focus:border-gold-300/40 focus:bg-white/[0.06] transition-all"
             />
             {/* Clear button */}

@@ -114,14 +114,44 @@ export function JsonLd() {
       {
         "@type": "ListItem",
         position: 3,
+        name: "Buffet",
+        item: "https://demisrestaurant.co.uk/buffet",
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: "Events",
+        item: "https://demisrestaurant.co.uk/events",
+      },
+      {
+        "@type": "ListItem",
+        position: 5,
+        name: "Cricklewood",
+        item: "https://demisrestaurant.co.uk/locations/cricklewood",
+      },
+      {
+        "@type": "ListItem",
+        position: 6,
+        name: "Streatham Hill",
+        item: "https://demisrestaurant.co.uk/locations/streatham",
+      },
+      {
+        "@type": "ListItem",
+        position: 7,
         name: "About",
         item: "https://demisrestaurant.co.uk/about",
       },
       {
         "@type": "ListItem",
-        position: 4,
+        position: 8,
         name: "Contact",
         item: "https://demisrestaurant.co.uk/contact",
+      },
+      {
+        "@type": "ListItem",
+        position: 9,
+        name: "Booking",
+        item: "https://demisrestaurant.co.uk/booking",
       },
     ],
   };

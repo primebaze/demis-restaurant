@@ -11,6 +11,14 @@ export const metadata: Metadata = {
     "Streatham Hill restaurant",
     "Nigerian food South London",
   ],
+  openGraph: {
+    title: "Streatham Hill | Demi's Restaurant",
+    description:
+      "Visit Demi's Nigerian Restaurant at 67 Streatham Hill, London SW2 4TX. Nigerian cuisine in South London.",
+  },
+  alternates: {
+    canonical: "https://demisrestaurant.co.uk/locations/streatham",
+  },
 };
 
 export default function StreathamPage() {
