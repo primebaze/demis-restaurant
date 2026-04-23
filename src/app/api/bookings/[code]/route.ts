@@ -2,17 +2,26 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendBookingModification, sendBookingCancellation } from "@/lib/email";
 import { cancelDeposit } from "@/lib/stripe";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
+
+const LOOKUP_RATE_LIMIT = { maxRequests: 20, windowMs: 60 * 1000 };
 
 
 /**
  * GET /api/bookings/[code] — Public lookup for payment page (limited fields only)
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ code: string }> }
 ) {
   try {
+    const ip = getClientIp(req);
+    const limiter = rateLimit(`booking-lookup:${ip}`, LOOKUP_RATE_LIMIT);
+    if (!limiter.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { code } = await params;
 
     const booking = await prisma.booking.findUnique({
@@ -26,7 +35,6 @@ export async function GET(
 
     return NextResponse.json({
       booking: {
-        id: booking.id,
         confirmationCode: booking.confirmationCode,
         status: booking.status,
         depositAmountPence: booking.depositAmountPence,
@@ -119,10 +127,9 @@ export async function PATCH(
         (await prisma.bookingPolicy.findUnique({ where: { locationSlug: "default" } }));
 
       if (policy && updates.partySize >= policy.depositThreshold && booking.depositAmountPence === 0) {
-        // Crossed deposit threshold — mark as pending payment
-        updates.depositAmountPence = policy.depositAmountPence;
-        updates.depositStatus = "pending";
-        updates.status = "pending_payment";
+        updates._serverDepositAmountPence = policy.depositAmountPence;
+        updates._serverDepositStatus = "pending";
+        updates._serverStatus = "pending_payment";
       }
     }
 
@@ -140,21 +147,20 @@ export async function PATCH(
       }
     }
 
-    // ─── Apply updates ───
+    // ─── Apply updates (only guest-safe fields) ───
+    const GUEST_WRITABLE = ["date", "time", "timeSlotId", "partySize", "notes"] as const;
     const data: Record<string, unknown> = {};
-    if (updates.date) data.date = updates.date;
-    if (updates.time) data.time = updates.time;
-    if (updates.timeSlotId) data.timeSlotId = updates.timeSlotId;
-    if (updates.partySize) data.partySize = updates.partySize;
-    if (updates.notes !== undefined) data.notes = updates.notes;
-    if (updates.depositAmountPence !== undefined) data.depositAmountPence = updates.depositAmountPence;
-    if (updates.depositStatus) data.depositStatus = updates.depositStatus;
+    for (const field of GUEST_WRITABLE) {
+      if (updates[field] !== undefined) data[field] = updates[field];
+    }
 
-    // Set status to modified if guest is changing details, unless already overridden
-    if (!updates.status && Object.keys(data).length > 0) {
+    // Deposit fields are only set by server logic (deposit threshold), never from user input
+    if (updates._serverDepositAmountPence !== undefined) data.depositAmountPence = updates._serverDepositAmountPence;
+    if (updates._serverDepositStatus) data.depositStatus = updates._serverDepositStatus;
+    if (updates._serverStatus) data.status = updates._serverStatus;
+
+    if (!data.status && Object.keys(data).length > 0) {
       data.status = "modified";
-    } else if (updates.status) {
-      data.status = updates.status;
     }
 
     const updated = await prisma.booking.update({

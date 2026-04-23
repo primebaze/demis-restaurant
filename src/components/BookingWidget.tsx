@@ -230,7 +230,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
         const checkoutRes = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId: data.bookingId }),
+          body: JSON.stringify({ confirmationCode: data.booking.confirmationCode }),
         });
         const checkoutData = await checkoutRes.json();
 

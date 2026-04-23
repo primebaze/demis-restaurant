@@ -6,12 +6,12 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 
 
-if (!process.env.ADMIN_JWT_SECRET || process.env.ADMIN_JWT_SECRET === "demis-admin-secret-change-me") {
-  console.warn("⚠️  ADMIN_JWT_SECRET is missing or using the default — set a strong secret in production!");
+if (!process.env.ADMIN_JWT_SECRET) {
+  console.warn("⚠️  ADMIN_JWT_SECRET is not set — admin login will be disabled!");
 }
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || "demis-admin-secret-change-me"
-);
+const JWT_SECRET = process.env.ADMIN_JWT_SECRET
+  ? new TextEncoder().encode(process.env.ADMIN_JWT_SECRET)
+  : null;
 
 // 5 login attempts per IP every 15 minutes
 const LOGIN_RATE_LIMIT = { maxRequests: 5, windowMs: 15 * 60 * 1000 };
@@ -21,7 +21,10 @@ const LOGIN_RATE_LIMIT = { maxRequests: 5, windowMs: 15 * 60 * 1000 };
  */
 export async function POST(req: Request) {
   try {
-    // Rate limit check
+    if (!JWT_SECRET) {
+      return NextResponse.json({ error: "Admin login is not configured" }, { status: 500 });
+    }
+
     const ip = getClientIp(req);
     const limiter = rateLimit(`login:${ip}`, LOGIN_RATE_LIMIT);
     if (!limiter.success) {

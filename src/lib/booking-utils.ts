@@ -1,9 +1,9 @@
 import { customAlphabet } from "nanoid";
 
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I confusion
-const generate = customAlphabet(alphabet, 4);
+const generate = customAlphabet(alphabet, 6);
 
-/** Generate a confirmation code like "DEM-4K7X" */
+/** Generate a confirmation code like "DEM-4K7XBR" */
 export function generateConfirmationCode(): string {
   return `DEM-${generate()}`;
 }

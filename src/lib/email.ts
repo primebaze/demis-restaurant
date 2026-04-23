@@ -23,6 +23,14 @@ function formatPence(pence: number): string {
   return `£${(pence / 100).toFixed(2)}`;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
   return d.toLocaleDateString("en-GB", {
@@ -183,7 +191,7 @@ export async function sendBookingConfirmation(data: {
   const body = `
     <!-- Guest name -->
     <p style="margin:0 0 24px; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#666; font-size:16px;">
-      ${data.guestName}
+      ${escapeHtml(data.guestName)}
     </p>
 
     <!-- Date (bold, centered) -->
@@ -222,7 +230,7 @@ export async function sendBookingConfirmation(data: {
             Booking Confirmed
           </h3>
           <p style="margin:0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
-            Thank you ${data.guestName} for booking with us! We are excited to have you join us for a wonderful dining experience.
+            Thank you ${escapeHtml(data.guestName)} for booking with us! We are excited to have you join us for a wonderful dining experience.
             Your reservation has been confirmed and our team is looking forward to welcoming you.
           </p>
           <p style="margin:14px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
@@ -292,7 +300,7 @@ export async function sendBookingModification(data: {
   const body = `
     <!-- Guest name -->
     <p style="margin:0 0 24px; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#666; font-size:16px;">
-      ${data.guestName}
+      ${escapeHtml(data.guestName)}
     </p>
 
     <!-- Date -->
@@ -307,7 +315,7 @@ export async function sendBookingModification(data: {
 
     <!-- Location -->
     <p style="margin:8px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:13px;">
-      Reserved at ${data.location}
+      Reserved at ${escapeHtml(data.location)}
     </p>
 
     <!-- Action links -->
@@ -327,7 +335,7 @@ export async function sendBookingModification(data: {
             Booking Updated
           </h3>
           <p style="margin:0 0 16px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
-            Hi ${data.guestName}, your reservation has been updated. Here are the changes:
+            Hi ${escapeHtml(data.guestName)}, your reservation has been updated. Here are the changes:
           </p>
           <div style="text-align:center;">${changesHtml}</div>
         </td>
@@ -367,7 +375,7 @@ export async function sendBookingCancellation(data: {
   const body = `
     <!-- Guest name -->
     <p style="margin:0 0 24px; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#666; font-size:16px;">
-      ${data.guestName}
+      ${escapeHtml(data.guestName)}
     </p>
 
     <!-- Date -->
@@ -390,7 +398,7 @@ export async function sendBookingCancellation(data: {
             Booking Cancelled
           </h3>
           <p style="margin:0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
-            Hi ${data.guestName}, your reservation has been cancelled. We&rsquo;re sorry to see you go and hope to welcome you another time.
+            Hi ${escapeHtml(data.guestName)}, your reservation has been cancelled. We&rsquo;re sorry to see you go and hope to welcome you another time.
           </p>
           ${depositMsg}
         </td>
@@ -439,10 +447,10 @@ export async function sendAdminNewBooking(data: {
 
     <!-- Guest info -->
     <p style="margin:20px 0 0; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#333; font-size:16px;">
-      ${data.guestName}
+      ${escapeHtml(data.guestName)}
     </p>
     <p style="margin:2px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">
-      ${data.guestEmail}
+      ${escapeHtml(data.guestEmail)}
     </p>
 
     <!-- Date -->
@@ -470,7 +478,7 @@ export async function sendAdminNewBooking(data: {
 
   await send(
     adminEmail,
-    `New Booking: ${data.confirmationCode} — ${data.guestName} (${data.partySize} guests)`,
+    `New Booking: ${data.confirmationCode} — ${escapeHtml(data.guestName)} (${data.partySize} guests)`,
     emailLayout(body, data.confirmationCode)
   );
 }
@@ -491,7 +499,7 @@ export async function sendDepositPaymentLink(data: {
   const body = `
     <!-- Guest name -->
     <p style="margin:0 0 24px; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#666; font-size:16px;">
-      ${data.guestName}
+      ${escapeHtml(data.guestName)}
     </p>
 
     <!-- Date -->
@@ -506,7 +514,7 @@ export async function sendDepositPaymentLink(data: {
 
     <!-- Location -->
     <p style="margin:8px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:13px;">
-      Reserved at ${data.location}
+      Reserved at ${escapeHtml(data.location)}
     </p>
 
     <hr style="border:none; border-top:1px solid #eee; margin:28px 0;" />

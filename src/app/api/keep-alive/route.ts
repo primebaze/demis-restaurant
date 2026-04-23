@@ -8,9 +8,7 @@ export async function GET() {
     await prisma.$queryRawUnsafe("SELECT 1");
     return NextResponse.json({ ok: true, ts: new Date().toISOString() });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "unknown" },
-      { status: 500 },
-    );
+    console.error("[keep-alive] Database ping failed:", e);
+    return NextResponse.json({ ok: false }, { status: 500 });
   }
 }

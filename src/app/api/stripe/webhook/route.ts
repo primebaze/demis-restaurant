@@ -64,13 +64,32 @@ export async function POST(req: Request) {
     console.log(`[Stripe Webhook] Payment completed for booking ${bookingId}`);
 
     try {
-      // Update booking status
+      // Verify payment amount matches expected total
+      const pendingBooking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { addOns: { include: { addOn: true } } },
+      });
+
+      if (pendingBooking) {
+        const expectedPence =
+          pendingBooking.depositAmountPence +
+          pendingBooking.addOns.reduce((sum, ba) => sum + ba.addOn.pricePence * ba.quantity, 0);
+        const paidPence = session.amount_total ?? 0;
+
+        if (paidPence < expectedPence) {
+          console.error(
+            `[Stripe Webhook] Amount mismatch for ${bookingId}: paid ${paidPence}, expected ${expectedPence}`
+          );
+          return NextResponse.json({ received: true });
+        }
+      }
+
       const booking = await prisma.booking.update({
         where: { id: bookingId },
         data: {
           status: "confirmed",
           depositStatus: "captured",
-          stripePaymentIntentId: session.payment_intent as string || session.id,
+          stripePaymentIntentId: (session.payment_intent as string) || session.id,
         },
         include: {
           location: true,

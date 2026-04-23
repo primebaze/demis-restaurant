@@ -23,14 +23,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const { bookingId } = await req.json();
+    const { bookingId, confirmationCode } = await req.json();
 
-    if (!bookingId) {
-      return NextResponse.json({ error: "Missing bookingId" }, { status: 400 });
+    if (!bookingId && !confirmationCode) {
+      return NextResponse.json({ error: "Missing booking identifier" }, { status: 400 });
     }
 
     const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
+      where: confirmationCode
+        ? { confirmationCode }
+        : { id: bookingId },
       include: {
         location: true,
         guest: true,
@@ -107,10 +109,10 @@ export async function POST(req: Request) {
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes
     });
 
-    // Store session ID on booking
+    // Store payment intent ID (or session ID as fallback) for later capture/refund
     await prisma.booking.update({
       where: { id: booking.id },
-      data: { stripePaymentIntentId: session.id },
+      data: { stripePaymentIntentId: (session.payment_intent as string) || session.id },
     });
 
     return NextResponse.json({ checkoutUrl: session.url });

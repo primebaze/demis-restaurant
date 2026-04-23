@@ -7,7 +7,6 @@ import Link from "next/link";
 type AddOn = { name: string; pricePence: number; quantity: number };
 
 type BookingInfo = {
-  id: string;
   confirmationCode: string;
   status: string;
   depositAmountPence: number;
@@ -66,7 +65,7 @@ function PayContent() {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: booking.id }),
+        body: JSON.stringify({ confirmationCode: booking.confirmationCode }),
       });
 
       const data = await res.json();
