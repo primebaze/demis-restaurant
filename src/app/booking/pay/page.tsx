@@ -4,6 +4,8 @@ import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+type AddOn = { name: string; pricePence: number; quantity: number };
+
 type BookingInfo = {
   id: string;
   confirmationCode: string;
@@ -12,7 +14,12 @@ type BookingInfo = {
   location: string;
   date: string;
   partySize: number;
+  addOns: AddOn[];
 };
+
+function formatPence(p: number) {
+  return `£${(p / 100).toFixed(2)}`;
+}
 
 function PayContent() {
   const searchParams = useSearchParams();
@@ -101,6 +108,11 @@ function PayContent() {
 
   if (!booking) return null;
 
+  const hasDeposit = booking.depositAmountPence > 0;
+  const hasAddOns = booking.addOns.length > 0;
+  const addOnsTotal = booking.addOns.reduce((sum, a) => sum + a.pricePence * a.quantity, 0);
+  const totalPence = booking.depositAmountPence + addOnsTotal;
+
   const isExpired = booking.status === "cancelled_guest" || booking.status === "cancelled_admin";
   const isConfirmed = booking.status === "confirmed";
   const canPay = booking.status === "pending_payment";
@@ -132,39 +144,71 @@ function PayContent() {
       )}
 
       <div className="text-5xl mb-4">💳</div>
-      <h1 className="text-2xl font-bold text-white mb-2">Deposit Payment</h1>
+      <h1 className="text-2xl font-bold text-white mb-2">Complete Payment</h1>
       <p className="text-stone-400 text-sm mb-6">
         Booking: <span className="text-gold-300 font-mono">{booking.confirmationCode}</span>
       </p>
 
-      <div className="bg-[#1a1a1a] rounded-xl p-6 mb-6">
-        <p className="text-stone-400 text-sm mb-1">{booking.location}</p>
-        <p className="text-stone-500 text-xs mb-4">
+      <div className="bg-[#1a1a1a] rounded-xl p-6 mb-6 text-left">
+        <p className="text-white font-medium text-sm">{booking.location}</p>
+        <p className="text-stone-500 text-xs mt-1 mb-5">
           {new Date(booking.date + "T12:00:00").toLocaleDateString("en-GB", {
             weekday: "long", day: "numeric", month: "long", year: "numeric",
           })} · {booking.partySize} guests
         </p>
-        <p className="text-stone-400 text-sm mb-2">Deposit amount</p>
-        <p className="text-3xl font-bold text-gold-300">
-          £{(booking.depositAmountPence / 100).toFixed(2)}
-        </p>
-        <p className="text-xs text-stone-500 mt-2">
-          This is a hold fee only — it will be released after your visit.
-        </p>
+
+        {hasAddOns && (
+          <div className="mb-4">
+            <p className="text-xs text-stone-500 uppercase tracking-wider mb-2">Add-ons</p>
+            {booking.addOns.map((a, i) => (
+              <div key={i} className="flex justify-between text-sm mb-1.5">
+                <span className="text-stone-400">
+                  {a.name}{a.quantity > 1 ? ` × ${a.quantity}` : ""}
+                </span>
+                <span className="text-white font-medium">
+                  {formatPence(a.pricePence * a.quantity)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {hasDeposit && (
+          <div className={hasAddOns ? "border-t border-white/[0.06] pt-4 mb-4" : "mb-4"}>
+            <div className="flex justify-between text-sm">
+              <span className="text-stone-400">Refundable hold fee</span>
+              <span className="text-white font-medium">
+                {formatPence(booking.depositAmountPence)}
+              </span>
+            </div>
+            <p className="text-xs text-stone-500 mt-1">
+              Released after your visit or if cancelled 24+ hours in advance.
+            </p>
+          </div>
+        )}
+
+        <div className="border-t border-white/[0.06] pt-4 flex justify-between items-center">
+          <span className="text-stone-400 text-sm font-medium">Total</span>
+          <span className="text-2xl font-bold text-gold-300">{formatPence(totalPence)}</span>
+        </div>
       </div>
 
       {error && (
         <p className="text-red-400 text-sm mb-4">{error}</p>
       )}
 
-      {canPay && (
+      {canPay && totalPence > 0 && (
         <button
           onClick={handlePay}
           disabled={paying}
           className="w-full rounded-full bg-gold-300 px-8 py-3.5 text-sm font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {paying ? "Redirecting to payment..." : "Pay Now"}
+          {paying ? "Redirecting to payment..." : `Pay ${formatPence(totalPence)}`}
         </button>
+      )}
+
+      {canPay && totalPence === 0 && (
+        <p className="text-stone-400 text-sm">No payment required for this booking.</p>
       )}
 
       {isExpired && (
@@ -177,7 +221,7 @@ function PayContent() {
       )}
 
       <p className="mt-4 text-xs text-stone-500">
-        Your booking is held for 30 minutes while the deposit is pending.
+        Your booking is held for 30 minutes while payment is pending.
       </p>
 
       <Link

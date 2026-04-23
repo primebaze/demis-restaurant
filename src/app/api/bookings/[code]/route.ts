@@ -17,7 +17,7 @@ export async function GET(
 
     const booking = await prisma.booking.findUnique({
       where: { confirmationCode: code },
-      include: { location: true },
+      include: { location: true, addOns: { include: { addOn: true } } },
     });
 
     if (!booking) {
@@ -33,6 +33,11 @@ export async function GET(
         location: booking.location.name,
         date: booking.date,
         partySize: booking.partySize,
+        addOns: booking.addOns.map((ba) => ({
+          name: ba.addOn.name,
+          pricePence: ba.addOn.pricePence,
+          quantity: ba.quantity,
+        })),
       },
     });
   } catch (error) {
