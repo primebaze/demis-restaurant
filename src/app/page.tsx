@@ -32,7 +32,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
           <h1 className="text-white">
             <span className="block text-[clamp(2.8rem,10vw,5.5rem)] font-bold uppercase tracking-[0.04em] leading-[1]">
-              DEMI{/* Chili pepper apostrophe */}<span className="inline-block relative" style={{ top: '-0.38em', marginLeft: '-0.01em', marginRight: '-0.01em' }}><svg viewBox="0 0 24 44" style={{ height: '0.28em', width: 'auto' }} className="inline-block" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C12 1,13 5,12 8" stroke="#2d7a2d" strokeWidth="2" strokeLinecap="round" fill="none"/><path d="M12 5C14 3,17 3.5,16 6C15 7.5,13 6.5,12 5Z" fill="#2d7a2d"/><path d="M7 10C4 12,3 20,5 28C6 32,8 37,10 41C11 43,13 43,13 41C15 35,19 26,19 20C19 14,16 9,12 9C10 9,8 9.5,7 10Z" fill="#d42c2c"/><path d="M9 14C8 17,7 23,8 29" stroke="#e85050" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/></svg></span>S
+              DEMI<span className="inline-block text-[0.22em] align-top relative -top-[0.05em] mx-[-0.02em]">🌶️</span>S
             </span>
             <span className="block text-[clamp(0.65rem,1.6vw,0.8rem)] tracking-[0.45em] uppercase font-light mt-3 text-gold-300">
               Nigerian Restaurant
@@ -194,19 +194,19 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               {/* Left — sizes */}
               <div>
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                   <div>
-                    <p className="text-4xl sm:text-5xl font-bold text-stone-900">Small</p>
+                    <p className="text-[clamp(1.25rem,2.5vw,3rem)] font-bold text-stone-900">Small</p>
                     <p className="text-xs text-stone-500 mt-1">4l</p>
                     <p className="text-[11px] text-stone-400 mt-0.5">3–5 people</p>
                   </div>
                   <div>
-                    <p className="text-4xl sm:text-5xl font-bold text-gold-600">Medium</p>
+                    <p className="text-[clamp(1.25rem,2.5vw,3rem)] font-bold text-gold-600">Medium</p>
                     <p className="text-xs text-stone-500 mt-1">7l</p>
                     <p className="text-[11px] text-stone-400 mt-0.5">6–10 people</p>
                   </div>
                   <div>
-                    <p className="text-4xl sm:text-5xl font-bold text-stone-900">Large</p>
+                    <p className="text-[clamp(1.25rem,2.5vw,3rem)] font-bold text-stone-900">Large</p>
                     <p className="text-xs text-stone-500 mt-1">14l</p>
                     <p className="text-[11px] text-stone-400 mt-0.5">12–20+ people</p>
                   </div>
@@ -289,10 +289,10 @@ export default function HomePage() {
                 Lunch Menu
               </h3>
               <p className="mt-3 text-sm text-white/60 leading-relaxed">
-                Akara, plantain, eggs &amp; bottomless Chapman cocktails. Bring the whole crew.
+                Extensive lunch menu.
               </p>
               <p className="mt-5 text-xs font-semibold text-gold-300">
-                Both Locations &middot; 12 PM &ndash; 4 PM
+                Coming Soon
               </p>
             </div>
 
@@ -304,7 +304,7 @@ export default function HomePage() {
                 Buffet Sundays
               </h3>
               <p className="mt-3 text-sm text-white/60 leading-relaxed">
-                All-you-can-eat jollof, fried rice, and more. Start the week with a feast!
+                All-you-can-eat extensive buffet menu. Start the week with a feast!
               </p>
               <p className="mt-5 text-xs font-semibold text-gold-300">
                 Cricklewood &middot; 4 PM &ndash; 10 PM
