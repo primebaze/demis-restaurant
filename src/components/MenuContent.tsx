@@ -284,9 +284,9 @@ export default function MenuContent() {
             <a href="/booking" className="btn-gold text-xs">
               Book a Table
             </a>
-            <a href="https://dropoff.demisrestaurant.co.uk" target="_blank" rel="noopener noreferrer" className="btn-outline-white text-xs">
-              Bulk Order
-            </a>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-2.5 text-xs font-semibold text-white/30 cursor-not-allowed">
+              Bulk Order (Coming Soon)
+            </span>
           </div>
         </div>
       </section>

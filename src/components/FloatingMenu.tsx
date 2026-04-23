@@ -5,21 +5,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /* ── Link sets ── */
-const DESKTOP_LINKS = [
+type NavLink = { label: string; href: string; comingSoon?: boolean };
+
+const DESKTOP_LINKS: NavLink[] = [
   { label: "Menu", href: "/menu" },
   { label: "Buffet", href: "/buffet" },
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
   { label: "Events", href: "/events" },
-  { label: "Bulk Order", href: "https://dropoff.demisrestaurant.co.uk" },
+  { label: "Bulk Order", href: "/bulk-orders", comingSoon: true },
   { label: "Contact", href: "/contact" },
 ];
 
-const MOBILE_LINKS = [
+const MOBILE_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Menu", href: "/menu" },
   { label: "Buffet", href: "/buffet" },
-  { label: "Bulk Order", href: "https://dropoff.demisrestaurant.co.uk" },
+  { label: "Bulk Order", href: "/bulk-orders", comingSoon: true },
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
   { label: "Events", href: "/events" },
@@ -269,6 +271,20 @@ export function FloatingMenu() {
               {DESKTOP_LINKS.map((link) => {
                 const active = isActive(link.href);
                 const isExternal = link.href.startsWith("http");
+
+                if (link.comingSoon) {
+                  return (
+                    <span
+                      key={link.href}
+                      ref={(el) => { if (el) linkRefs.current.set(link.href, el); }}
+                      onMouseEnter={() => handleLinkHover(link.href)}
+                      className="relative z-10 block px-4 py-2 text-[13px] font-medium tracking-[0.02em] text-stone-600 cursor-not-allowed"
+                    >
+                      {link.label}
+                    </span>
+                  );
+                }
+
                 const LinkTag = isExternal ? "a" : Link;
                 const extraProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
                 return (
@@ -289,7 +305,6 @@ export function FloatingMenu() {
                       }`}
                     >
                       {link.label}
-                      {/* Active dot */}
                       {active && (
                         <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gold-300 shadow-[0_0_6px_rgba(232,204,156,0.6)]" />
                       )}
@@ -337,6 +352,21 @@ export function FloatingMenu() {
         >
           <nav className="space-y-1 overflow-y-auto max-h-[calc(70vh-4rem)] p-8" style={{ scrollbarWidth: "thin" }}>
             {MOBILE_LINKS.map((link, i) => {
+              if (link.comingSoon) {
+                return (
+                  <span
+                    key={`desktop-${link.label}-${i}`}
+                    className="block py-3 px-2 text-lg font-light rounded-xl text-stone-400 cursor-not-allowed"
+                    style={{
+                      transitionDelay: desktopMenuOpen ? `${i * 30}ms` : "0ms",
+                      opacity: desktopMenuOpen ? 0.5 : 0,
+                      transform: desktopMenuOpen ? "translateX(0)" : "translateX(-12px)",
+                    }}
+                  >
+                    {link.label} <span className="text-xs text-stone-400">(Coming Soon)</span>
+                  </span>
+                );
+              }
               const isExternal = link.href.startsWith("http");
               const LinkTag = isExternal ? "a" : Link;
               const extraProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
@@ -420,6 +450,21 @@ export function FloatingMenu() {
         >
           <nav className="space-y-1 overflow-y-auto max-h-[calc(70vh-4rem)] p-8" style={{ scrollbarWidth: "thin" }}>
             {MOBILE_LINKS.map((link, i) => {
+              if (link.comingSoon) {
+                return (
+                  <span
+                    key={`${link.label}-${i}`}
+                    className="block py-3 px-2 text-lg font-light rounded-xl text-stone-400 cursor-not-allowed"
+                    style={{
+                      transitionDelay: mobileOpen ? `${i * 30}ms` : "0ms",
+                      opacity: mobileOpen ? 0.5 : 0,
+                      transform: mobileOpen ? "translateX(0)" : "translateX(-12px)",
+                    }}
+                  >
+                    {link.label} <span className="text-xs text-stone-400">(Coming Soon)</span>
+                  </span>
+                );
+              }
               const isExternal = link.href.startsWith("http");
               const LinkTag = isExternal ? "a" : Link;
               const extraProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};

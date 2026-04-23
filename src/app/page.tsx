@@ -87,12 +87,11 @@ export default function HomePage() {
                 </h3>
                 <p className="mt-4 text-sm text-stone-400 leading-relaxed max-w-[280px]">
                   Small, medium, or large portions delivered fresh to your home or office. Perfect for family dinners, parties, or work events.</p>
-                <a
-                  href="https://dropoff.demisrestaurant.co.uk/menu"
-                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-sm font-semibold text-stone-900 hover:bg-gold-200 transition-all"
+                <span
+                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-gold-300/40 px-6 py-2.5 text-sm font-semibold text-stone-900/50 cursor-not-allowed"
                 >
-                  Start your order <span>&rarr;</span>
-                </a>
+                  Coming Soon
+                </span>
               </div>
             </div>
 
@@ -224,9 +223,9 @@ export default function HomePage() {
                   Free delivery over &pound;100. 24-hour advance notice.
                 </p>
                 <div className="mt-6 flex items-center gap-3 flex-wrap">
-                  <a href="https://dropoff.demisrestaurant.co.uk/menu" className="btn-dark">
-                    Order Now
-                  </a>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-stone-900/40 px-7 py-3 text-sm font-semibold text-white/50 cursor-not-allowed">
+                    Coming Soon
+                  </span>
                   <a href="tel:02039046977" className="inline-flex items-center gap-2 rounded-full border-2 border-stone-300 px-6 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-all">
                     Call to Order
                   </a>

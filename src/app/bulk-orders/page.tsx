@@ -39,12 +39,9 @@ export default function BulkOrdersPage() {
             Delivered fresh across London with just 24 hours&apos; notice.
           </p>
           <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
-            <a href="https://dropoff.demisrestaurant.co.uk/menu" className="btn-gold text-xs">
-              Order Now
-            </a>
-            <a href="tel:02039046977" className="btn-outline-white text-xs">
-              Call to Order
-            </a>
+            <span className="inline-flex items-center gap-2 rounded-full bg-gold-300/40 px-7 py-3 text-xs font-semibold text-stone-900/50 cursor-not-allowed">
+              Coming Soon
+            </span>
           </div>
         </div>
       </section>
@@ -133,12 +130,9 @@ export default function BulkOrdersPage() {
           <h2 className="heading-lg">Ready to place your order?</h2>
           <p className="mt-3 body-text">Order online or call us to arrange bulk delivery across London.</p>
           <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
-            <a href="https://dropoff.demisrestaurant.co.uk/menu" className="btn-gold text-xs">
-              Order Online
-            </a>
-            <a href="tel:02039046977" className="btn-outline-white text-xs">
-              Call 020 3904 6977
-            </a>
+            <span className="inline-flex items-center gap-2 rounded-full bg-gold-300/40 px-7 py-3 text-xs font-semibold text-stone-900/50 cursor-not-allowed">
+              Coming Soon
+            </span>
           </div>
         </div>
       </section>
