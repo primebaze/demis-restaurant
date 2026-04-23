@@ -6,6 +6,42 @@ export const dynamic = "force-dynamic";
 
 
 /**
+ * GET /api/bookings/[code] — Public lookup for payment page (limited fields only)
+ */
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ code: string }> }
+) {
+  try {
+    const { code } = await params;
+
+    const booking = await prisma.booking.findUnique({
+      where: { confirmationCode: code },
+      include: { location: true },
+    });
+
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      booking: {
+        id: booking.id,
+        confirmationCode: booking.confirmationCode,
+        status: booking.status,
+        depositAmountPence: booking.depositAmountPence,
+        location: booking.location.name,
+        date: booking.date,
+        partySize: booking.partySize,
+      },
+    });
+  } catch (error) {
+    console.error("Booking lookup error:", error);
+    return NextResponse.json({ error: "Failed to load booking" }, { status: 500 });
+  }
+}
+
+/**
  * PATCH /api/bookings/[code] — Modify a booking (guest or admin)
  * Body: { token, date?, time?, timeSlotId?, partySize?, notes?, status? }
  *
