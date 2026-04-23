@@ -1,21 +1,31 @@
-// Restaurant structured data (JSON-LD) for Google rich results
 export function JsonLd() {
   const restaurantSchema = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
+    "@id": "https://demisrestaurant.co.uk",
     name: "Demi's Restaurant",
     image: "https://demisrestaurant.co.uk/og-image.jpg",
     url: "https://demisrestaurant.co.uk",
     telephone: "+442039046977",
     email: "bookings@demisrestaurant.co.uk",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "89 Cricklewood Broadway",
-      addressLocality: "London",
-      addressRegion: "Greater London",
-      postalCode: "NW2 3JG",
-      addressCountry: "GB",
-    },
+    address: [
+      {
+        "@type": "PostalAddress",
+        streetAddress: "89 Cricklewood Broadway",
+        addressLocality: "London",
+        addressRegion: "Greater London",
+        postalCode: "NW2 3JG",
+        addressCountry: "GB",
+      },
+      {
+        "@type": "PostalAddress",
+        streetAddress: "67 Streatham Hill",
+        addressLocality: "London",
+        addressRegion: "Greater London",
+        postalCode: "SW2 4TX",
+        addressCountry: "GB",
+      },
+    ],
     geo: {
       "@type": "GeoCoordinates",
       latitude: 51.555033,
@@ -39,17 +49,16 @@ export function JsonLd() {
     ],
     servesCuisine: ["Nigerian", "African", "West African"],
     priceRange: "££",
-    acceptsReservations: "True",
+    acceptsReservations: true,
     menu: "https://demisrestaurant.co.uk/menu",
     hasMenu: {
       "@type": "Menu",
       url: "https://demisrestaurant.co.uk/menu",
       name: "Main Menu",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      reviewCount: "120",
+    areaServed: {
+      "@type": "City",
+      name: "London",
     },
     sameAs: [
       "https://www.instagram.com/demisrestaurant/",
@@ -68,108 +77,10 @@ export function JsonLd() {
     },
   };
 
-  const localBusinessSchema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: "Demi's Restaurant",
-    image: "https://demisrestaurant.co.uk/og-image.jpg",
-    "@id": "https://demisrestaurant.co.uk",
-    url: "https://demisrestaurant.co.uk",
-    telephone: "+442039046977",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "89 Cricklewood Broadway",
-      addressLocality: "London",
-      addressRegion: "Greater London",
-      postalCode: "NW2 3JG",
-      addressCountry: "GB",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: 51.555033,
-      longitude: -0.213608,
-    },
-    areaServed: {
-      "@type": "City",
-      name: "London",
-    },
-  };
-
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://demisrestaurant.co.uk",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Menu",
-        item: "https://demisrestaurant.co.uk/menu",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: "Buffet",
-        item: "https://demisrestaurant.co.uk/buffet",
-      },
-      {
-        "@type": "ListItem",
-        position: 4,
-        name: "Events",
-        item: "https://demisrestaurant.co.uk/events",
-      },
-      {
-        "@type": "ListItem",
-        position: 5,
-        name: "Cricklewood",
-        item: "https://demisrestaurant.co.uk/locations/cricklewood",
-      },
-      {
-        "@type": "ListItem",
-        position: 6,
-        name: "Streatham Hill",
-        item: "https://demisrestaurant.co.uk/locations/streatham",
-      },
-      {
-        "@type": "ListItem",
-        position: 7,
-        name: "About",
-        item: "https://demisrestaurant.co.uk/about",
-      },
-      {
-        "@type": "ListItem",
-        position: 8,
-        name: "Contact",
-        item: "https://demisrestaurant.co.uk/contact",
-      },
-      {
-        "@type": "ListItem",
-        position: 9,
-        name: "Booking",
-        item: "https://demisrestaurant.co.uk/booking",
-      },
-    ],
-  };
-
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-    </>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantSchema) }}
+    />
   );
 }
