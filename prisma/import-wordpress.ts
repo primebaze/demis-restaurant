@@ -17,6 +17,7 @@ import * as path from "path";
 import { writeFileSync } from "fs";
 
 import { sanitizeHtml } from "../src/lib/blog-sanitize";
+import { optimizeBlogImageBuffer } from "../src/lib/blog-image-optimize";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
@@ -175,9 +176,21 @@ async function uploadImageUrl(
 
   if (!ALLOWED_EXT.has(ext)) ext = extFromUrl(normalized);
 
-  const filename = `${randomBytes(16).toString("hex")}${ext}`;
-  const { error } = await supabase.storage.from(BUCKET).upload(filename, buffer, {
-    contentType: mime,
+  let uploadBuffer = buffer;
+  let uploadMime = mime;
+  let uploadExt = ext;
+  try {
+    const optimized = await optimizeBlogImageBuffer(buffer);
+    uploadBuffer = optimized.buffer;
+    uploadMime = optimized.contentType;
+    uploadExt = optimized.ext;
+  } catch (e) {
+    console.warn(`  ⚠️  Optimize skipped (${normalized}):`, e);
+  }
+
+  const filename = `${randomBytes(16).toString("hex")}${uploadExt}`;
+  const { error } = await supabase.storage.from(BUCKET).upload(filename, uploadBuffer, {
+    contentType: uploadMime,
     upsert: false,
   });
   if (error) {
@@ -279,7 +292,7 @@ async function rewriteHtml(
     return `${attrs.trimEnd()} ${name}=${quote}${value}${quote}`;
   };
 
-  const imgMatches = [...out.matchAll(/<img\b([^>]*)>/gi)];
+  const imgMatches = Array.from(out.matchAll(/<img\b([^>]*)>/gi));
   for (const match of imgMatches) {
     const fullTag = match[0];
     const attrs = match[1];

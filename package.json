@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "import:wordpress": "npx tsx prisma/import-wordpress.ts",
+    "recompress:blog-images": "npx tsx prisma/recompress-blog-images.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "prisma": "^7.7.0",
     "react": "^18",
     "react-dom": "^18",
+    "sharp": "^0.34.5",
     "stripe": "^22.0.1"
   },
   "devDependencies": {

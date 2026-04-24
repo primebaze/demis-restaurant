@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CommentForm } from "./CommentForm";
@@ -123,7 +124,13 @@ export default async function BlogPostPage({
           )}
           <div className="mt-6 flex items-center gap-4">
             {post.author.avatarUrl && (
-              <img src={post.author.avatarUrl} alt={post.author.name} className="w-10 h-10 rounded-full object-cover" />
+              <img
+                src={post.author.avatarUrl}
+                alt={post.author.name}
+                className="w-10 h-10 rounded-full object-cover"
+                width={40}
+                height={40}
+              />
             )}
             <div>
               <p className="text-sm font-medium text-white">{post.author.name}</p>
@@ -138,8 +145,15 @@ export default async function BlogPostPage({
 
         {/* Featured Image */}
         {post.featuredImage && (
-          <div className="mb-10 rounded-2xl overflow-hidden max-h-[400px]">
-            <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+          <div className="relative mb-10 w-full h-[220px] sm:h-[280px] md:h-[360px] max-h-[400px] rounded-2xl overflow-hidden">
+            <Image
+              src={post.featuredImage}
+              alt={post.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 768px"
+              priority
+            />
           </div>
         )}
 
@@ -164,7 +178,13 @@ export default async function BlogPostPage({
           <div className="mt-14 p-6 bg-[#1a1a1a] border border-white/5 rounded-2xl">
             <div className="flex items-center gap-4">
               {post.author.avatarUrl && (
-                <img src={post.author.avatarUrl} alt={post.author.name} className="w-14 h-14 rounded-full object-cover" />
+                <img
+                  src={post.author.avatarUrl}
+                  alt={post.author.name}
+                  className="w-14 h-14 rounded-full object-cover"
+                  width={56}
+                  height={56}
+                />
               )}
               <div>
                 <p className="font-semibold text-white">{post.author.name}</p>

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -121,11 +122,13 @@ export default async function BlogPage({
               <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
                 <article className="bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition">
                   {post.featuredImage && (
-                    <div className="aspect-[16/9] overflow-hidden">
-                      <img
+                    <div className="aspect-[16/9] overflow-hidden relative">
+                      <Image
                         src={post.featuredImage}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        fill
+                        className="object-cover group-hover:scale-105 transition duration-500"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     </div>
                   )}
@@ -150,7 +153,13 @@ export default async function BlogPage({
                     )}
                     <div className="mt-4 flex items-center gap-2">
                       {post.author.avatarUrl && (
-                        <img src={post.author.avatarUrl} alt={post.author.name} className="w-6 h-6 rounded-full object-cover" />
+                        <img
+                          src={post.author.avatarUrl}
+                          alt={post.author.name}
+                          className="w-6 h-6 rounded-full object-cover"
+                          width={24}
+                          height={24}
+                        />
                       )}
                       <span className="text-xs text-stone-500">{post.author.name}</span>
                     </div>

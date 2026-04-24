@@ -3,11 +3,14 @@ import { requireBlogAuthor } from "@/lib/blog-auth";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import path from "path";
+import { optimizeBlogImageBuffer } from "@/lib/blog-image-optimize";
 export const dynamic = "force-dynamic";
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const ALLOWED_EXTS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+/** Original upload limit before optimization (output is typically much smaller WebP). */
+const MAX_UPLOAD = 15 * 1024 * 1024;
+const MAX_STORED = 15 * 1024 * 1024;
 const BUCKET = "blog-images";
 
 function getSupabase() {
@@ -41,8 +44,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid file extension" }, { status: 400 });
     }
 
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: "File too large. Maximum 5MB." }, { status: 400 });
+    if (file.size > MAX_UPLOAD) {
+      return NextResponse.json({ error: "File too large. Maximum 15MB before optimization." }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -58,12 +61,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "File content does not match an allowed image type" }, { status: 400 });
     }
 
-    const filename = `${randomBytes(16).toString("hex")}${ext}`;
+    let uploadBuffer = buffer;
+    let contentType = file.type;
+    let outExt = ext;
+    try {
+      const optimized = await optimizeBlogImageBuffer(buffer);
+      uploadBuffer = Buffer.from(optimized.buffer);
+      contentType = optimized.contentType;
+      outExt = optimized.ext;
+    } catch (e) {
+      console.warn("Blog image optimization skipped:", e);
+    }
+
+    if (uploadBuffer.length > MAX_STORED) {
+      return NextResponse.json({ error: "Image too large after processing." }, { status: 400 });
+    }
+
+    const filename = `${randomBytes(16).toString("hex")}${outExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(filename, buffer, {
-        contentType: file.type,
+      .upload(filename, uploadBuffer, {
+        contentType,
         upsert: false,
       });
 
