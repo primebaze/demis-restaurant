@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 type Category = { id: string; name: string };
 
@@ -149,9 +150,12 @@ export default function EditPostPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Content (HTML)</label>
-          <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={16}
-            className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold-400 resize-y font-mono text-sm" />
+          <label className="block text-sm font-medium text-gray-300 mb-1.5">Content</label>
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
+            placeholder="Start writing your blog post..."
+          />
         </div>
 
         <div className="border-t border-gray-800 pt-6">
