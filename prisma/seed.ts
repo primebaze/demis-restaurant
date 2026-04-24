@@ -151,6 +151,39 @@ async function main() {
 
   console.log("✅ Admin user created (admin@demisrestaurant.co.uk / admin123)");
 
+  // ─── BLOG AUTHOR ───
+  const blogHash = hashSync("blog123", 10); // change this!
+  await prisma.blogAuthor.upsert({
+    where: { email: "blog@demisrestaurant.co.uk" },
+    update: {},
+    create: {
+      email: "blog@demisrestaurant.co.uk",
+      passwordHash: blogHash,
+      name: "Demi's Kitchen",
+      bio: "Stories, recipes, and news from Demi's Restaurant.",
+      isActive: true,
+    },
+  });
+
+  console.log("✅ Blog author created (blog@demisrestaurant.co.uk / blog123)");
+
+  // ─── BLOG CATEGORIES ───
+  const blogCategories = [
+    { name: "Recipes", slug: "recipes", description: "Nigerian recipes and cooking tips", sortOrder: 1 },
+    { name: "News", slug: "news", description: "Restaurant news and updates", sortOrder: 2 },
+    { name: "Culture", slug: "culture", description: "Nigerian food culture and traditions", sortOrder: 3 },
+  ];
+
+  for (const cat of blogCategories) {
+    await prisma.blogCategory.upsert({
+      where: { slug: cat.slug },
+      update: {},
+      create: cat,
+    });
+  }
+
+  console.log("✅ Blog categories created");
+
   console.log("\n🎉 Seed complete!");
 }
 

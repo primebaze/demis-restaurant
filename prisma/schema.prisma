@@ -174,3 +174,67 @@ model AdminUser {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
 }
+
+// ─── BLOG AUTHORS (separate from admin) ───
+model BlogAuthor {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  bio          String   @default("")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  posts BlogPost[]
+}
+
+// ─── BLOG CATEGORIES ───
+model BlogCategory {
+  id          String @id @default(cuid())
+  name        String
+  slug        String @unique
+  description String @default("")
+  sortOrder   Int    @default(0)
+
+  posts BlogPost[]
+}
+
+// ─── BLOG POSTS ───
+model BlogPost {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  excerpt         String    @default("")
+  content         String    @default("")
+  featuredImage   String?
+  categoryId      String?
+  authorId        String
+  status          String    @default("draft") // draft, published
+  publishedAt     DateTime?
+  metaTitle       String?
+  metaDescription String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  author   BlogAuthor    @relation(fields: [authorId], references: [id])
+  category BlogCategory? @relation(fields: [categoryId], references: [id])
+  comments BlogComment[]
+
+  @@index([status, publishedAt])
+}
+
+// ─── BLOG COMMENTS ───
+model BlogComment {
+  id        String   @id @default(cuid())
+  postId    String
+  name      String
+  email     String
+  content   String
+  status    String   @default("pending") // pending, approved, rejected
+  createdAt DateTime @default(now())
+
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, status])
+}

@@ -13,6 +13,7 @@ const DESKTOP_LINKS: NavLink[] = [
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
   { label: "Events", href: "/events" },
+  { label: "Blog", href: "/blog" },
   { label: "Bulk Order", href: "/bulk-orders", comingSoon: true },
   { label: "Contact", href: "/contact" },
 ];
@@ -21,6 +22,7 @@ const MOBILE_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Menu", href: "/menu" },
   { label: "Buffet", href: "/buffet" },
+  { label: "Blog", href: "/blog" },
   { label: "Bulk Order", href: "/bulk-orders", comingSoon: true },
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
