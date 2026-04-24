@@ -2,9 +2,38 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hashSync } from "bcryptjs";
+import { createClient } from "@supabase/supabase-js";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+
+async function ensureBlogImagesBucket() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.log("⚠️  Skipping storage bucket — NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set");
+    return;
+  }
+
+  const supabase = createClient(url, key);
+  const { data: buckets } = await supabase.storage.listBuckets();
+  const exists = buckets?.some((b) => b.name === "blog-images");
+
+  if (!exists) {
+    const { error } = await supabase.storage.createBucket("blog-images", {
+      public: true,
+      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+      fileSizeLimit: 5 * 1024 * 1024,
+    });
+    if (error) {
+      console.error("❌ Failed to create blog-images bucket:", error.message);
+    } else {
+      console.log("✅ Supabase Storage bucket 'blog-images' created (public)");
+    }
+  } else {
+    console.log("✅ Supabase Storage bucket 'blog-images' already exists");
+  }
+}
 
 async function main() {
   console.log("🌱 Seeding database...");
@@ -183,6 +212,9 @@ async function main() {
   }
 
   console.log("✅ Blog categories created");
+
+  // ─── SUPABASE STORAGE BUCKET ───
+  await ensureBlogImagesBucket();
 
   console.log("\n🎉 Seed complete!");
 }
