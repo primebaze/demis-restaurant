@@ -4,6 +4,7 @@ import "./globals.css";
 import { JsonLd } from "@/components/JsonLd";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { LayoutShell } from "@/components/LayoutShell";
+import { Analytics } from "@vercel/analytics/react";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -111,6 +112,7 @@ export default function RootLayout({
         <ScrollToTop />
         <JsonLd />
         <LayoutShell>{children}</LayoutShell>
+        <Analytics />
       </body>
     </html>
   );
