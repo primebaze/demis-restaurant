@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/blog/admin/posts", label: "Posts", icon: "📄" },
   { href: "/blog/admin/categories", label: "Categories", icon: "🏷️" },
   { href: "/blog/admin/comments", label: "Comments", icon: "💬" },
+  { href: "/blog/admin/settings", label: "Settings", icon: "⚙️" },
 ];
 
 export default function BlogAdminLayout({
