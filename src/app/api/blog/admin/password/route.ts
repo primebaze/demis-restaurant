@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireBlogAuthor } from "@/lib/blog-auth";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { prisma } from "@/lib/prisma";
 import { compareSync, hashSync } from "bcryptjs";
 export const dynamic = "force-dynamic";
-
-const adapter = new PrismaPg(process.env.DATABASE_URL!);
-const prisma = new PrismaClient({ adapter });
 
 export async function PATCH(req: Request) {
   const { author, unauthorized } = await requireBlogAuthor();

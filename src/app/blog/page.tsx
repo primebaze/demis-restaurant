@@ -5,10 +5,20 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Blog | Demi's Restaurant",
   description: "Explore Nigerian food culture, recipes, restaurant news, and dining tips from Demi's Restaurant in London.",
+  alternates: {
+    canonical: "https://demisrestaurant.co.uk/blog",
+  },
   openGraph: {
     title: "Blog | Demi's Restaurant",
     description: "Explore Nigerian food culture, recipes, restaurant news, and dining tips from Demi's Restaurant in London.",
-    url: "https://www.demisrestaurant.co.uk/blog",
+    url: "https://demisrestaurant.co.uk/blog",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Demi's Restaurant Blog" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog | Demi's Restaurant",
+    description: "Explore Nigerian food culture, recipes, restaurant news, and dining tips from Demi's Restaurant in London.",
+    images: ["/og-image.jpg"],
   },
 };
 
@@ -57,7 +67,7 @@ export default async function BlogPage({
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f] pt-32 pb-20">
+    <div className="min-h-screen bg-[#0f0f0f] pt-32 pb-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white font-[family-name:var(--font-display)]">
@@ -174,6 +184,6 @@ export default async function BlogPage({
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

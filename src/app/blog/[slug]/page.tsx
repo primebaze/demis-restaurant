@@ -3,51 +3,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CommentForm } from "./CommentForm";
+import { cache } from "react";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const post = await prisma.blogPost.findFirst({
-    where: { slug, status: "published" },
-    select: { title: true, excerpt: true, metaTitle: true, metaDescription: true, featuredImage: true },
-  });
-
-  if (!post) return { title: "Post Not Found" };
-
-  const title = post.metaTitle || `${post.title} | Demi's Restaurant Blog`;
-  const description = post.metaDescription || post.excerpt || "";
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      url: `https://www.demisrestaurant.co.uk/blog/${slug}`,
-      images: post.featuredImage ? [{ url: post.featuredImage }] : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-  };
-}
-
-export default async function BlogPostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-
-  const post = await prisma.blogPost.findFirst({
+const getPost = cache(async (slug: string) => {
+  return prisma.blogPost.findFirst({
     where: { slug, status: "published" },
     include: {
       author: { select: { name: true, avatarUrl: true, bio: true } },
@@ -59,6 +20,50 @@ export default async function BlogPostPage({
       },
     },
   });
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
+
+  if (!post) return { title: "Post Not Found" };
+
+  const title = post.metaTitle || `${post.title} | Demi's Restaurant Blog`;
+  const description = post.metaDescription || post.excerpt || "";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `https://demisrestaurant.co.uk/blog/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: `https://demisrestaurant.co.uk/blog/${slug}`,
+      images: post.featuredImage ? [{ url: post.featuredImage }] : [{ url: "/og-image.jpg" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: post.featuredImage ? [post.featuredImage] : ["/og-image.jpg"],
+    },
+  };
+}
+
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const post = await getPost(slug);
 
   if (!post) notFound();
 
@@ -83,7 +88,7 @@ export default async function BlogPostPage({
   };
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f] pt-32 pb-20">
+    <div className="min-h-screen bg-[#0f0f0f] pt-32 pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -197,6 +202,6 @@ export default async function BlogPostPage({
           <CommentForm postSlug={slug} />
         </section>
       </article>
-    </main>
+    </div>
   );
 }

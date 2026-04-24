@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/dashboard", "/checkout", "/api"],
+        disallow: ["/admin", "/blog/admin", "/dashboard", "/checkout", "/api"],
       },
     ],
     sitemap: "https://demisrestaurant.co.uk/sitemap.xml",
