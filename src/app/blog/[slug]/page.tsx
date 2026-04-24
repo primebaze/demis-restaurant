@@ -133,7 +133,7 @@ export default async function BlogPostPage({
 
         {/* Featured Image */}
         {post.featuredImage && (
-          <div className="mb-10 rounded-2xl overflow-hidden aspect-[16/9]">
+          <div className="mb-10 rounded-2xl overflow-hidden max-h-[400px]">
             <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
           </div>
         )}
