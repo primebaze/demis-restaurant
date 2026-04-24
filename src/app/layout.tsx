@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import { Footer } from "@/components/Footer";
-import { FloatingMenu } from "@/components/FloatingMenu";
 import { JsonLd } from "@/components/JsonLd";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { LayoutShell } from "@/components/LayoutShell";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -111,9 +110,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ScrollToTop />
         <JsonLd />
-        <main>{children}</main>
-        <Footer />
-        <FloatingMenu />
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
