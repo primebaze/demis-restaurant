@@ -1,9 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 
 // SERVER COMPONENT — fully rendered HTML for maximum SEO
 export default function HomePage() {
   return (
     <>
+      <link rel="preload" href="/og-image.jpg" as="image" />
       {/* ─── TOP ANNOUNCEMENT BAR ─── */}
       <div className="bg-white lg:hidden">
         <div className="py-3 sm:py-3.5 text-center">
@@ -13,18 +15,19 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ─── VIDEO HERO ─── */}
+      {/* ─── VIDEO HERO (all viewports) — poster improves first paint */}
       <section className="relative h-[100svh] overflow-hidden">
         <video
           autoPlay
           muted
           loop
           playsInline
+          preload="metadata"
+          poster="/og-image.jpg"
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
         >
           <source src="/hero.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
         </video>
 
         <div className="absolute inset-0 bg-black/55" />
@@ -129,17 +132,15 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-5">
-            {/* Cricklewood */}
+            {/* Cricklewood — static image avoids a second ~15MB video download */}
             <div className="relative rounded-2xl overflow-hidden h-[340px] sm:h-[380px]">
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
-              >
-                <source src="/hero.mp4" type="video/mp4" />
-              </video>
+              <Image
+                src="/events.jpeg"
+                alt="Demi's Restaurant Cricklewood"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
               <div className="absolute inset-0 bg-black/60" />
               <div className="absolute inset-0 p-7 sm:p-9 flex flex-col justify-end text-white">
                 <p className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold-300">Now Open</p>
@@ -160,10 +161,12 @@ export default function HomePage() {
 
             {/* Streatham */}
             <div className="relative rounded-2xl overflow-hidden h-[340px] sm:h-[380px]">
-              <img
+              <Image
                 src="/streatham.jpeg"
                 alt="Demi's Restaurant Streatham Hill"
-                className="absolute inset-0 w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
               />
               <div className="absolute inset-0 bg-black/60" />
               <div className="absolute inset-0 p-7 sm:p-9 flex flex-col justify-end text-white">
@@ -240,7 +243,13 @@ export default function HomePage() {
       <section className="relative py-20 sm:py-28 overflow-hidden">
         {/* Background image with warm overlay */}
         <div className="absolute inset-0">
-          <img src="/events.jpeg" alt="" className="w-full h-full object-cover" />
+          <Image
+            src="/events.jpeg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a] via-black/70 to-[#1a1a1a]" />
         </div>
 
@@ -431,8 +440,13 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="group relative aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer"
               >
-                {/* Thumbnail image */}
-                <img src={reel.thumb} alt={reel.label} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image
+                  src={reel.thumb}
+                  alt={reel.label}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
                 {/* Dark overlay on hover */}
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors duration-300" />
 
