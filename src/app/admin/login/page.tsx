@@ -98,6 +98,12 @@ export default function AdminLoginPage() {
         <p className="text-center text-gray-600 text-xs mt-6">
           &copy; {new Date().getFullYear()} Demi&apos;s Restaurant
         </p>
+        <p className="text-center text-gray-700 text-[10px] mt-2">
+          Crafted and Designed By{" "}
+          <a href="https://bazeflix.co.uk" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors">
+            Bazeflix
+          </a>
+        </p>
       </div>
     </div>
   );

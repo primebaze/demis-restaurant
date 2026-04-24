@@ -23,6 +23,12 @@ export function Footer() {
         <p className="mt-8 text-xs text-stone-600">
           &copy; {new Date().getFullYear()} Demi&apos;s Restaurant
         </p>
+        <p className="mt-2 text-[10px] text-stone-700">
+          Crafted and Designed By{" "}
+          <a href="https://bazeflix.co.uk" target="_blank" rel="noopener noreferrer" className="text-stone-500 hover:text-white transition-colors">
+            Bazeflix
+          </a>
+        </p>
       </div>
     </footer>
   );
