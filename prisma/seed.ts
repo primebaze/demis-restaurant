@@ -23,7 +23,8 @@ async function ensureBlogImagesBucket() {
     const { error } = await supabase.storage.createBucket("blog-images", {
       public: true,
       allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-      fileSizeLimit: 5 * 1024 * 1024,
+      // 15MB: WordPress originals; admin UI still validates 5MB per upload route
+      fileSizeLimit: 15 * 1024 * 1024,
     });
     if (error) {
       console.error("❌ Failed to create blog-images bucket:", error.message);

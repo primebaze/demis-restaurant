@@ -44,3 +44,6 @@ next-env.d.ts
 # uploaded blog images (keep the directory, ignore contents)
 /public/uploads/blog/*
 !/public/uploads/blog/.gitkeep
+
+# WordPress import (regenerate with npm run import:wordpress)
+wordpress-import-redirects.json
