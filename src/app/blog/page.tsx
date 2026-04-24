@@ -64,7 +64,7 @@ export default async function BlogPage({
             Our Blog
           </h1>
           <p className="mt-4 text-stone-400 max-w-xl mx-auto">
-            Stories, recipes, and news from Demi&apos;s kitchen
+            Stories, recipes, and news from Demi&apos;s Nigerian Restaurant
           </p>
         </div>
 
