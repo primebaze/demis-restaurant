@@ -161,7 +161,7 @@ export default function CricklewoodPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="rounded-2xl overflow-hidden h-[350px] sm:h-[450px]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2480.7!2d-0.2135!3d51.5555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTHCsDMzJzIwLjAiTiAwwrAxMic0OC42Ilc!5e0!3m2!1sen!2suk!4v1"
+              src="https://www.google.com/maps?q=89+Cricklewood+Broadway,+London+NW2+3JG&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}

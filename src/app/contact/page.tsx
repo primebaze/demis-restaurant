@@ -86,7 +86,7 @@ export default function ContactPage() {
               <h2 className="font-semibold text-white">WhatsApp</h2>
               <p className="mt-2 text-sm text-stone-400">Quick questions? Message us for a fast response.</p>
               <a
-                href="https://wa.me/442039046977"
+                href="https://wa.me/447908458479?text=I%20would%20like%20to%20make%20a%20booking"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-gold mt-4 text-xs"
@@ -110,7 +110,7 @@ export default function ContactPage() {
           {/* Map */}
           <div className="mt-12 rounded-xl overflow-hidden h-72 sm:h-80 lg:h-[420px] border border-white/10">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2481.2!2d-0.2136!3d51.555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s89+Cricklewood+Broadway+London+NW2+3JG!5e0!3m2!1sen!2suk!4v1"
+              src="https://www.google.com/maps?q=89+Cricklewood+Broadway,+London+NW2+3JG&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}
