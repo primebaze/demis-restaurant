@@ -15,8 +15,18 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ─── VIDEO HERO (all viewports) — poster improves first paint */}
+      {/* ─── VIDEO HERO: OG image paints first, video covers when ready */}
       <section className="relative h-[100svh] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/og-image.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
         <video
           autoPlay
           muted
@@ -25,14 +35,14 @@ export default function HomePage() {
           preload="metadata"
           poster="/og-image.jpg"
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 z-[1] h-full w-full object-cover"
         >
           <source src="/hero.mp4" type="video/mp4" />
         </video>
 
-        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 z-[2] bg-black/55" />
 
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
+        <div className="absolute inset-0 z-[3] flex flex-col items-center justify-center px-6 text-center">
           <h1 className="text-white">
             <span className="block text-[clamp(2.8rem,10vw,5.5rem)] font-bold uppercase tracking-[0.04em] leading-[1]">
               DEMI<span className="inline-block text-[0.22em] align-top relative -top-[0.05em] mx-[-0.02em]">🌶️</span>S
@@ -244,7 +254,7 @@ export default function HomePage() {
         {/* Background image with warm overlay */}
         <div className="absolute inset-0">
           <Image
-            src="/events.jpeg"
+            src="/ss.jpg"
             alt=""
             fill
             sizes="100vw"
