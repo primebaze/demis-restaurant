@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "Our commitment to sustainable practices, from sourcing to packaging.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/sustainability",
+    canonical: "https://www.demisrestaurant.co.uk/sustainability",
   },
 };
 

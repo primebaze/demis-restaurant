@@ -17,7 +17,7 @@ export const metadata: Metadata = {
       "Visit Demi's Nigerian Restaurant at 67 Streatham Hill, London SW2 4TX. Nigerian cuisine in South London.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/locations/streatham",
+    canonical: "https://www.demisrestaurant.co.uk/locations/streatham",
   },
 };
 

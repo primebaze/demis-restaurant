@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "Nigerian buffet for events — jollof rice, chicken, suya, pounded yam, small chops and more. From £40pp.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/buffet",
+    canonical: "https://www.demisrestaurant.co.uk/buffet",
   },
 };
 

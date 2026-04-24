@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     description: "Our story, our passion for Nigerian food, and our commitment to bringing real West African flavours to London.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/about",
+    canonical: "https://www.demisrestaurant.co.uk/about",
   },
 };
 

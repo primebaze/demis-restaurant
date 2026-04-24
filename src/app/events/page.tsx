@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "Live music, Afrobeats nights, weekend brunch, private hire and celebrations at Demi's Nigerian Restaurant in London.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/events",
+    canonical: "https://www.demisrestaurant.co.uk/events",
   },
 };
 

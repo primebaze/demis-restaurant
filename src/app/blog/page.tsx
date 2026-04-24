@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: "Blog | Demi's Restaurant",
   description: "Explore Nigerian food culture, recipes, restaurant news, and dining tips from Demi's Restaurant in London.",
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/blog",
+    canonical: "https://www.demisrestaurant.co.uk/blog",
   },
   openGraph: {
     title: "Blog | Demi's Restaurant",
     description: "Explore Nigerian food culture, recipes, restaurant news, and dining tips from Demi's Restaurant in London.",
-    url: "https://demisrestaurant.co.uk/blog",
+    url: "https://www.demisrestaurant.co.uk/blog",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Demi's Restaurant Blog" }],
   },
   twitter: {

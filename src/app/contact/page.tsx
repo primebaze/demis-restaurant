@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Get in touch with Demi's Restaurant. 89 Cricklewood Broadway, London NW2 3JG. Phone: 020 3904 6977.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/contact",
+    canonical: "https://www.demisrestaurant.co.uk/contact",
   },
 };
 

@@ -169,7 +169,7 @@ export async function sendBookingConfirmation(data: {
         addressLocality: "London",
         addressCountry: "GB",
       },
-      url: "https://demisrestaurant.co.uk",
+      url: "https://www.demisrestaurant.co.uk",
     },
     startDate: startDateTime,
     partySize: data.partySize,
@@ -262,7 +262,7 @@ export async function sendBookingConfirmation(data: {
       <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#333;">Location</p>
       <p style="margin:6px 0 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:12px; line-height:1.6;">
         ${data.location}<br/>
-        <a href="https://demisrestaurant.co.uk" style="color:#8b0000; text-decoration:none; font-size:12px;">Demi's Nigerian Restaurant</a>
+        <a href="https://www.demisrestaurant.co.uk" style="color:#8b0000; text-decoration:none; font-size:12px;">Demi's Nigerian Restaurant</a>
       </p>
     </div>
   `;

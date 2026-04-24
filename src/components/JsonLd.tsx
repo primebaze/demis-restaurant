@@ -2,10 +2,10 @@ export function JsonLd() {
   const restaurantSchema = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
-    "@id": "https://demisrestaurant.co.uk",
+    "@id": "https://www.demisrestaurant.co.uk",
     name: "Demi's Restaurant",
-    image: "https://demisrestaurant.co.uk/og-image.jpg",
-    url: "https://demisrestaurant.co.uk",
+    image: "https://www.demisrestaurant.co.uk/og-image.jpg",
+    url: "https://www.demisrestaurant.co.uk",
     telephone: "+442039046977",
     email: "bookings@demisrestaurant.co.uk",
     address: [
@@ -50,10 +50,10 @@ export function JsonLd() {
     servesCuisine: ["Nigerian", "African", "West African"],
     priceRange: "££",
     acceptsReservations: true,
-    menu: "https://demisrestaurant.co.uk/menu",
+    menu: "https://www.demisrestaurant.co.uk/menu",
     hasMenu: {
       "@type": "Menu",
-      url: "https://demisrestaurant.co.uk/menu",
+      url: "https://www.demisrestaurant.co.uk/menu",
       name: "Main Menu",
     },
     areaServed: {
@@ -68,7 +68,7 @@ export function JsonLd() {
       "@type": "ReserveAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://demisrestaurant.co.uk/booking",
+        urlTemplate: "https://www.demisrestaurant.co.uk/booking",
       },
       result: {
         "@type": "Reservation",

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description: "Terms and conditions for using Demi's Restaurant website and ordering services.",
-  alternates: { canonical: "https://demisrestaurant.co.uk/terms" },
+  alternates: { canonical: "https://www.demisrestaurant.co.uk/terms" },
   robots: { index: false },
 };
 

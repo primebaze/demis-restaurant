@@ -18,7 +18,7 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
-const SITE_URL = "https://demisrestaurant.co.uk";
+const SITE_URL = "https://www.demisrestaurant.co.uk";
 const SITE_NAME = "Demi's Restaurant";
 const SITE_DESCRIPTION =
   "Nigerian restaurant in Cricklewood, London. Enjoy jollof rice, suya, egusi soup, pounded yam and more. Dine in, takeaway, or bulk delivery across London. Book a table today.";

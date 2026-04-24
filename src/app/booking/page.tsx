@@ -14,7 +14,7 @@ export const metadata: Metadata = {
       "Reserve your table at Demi's Nigerian Restaurant. Cricklewood or Streatham Hill — pick your date and time.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/booking",
+    canonical: "https://www.demisrestaurant.co.uk/booking",
   },
 };
 

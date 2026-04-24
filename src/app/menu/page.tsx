@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "Browse our full Nigerian menu. From jollof rice to suya, egusi soup to pounded yam. Dine in or order bulk delivery.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/menu",
+    canonical: "https://www.demisrestaurant.co.uk/menu",
   },
 };
 

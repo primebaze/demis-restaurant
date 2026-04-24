@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://demisrestaurant.co.uk";
+  const baseUrl = "https://www.demisrestaurant.co.uk";
 
   let blogPosts: { slug: string; updatedAt: Date }[] = [];
   try {

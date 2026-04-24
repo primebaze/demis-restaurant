@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "Privacy policy for Demi's Restaurant. How we collect, use, and protect your personal information.",
-  alternates: { canonical: "https://demisrestaurant.co.uk/privacy" },
+  alternates: { canonical: "https://www.demisrestaurant.co.uk/privacy" },
   robots: { index: false },
 };
 

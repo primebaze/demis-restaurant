@@ -39,13 +39,13 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
-      canonical: `https://demisrestaurant.co.uk/blog/${slug}`,
+      canonical: `https://www.demisrestaurant.co.uk/blog/${slug}`,
     },
     openGraph: {
       title,
       description,
       type: "article",
-      url: `https://demisrestaurant.co.uk/blog/${slug}`,
+      url: `https://www.demisrestaurant.co.uk/blog/${slug}`,
       images: post.featuredImage ? [{ url: post.featuredImage }] : [{ url: "/og-image.jpg" }],
     },
     twitter: {

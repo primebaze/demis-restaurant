@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: "Order freshly made Nigerian meals in bulk — jollof rice, egusi soup, suya, and more. Delivered fresh across London.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/bulk-orders",
+    canonical: "https://www.demisrestaurant.co.uk/bulk-orders",
   },
 };
 

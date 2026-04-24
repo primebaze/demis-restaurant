@@ -17,7 +17,7 @@ export const metadata: Metadata = {
       "Visit Demi's Nigerian Restaurant at 89 Cricklewood Broadway, London NW2 3JG. Nigerian cuisine in North West London.",
   },
   alternates: {
-    canonical: "https://demisrestaurant.co.uk/locations/cricklewood",
+    canonical: "https://www.demisrestaurant.co.uk/locations/cricklewood",
   },
 };
 
