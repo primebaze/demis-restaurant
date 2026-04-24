@@ -431,6 +431,8 @@ export async function sendAdminNewBooking(data: {
   slot: string;
   partySize: number;
   depositRequired: boolean;
+  depositAmountPence: number;
+  addOns: { name: string; pricePence: number; quantity: number }[];
   source: string;
 }) {
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@demisrestaurant.co.uk";
@@ -465,8 +467,35 @@ export async function sendAdminNewBooking(data: {
 
     <!-- Location -->
     <p style="margin:8px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:13px;">
-      ${data.location} ${data.depositRequired ? "&middot; Deposit required" : ""}
+      ${escapeHtml(data.location)}
     </p>
+
+    ${(data.addOns.length > 0 || data.depositRequired) ? `
+    <hr style="border:none; border-top:1px solid #eee; margin:24px 0;" />
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border-radius:8px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <h3 style="margin:0 0 12px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px;">
+            Payment Summary
+          </h3>
+          ${data.addOns.map((a) => `
+          <p style="margin:4px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; color:#555;">
+            ${escapeHtml(a.name)} ${a.quantity > 1 ? `&times; ${a.quantity}` : ""} &mdash; <strong>${formatPence(a.pricePence * a.quantity)}</strong>
+          </p>
+          `).join("")}
+          ${data.depositRequired ? `
+          <p style="margin:4px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; color:#555;">
+            Hold fee &mdash; <strong>${formatPence(data.depositAmountPence)}</strong>
+          </p>
+          ` : ""}
+          <hr style="border:none; border-top:1px solid #ddd; margin:10px 0;" />
+          <p style="margin:4px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; color:#333;">
+            Total: ${formatPence(data.addOns.reduce((sum, a) => sum + a.pricePence * a.quantity, 0) + data.depositAmountPence)}
+          </p>
+        </td>
+      </tr>
+    </table>
+    ` : ""}
 
     <!-- Admin link -->
     <p style="margin:28px 0 0; text-align:center;">

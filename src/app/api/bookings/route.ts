@@ -341,6 +341,12 @@ export async function POST(req: Request) {
         slot: formatTime24(booking.timeSlot.startTime),
         partySize,
         depositRequired: false,
+        depositAmountPence: 0,
+        addOns: bookingAddOns.map((ba) => ({
+          name: ba.addOn.name,
+          pricePence: ba.addOn.pricePence,
+          quantity: ba.quantity,
+        })),
         source: source || "website",
       }),
     ]);

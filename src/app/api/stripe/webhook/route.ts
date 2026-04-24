@@ -141,6 +141,12 @@ export async function POST(req: Request) {
           slot: formatTime24(booking.timeSlot.startTime),
           partySize: booking.partySize,
           depositRequired: booking.depositAmountPence > 0,
+          depositAmountPence: booking.depositAmountPence,
+          addOns: booking.addOns.map((ba) => ({
+            name: ba.addOn.name,
+            pricePence: ba.addOn.pricePence,
+            quantity: ba.quantity,
+          })),
           source: booking.source,
         }),
       ]);
