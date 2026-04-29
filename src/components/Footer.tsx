@@ -7,6 +7,7 @@ export function Footer() {
         {/* Footer links */}
         <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-stone-500 lg:gap-x-8">
           <Link href="/menu" className="hover:text-white transition-colors">Menu</Link>
+          <Link href="/set-menu" className="hover:text-white transition-colors">Set Menu</Link>
           <Link href="/buffet" className="hover:text-white transition-colors">Buffet</Link>
           <span className="text-stone-600 cursor-not-allowed">Bulk Order <span className="text-[10px]">(Coming Soon)</span></span>
           <Link href="/locations/cricklewood" className="hover:text-white transition-colors">Cricklewood</Link>
