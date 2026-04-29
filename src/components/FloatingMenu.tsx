@@ -9,6 +9,7 @@ type NavLink = { label: string; href: string; comingSoon?: boolean };
 
 const DESKTOP_LINKS: NavLink[] = [
   { label: "Menu", href: "/menu" },
+  { label: "Set Menu", href: "/set-menu" },
   { label: "Buffet", href: "/buffet" },
   { label: "Cricklewood", href: "/locations/cricklewood" },
   { label: "Streatham Hill", href: "/locations/streatham" },
@@ -21,6 +22,7 @@ const DESKTOP_LINKS: NavLink[] = [
 const MOBILE_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Menu", href: "/menu" },
+  { label: "Set Menu", href: "/set-menu" },
   { label: "Buffet", href: "/buffet" },
   { label: "Blog", href: "/blog" },
   { label: "Bulk Order", href: "/bulk-orders", comingSoon: true },

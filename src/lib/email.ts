@@ -512,6 +512,197 @@ export async function sendAdminNewBooking(data: {
   );
 }
 
+// ─── ADMIN: NEW SET MENU GROUP ───
+
+export async function sendAdminNewSetMenuGroup(data: {
+  groupCode: string;
+  organizerName: string;
+  organizerEmail: string;
+  organizerPhone: string;
+  date: string;
+  partySize: number;
+  locationSlug: string;
+  guestSelectionUrl: string;
+}) {
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@demisrestaurant.co.uk";
+  const locationName = data.locationSlug === "streatham" ? "Streatham Hill" : "Cricklewood";
+
+  const body = `
+    <h2 style="margin:0 0 20px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#333;">
+      New Set Menu Group Created
+    </h2>
+
+    <p style="margin:0 0 6px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:13px; font-weight:700; letter-spacing:2px;">
+      ${escapeHtml(data.groupCode)}
+    </p>
+
+    <p style="margin:20px 0 0; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#333; font-size:16px;">
+      ${escapeHtml(data.organizerName)}
+    </p>
+    ${data.organizerEmail ? `<p style="margin:2px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">${escapeHtml(data.organizerEmail)}</p>` : ""}
+    ${data.organizerPhone ? `<p style="margin:2px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">${escapeHtml(data.organizerPhone)}</p>` : ""}
+
+    <p style="margin:20px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:16px; font-weight:700;">
+      ${formatDate(data.date)}
+    </p>
+    <p style="margin:4px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:15px; font-weight:700;">
+      ${data.partySize} guest${data.partySize === 1 ? "" : "s"} &middot; ${locationName}
+    </p>
+
+    <hr style="border:none; border-top:1px solid #eee; margin:24px 0;" />
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border-radius:8px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <h3 style="margin:0 0 10px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px;">
+            Guest Selection Link
+          </h3>
+          <p style="margin:0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:12px; word-break:break-all;">
+            ${escapeHtml(data.guestSelectionUrl)}
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:28px 0 0; text-align:center;">
+      <a href="${SITE_URL}/admin/set-menu" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; display:inline-block; background-color:#e8cc9c; color:#1a1a1a; text-decoration:none; font-weight:600; font-size:13px; padding:12px 32px; border-radius:6px;">
+        View in Admin
+      </a>
+    </p>
+  `;
+
+  await send(
+    adminEmail,
+    `New Set Menu Group: ${data.groupCode} — ${escapeHtml(data.organizerName)} (${data.partySize} guests)`,
+    emailLayout(body)
+  );
+}
+
+// ─── ORGANISER: SET MENU CONFIRMATION ───
+
+export async function sendOrganizerSetMenuConfirmation(data: {
+  organizerName: string;
+  organizerEmail: string;
+  groupCode: string;
+  date: string;
+  partySize: number;
+  locationSlug: string;
+  guestSelectionUrl: string;
+}) {
+  const locationName = data.locationSlug === "streatham" ? "Streatham Hill" : "Cricklewood";
+
+  const body = `
+    <p style="margin:0 0 24px; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#666; font-size:16px;">
+      ${escapeHtml(data.organizerName)}
+    </p>
+
+    <p style="margin:0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:16px; font-weight:700;">
+      ${formatDate(data.date)}
+    </p>
+    <p style="margin:4px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:15px; font-weight:700;">
+      ${data.partySize} guest${data.partySize === 1 ? "" : "s"} &middot; ${locationName}
+    </p>
+
+    <hr style="border:none; border-top:1px solid #eee; margin:28px 0;" />
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border-radius:8px;">
+      <tr>
+        <td style="padding:24px 28px;">
+          <h3 style="margin:0 0 12px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px;">
+            Share This Link With Your Guests
+          </h3>
+          <p style="margin:0 0 16px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
+            Each person in your group should visit this link to choose their appetiser for the four course set menu.
+          </p>
+          <div style="background:#fff; border:1px solid #eee; border-radius:8px; padding:14px 20px; text-align:center;">
+            <a href="${data.guestSelectionUrl}" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#8b0000; font-size:13px; word-break:break-all;">${escapeHtml(data.guestSelectionUrl)}</a>
+          </div>
+          <p style="margin:14px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">
+            Group code: <strong style="color:#333;">${data.groupCode}</strong>
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <hr style="border:none; border-top:1px solid #eee; margin:28px 0;" />
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border-radius:8px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <h3 style="margin:0 0 10px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; color:#333;">
+            Your Four Course Menu
+          </h3>
+          ${[
+            ["Appetiser", "Guest's choice (Puff Puff, Samosa or Spring Rolls)"],
+            ["Starter", "Salad"],
+            ["Main", "Jollof Rice + Chicken"],
+            ["Dessert", "Ice Cream Xplosion"],
+          ].map(([label, value]) => `
+          <p style="margin:6px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; color:#555;">
+            <strong style="color:#333;">${label}:</strong> ${value}
+          </p>`).join("")}
+        </td>
+      </tr>
+    </table>
+  `;
+
+  await send(
+    data.organizerEmail,
+    `Your Set Menu Group ${data.groupCode} — Demi's Restaurant`,
+    emailLayout(body, data.groupCode)
+  );
+}
+
+// ─── ADMIN: NEW GUEST SELECTION ───
+
+export async function sendAdminGuestSelection(data: {
+  groupCode: string;
+  guestName: string;
+  appetiser: string;
+  date: string;
+  organizerName: string;
+  selectionNumber: number;
+  totalExpected: number;
+}) {
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@demisrestaurant.co.uk";
+
+  const body = `
+    <h2 style="margin:0 0 20px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#333;">
+      New Guest Selection
+    </h2>
+
+    <p style="margin:0 0 4px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">
+      Group ${escapeHtml(data.groupCode)} &middot; ${escapeHtml(data.organizerName)}
+    </p>
+    <p style="margin:0 0 20px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:13px;">
+      ${formatDate(data.date)}
+    </p>
+
+    <p style="margin:0; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#333; font-size:18px;">
+      ${escapeHtml(data.guestName)}
+    </p>
+    <p style="margin:8px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#e8cc9c; font-size:15px; font-weight:700;">
+      Appetiser: ${escapeHtml(data.appetiser)}
+    </p>
+
+    <p style="margin:20px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">
+      Selection ${data.selectionNumber} of ${data.totalExpected}
+    </p>
+
+    <p style="margin:28px 0 0; text-align:center;">
+      <a href="${SITE_URL}/admin/set-menu" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; display:inline-block; background-color:#e8cc9c; color:#1a1a1a; text-decoration:none; font-weight:600; font-size:13px; padding:12px 32px; border-radius:6px;">
+        View All Selections
+      </a>
+    </p>
+  `;
+
+  await send(
+    adminEmail,
+    `Set Menu ${data.groupCode}: ${escapeHtml(data.guestName)} chose ${escapeHtml(data.appetiser)} (${data.selectionNumber}/${data.totalExpected})`,
+    emailLayout(body)
+  );
+}
+
 // ─── DEPOSIT PAYMENT LINK ───
 
 export async function sendDepositPaymentLink(data: {

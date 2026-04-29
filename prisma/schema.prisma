@@ -224,6 +224,40 @@ model BlogPost {
   @@index([status, publishedAt])
 }
 
+// ─── SET MENU GROUPS ───
+model SetMenuGroup {
+  id             String   @id @default(cuid())
+  groupCode      String   @unique // e.g. "SM-0001"
+  organizerName  String
+  organizerEmail String   @default("")
+  organizerPhone String   @default("")
+  date           String   // "2026-05-15"
+  partySize      Int
+  locationSlug   String   @default("cricklewood")
+  notes          String   @default("")
+  status         String   @default("active") // active, completed, cancelled
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  selections SetMenuSelection[]
+
+  @@index([date])
+  @@index([status])
+}
+
+// ─── SET MENU GUEST SELECTIONS ───
+model SetMenuSelection {
+  id         String   @id @default(cuid())
+  groupId    String
+  guestName  String
+  appetiser  String   // "Puff Puff" | "Samosa" | "Spring Rolls"
+  createdAt  DateTime @default(now())
+
+  group SetMenuGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+}
+
 // ─── BLOG COMMENTS ───
 model BlogComment {
   id        String   @id @default(cuid())
