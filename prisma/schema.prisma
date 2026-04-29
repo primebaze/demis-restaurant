@@ -251,6 +251,11 @@ model SetMenuSelection {
   groupId    String
   guestName  String
   appetiser  String   // "Puff Puff" | "Samosa" | "Spring Rolls"
+  starter    String   @default("Salad")
+  main       String   @default("Jollof Rice")
+  protein    String   @default("Chicken")
+  dessert    String   @default("Ice Cream Xplosion")
+  allergies  String   @default("")
   createdAt  DateTime @default(now())
 
   group SetMenuGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)

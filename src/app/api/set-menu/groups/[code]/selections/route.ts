@@ -5,8 +5,11 @@ import { sendAdminGuestSelection } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
 const VALID_APPETISERS = ["Puff Puff", "Samosa", "Spring Rolls"];
+const VALID_STARTERS = ["Salad"];
+const VALID_MAINS = ["Jollof Rice"];
+const VALID_PROTEINS = ["Chicken"];
+const VALID_DESSERTS = ["Ice Cream Xplosion"];
 
-/** POST /api/set-menu/groups/[code]/selections — guest submits their menu choice */
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ code: string }> }
@@ -35,7 +38,16 @@ export async function POST(
   const { code } = await params;
   const groupCode = code.toUpperCase();
 
-  let body: { guestName: string; appetiser: string; website?: string };
+  let body: {
+    guestName: string;
+    appetiser: string;
+    starter: string;
+    main: string;
+    protein: string;
+    dessert: string;
+    allergies?: string;
+    website?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -45,14 +57,20 @@ export async function POST(
   // Honeypot
   if (body.website) return NextResponse.json({ ok: true });
 
-  const { guestName, appetiser } = body;
+  const { guestName, appetiser, starter, main, protein, dessert, allergies = "" } = body;
 
-  if (!guestName?.trim() || guestName.trim().length > 200) {
+  if (!guestName?.trim() || guestName.trim().length > 200)
     return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
-  }
-  if (!VALID_APPETISERS.includes(appetiser)) {
+  if (!VALID_APPETISERS.includes(appetiser))
     return NextResponse.json({ error: "Please choose a valid appetiser" }, { status: 400 });
-  }
+  if (!VALID_STARTERS.includes(starter))
+    return NextResponse.json({ error: "Please choose a valid starter" }, { status: 400 });
+  if (!VALID_MAINS.includes(main))
+    return NextResponse.json({ error: "Please choose a valid main" }, { status: 400 });
+  if (!VALID_PROTEINS.includes(protein))
+    return NextResponse.json({ error: "Please choose a valid protein" }, { status: 400 });
+  if (!VALID_DESSERTS.includes(dessert))
+    return NextResponse.json({ error: "Please choose a valid dessert" }, { status: 400 });
 
   const group = await prisma.setMenuGroup.findUnique({
     where: { groupCode },
@@ -61,23 +79,31 @@ export async function POST(
 
   if (!group) return NextResponse.json({ error: "Group not found" }, { status: 404 });
   if (group.status === "cancelled") return NextResponse.json({ error: "This event has been cancelled" }, { status: 410 });
-  if (group._count.selections >= group.partySize) {
+  if (group._count.selections >= group.partySize)
     return NextResponse.json({ error: "All selections for this event have been received" }, { status: 409 });
-  }
 
   const selection = await prisma.setMenuSelection.create({
     data: {
       groupId: group.id,
       guestName: guestName.trim(),
       appetiser,
+      starter,
+      main,
+      protein,
+      dessert,
+      allergies: allergies.trim().slice(0, 500),
     },
   });
 
-  // Notify admin of new guest selection (non-blocking)
   sendAdminGuestSelection({
     groupCode,
     guestName: selection.guestName,
     appetiser: selection.appetiser,
+    starter: selection.starter,
+    main: selection.main,
+    protein: selection.protein,
+    dessert: selection.dessert,
+    allergies: selection.allergies,
     date: group.date,
     organizerName: group.organizerName,
     selectionNumber: group._count.selections + 1,

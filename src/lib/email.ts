@@ -659,12 +659,29 @@ export async function sendAdminGuestSelection(data: {
   groupCode: string;
   guestName: string;
   appetiser: string;
+  starter: string;
+  main: string;
+  protein: string;
+  dessert: string;
+  allergies: string;
   date: string;
   organizerName: string;
   selectionNumber: number;
   totalExpected: number;
 }) {
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@demisrestaurant.co.uk";
+
+  const menuRows = [
+    ["Appetiser", data.appetiser],
+    ["Starter", data.starter],
+    ["Main", data.main],
+    ["Protein", data.protein],
+    ["Dessert", data.dessert],
+    ...(data.allergies ? [["Allergies", data.allergies]] : []),
+  ].map(([label, value]) => `
+    <p style="margin:4px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; color:#555;">
+      <strong style="color:#333;">${label}:</strong> ${escapeHtml(value)}
+    </p>`).join("");
 
   const body = `
     <h2 style="margin:0 0 20px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#333;">
@@ -681,9 +698,16 @@ export async function sendAdminGuestSelection(data: {
     <p style="margin:0; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#333; font-size:18px;">
       ${escapeHtml(data.guestName)}
     </p>
-    <p style="margin:8px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#e8cc9c; font-size:15px; font-weight:700;">
-      Appetiser: ${escapeHtml(data.appetiser)}
-    </p>
+
+    <hr style="border:none; border-top:1px solid #eee; margin:20px 0;" />
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border-radius:8px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          ${menuRows}
+        </td>
+      </tr>
+    </table>
 
     <p style="margin:20px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">
       Selection ${data.selectionNumber} of ${data.totalExpected}
@@ -698,7 +722,7 @@ export async function sendAdminGuestSelection(data: {
 
   await send(
     adminEmail,
-    `Set Menu ${data.groupCode}: ${escapeHtml(data.guestName)} chose ${escapeHtml(data.appetiser)} (${data.selectionNumber}/${data.totalExpected})`,
+    `Set Menu ${data.groupCode}: ${escapeHtml(data.guestName)} (${data.selectionNumber}/${data.totalExpected})`,
     emailLayout(body)
   );
 }

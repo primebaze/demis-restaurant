@@ -13,11 +13,45 @@ type GroupInfo = {
   isFull: boolean;
 };
 
-const APPETISERS = ["Puff Puff", "Samosa", "Spring Rolls"];
-
 const LOCATION_NAMES: Record<string, string> = {
   cricklewood: "Cricklewood",
   streatham: "Streatham Hill",
+};
+
+const COURSES = [
+  {
+    key: "appetiser" as const,
+    label: "01 Appetiser",
+    options: ["Puff Puff", "Samosa", "Spring Rolls"],
+  },
+  {
+    key: "starter" as const,
+    label: "02 Starter",
+    options: ["Salad"],
+  },
+  {
+    key: "main" as const,
+    label: "03 Main Meal",
+    options: ["Jollof Rice"],
+  },
+  {
+    key: "protein" as const,
+    label: "03a Choice of Protein",
+    options: ["Chicken"],
+  },
+  {
+    key: "dessert" as const,
+    label: "04 Dessert",
+    options: ["Ice Cream Xplosion"],
+  },
+];
+
+type Selections = {
+  appetiser: string;
+  starter: string;
+  main: string;
+  protein: string;
+  dessert: string;
 };
 
 function formatDate(dateStr: string) {
@@ -38,9 +72,15 @@ export default function GuestSelectionPage() {
   const [loadError, setLoadError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Form state
   const [guestName, setGuestName] = useState("");
-  const [appetiser, setAppetiser] = useState("");
+  const [selections, setSelections] = useState<Selections>({
+    appetiser: "",
+    starter: "Salad",
+    main: "Jollof Rice",
+    protein: "Chicken",
+    dessert: "Ice Cream Xplosion",
+  });
+  const [allergies, setAllergies] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -51,20 +91,21 @@ export default function GuestSelectionPage() {
     fetch(`/api/set-menu/groups/${code}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) {
-          setLoadError(data.error);
-        } else {
-          setGroup(data);
-        }
+        if (data.error) setLoadError(data.error);
+        else setGroup(data);
       })
       .catch(() => setLoadError("Could not load this event. Please check your link."))
       .finally(() => setLoading(false));
   }, [code]);
 
+  function pick(key: keyof Selections, value: string) {
+    setSelections((s) => ({ ...s, [key]: value }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!guestName.trim()) { setSubmitError("Please enter your name"); return; }
-    if (!appetiser) { setSubmitError("Please choose your appetiser"); return; }
+    if (!selections.appetiser) { setSubmitError("Please choose your appetiser"); return; }
 
     setSubmitting(true);
     setSubmitError("");
@@ -73,14 +114,11 @@ export default function GuestSelectionPage() {
       const res = await fetch(`/api/set-menu/groups/${code}/selections`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guestName: guestName.trim(), appetiser, website: honeypot }),
+        body: JSON.stringify({ guestName: guestName.trim(), ...selections, allergies, website: honeypot }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setSubmitError(data.error || "Something went wrong. Please try again.");
-      } else {
-        setSubmitted(true);
-      }
+      if (!res.ok) setSubmitError(data.error || "Something went wrong. Please try again.");
+      else setSubmitted(true);
     } catch {
       setSubmitError("Network error. Please try again.");
     } finally {
@@ -102,9 +140,7 @@ export default function GuestSelectionPage() {
         <div className="text-center max-w-sm">
           <p className="text-2xl font-bold text-white mb-3">Link not found</p>
           <p className="text-stone-400 text-sm leading-relaxed">{loadError}</p>
-          <Link href="/set-menu" className="mt-8 inline-block btn-gold px-6 py-2.5 text-sm">
-            View Set Menu &rarr;
-          </Link>
+          <Link href="/set-menu" className="mt-8 inline-block btn-gold px-6 py-2.5 text-sm">View Set Menu &rarr;</Link>
         </div>
       </div>
     );
@@ -113,8 +149,7 @@ export default function GuestSelectionPage() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
-          {/* Success icon */}
+        <div className="text-center max-w-md w-full">
           <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-gold-300/[0.08] border border-gold-300/20 flex items-center justify-center">
             <svg className="w-7 h-7 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -122,22 +157,23 @@ export default function GuestSelectionPage() {
           </div>
           <p className="section-label mb-3">Selection Confirmed</p>
           <h1 className="heading-lg mb-4">You&apos;re all set, {guestName.split(" ")[0]}!</h1>
-          <p className="body-text text-sm max-w-sm mx-auto">
-            Your appetiser choice of <span className="text-gold-300 font-semibold">{appetiser}</span> has been saved.
-            We look forward to welcoming you on {group && formatDate(group.date)}.
+          <p className="body-text text-sm max-w-sm mx-auto mb-8">
+            Your menu has been saved. We look forward to welcoming you{group ? ` on ${formatDate(group.date)}` : ""}.
           </p>
 
-          <div className="mt-10 p-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-left space-y-3">
-            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/60">Your Menu</p>
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 text-left space-y-0">
+            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/60 mb-4">Your Menu</p>
             {[
-              { label: "Appetiser", value: appetiser },
-              { label: "Starter", value: "Salad" },
-              { label: "Main", value: "Jollof Rice + Chicken" },
-              { label: "Dessert", value: "Ice Cream Xplosion" },
+              { label: "Appetiser", value: selections.appetiser },
+              { label: "Starter", value: selections.starter },
+              { label: "Main", value: selections.main },
+              { label: "Protein", value: selections.protein },
+              { label: "Dessert", value: selections.dessert },
+              ...(allergies ? [{ label: "Allergies", value: allergies }] : []),
             ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between items-center py-2 border-b border-white/[0.05] last:border-0">
+              <div key={label} className="flex justify-between items-center py-2.5 border-b border-white/[0.05] last:border-0">
                 <span className="text-xs text-stone-500 uppercase tracking-wider">{label}</span>
-                <span className="text-sm text-stone-200 font-medium">{value}</span>
+                <span className="text-sm text-stone-200 font-medium text-right max-w-[60%]">{value}</span>
               </div>
             ))}
           </div>
@@ -176,94 +212,83 @@ export default function GuestSelectionPage() {
             <p className="text-sm text-stone-400">Everyone in this group has submitted their menu choice.</p>
           </div>
         ) : (
-          <>
-            {/* Menu preview */}
-            <div className="mb-8 rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-transparent p-6">
-              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/60 mb-4">Your Four Course Menu</p>
-              <div className="space-y-3">
-                {[
-                  { label: "01 Appetiser", value: "Your choice below ↓", highlight: true },
-                  { label: "02 Starter", value: "Salad" },
-                  { label: "03 Main", value: "Jollof Rice + Chicken" },
-                  { label: "04 Dessert", value: "Ice Cream Xplosion" },
-                ].map(({ label, value, highlight }) => (
-                  <div key={label} className="flex justify-between items-center py-2.5 border-b border-white/[0.05] last:border-0">
-                    <span className="text-xs text-stone-500 uppercase tracking-wider">{label}</span>
-                    <span className={`text-sm font-medium ${highlight ? "text-gold-300" : "text-stone-200"}`}>{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-7">
+            {/* Honeypot */}
+            <input type="text" name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Honeypot — hidden from humans */}
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-stone-300 mb-2">Your Name</label>
               <input
                 type="text"
-                name="website"
-                value={honeypot}
-                onChange={(e) => setHoneypot(e.target.value)}
-                className="hidden"
-                tabIndex={-1}
-                autoComplete="off"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="e.g. Amara Johnson"
+                maxLength={200}
+                className="w-full px-4 py-3 bg-white/[0.05] border border-white/[0.10] rounded-xl text-white placeholder-stone-600 text-sm focus:outline-none focus:border-gold-300/40 transition-colors"
               />
+            </div>
 
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-stone-300 mb-2">Your Name</label>
-                <input
-                  type="text"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="e.g. Amara Johnson"
-                  maxLength={200}
-                  className="w-full px-4 py-3 bg-white/[0.05] border border-white/[0.10] rounded-xl text-white placeholder-stone-600 text-sm focus:outline-none focus:border-gold-300/40 transition-colors"
-                />
-              </div>
-
-              {/* Appetiser choice */}
-              <div>
-                <label className="block text-sm font-medium text-stone-300 mb-3">Choose Your Appetiser</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {APPETISERS.map((item) => (
+            {/* Course selections */}
+            {COURSES.map((course) => (
+              <div key={course.key}>
+                <label className="block text-sm font-medium text-stone-300 mb-3">{course.label}</label>
+                <div className={`grid gap-3 ${course.options.length > 1 ? "grid-cols-3" : "grid-cols-1"}`}>
+                  {course.options.map((option) => (
                     <button
-                      key={item}
+                      key={option}
                       type="button"
-                      onClick={() => setAppetiser(item)}
-                      className={`relative py-4 px-3 rounded-xl border text-sm font-medium text-center transition-all duration-200 ${
-                        appetiser === item
+                      onClick={() => pick(course.key, option)}
+                      className={`relative py-3.5 px-4 rounded-xl border text-sm font-medium text-center transition-all duration-200 ${
+                        selections[course.key] === option
                           ? "border-gold-300/50 bg-gold-300/[0.08] text-gold-300"
                           : "border-white/[0.08] bg-white/[0.02] text-stone-400 hover:border-white/20 hover:text-stone-200"
                       }`}
                     >
-                      {appetiser === item && (
+                      {selections[course.key] === option && (
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-gold-300" />
                       )}
-                      {item}
+                      {option}
                     </button>
                   ))}
                 </div>
               </div>
+            ))}
 
-              {submitError && (
-                <p className="text-sm text-red-400 bg-red-500/[0.08] border border-red-500/20 rounded-xl px-4 py-3">
-                  {submitError}
-                </p>
-              )}
+            {/* Allergies */}
+            <div>
+              <label className="block text-sm font-medium text-stone-300 mb-2">
+                Allergies or Dietary Requirements
+                <span className="ml-2 text-xs text-stone-500 font-normal">(optional)</span>
+              </label>
+              <textarea
+                value={allergies}
+                onChange={(e) => setAllergies(e.target.value)}
+                placeholder="e.g. nut allergy, gluten-free, vegetarian…"
+                maxLength={500}
+                rows={3}
+                className="w-full px-4 py-3 bg-white/[0.05] border border-white/[0.10] rounded-xl text-white placeholder-stone-600 text-sm focus:outline-none focus:border-gold-300/40 transition-colors resize-none"
+              />
+            </div>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full btn-gold py-3.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? "Saving…" : "Confirm My Selection →"}
-              </button>
-
-              <p className="text-xs text-stone-600 text-center">
-                Group {code} &middot; {group?.selectionsCount ?? 0} of {group?.partySize ?? "?"} selections received
+            {submitError && (
+              <p className="text-sm text-red-400 bg-red-500/[0.08] border border-red-500/20 rounded-xl px-4 py-3">
+                {submitError}
               </p>
-            </form>
-          </>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full btn-gold py-3.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? "Saving…" : "Confirm My Selection →"}
+            </button>
+
+            <p className="text-xs text-stone-600 text-center">
+              Group {code} &middot; {group?.selectionsCount ?? 0} of {group?.partySize ?? "?"} selections received
+            </p>
+          </form>
         )}
       </div>
     </div>

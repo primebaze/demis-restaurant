@@ -8,6 +8,11 @@ type Selection = {
   id: string;
   guestName: string;
   appetiser: string;
+  starter: string;
+  main: string;
+  protein: string;
+  dessert: string;
+  allergies: string;
   createdAt: string;
 };
 
@@ -349,16 +354,25 @@ export default function AdminSetMenuPage() {
                             {g.selections.length === 0 ? (
                               <p className="text-sm text-gray-600">No selections yet</p>
                             ) : (
-                              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                              <div className="space-y-2">
                                 {g.selections.map((s, i) => (
-                                  <div key={s.id} className="flex items-center justify-between bg-[#1a1a1a] border border-gray-800 rounded-xl px-4 py-2.5">
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-xs text-gray-600 w-5 text-right">{i + 1}.</span>
-                                      <span className="text-sm text-white">{s.guestName}</span>
+                                  <div key={s.id} className="bg-[#1a1a1a] border border-gray-800 rounded-xl px-4 py-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-xs text-gray-600 w-5 text-right">{i + 1}.</span>
+                                        <span className="text-sm font-semibold text-white">{s.guestName}</span>
+                                      </div>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPETISER_COLORS[s.appetiser] || "bg-gray-700 text-gray-300"}`}>
+                                        {s.appetiser}
+                                      </span>
                                     </div>
-                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPETISER_COLORS[s.appetiser] || "bg-gray-700 text-gray-300"}`}>
-                                      {s.appetiser}
-                                    </span>
+                                    <div className="flex flex-wrap gap-x-4 gap-y-1 ml-8 text-xs text-gray-500">
+                                      <span>Starter: <span className="text-gray-300">{s.starter}</span></span>
+                                      <span>Main: <span className="text-gray-300">{s.main}</span></span>
+                                      <span>Protein: <span className="text-gray-300">{s.protein}</span></span>
+                                      <span>Dessert: <span className="text-gray-300">{s.dessert}</span></span>
+                                      {s.allergies && <span className="text-amber-400">⚠ {s.allergies}</span>}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
