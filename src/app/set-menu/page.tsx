@@ -78,8 +78,7 @@ export default function SetMenuPage() {
             Four Course<br className="hidden sm:block" /> Set Menu
           </h1>
           <p className="mt-6 body-text max-w-xl mx-auto">
-            Small chops to start, your choice of starter, a hearty Nigerian main with protein,
-            and a dessert to finish. Every guest chooses their own — we take care of the rest.
+            A four course premium dining experience.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="tel:02039046977" className="btn-gold px-8 py-3.5 text-sm flex items-center gap-2.5">
