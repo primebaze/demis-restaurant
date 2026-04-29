@@ -27,22 +27,22 @@ const COURSES = [
   {
     key: "starter" as const,
     label: "02 Starter",
-    options: ["Salad"],
+    options: ["Salad", "Assorted Goat Meat Pepper Soup", "Gizzdodo", "Beef Suya", "Lamb Suya", "Moi Moi", "Nil"],
   },
   {
     key: "main" as const,
     label: "03 Main Meal",
-    options: ["Jollof Rice"],
+    options: ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase", "Nil"],
   },
   {
     key: "protein" as const,
     label: "03a Choice of Protein",
-    options: ["Chicken"],
+    options: ["Chicken", "Beef", "Goat Meat", "Fish", "Nil"],
   },
   {
     key: "dessert" as const,
     label: "04 Dessert",
-    options: ["Ice Cream Xplosion"],
+    options: ["Ice Cream Xplosion", "Toffee Pudding", "Nil"],
   },
 ];
 
@@ -75,10 +75,10 @@ export default function GuestSelectionPage() {
   const [guestName, setGuestName] = useState("");
   const [selections, setSelections] = useState<Selections>({
     appetiser: "",
-    starter: "Salad",
-    main: "Jollof Rice",
-    protein: "Chicken",
-    dessert: "Ice Cream Xplosion",
+    starter: "",
+    main: "",
+    protein: "",
+    dessert: "",
   });
   const [allergies, setAllergies] = useState("");
   const [honeypot, setHoneypot] = useState("");
@@ -106,6 +106,10 @@ export default function GuestSelectionPage() {
     e.preventDefault();
     if (!guestName.trim()) { setSubmitError("Please enter your name"); return; }
     if (!selections.appetiser) { setSubmitError("Please choose your appetiser"); return; }
+    if (!selections.starter) { setSubmitError("Please choose your starter"); return; }
+    if (!selections.main) { setSubmitError("Please choose your main meal"); return; }
+    if (!selections.protein) { setSubmitError("Please choose your protein"); return; }
+    if (!selections.dessert) { setSubmitError("Please choose your dessert"); return; }
 
     setSubmitting(true);
     setSubmitError("");
@@ -233,7 +237,7 @@ export default function GuestSelectionPage() {
             {COURSES.map((course) => (
               <div key={course.key}>
                 <label className="block text-sm font-medium text-stone-300 mb-3">{course.label}</label>
-                <div className={`grid gap-3 ${course.options.length > 1 ? "grid-cols-3" : "grid-cols-1"}`}>
+                <div className={`grid gap-3 ${course.options.length <= 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3"}`}>
                   {course.options.map((option) => (
                     <button
                       key={option}

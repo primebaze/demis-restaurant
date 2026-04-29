@@ -4,10 +4,10 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 
 const VALID_APPETISERS = ["Puff Puff", "Samosa", "Spring Rolls"];
-const VALID_STARTERS = ["Salad"];
-const VALID_MAINS = ["Jollof Rice"];
-const VALID_PROTEINS = ["Chicken"];
-const VALID_DESSERTS = ["Ice Cream Xplosion"];
+const VALID_STARTERS = ["Salad", "Assorted Goat Meat Pepper Soup", "Gizzdodo", "Beef Suya", "Lamb Suya", "Moi Moi", "Nil"];
+const VALID_MAINS = ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase", "Nil"];
+const VALID_PROTEINS = ["Chicken", "Beef", "Goat Meat", "Fish", "Nil"];
+const VALID_DESSERTS = ["Ice Cream Xplosion", "Toffee Pudding", "Nil"];
 
 export async function GET(
   _req: Request,
@@ -62,13 +62,13 @@ export async function POST(
     return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
   if (!VALID_APPETISERS.includes(appetiser))
     return NextResponse.json({ error: "Please choose a valid appetiser" }, { status: 400 });
-  if (!VALID_STARTERS.includes(starter))
+  if (!starter || !VALID_STARTERS.includes(starter))
     return NextResponse.json({ error: "Please choose a valid starter" }, { status: 400 });
-  if (!VALID_MAINS.includes(main))
+  if (!main || !VALID_MAINS.includes(main))
     return NextResponse.json({ error: "Please choose a valid main" }, { status: 400 });
-  if (!VALID_PROTEINS.includes(protein))
+  if (!protein || !VALID_PROTEINS.includes(protein))
     return NextResponse.json({ error: "Please choose a valid protein" }, { status: 400 });
-  if (!VALID_DESSERTS.includes(dessert))
+  if (!dessert || !VALID_DESSERTS.includes(dessert))
     return NextResponse.json({ error: "Please choose a valid dessert" }, { status: 400 });
 
   const group = await prisma.setMenuGroup.findUnique({
