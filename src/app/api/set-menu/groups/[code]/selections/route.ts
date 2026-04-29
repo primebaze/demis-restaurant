@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { sendAdminGuestSelection } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
 const VALID_APPETISERS = ["Puff Puff", "Samosa", "Spring Rolls"];
@@ -94,21 +93,6 @@ export async function POST(
       allergies: allergies.trim().slice(0, 500),
     },
   });
-
-  sendAdminGuestSelection({
-    groupCode,
-    guestName: selection.guestName,
-    appetiser: selection.appetiser,
-    starter: selection.starter,
-    main: selection.main,
-    protein: selection.protein,
-    dessert: selection.dessert,
-    allergies: selection.allergies,
-    date: group.date,
-    organizerName: group.organizerName,
-    selectionNumber: group._count.selections + 1,
-    totalExpected: group.partySize,
-  }).catch(console.error);
 
   return NextResponse.json({ ok: true, selection }, { status: 201 });
 }
