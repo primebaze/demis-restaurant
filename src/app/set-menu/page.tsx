@@ -164,12 +164,12 @@ export default function SetMenuPage() {
               {
                 step: "02",
                 title: "We set up your group",
-                desc: "We create your group event and send you a unique guest selection link (e.g. SM-0042).",
+                desc: "We create your group event and send you a unique guest selection link.",
               },
               {
                 step: "03",
                 title: "Share with your guests",
-                desc: "Forward the link to everyone in your group. Each person visits the page and picks their appetiser — Puff Puff, Samosa, or Spring Rolls.",
+                desc: "Forward the link to everyone in your group. Each person visits the page and selects their starter, main, protein, and dessert — plus any allergies.",
               },
               {
                 step: "04",
