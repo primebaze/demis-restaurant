@@ -220,7 +220,7 @@ export default function AdminSetMenuPage() {
                 </div>
                 <div>
                   <label className={labelCls}>Expected Party Size *</label>
-                  <input type="number" min="1" max="500" value={form.partySize} onChange={(e) => setForm(f => ({ ...f, partySize: e.target.value }))} placeholder="e.g. 40" className={inputCls} />
+                  <input type="number" min="1" value={form.partySize} onChange={(e) => setForm(f => ({ ...f, partySize: e.target.value }))} placeholder="e.g. 40" className={inputCls} />
                 </div>
                 <div>
                   <label className={labelCls}>Location</label>

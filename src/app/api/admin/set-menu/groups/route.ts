@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
   if (!organizerName?.trim()) return NextResponse.json({ error: "Organiser name is required" }, { status: 400 });
   if (!date?.match(/^\d{4}-\d{2}-\d{2}$/)) return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
-  if (!partySize || partySize < 1 || partySize > 500) return NextResponse.json({ error: "Party size must be 1–500" }, { status: 400 });
+  if (!partySize || partySize < 1) return NextResponse.json({ error: "Party size must be at least 1" }, { status: 400 });
 
   // Generate unique random code — retry on collision
   let groupCode = "";
