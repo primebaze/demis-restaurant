@@ -612,7 +612,7 @@ export async function sendOrganizerSetMenuConfirmation(data: {
             Share This Link With Your Guests
           </h3>
           <p style="margin:0 0 16px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
-            Each person in your group should visit this link to choose their appetiser for the four course set menu.
+            Each person in your group should visit this link to select their appetiser, starter, main, protein, and dessert — plus any dietary allergies.
           </p>
           <div style="background:#fff; border:1px solid #eee; border-radius:8px; padding:14px 20px; text-align:center;">
             <a href="${data.guestSelectionUrl}" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#8b0000; font-size:13px; word-break:break-all;">${escapeHtml(data.guestSelectionUrl)}</a>
@@ -633,10 +633,11 @@ export async function sendOrganizerSetMenuConfirmation(data: {
             Your Four Course Menu
           </h3>
           ${[
-            ["Appetiser", "Guest's choice (Puff Puff, Samosa or Spring Rolls)"],
-            ["Starter", "Salad"],
-            ["Main", "Jollof Rice + Chicken"],
-            ["Dessert", "Ice Cream Xplosion"],
+            ["Appetiser", "Puff Puff, Samosa or Spring Rolls (guest's choice)"],
+            ["Starter", "Salad, Pepper Soup, Gizzdodo, Beef Suya, Lamb Suya, Moi Moi or Nil (guest's choice)"],
+            ["Main", "Jollof Rice, Fried Rice, Eforiro, Egusi, Amala or White Rice & Ayamase (guest's choice)"],
+            ["Protein", "Chicken, Beef, Goat Meat, Fish or Nil (guest's choice)"],
+            ["Dessert", "Ice Cream Xplosion, Toffee Pudding or Nil (guest's choice)"],
           ].map(([label, value]) => `
           <p style="margin:6px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; color:#555;">
             <strong style="color:#333;">${label}:</strong> ${value}

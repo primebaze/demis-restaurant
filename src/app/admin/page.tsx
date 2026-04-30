@@ -90,7 +90,7 @@ export default function AdminDashboard() {
                 : "bg-[#1a1a1a] border-gray-800"
             }`}
           >
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 truncate">
               {s.label}
             </p>
             <p className={`text-2xl font-bold ${s.accent ? "text-gold-300" : "text-white"}`}>
