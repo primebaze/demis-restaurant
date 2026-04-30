@@ -59,18 +59,18 @@ export default function SetMenuPage() {
     <>
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden px-6 pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pt-44 lg:pb-28">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0f0f0f] via-[#1a1a1a] to-[#111]" />
-        {/* Subtle gold dot pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(232,204,156,0.6) 1px, transparent 0)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-        {/* Gold radial glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-gold-300/[0.04] blur-3xl pointer-events-none" />
+        {/* Video background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/set-hero.mp4" type="video/mp4" />
+        </video>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/60" />
 
         <div className="relative z-10 mx-auto max-w-3xl text-center">
           <p className="section-label">Premium Dining Experience</p>
