@@ -77,7 +77,7 @@ export async function POST(
   });
 
   if (!group) return NextResponse.json({ error: "Group not found" }, { status: 404 });
-  if (group.status === "cancelled") return NextResponse.json({ error: "This event has been cancelled" }, { status: 410 });
+  if (group.status === "inactive") return NextResponse.json({ error: "This link is no longer active" }, { status: 410 });
   if (group._count.selections >= group.partySize)
     return NextResponse.json({ error: "All selections for this event have been received" }, { status: 409 });
 

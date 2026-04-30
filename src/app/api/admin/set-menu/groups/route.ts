@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { sendAdminNewSetMenuGroup, sendOrganizerSetMenuConfirmation } from "@/lib/email";
@@ -59,9 +60,14 @@ export async function POST(req: Request) {
   if (!date?.match(/^\d{4}-\d{2}-\d{2}$/)) return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
   if (!partySize || partySize < 1 || partySize > 500) return NextResponse.json({ error: "Party size must be 1–500" }, { status: 400 });
 
-  // Generate sequential group code
-  const count = await prisma.setMenuGroup.count();
-  const groupCode = `SM-${String(count + 1).padStart(4, "0")}`;
+  // Generate unique random code — retry on collision
+  let groupCode = "";
+  for (let i = 0; i < 5; i++) {
+    const candidate = randomBytes(4).toString("hex").toUpperCase(); // e.g. "A3KX9P2M"
+    const existing = await prisma.setMenuGroup.findUnique({ where: { groupCode: candidate } });
+    if (!existing) { groupCode = candidate; break; }
+  }
+  if (!groupCode) return NextResponse.json({ error: "Could not generate unique code" }, { status: 500 });
 
   const group = await prisma.setMenuGroup.create({
     data: {

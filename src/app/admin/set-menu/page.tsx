@@ -39,8 +39,7 @@ const APPETISER_COLORS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-emerald-500/20 text-emerald-400",
-  completed: "bg-gray-500/20 text-gray-400",
-  cancelled: "bg-red-500/20 text-red-400",
+  inactive: "bg-red-500/20 text-red-400",
 };
 
 const LOCATIONS: Record<string, string> = {
@@ -59,6 +58,7 @@ export default function AdminSetMenuPage() {
   const [total, setTotal] = useState(0);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
 
   // Filters
   const [filterStatus, setFilterStatus] = useState("");
@@ -124,6 +124,18 @@ export default function AdminSetMenuPage() {
     } finally {
       setCreating(false);
     }
+  }
+
+  async function toggleStatus(id: string, currentStatus: string) {
+    setToggling(id);
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    await fetch(`/api/admin/set-menu/groups/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    setToggling(null);
+    fetchGroups();
   }
 
   function copyLink(url: string, code: string) {
@@ -249,8 +261,7 @@ export default function AdminSetMenuPage() {
         >
           <option value="">All Statuses</option>
           <option value="active">Active</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="inactive">Inactive</option>
         </select>
         {filterStatus && (
           <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-gray-400 hover:text-white transition">
@@ -276,6 +287,7 @@ export default function AdminSetMenuPage() {
                   <th className="px-4 py-3">Location</th>
                   <th className="px-4 py-3">Selections</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Toggle</th>
                   <th className="px-4 py-3">Link</th>
                 </tr>
               </thead>
@@ -313,6 +325,19 @@ export default function AdminSetMenuPage() {
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[g.status] || "bg-gray-700 text-gray-300"}`}>
                             {g.status}
                           </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleStatus(g.id, g.status); }}
+                            disabled={toggling === g.id}
+                            className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 ${
+                              g.status === "active"
+                                ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                                : "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                            }`}
+                          >
+                            {toggling === g.id ? "…" : g.status === "active" ? "Deactivate" : "Activate"}
+                          </button>
                         </td>
                         <td className="px-4 py-3">
                           <button
