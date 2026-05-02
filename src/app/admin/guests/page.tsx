@@ -17,6 +17,25 @@ interface GuestRow {
   createdAt: string;
 }
 
+interface ComposeState {
+  mode: "single" | "all";
+  guestId?: string;
+  toLabel: string;
+  subject: string;
+  message: string;
+  sending: boolean;
+  error: string;
+  success: string;
+}
+
+function EnvelopeIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  );
+}
+
 export default function AdminGuestsPage() {
   const [guests, setGuests] = useState<GuestRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,11 +44,13 @@ export default function AdminGuestsPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTags, setEditTags] = useState("");
   const [editNotes, setEditNotes] = useState("");
+
+  // Compose modal
+  const [compose, setCompose] = useState<ComposeState | null>(null);
 
   const fetchGuests = useCallback(async () => {
     setLoading(true);
@@ -72,11 +93,80 @@ export default function AdminGuestsPage() {
     fetchGuests();
   }
 
+  function openComposeSingle(guest: GuestRow) {
+    setCompose({
+      mode: "single",
+      guestId: guest.id,
+      toLabel: `${guest.name} <${guest.email}>`,
+      subject: "",
+      message: "",
+      sending: false,
+      error: "",
+      success: "",
+    });
+  }
+
+  function openComposeAll() {
+    setCompose({
+      mode: "all",
+      toLabel: "All guests with email address",
+      subject: "",
+      message: "",
+      sending: false,
+      error: "",
+      success: "",
+    });
+  }
+
+  async function sendEmail() {
+    if (!compose) return;
+    if (!compose.subject.trim()) {
+      setCompose((c) => c && { ...c, error: "Subject is required" });
+      return;
+    }
+    if (!compose.message.trim()) {
+      setCompose((c) => c && { ...c, error: "Message is required" });
+      return;
+    }
+
+    setCompose((c) => c && { ...c, sending: true, error: "" });
+
+    const body =
+      compose.mode === "all"
+        ? { all: true, subject: compose.subject, message: compose.message }
+        : { guestId: compose.guestId, subject: compose.subject, message: compose.message };
+
+    const res = await fetch("/api/admin/email/guests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setCompose((c) => c && { ...c, sending: false, error: data.error || "Failed to send" });
+    } else {
+      setCompose((c) => c && { ...c, sending: false, success: `Sent to ${data.sent} recipient${data.sent !== 1 ? "s" : ""}` });
+      setTimeout(() => setCompose(null), 2000);
+    }
+  }
+
+  const inputCls = "w-full px-3 py-2.5 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400";
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Guest CRM</h1>
-        <span className="text-sm text-gray-500">{total} guests</span>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Guest CRM</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{total} guests</p>
+        </div>
+        <button
+          onClick={openComposeAll}
+          className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
+        >
+          <EnvelopeIcon />
+          Email All Guests
+        </button>
       </div>
 
       {/* Search */}
@@ -148,21 +238,30 @@ export default function AdminGuestsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-6 text-xs text-gray-400 shrink-0">
-                    <div className="text-center">
+                  <div className="flex items-center gap-4 text-xs text-gray-400 shrink-0">
+                    <div className="text-center hidden sm:block">
                       <p className="text-white font-medium text-sm">{g.totalBookings}</p>
                       <p>Bookings</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center hidden sm:block">
                       <p className="text-white font-medium text-sm">{g.totalVisits}</p>
                       <p>Visits</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center hidden sm:block">
                       <p className="text-white font-medium text-sm">
                         £{(g.totalSpendPence / 100).toFixed(0)}
                       </p>
                       <p>Spend</p>
                     </div>
+                    {g.email && (
+                      <button
+                        onClick={() => openComposeSingle(g)}
+                        title="Email this guest"
+                        className="px-2 py-1 text-xs text-gray-400 hover:text-gold-300 border border-gray-700 hover:border-gold-300/40 rounded transition flex items-center gap-1"
+                      >
+                        <EnvelopeIcon />
+                      </button>
+                    )}
                     <button
                       onClick={() => startEdit(g)}
                       className="px-2 py-1 text-xs text-gray-400 hover:text-gold-300 border border-gray-700 rounded transition"
@@ -245,6 +344,73 @@ export default function AdminGuestsPage() {
           </div>
         )}
       </div>
+
+      {/* Compose modal */}
+      {compose && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 w-full max-w-lg">
+            <h2 className="text-lg font-semibold text-white mb-5">Send Email</h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-gray-500 uppercase tracking-wider">To</label>
+                <p className="mt-1 px-3 py-2.5 bg-[#0f0f0f] border border-gray-800 rounded-xl text-sm text-gray-400 truncate">
+                  {compose.toLabel}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 uppercase tracking-wider">Subject</label>
+                <input
+                  type="text"
+                  value={compose.subject}
+                  onChange={(e) => setCompose((c) => c && { ...c, subject: e.target.value })}
+                  placeholder="e.g. Special offer for you"
+                  className={`mt-1 ${inputCls}`}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 uppercase tracking-wider">Message</label>
+                <textarea
+                  value={compose.message}
+                  onChange={(e) => setCompose((c) => c && { ...c, message: e.target.value })}
+                  rows={8}
+                  placeholder="Write your message here..."
+                  className={`mt-1 ${inputCls} resize-none`}
+                />
+              </div>
+            </div>
+
+            {compose.error && (
+              <p className="mt-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {compose.error}
+              </p>
+            )}
+            {compose.success && (
+              <p className="mt-3 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                {compose.success}
+              </p>
+            )}
+
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={sendEmail}
+                disabled={compose.sending}
+                className="flex-1 py-2.5 bg-gold-300 text-black font-semibold text-sm rounded-xl hover:bg-gold-400 disabled:opacity-50 transition"
+              >
+                {compose.sending ? "Sending…" : "Send"}
+              </button>
+              <button
+                onClick={() => setCompose(null)}
+                disabled={compose.sending}
+                className="px-5 py-2.5 text-sm text-gray-400 hover:text-white border border-gray-700 rounded-xl transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

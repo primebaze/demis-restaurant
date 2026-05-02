@@ -796,3 +796,21 @@ export async function sendDepositPaymentLink(data: {
     emailLayout(body, data.confirmationCode)
   );
 }
+
+// ─── ADMIN: DIRECT GUEST EMAIL ───
+
+export async function sendDirectGuestEmail(data: {
+  to: string;
+  subject: string;
+  message: string;
+}): Promise<boolean> {
+  const paragraphs = escapeHtml(data.message)
+    .split(/\n+/)
+    .filter((p) => p.trim())
+    .map((p) => `<p style="margin:0 0 16px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#555; font-size:14px; line-height:1.7;">${p}</p>`)
+    .join("");
+
+  const body = `<div style="padding:4px 0;">${paragraphs}</div>`;
+
+  return send(data.to, data.subject, emailLayout(body));
+}
