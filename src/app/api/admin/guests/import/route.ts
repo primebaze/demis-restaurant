@@ -91,7 +91,7 @@ function extractFromText(text: string): GuestImportRow[] {
     const idx = lines.findIndex((l) => l.includes(email));
     let name = "";
     // Look at adjacent lines for a name-like string (no @, no digits-only)
-    for (let offset of [-1, 1, -2, 2]) {
+    for (const offset of [-1, 1, -2, 2]) {
       const candidate = lines[idx + offset] || "";
       if (
         candidate &&
