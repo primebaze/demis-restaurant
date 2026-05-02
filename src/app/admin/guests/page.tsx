@@ -44,6 +44,8 @@ export default function AdminGuestsPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [exporting, setExporting] = useState(false);
+
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTags, setEditTags] = useState("");
@@ -91,6 +93,47 @@ export default function AdminGuestsPage() {
     });
     setEditingId(null);
     fetchGuests();
+  }
+
+  async function exportPdf() {
+    setExporting(true);
+    try {
+      const res = await fetch("/api/admin/guests?export=true&page=1");
+      const data = await res.json();
+      const allGuests: GuestRow[] = data.guests || [];
+
+      const { jsPDF } = await import("jspdf");
+      const autoTable = (await import("jspdf-autotable")).default;
+
+      const doc = new jsPDF({ orientation: "landscape" });
+      doc.setFontSize(16);
+      doc.text("Guest CRM — Demi's Restaurant", 14, 16);
+      doc.setFontSize(10);
+      doc.setTextColor(120);
+      doc.text(`Exported ${new Date().toLocaleDateString("en-GB")} · ${allGuests.length} guests`, 14, 23);
+
+      autoTable(doc, {
+        startY: 28,
+        head: [["Name", "Email", "Phone", "Tags", "Bookings", "Visits", "Spend", "Last Booking"]],
+        body: allGuests.map((g) => [
+          g.name,
+          g.email || "—",
+          g.phone || "—",
+          g.tags || "—",
+          g.totalBookings,
+          g.totalVisits,
+          `£${(g.totalSpendPence / 100).toFixed(2)}`,
+          g.lastBooking ? `${g.lastBooking.date} (${g.lastBooking.status})` : "—",
+        ]),
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [26, 26, 26], textColor: [232, 204, 156] },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+      });
+
+      doc.save(`demis-guests-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } finally {
+      setExporting(false);
+    }
   }
 
   function openComposeSingle(guest: GuestRow) {
@@ -160,13 +203,25 @@ export default function AdminGuestsPage() {
           <h1 className="text-2xl font-bold text-white">Guest CRM</h1>
           <p className="text-sm text-gray-500 mt-0.5">{total} guests</p>
         </div>
-        <button
-          onClick={openComposeAll}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
-        >
-          <EnvelopeIcon />
-          Email All Guests
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportPdf}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            {exporting ? "Exporting…" : "Export PDF"}
+          </button>
+          <button
+            onClick={openComposeAll}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
+          >
+            <EnvelopeIcon />
+            Email All Guests
+          </button>
+        </div>
       </div>
 
       {/* Search */}

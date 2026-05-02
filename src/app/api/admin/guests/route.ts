@@ -14,8 +14,9 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search");
+  const isExport = searchParams.get("export") === "true";
   const page = parseInt(searchParams.get("page") || "1");
-  const limit = 20;
+  const limit = isExport ? 10000 : 20;
 
   if (search && search.length > 200) {
     return NextResponse.json({ error: "Search query too long" }, { status: 400 });
