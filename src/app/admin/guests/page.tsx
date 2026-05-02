@@ -204,6 +204,15 @@ export default function AdminGuestsPage() {
           <p className="text-sm text-gray-500 mt-0.5">{total} guests</p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/guests/import"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
+            </svg>
+            Import
+          </Link>
           <button
             onClick={exportPdf}
             disabled={exporting}
