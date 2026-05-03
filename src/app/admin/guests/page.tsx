@@ -26,6 +26,7 @@ interface ComposeState {
   sending: boolean;
   error: string;
   success: string;
+  failures: { name: string; email: string }[];
 }
 
 function EnvelopeIcon() {
@@ -146,6 +147,7 @@ export default function AdminGuestsPage() {
       sending: false,
       error: "",
       success: "",
+      failures: [],
     });
   }
 
@@ -158,6 +160,7 @@ export default function AdminGuestsPage() {
       sending: false,
       error: "",
       success: "",
+      failures: [],
     });
   }
 
@@ -189,8 +192,11 @@ export default function AdminGuestsPage() {
     if (!res.ok) {
       setCompose((c) => c && { ...c, sending: false, error: data.error || "Failed to send" });
     } else {
-      setCompose((c) => c && { ...c, sending: false, success: `Sent to ${data.sent} recipient${data.sent !== 1 ? "s" : ""}` });
-      setTimeout(() => setCompose(null), 2000);
+      const successMsg = data.failed > 0
+        ? `Sent to ${data.sent} · ${data.failed} failed`
+        : `Sent to ${data.sent} recipient${data.sent !== 1 ? "s" : ""}`;
+      setCompose((c) => c && { ...c, sending: false, success: successMsg, failures: data.failures || [] });
+      if (data.failed === 0) setTimeout(() => setCompose(null), 2500);
     }
   }
 
@@ -451,9 +457,23 @@ export default function AdminGuestsPage() {
               </p>
             )}
             {compose.success && (
-              <p className="mt-3 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
-                {compose.success}
-              </p>
+              <div className="mt-3">
+                <p className="text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                  {compose.success}
+                </p>
+                {compose.failures.length > 0 && (
+                  <div className="mt-2 p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
+                    <p className="text-xs text-red-400 font-medium mb-2">Failed deliveries:</p>
+                    <ul className="space-y-1">
+                      {compose.failures.map((f) => (
+                        <li key={f.email} className="text-xs text-gray-400">
+                          {f.name} — <span className="text-red-400">{f.email}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             )}
 
             <div className="flex gap-3 mt-5">
@@ -462,7 +482,7 @@ export default function AdminGuestsPage() {
                 disabled={compose.sending}
                 className="flex-1 py-2.5 bg-gold-300 text-black font-semibold text-sm rounded-xl hover:bg-gold-400 disabled:opacity-50 transition"
               >
-                {compose.sending ? "Sending…" : "Send"}
+                {compose.sending ? "Sending… (this may take a moment)" : "Send"}
               </button>
               <button
                 onClick={() => setCompose(null)}
