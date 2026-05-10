@@ -45,10 +45,18 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { title, excerpt, content, featuredImage, categoryId, metaTitle, metaDescription, status } = body;
+    const { title, excerpt, content, featuredImage, categoryId, metaTitle, metaDescription, status, authorId: bodyAuthorId } = body;
 
     if (!title || !title.trim()) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    }
+
+    // Use provided authorId if valid and active, otherwise fall back to logged-in author
+    let resolvedAuthorId = author.sub;
+    if (bodyAuthorId && bodyAuthorId !== author.sub) {
+      const targetAuthor = await prisma.blogAuthor.findUnique({ where: { id: bodyAuthorId, isActive: true } });
+      if (!targetAuthor) return NextResponse.json({ error: "Selected author not found" }, { status: 400 });
+      resolvedAuthorId = bodyAuthorId;
     }
 
     let slug = slugify(title);
@@ -65,7 +73,7 @@ export async function POST(req: Request) {
         content: sanitizeHtml(content || ""),
         featuredImage: featuredImage || null,
         categoryId: categoryId || null,
-        authorId: author.sub,
+        authorId: resolvedAuthorId,
         status: status === "published" ? "published" : "draft",
         publishedAt: status === "published" ? new Date() : null,
         metaTitle: metaTitle || null,

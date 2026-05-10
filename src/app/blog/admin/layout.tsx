@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 const NAV_ITEMS = [
   { href: "/blog/admin", label: "Dashboard", icon: "📝" },
   { href: "/blog/admin/posts", label: "Posts", icon: "📄" },
+  { href: "/blog/admin/authors", label: "Authors", icon: "✍️" },
   { href: "/blog/admin/categories", label: "Categories", icon: "🏷️" },
   { href: "/blog/admin/comments", label: "Comments", icon: "💬" },
   { href: "/blog/admin/settings", label: "Settings", icon: "⚙️" },

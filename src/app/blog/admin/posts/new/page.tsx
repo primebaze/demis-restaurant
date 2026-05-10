@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { RichTextEditor } from "@/components/RichTextEditor";
 
 type Category = { id: string; name: string };
+type Author = { id: string; name: string };
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -14,18 +15,27 @@ export default function NewPostPage() {
   const [content, setContent] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [authorId, setAuthorId] = useState("");
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [status, setStatus] = useState("draft");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/blog/admin/categories")
-      .then((r) => r.json())
-      .then((d) => setCategories(d.categories || []));
+    Promise.all([
+      fetch("/api/blog/admin/categories").then((r) => r.json()),
+      fetch("/api/blog/admin/authors").then((r) => r.json()),
+      fetch("/api/blog/admin/me").then((r) => r.json()),
+    ]).then(([catData, authorData, meData]) => {
+      setCategories(catData.categories || []);
+      setAuthors(authorData.authors || []);
+      // Default to logged-in author
+      if (meData.author?.sub) setAuthorId(meData.author.sub);
+    });
   }, []);
 
   function autoSlug(t: string) {
@@ -58,7 +68,7 @@ export default function NewPostPage() {
       const res = await fetch("/api/blog/admin/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, slug, excerpt, content, featuredImage, categoryId, metaTitle, metaDescription, status }),
+        body: JSON.stringify({ title, slug, excerpt, content, featuredImage, categoryId, authorId, metaTitle, metaDescription, status }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -104,7 +114,17 @@ export default function NewPostPage() {
           />
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">Author</label>
+            <select
+              value={authorId}
+              onChange={(e) => setAuthorId(e.target.value)}
+              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
+            >
+              {authors.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Category</label>
             <select

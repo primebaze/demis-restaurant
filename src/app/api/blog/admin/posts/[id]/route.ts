@@ -33,7 +33,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await req.json();
-  const { title, slug: rawSlug, excerpt, content, featuredImage, categoryId, metaTitle, metaDescription, status } = body;
+  const { title, slug: rawSlug, excerpt, content, featuredImage, categoryId, metaTitle, metaDescription, status, authorId: bodyAuthorId } = body;
 
   const existing = await prisma.blogPost.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -57,6 +57,11 @@ export async function PATCH(
     if (status === "published" && !existing.publishedAt) {
       data.publishedAt = new Date();
     }
+  }
+  if (bodyAuthorId !== undefined) {
+    const targetAuthor = await prisma.blogAuthor.findUnique({ where: { id: bodyAuthorId, isActive: true } });
+    if (!targetAuthor) return NextResponse.json({ error: "Selected author not found" }, { status: 400 });
+    data.authorId = bodyAuthorId;
   }
 
   const post = await prisma.blogPost.update({
