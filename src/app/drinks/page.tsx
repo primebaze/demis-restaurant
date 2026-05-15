@@ -382,35 +382,24 @@ export default function DrinksPage() {
   return (
     <>
       {/* ─── Hero ─── */}
-      <section className="relative overflow-hidden px-6 pt-28 pb-16 sm:pt-36 sm:pb-20 lg:pt-40 lg:pb-24">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a] via-[#1a1a1a] to-[#111]" />
-        {/* Dot grid */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(232,204,156,0.4) 1px, transparent 0)",
-            backgroundSize: "40px 40px",
-          }}
+      <section className="relative h-[60vh] sm:h-[70vh] overflow-hidden">
+        <img
+          src="/reel-1.jpg"
+          alt="Demi's Restaurant bar and drinks"
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Glow orb */}
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full opacity-10 blur-3xl pointer-events-none bg-gradient-to-r from-amber-400 via-gold-300 to-teal-400" />
-
-        <div className="relative z-10 mx-auto max-w-3xl text-center">
-          <p className="section-label">Demi&apos;s Restaurant & Bar</p>
-          <h1 className="mt-4 heading-display">
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
+          <p className="section-label">Demi&apos;s Restaurant &amp; Bar</p>
+          <h1 className="mt-3 text-4xl sm:text-6xl font-bold text-white tracking-tight">
             Drinks Menu
           </h1>
-          <p className="mt-4 body-text max-w-xl mx-auto">
+          <p className="mt-4 text-sm sm:text-base text-white/60 max-w-md">
             Cocktails, fine wines, Nigerian palm wine and everything in between.
-            Served at the bar at both Cricklewood and Streatham Hill.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-8">
             <Link href="/booking" className="btn-gold text-sm">
               Reserve a Table
-            </Link>
-            <Link href="/menu" className="btn-outline-white text-sm">
-              View Food Menu
             </Link>
           </div>
         </div>

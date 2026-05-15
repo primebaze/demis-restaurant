@@ -33,22 +33,20 @@ export default function LocationsPage() {
   return (
     <>
       {/* ─── Hero ─── */}
-      <section className="relative overflow-hidden px-6 pt-28 pb-16 sm:pt-36 sm:pb-20 lg:pt-40 lg:pb-24">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a] via-[#1a1a1a] to-[#111]" />
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(232,204,156,0.4) 1px, transparent 0)",
-            backgroundSize: "40px 40px",
-          }}
+      <section className="relative h-[60vh] sm:h-[70vh] overflow-hidden">
+        <img
+          src="/reel-2.jpg"
+          alt="Demi's Restaurant"
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="relative z-10 mx-auto max-w-3xl text-center">
-          <p className="section-label">Find Us</p>
-          <h1 className="mt-4 heading-display">Our Locations</h1>
-          <p className="mt-4 body-text max-w-xl mx-auto">
-            Two restaurants across London — both serving the same bold Nigerian flavours,
-            fresh from our kitchen.
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
+          <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-gold-300">Find Us</p>
+          <h1 className="mt-3 text-4xl sm:text-6xl font-bold text-white tracking-tight">
+            Our Locations
+          </h1>
+          <p className="mt-4 text-sm sm:text-base text-white/60 max-w-md">
+            Two restaurants across London — both serving the same bold Nigerian flavours.
           </p>
         </div>
       </section>
