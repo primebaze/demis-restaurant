@@ -26,29 +26,40 @@ export const metadata: Metadata = {
 
 export default function MenuPage() {
   return (
-    <div className="">
+    <>
       {/* ─── Hero ─── */}
-      <section className="px-6 pt-16 pb-6 sm:pt-24 sm:pb-10">
-        <div className="mx-auto max-w-7xl text-center">
-          <p className="section-label">Our Menu</p>
-          <h1 className="mt-4 heading-display">
-            Explore Our Delicious Nigerian Dishes
+      <section className="relative h-[60vh] sm:h-[70vh] overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/set-hero.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
+          <p className="section-label">Demi&apos;s Restaurant</p>
+          <h1 className="mt-3 text-4xl sm:text-6xl font-bold text-white tracking-tight">
+            Our Menu
           </h1>
-          <p className="mt-4 body-text max-w-xl mx-auto lg:max-w-2xl">
-            Everything is prepared fresh using traditional Nigerian recipes.
-            Dine in at 89 Cricklewood Broadway, NW2 3JG, or order bulk delivery across London.
+          <p className="mt-4 text-sm sm:text-base text-white/60 max-w-md">
+            Traditional Nigerian recipes prepared fresh daily. Dine in or order bulk delivery across London.
           </p>
-          {/* Legend */}
-          <div className="mt-6 flex items-center justify-center gap-6 text-xs text-stone-500">
-            <span><span className="text-emerald-400 font-bold">V</span> = Vegetarian</span>
-            <span>🌶 = Spicy</span>
-            <span className="text-gold-300/70">All prices in £</span>
-          </div>
         </div>
       </section>
 
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-6 text-xs text-stone-500 py-4 border-b border-white/[0.06]">
+        <span><span className="text-emerald-400 font-bold">V</span> = Vegetarian</span>
+        <span>🌶 = Spicy</span>
+        <span className="text-gold-300/70">All prices in £</span>
+      </div>
+
       {/* Interactive menu with search */}
       <MenuContent />
-    </div>
+    </>
   );
 }
