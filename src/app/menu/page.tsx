@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import MenuContent from "@/components/MenuContent";
 
 export const metadata: Metadata = {
@@ -48,6 +49,11 @@ export default function MenuPage() {
           <p className="mt-4 text-sm sm:text-base text-white/60 max-w-md">
             Traditional Nigerian recipes prepared fresh daily. Dine in or order bulk delivery across London.
           </p>
+          <div className="mt-8">
+            <Link href="/drinks" className="btn-outline-white text-sm">
+              View Drinks Menu
+            </Link>
+          </div>
         </div>
       </section>
 

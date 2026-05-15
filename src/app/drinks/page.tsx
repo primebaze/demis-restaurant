@@ -574,6 +574,9 @@ export default function DrinksPage() {
             <Link href="/booking" className="btn-gold text-xs">
               Book a Table
             </Link>
+            <Link href="/menu" className="btn-outline-white text-xs">
+              View Food Menu
+            </Link>
             <Link href="/locations/cricklewood" className="btn-outline-white text-xs">
               Find Us
             </Link>
