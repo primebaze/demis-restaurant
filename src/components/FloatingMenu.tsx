@@ -12,11 +12,9 @@ const DESKTOP_LINKS: NavLink[] = [
   { label: "Drinks", href: "/drinks" },
   { label: "Set Menu", href: "/set-menu" },
   { label: "Buffet", href: "/buffet" },
-  { label: "Cricklewood", href: "/locations/cricklewood" },
-  { label: "Streatham Hill", href: "/locations/streatham" },
+  { label: "Locations", href: "/locations" },
   { label: "Events", href: "/events" },
   { label: "Blog", href: "/blog" },
-  { label: "Bulk Order", href: "/bulk-orders", comingSoon: true },
   { label: "Contact", href: "/contact" },
 ];
 
