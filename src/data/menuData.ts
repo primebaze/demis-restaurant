@@ -45,7 +45,7 @@ export const ALL_CATEGORIES: MenuCategory[] = [
     title: "Rice Meals",
     subtitle: "Served with plantain and your choice of protein: Assorted meat / Asun (+10) / Beef / Chicken / Fresh Fish (+5) / Goat Meat / Turkey (+3) / Fried Fish (+3)",
     items: [
-      { name: "Jollof Rice", price: 26, desc: "Smoky tasty basmati rice slow cooked in our signature pepper base", v: true },
+      { name: "Jollof Rice", price: 20, desc: "Smoky tasty basmati rice slow cooked in our signature pepper base", v: true },
       { name: "Fried Rice", price: 20, desc: "Stir fry green rice with crispy vegetables", v: true },
       { name: "White Rice", price: 20, desc: "Lightly salted long green rice", v: true },
       { name: "White Rice with Ayamase", price: 20, desc: "White rice served with assorted meat cooked in a spicy green pepper sauce" },
