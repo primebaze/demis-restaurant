@@ -383,11 +383,16 @@ export default function DrinksPage() {
     <>
       {/* ─── Hero ─── */}
       <section className="relative h-[60vh] sm:h-[70vh] overflow-hidden">
-        <img
-          src="/reel-1.jpg"
-          alt="Demi's Restaurant bar and drinks"
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
-        />
+        >
+          <source src="/drinks.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-black/60" />
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
           <p className="section-label">Demi&apos;s Restaurant &amp; Bar</p>
