@@ -654,6 +654,113 @@ export async function sendOrganizerSetMenuConfirmation(data: {
   );
 }
 
+// ─── ADMIN: NEW BUFFET BOOKING ───
+
+export async function sendAdminNewBuffetBooking(data: {
+  bookingCode: string;
+  name: string;
+  email: string;
+  phone: string;
+  partySize: number;
+  date: string;
+  time: string;
+  locationSlug: string;
+}) {
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@demisrestaurant.co.uk";
+  const locationName = data.locationSlug === "streatham" ? "Streatham Hill" : "Cricklewood";
+
+  const body = `
+    <h2 style="margin:0 0 20px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#333;">
+      New Buffet Booking
+    </h2>
+
+    <p style="margin:0 0 6px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:13px; font-weight:700; letter-spacing:2px;">
+      ${escapeHtml(data.bookingCode)}
+    </p>
+
+    <p style="margin:20px 0 0; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#333; font-size:16px;">
+      ${escapeHtml(data.name)}
+    </p>
+    ${data.email ? `<p style="margin:2px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">${escapeHtml(data.email)}</p>` : ""}
+    ${data.phone ? `<p style="margin:2px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">${escapeHtml(data.phone)}</p>` : ""}
+
+    <p style="margin:20px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:16px; font-weight:700;">
+      ${formatDate(data.date)} &middot; ${escapeHtml(data.time)}
+    </p>
+    <p style="margin:4px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:15px; font-weight:700;">
+      ${data.partySize} guest${data.partySize === 1 ? "" : "s"} &middot; ${locationName}
+    </p>
+
+    <p style="margin:28px 0 0; text-align:center;">
+      <a href="${SITE_URL}/admin/buffet" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; display:inline-block; background-color:#e8cc9c; color:#1a1a1a; text-decoration:none; font-weight:600; font-size:13px; padding:12px 32px; border-radius:6px;">
+        View in Admin
+      </a>
+    </p>
+  `;
+
+  await send(
+    adminEmail,
+    `New Buffet Booking: ${data.bookingCode} — ${escapeHtml(data.name)} (${data.partySize} guests)`,
+    emailLayout(body)
+  );
+}
+
+// ─── GUEST: BUFFET BOOKING CONFIRMATION ───
+
+export async function sendBuffetGuestConfirmation(data: {
+  name: string;
+  email: string;
+  bookingCode: string;
+  partySize: number;
+  date: string;
+  time: string;
+  locationSlug: string;
+}) {
+  const locationName = data.locationSlug === "streatham" ? "Streatham Hill" : "Cricklewood";
+
+  const body = `
+    <h2 style="margin:0 0 20px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#333;">
+      Your Buffet Booking is Confirmed
+    </h2>
+
+    <p style="margin:0 0 24px; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#666; font-size:16px;">
+      ${escapeHtml(data.name)}
+    </p>
+
+    <p style="margin:0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:16px; font-weight:700;">
+      ${formatDate(data.date)} &middot; ${escapeHtml(data.time)}
+    </p>
+    <p style="margin:4px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:15px; font-weight:700;">
+      ${data.partySize} guest${data.partySize === 1 ? "" : "s"} &middot; ${locationName}
+    </p>
+
+    <hr style="border:none; border-top:1px solid #eee; margin:28px 0;" />
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border-radius:8px;">
+      <tr>
+        <td style="padding:20px 24px; text-align:center;">
+          <p style="margin:0 0 6px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px; text-transform:uppercase; letter-spacing:1px;">
+            Booking Reference
+          </p>
+          <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:18px; font-weight:700; letter-spacing:2px;">
+            ${escapeHtml(data.bookingCode)}
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:28px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#777; font-size:13px; line-height:1.7;">
+      We look forward to welcoming you. If you need to make any changes, please reply to this email or call the restaurant.
+    </p>
+  `;
+
+  await send(
+    data.email,
+    `Your Buffet Booking ${data.bookingCode} — Demi's Restaurant`,
+    emailLayout(body, data.bookingCode)
+  );
+}
+
 // ─── ADMIN: NEW GUEST SELECTION ───
 
 export async function sendAdminGuestSelection(data: {

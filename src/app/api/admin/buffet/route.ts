@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { sendAdminNewBuffetBooking, sendBuffetGuestConfirmation } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
 /** GET /api/admin/buffet — list buffet bookings (latest first) */
@@ -80,6 +81,31 @@ export async function POST(req: Request) {
       notes: notes.trim().slice(0, 1000),
     },
   });
+
+  // Notify admin (non-blocking)
+  sendAdminNewBuffetBooking({
+    bookingCode: booking.bookingCode,
+    name: booking.name,
+    email: booking.email,
+    phone: booking.phone,
+    partySize: booking.partySize,
+    date: booking.date,
+    time: booking.time,
+    locationSlug: booking.locationSlug,
+  }).catch(console.error);
+
+  // Confirm to the guest if an email was provided (non-blocking)
+  if (booking.email) {
+    sendBuffetGuestConfirmation({
+      name: booking.name,
+      email: booking.email,
+      bookingCode: booking.bookingCode,
+      partySize: booking.partySize,
+      date: booking.date,
+      time: booking.time,
+      locationSlug: booking.locationSlug,
+    }).catch(console.error);
+  }
 
   return NextResponse.json({ booking }, { status: 201 });
 }
