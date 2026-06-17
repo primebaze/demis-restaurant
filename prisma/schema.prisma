@@ -263,6 +263,26 @@ model SetMenuSelection {
   @@index([groupId])
 }
 
+// ─── BUFFET BOOKINGS (staff-entered) ───
+model BuffetBooking {
+  id           String   @id @default(cuid())
+  bookingCode  String   @unique // e.g. "BF-A3KX9P2M"
+  name         String
+  email        String   @default("")
+  phone        String   @default("")
+  partySize    Int
+  date         String   // "2026-05-15"
+  time         String   // "19:00"
+  locationSlug String   @default("cricklewood")
+  notes        String   @default("")
+  status       String   @default("confirmed") // confirmed, cancelled
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([date])
+  @@index([status])
+}
+
 // ─── BLOG COMMENTS ───
 model BlogComment {
   id        String   @id @default(cuid())

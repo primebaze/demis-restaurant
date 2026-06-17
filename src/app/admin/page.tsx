@@ -11,7 +11,14 @@ interface TodayBooking {
   slot: string;
   partySize: number;
   status: string;
+  type: string;
 }
+
+const TYPE_COLORS: Record<string, string> = {
+  Website: "bg-blue-500/15 text-blue-300",
+  "Set Menu": "bg-purple-500/15 text-purple-300",
+  Buffet: "bg-orange-500/15 text-orange-300",
+};
 
 interface DashboardData {
   today: {
@@ -116,6 +123,7 @@ export default function AdminDashboard() {
               <thead>
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
                   <th className="px-6 py-3">Code</th>
+                  <th className="px-6 py-3">Type</th>
                   <th className="px-6 py-3">Guest</th>
                   <th className="px-6 py-3">Location</th>
                   <th className="px-6 py-3">Time</th>
@@ -128,6 +136,11 @@ export default function AdminDashboard() {
                   <tr key={b.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
                     <td className="px-6 py-4 text-sm font-mono text-gold-300">
                       {b.confirmationCode}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[b.type] || "bg-gray-700 text-gray-300"}`}>
+                        {b.type}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-white">{b.guest}</td>
                     <td className="px-6 py-4 text-sm text-gray-400">{b.location}</td>

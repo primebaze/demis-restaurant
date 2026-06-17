@@ -13,14 +13,86 @@ export async function GET() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  // Today's bookings
-  const todayBookings = await prisma.booking.findMany({
-    where: { date: today, status: { in: ["confirmed", "modified", "pending_payment"] } },
-    include: { location: true, guest: true, timeSlot: true },
-    orderBy: { time: "asc" },
-  });
+  // Location slug → display name (set-menu / buffet store slug, not a relation)
+  const locations = await prisma.location.findMany({ select: { slug: true, name: true } });
+  const slugToName: Record<string, string> = {};
+  for (const l of locations) slugToName[l.slug] = l.name;
+  const locName = (slug: string) => slugToName[slug] || slug;
 
-  const todayCovers = todayBookings.reduce((sum, b) => sum + b.partySize, 0);
+  // Today's bookings — merge website bookings, set-menu groups, and buffet bookings.
+  // Buffet is wrapped defensively: if the table isn't migrated yet it must not break the dashboard.
+  const [websiteBookings, todaySetMenu, todayBuffet] = await Promise.all([
+    prisma.booking.findMany({
+      where: { date: today, status: { in: ["confirmed", "modified", "pending_payment"] } },
+      include: { location: true, guest: true, timeSlot: true },
+      orderBy: { time: "asc" },
+    }),
+    prisma.setMenuGroup.findMany({
+      where: { date: today, status: "active" },
+      include: { selections: true },
+    }),
+    prisma.buffetBooking
+      .findMany({ where: { date: today, status: "confirmed" } })
+      .catch(() => []),
+  ]);
+
+  type TodayRow = {
+    id: string;
+    confirmationCode: string;
+    guest: string;
+    location: string;
+    time: string;
+    slot: string;
+    partySize: number;
+    status: string;
+    type: string;
+    sortKey: string;
+  };
+
+  const websiteRows: TodayRow[] = websiteBookings.map((b) => ({
+    id: b.id,
+    confirmationCode: b.confirmationCode,
+    guest: b.guest.name,
+    location: b.location.name,
+    time: b.time,
+    slot: `${b.timeSlot.startTime} – ${b.timeSlot.endTime}`,
+    partySize: b.partySize,
+    status: b.status,
+    type: "Website",
+    sortKey: b.time,
+  }));
+
+  const setMenuRows: TodayRow[] = todaySetMenu.map((g) => ({
+    id: g.id,
+    confirmationCode: g.groupCode,
+    guest: g.organizerName,
+    location: locName(g.locationSlug),
+    time: "",
+    slot: "All day",
+    partySize: g.selections.length || g.partySize,
+    status: "confirmed",
+    type: "Set Menu",
+    sortKey: "99:98",
+  }));
+
+  const buffetRows: TodayRow[] = todayBuffet.map((b) => ({
+    id: b.id,
+    confirmationCode: b.bookingCode,
+    guest: b.name,
+    location: locName(b.locationSlug),
+    time: b.time,
+    slot: b.time,
+    partySize: b.partySize,
+    status: b.status,
+    type: "Buffet",
+    sortKey: b.time || "99:99",
+  }));
+
+  const todayRows = [...websiteRows, ...setMenuRows, ...buffetRows].sort((a, b) =>
+    a.sortKey.localeCompare(b.sortKey)
+  );
+
+  const todayCovers = todayRows.reduce((sum, b) => sum + b.partySize, 0);
 
   // Stats for last 30 days
   const thirtyDaysAgo = new Date();
@@ -50,30 +122,40 @@ export async function GET() {
   sevenDaysAhead.setDate(sevenDaysAhead.getDate() + 7);
   const sevenDaysStr = sevenDaysAhead.toISOString().split("T")[0];
 
-  const upcomingCount = await prisma.booking.count({
-    where: {
-      date: { gte: today, lte: sevenDaysStr },
-      status: { in: ["confirmed", "modified", "pending_payment"] },
-    },
-  });
+  const [upcomingBookingCount, upcomingSetMenuCount, upcomingBuffetCount] = await Promise.all([
+    prisma.booking.count({
+      where: {
+        date: { gte: today, lte: sevenDaysStr },
+        status: { in: ["confirmed", "modified", "pending_payment"] },
+      },
+    }),
+    prisma.setMenuGroup.count({
+      where: { date: { gte: today, lte: sevenDaysStr }, status: "active" },
+    }),
+    prisma.buffetBooking
+      .count({ where: { date: { gte: today, lte: sevenDaysStr }, status: "confirmed" } })
+      .catch(() => 0),
+  ]);
+  const upcomingCount = upcomingBookingCount + upcomingSetMenuCount + upcomingBuffetCount;
 
   // Total guests
   const totalGuests = await prisma.guest.count();
 
   return NextResponse.json({
     today: {
-      bookings: todayBookings.map((b) => ({
-        id: b.id,
-        confirmationCode: b.confirmationCode,
-        guest: b.guest.name,
-        location: b.location.name,
-        time: b.time,
-        slot: `${b.timeSlot.startTime} – ${b.timeSlot.endTime}`,
-        partySize: b.partySize,
-        status: b.status,
+      bookings: todayRows.map((r) => ({
+        id: r.id,
+        confirmationCode: r.confirmationCode,
+        guest: r.guest,
+        location: r.location,
+        time: r.time,
+        slot: r.slot,
+        partySize: r.partySize,
+        status: r.status,
+        type: r.type,
       })),
       totalCovers: todayCovers,
-      totalBookings: todayBookings.length,
+      totalBookings: todayRows.length,
     },
     stats: {
       totalBookings30d,

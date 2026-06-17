@@ -23,7 +23,7 @@ export async function GET(req: Request) {
     prisma.setMenuGroup.findMany({
       where,
       include: { selections: { orderBy: { createdAt: "asc" } } },
-      orderBy: { groupCode: "asc" },
+      orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
     }),
