@@ -325,7 +325,7 @@ export default function HomePage() {
                 All-you-can-eat extensive buffet menu. Start the week with a feast!
               </p>
               <p className="mt-5 text-xs font-semibold text-gold-300">
-                Cricklewood &middot; 4 PM &ndash; 10 PM
+                Streatham Hill &middot; 12 PM &ndash; 6 PM
               </p>
             </div>
           </div>
