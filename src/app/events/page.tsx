@@ -4,20 +4,20 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Events | Demi's Restaurant",
   description:
-    "Live music, Afrobeats nights, weekend brunch, private hire and celebrations at Demi's Nigerian Restaurant in London. See what's on at Cricklewood and Streatham Hill.",
+    "Live music, Afrobeats nights, Sunday buffet, open-mic events, private hire and celebrations at Demi's Nigerian Restaurant in London. See what's on at Cricklewood and Streatham Hill.",
   keywords: [
     "Demi's events",
     "Nigerian restaurant events London",
     "Afrobeats night London",
     "private hire Nigerian restaurant",
-    "weekend brunch London",
+    "Sunday buffet London",
     "Cricklewood events",
     "Streatham events",
   ],
   openGraph: {
     title: "Events | Demi's Restaurant",
     description:
-      "Live music, Afrobeats nights, weekend brunch, private hire and celebrations at Demi's Nigerian Restaurant in London.",
+      "Live music, Afrobeats nights, Sunday buffet, open-mic events, private hire and celebrations at Demi's Nigerian Restaurant in London.",
   },
   alternates: {
     canonical: "https://www.demisrestaurant.co.uk/events",
@@ -83,23 +83,23 @@ export default function EventsPage() {
               </div>
             </div>
 
-            {/* Weekend Brunch */}
+            {/* Sunday Buffet */}
             <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🍳</span>
+                <span className="text-3xl">🍲</span>
                 <div>
-                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Saturdays &amp; Sundays</p>
-                  <p className="text-xs text-stone-500">11 AM &ndash; 3 PM</p>
+                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Sunday</p>
+                  <p className="text-xs text-stone-500">12 PM &ndash; 6 PM</p>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white">Weekend Brunch</h3>
+              <h3 className="text-2xl font-bold text-white">Sunday Buffet</h3>
               <p className="mt-3 text-sm text-stone-400 leading-relaxed">
-                Start your weekend right with our Nigerian brunch menu. Akara, perfectly fried
-                plantain, scrambled eggs with peppers, fresh smoothies and bottomless
-                Chapman cocktails. Bring the family or come with friends.
+                All-you-can-eat extensive buffet menu &mdash; a feast of Nigerian favourites.
+                Jollof and fried rice, grilled meats, small chops, sides and dessert, piled high
+                and refilled all afternoon. Bring the family and come hungry.
               </p>
               <div className="mt-5 flex items-center gap-4">
-                <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Both Locations</span>
+                <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Streatham Hill</span>
               </div>
             </div>
 
@@ -113,30 +113,31 @@ export default function EventsPage() {
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-white">Suya Sundays</h3>
+              <p className="mt-1 text-sm font-semibold text-gold-300">Smoke, spice &amp; chill</p>
               <p className="mt-3 text-sm text-stone-400 leading-relaxed">
-                Wind down the weekend with our signature suya &mdash; char-grilled, perfectly
-                spiced and served with all the sides. Enjoy special pricing on suya platters,
-                cold drinks and good conversations.
+                Over at Cricklewood, Sundays are for suya. Char-grilled, perfectly spiced and
+                served with all the sides &mdash; with special pricing on suya platters, cold
+                drinks and good conversation. The relaxed way to end the weekend.
               </p>
               <div className="mt-5 flex items-center gap-4">
                 <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Cricklewood</span>
               </div>
             </div>
 
-            {/* Live Band Night */}
+            {/* Afromic Night */}
             <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🎸</span>
+                <span className="text-3xl">🎤</span>
                 <div>
                   <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Last Saturday of Month</p>
                   <p className="text-xs text-stone-500">7 PM &ndash; Late</p>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white">Live Band Night</h3>
+              <h3 className="text-2xl font-bold text-white">Afromic Night</h3>
               <p className="mt-3 text-sm text-stone-400 leading-relaxed">
-                Live highlife, jùjú, and Afrobeat classics performed by some of London&apos;s
-                finest musicians. A special set menu is available alongside our regular menu.
-                Book early &mdash; these nights always sell out.
+                Our open-mic celebration of African talent &mdash; singers, spoken word, comedy
+                and Afrobeats performers take the stage. Grab the mic or just soak up the vibes
+                over cocktails and our full menu. Book early &mdash; these nights always sell out.
               </p>
               <div className="mt-5 flex items-center gap-4">
                 <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Streatham Hill</span>
