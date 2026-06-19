@@ -103,27 +103,6 @@ export default function EventsPage() {
               </div>
             </div>
 
-            {/* Suya Sundays */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
-              <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🔥</span>
-                <div>
-                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Sunday</p>
-                  <p className="text-xs text-stone-500">4 PM &ndash; 10 PM</p>
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-white">Suya Sundays</h3>
-              <p className="mt-1 text-sm font-semibold text-gold-300">Smoke, spice &amp; chill</p>
-              <p className="mt-3 text-sm text-stone-400 leading-relaxed">
-                Over at Cricklewood, Sundays are for suya. Char-grilled, perfectly spiced and
-                served with all the sides &mdash; with special pricing on suya platters, cold
-                drinks and good conversation. The relaxed way to end the weekend.
-              </p>
-              <div className="mt-5 flex items-center gap-4">
-                <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Cricklewood</span>
-              </div>
-            </div>
-
             {/* Afromic Night */}
             <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
