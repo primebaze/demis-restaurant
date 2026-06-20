@@ -45,13 +45,16 @@ interface DashboardData {
 }
 
 function addDays(dateStr: string, n: number): string {
-  const d = new Date(dateStr + "T00:00:00");
-  d.setDate(d.getDate() + n);
-  return d.toISOString().split("T")[0];
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return dt.toISOString().split("T")[0];
 }
 
 function formatDayLabel(dateStr: string): string {
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-GB", {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-GB", {
+    timeZone: "UTC",
     weekday: "short",
     day: "numeric",
     month: "short",

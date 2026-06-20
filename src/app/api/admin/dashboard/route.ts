@@ -7,11 +7,24 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/admin/dashboard — Dashboard stats
  */
+// UK service date (server runs in UTC, so derive London date)
+function ukToday(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+}
+
+// Shift a YYYY-MM-DD string by n days, timezone-safe
+function shiftDate(dateStr: string, n: number): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return dt.toISOString().split("T")[0];
+}
+
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = ukToday();
 
   // Selected day for the bookings list — defaults to today, navigable via ?date=
   const { searchParams } = new URL(req.url);
@@ -114,9 +127,7 @@ export async function GET(req: Request) {
   const todayCovers = actualTodayRows.reduce((sum, b) => sum + b.partySize, 0);
 
   // Stats for last 30 days
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split("T")[0];
+  const thirtyDaysAgoStr = shiftDate(today, -30);
 
   const recentBookings = await prisma.booking.findMany({
     where: { date: { gte: thirtyDaysAgoStr } },
@@ -137,9 +148,7 @@ export async function GET(req: Request) {
     .reduce((sum, b) => sum + b.depositAmountPence, 0);
 
   // Upcoming bookings (next 7 days)
-  const sevenDaysAhead = new Date();
-  sevenDaysAhead.setDate(sevenDaysAhead.getDate() + 7);
-  const sevenDaysStr = sevenDaysAhead.toISOString().split("T")[0];
+  const sevenDaysStr = shiftDate(today, 7);
 
   const [upcomingBookingCount, upcomingSetMenuCount, upcomingBuffetCount] = await Promise.all([
     prisma.booking.count({
