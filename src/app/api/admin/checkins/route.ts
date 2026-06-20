@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { serviceDate } from "@/lib/checkin-auth";
 export const dynamic = "force-dynamic";
 
 /** GET /api/admin/checkins?date=YYYY-MM-DD — list a day's door check-ins. */
@@ -10,7 +11,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const param = searchParams.get("date");
-  const date = param && /^\d{4}-\d{2}-\d{2}$/.test(param) ? param : new Date().toISOString().split("T")[0];
+  const date = param && /^\d{4}-\d{2}-\d{2}$/.test(param) ? param : serviceDate();
 
   try {
     const checkins = await prisma.buffetCheckIn.findMany({

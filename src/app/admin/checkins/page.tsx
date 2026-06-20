@@ -23,6 +23,11 @@ function fmt(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
+// UK service date (matches how check-ins are stored server-side)
+function ukToday(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+}
+
 function remaining(endsAt: string, now: number): string {
   const ms = new Date(endsAt).getTime() - now;
   if (ms <= 0) return "over";
@@ -32,7 +37,7 @@ function remaining(endsAt: string, now: number): string {
 }
 
 export default function AdminCheckinsPage() {
-  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(() => ukToday());
   const [data, setData] = useState<{ total: number; tiers: { t20: number; t25: number; t30: number }; checkins: CheckIn[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(() => Date.now());
@@ -80,7 +85,7 @@ export default function AdminCheckinsPage() {
     else { setPinMsg("PIN saved"); setNewPin(""); setPinConfigured(true); }
   }
 
-  const isToday = date === new Date().toISOString().split("T")[0];
+  const isToday = date === ukToday();
 
   return (
     <div>

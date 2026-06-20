@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { isCheckinUnlocked, priceTierFor, CHECKIN_WINDOW_MIN } from "@/lib/checkin-auth";
+import { isCheckinUnlocked, priceTierFor, serviceDate, CHECKIN_WINDOW_MIN } from "@/lib/checkin-auth";
 export const dynamic = "force-dynamic";
-
-function todayStr(): string {
-  return new Date().toISOString().split("T")[0];
-}
 
 function isUniqueViolation(e: unknown): boolean {
   return !!e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "P2002";
@@ -31,7 +27,7 @@ export async function POST(req: Request) {
 
   const name = (body.name || "").trim().slice(0, 120);
   const partySize = Math.max(1, Math.min(50, Math.floor(Number(body.partySize) || 1)));
-  const date = todayStr();
+  const date = serviceDate();
   const endsAt = new Date(Date.now() + CHECKIN_WINDOW_MIN * 60 * 1000);
 
   // Atomic numbering: the unique (date, number) constraint prevents duplicates

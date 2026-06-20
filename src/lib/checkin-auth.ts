@@ -47,3 +47,8 @@ export function priceTierFor(n: number): number {
 }
 
 export const CHECKIN_WINDOW_MIN = 90; // 1h 30m dining window
+
+/** Service date in UK time (YYYY-MM-DD) — server runs in UTC, so derive London date. */
+export function serviceDate(d: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(d);
+}
