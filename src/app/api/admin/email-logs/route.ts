@@ -28,6 +28,7 @@ export async function GET(req: Request) {
           recipient: true,
           subject: true,
           type: true,
+          provider: true,
           status: true,
           error: true,
           campaign: true,

@@ -187,6 +187,69 @@ export async function sendRawEmail(to: string, subject: string, html: string): P
   return send(to, subject, html, { skipLog: true });
 }
 
+export function isResendConfigured(): boolean {
+  return !!process.env.RESEND_API_KEY;
+}
+
+const RESEND_FROM = process.env.RESEND_FROM || FROM_EMAIL;
+
+/** Send one email via the Resend HTTP API. No auto-logging. */
+export async function sendViaResend(to: string, subject: string, html: string): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: RESEND_FROM, to, subject, html }),
+    });
+    if (!res.ok) {
+      console.error(`[Resend] Failed (${res.status}): "${subject}" → ${to}`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error(`[Resend] Error: "${subject}" → ${to}`, error);
+    return false;
+  }
+}
+
+/**
+ * Send a batch (up to 100) via Resend's batch API. Returns whether the whole
+ * batch was accepted. No auto-logging.
+ */
+export async function sendResendBatch(
+  messages: { to: string; subject: string; html: string }[]
+): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || messages.length === 0) return false;
+  try {
+    const res = await fetch("https://api.resend.com/emails/batch", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify(messages.map((m) => ({ from: RESEND_FROM, to: m.to, subject: m.subject, html: m.html }))),
+    });
+    if (!res.ok) {
+      console.error(`[Resend] Batch failed (${res.status}) for ${messages.length} messages`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[Resend] Batch error", error);
+    return false;
+  }
+}
+
+/** Pick the right sender for a logged email's provider. No auto-logging. */
+export async function sendByProvider(
+  to: string,
+  subject: string,
+  html: string,
+  provider: string
+): Promise<boolean> {
+  return provider === "resend" ? sendViaResend(to, subject, html) : sendRawEmail(to, subject, html);
+}
+
 // ─── BOOKING CONFIRMATION ───
 
 export async function sendBookingConfirmation(data: {

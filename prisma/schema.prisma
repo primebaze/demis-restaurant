@@ -269,9 +269,10 @@ model EmailLog {
   recipient String
   subject   String
   type      String    @default("transactional") // transactional, direct, bulk, admin
+  provider  String    @default("smtp") // smtp, resend
   status    String    @default("sent") // sent, failed, queued
   error     String    @default("")
-  bodyHtml  String    @default("") // stored only while queued; cleared after send
+  bodyHtml  String    @default("") // retained for bulk so a send can be retried
   campaign  String    @default("") // label grouping a bulk batch
   createdAt DateTime  @default(now())
   sentAt    DateTime?

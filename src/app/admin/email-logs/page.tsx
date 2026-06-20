@@ -7,6 +7,7 @@ type Log = {
   recipient: string;
   subject: string;
   type: string;
+  provider: string;
   status: string;
   error: string;
   campaign: string;
@@ -61,6 +62,20 @@ export default function EmailLogsPage() {
   }, [filterStatus, page]);
 
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
+
+  const [resending, setResending] = useState<string | null>(null);
+
+  async function resend(id: string) {
+    setResending(id);
+    try {
+      const res = await fetch(`/api/admin/email-logs/${id}/resend`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) alert(data.error || "Resend failed");
+      await fetchLogs();
+    } finally {
+      setResending(null);
+    }
+  }
 
   const stats = [
     { label: "Sent (last hour)", value: summary.sentLastHour },
@@ -119,9 +134,11 @@ export default function EmailLogsPage() {
                   <th className="px-4 py-3">Recipient</th>
                   <th className="px-4 py-3">Subject</th>
                   <th className="px-4 py-3">Type</th>
+                  <th className="px-4 py-3">Via</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Created</th>
                   <th className="px-4 py-3">Sent</th>
+                  <th className="px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody>
@@ -134,6 +151,7 @@ export default function EmailLogsPage() {
                         {l.type}
                       </span>
                     </td>
+                    <td className="px-4 py-3 text-xs text-gray-400 uppercase">{l.provider}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[l.status] || "bg-gray-700 text-gray-300"}`} title={l.error || undefined}>
                         {l.status}
@@ -141,6 +159,18 @@ export default function EmailLogsPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400">{fmt(l.createdAt)}</td>
                     <td className="px-4 py-3 text-sm text-gray-400">{fmt(l.sentAt)}</td>
+                    <td className="px-4 py-3">
+                      {l.type === "bulk" && (
+                        <button
+                          onClick={() => resend(l.id)}
+                          disabled={resending === l.id}
+                          className="text-xs px-3 py-1.5 bg-gold-300/10 text-gold-300 rounded-lg hover:bg-gold-300/20 transition disabled:opacity-50"
+                          title="Send this email again now"
+                        >
+                          {resending === l.id ? "…" : "Resend"}
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

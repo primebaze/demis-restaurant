@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { sendRawEmail } from "@/lib/email";
+import { sendByProvider } from "@/lib/email";
 
 const MAX_BULK_PER_HOUR = 15;
 
@@ -31,14 +31,14 @@ export async function drainEmailQueue(): Promise<{ sent: number; failed: number;
   let failed = 0;
 
   for (const row of batch) {
-    const ok = await sendRawEmail(row.recipient, row.subject, row.bodyHtml);
+    const ok = await sendByProvider(row.recipient, row.subject, row.bodyHtml, row.provider);
     await prisma.emailLog.update({
       where: { id: row.id },
       data: {
         status: ok ? "sent" : "failed",
         sentAt: ok ? new Date() : null,
         error: ok ? "" : "send failed",
-        bodyHtml: "", // free the stored HTML once processed
+        // keep bodyHtml so a failed send can be retried from the logs page
       },
     });
     if (ok) sent++;
