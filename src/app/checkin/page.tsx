@@ -63,7 +63,7 @@ export default function CheckinKioskPage() {
   // After a check-in, auto-reset to the screensaver.
   useEffect(() => {
     if (!result) return;
-    const t = setTimeout(() => setResult(null), 6000);
+    const t = setTimeout(() => setResult(null), 3000);
     return () => clearTimeout(t);
   }, [result]);
 
