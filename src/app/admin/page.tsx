@@ -6,6 +6,8 @@ interface TodayBooking {
   id: string;
   confirmationCode: string;
   guest: string;
+  phone: string;
+  email: string;
   location: string;
   time: string;
   slot: string;
@@ -129,6 +131,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3">Time</th>
                   <th className="px-6 py-3">Party</th>
                   <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3">Contact</th>
                 </tr>
               </thead>
               <tbody>
@@ -154,6 +157,44 @@ export default function AdminDashboard() {
                       >
                         {b.status.replace("_", " ")}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        {b.phone ? (
+                          <a
+                            href={`tel:${b.phone.replace(/\s+/g, "")}`}
+                            title={`Call ${b.phone}`}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                          </a>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-800/50 text-gray-700">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                          </span>
+                        )}
+                        {b.email ? (
+                          <a
+                            href={`mailto:${b.email}`}
+                            title={`Email ${b.email}`}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gold-300/10 text-gold-300 hover:bg-gold-300/20 transition"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                          </a>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-800/50 text-gray-700">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

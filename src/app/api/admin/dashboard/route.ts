@@ -40,6 +40,8 @@ export async function GET() {
     id: string;
     confirmationCode: string;
     guest: string;
+    phone: string;
+    email: string;
     location: string;
     time: string;
     slot: string;
@@ -53,6 +55,8 @@ export async function GET() {
     id: b.id,
     confirmationCode: b.confirmationCode,
     guest: b.guest.name,
+    phone: b.guest.phone || "",
+    email: b.guest.email || "",
     location: b.location.name,
     time: b.time,
     slot: `${b.timeSlot.startTime} – ${b.timeSlot.endTime}`,
@@ -66,6 +70,8 @@ export async function GET() {
     id: g.id,
     confirmationCode: g.groupCode,
     guest: g.organizerName,
+    phone: g.organizerPhone || "",
+    email: g.organizerEmail || "",
     location: locName(g.locationSlug),
     time: "",
     slot: "All day",
@@ -79,6 +85,8 @@ export async function GET() {
     id: b.id,
     confirmationCode: b.bookingCode,
     guest: b.name,
+    phone: b.phone || "",
+    email: b.email || "",
     location: locName(b.locationSlug),
     time: b.time,
     slot: b.time,
@@ -147,6 +155,8 @@ export async function GET() {
         id: r.id,
         confirmationCode: r.confirmationCode,
         guest: r.guest,
+        phone: r.phone,
+        email: r.email,
         location: r.location,
         time: r.time,
         slot: r.slot,
