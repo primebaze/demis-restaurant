@@ -263,6 +263,23 @@ model SetMenuSelection {
   @@index([groupId])
 }
 
+// ─── EMAIL LOG / QUEUE ───
+model EmailLog {
+  id        String    @id @default(cuid())
+  recipient String
+  subject   String
+  type      String    @default("transactional") // transactional, direct, bulk, admin
+  status    String    @default("sent") // sent, failed, queued
+  error     String    @default("")
+  bodyHtml  String    @default("") // stored only while queued; cleared after send
+  campaign  String    @default("") // label grouping a bulk batch
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
 // ─── BUFFET BOOKINGS (staff-entered) ───
 model BuffetBooking {
   id           String   @id @default(cuid())

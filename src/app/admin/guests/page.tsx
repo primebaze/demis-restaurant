@@ -191,6 +191,11 @@ export default function AdminGuestsPage() {
 
     if (!res.ok) {
       setCompose((c) => c && { ...c, sending: false, error: data.error || "Failed to send" });
+    } else if (typeof data.queued === "number") {
+      // Bulk send is queued and drained at 15/hour by the cron
+      const successMsg = `${data.queued} email${data.queued !== 1 ? "s" : ""} queued — sending at 15/hour. Track progress in Email Logs.`;
+      setCompose((c) => c && { ...c, sending: false, success: successMsg, failures: [] });
+      setTimeout(() => setCompose(null), 3500);
     } else {
       const successMsg = data.failed > 0
         ? `Sent to ${data.sent} · ${data.failed} failed`

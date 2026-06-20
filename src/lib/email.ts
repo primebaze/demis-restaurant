@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { prisma } from "@/lib/prisma";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "mail.demisrestaurant.co.uk",
@@ -113,7 +114,39 @@ function linkRow(text: string, url: string): string {
   return `<a href="${url}" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#8b0000; font-size:13px; text-decoration:none;">${text}</a>`;
 }
 
-async function send(to: string, subject: string, html: string): Promise<boolean> {
+/**
+ * Record an email attempt to the EmailLog table. Defensive: never throws, so a
+ * logging/DB failure (e.g. table not migrated yet) can't break email sending.
+ */
+async function recordEmailLog(entry: {
+  recipient: string;
+  subject: string;
+  type?: string;
+  status: "sent" | "failed";
+  error?: string;
+}) {
+  try {
+    await prisma.emailLog.create({
+      data: {
+        recipient: entry.recipient,
+        subject: entry.subject,
+        type: entry.type || "transactional",
+        status: entry.status,
+        error: entry.error || "",
+        sentAt: entry.status === "sent" ? new Date() : null,
+      },
+    });
+  } catch {
+    // swallow — logging must never affect delivery
+  }
+}
+
+async function send(
+  to: string,
+  subject: string,
+  html: string,
+  opts?: { type?: string; skipLog?: boolean }
+): Promise<boolean> {
   try {
     await transporter.sendMail({
       from: FROM_EMAIL,
@@ -122,11 +155,36 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
       html,
     });
     console.log(`[Email] Sent: "${subject}" → ${to}`);
+    if (!opts?.skipLog) await recordEmailLog({ recipient: to, subject, type: opts?.type, status: "sent" });
     return true;
   } catch (error) {
     console.error(`[Email] Failed: "${subject}" → ${to}`, error);
+    if (!opts?.skipLog) {
+      await recordEmailLog({
+        recipient: to,
+        subject,
+        type: opts?.type,
+        status: "failed",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
     return false;
   }
+}
+
+/** Build the branded HTML for a plain-text guest message (used for direct + bulk). */
+export function buildGuestEmailHtml(message: string): string {
+  const paragraphs = escapeHtml(message)
+    .split(/\n+/)
+    .filter((p) => p.trim())
+    .map((p) => `<p style="margin:0 0 16px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#555; font-size:14px; line-height:1.7;">${p}</p>`)
+    .join("");
+  return emailLayout(`<div style="padding:4px 0;">${paragraphs}</div>`);
+}
+
+/** Low-level sender for the queue processor — sends pre-rendered HTML, no auto-logging. */
+export async function sendRawEmail(to: string, subject: string, html: string): Promise<boolean> {
+  return send(to, subject, html, { skipLog: true });
 }
 
 // ─── BOOKING CONFIRMATION ───
@@ -911,13 +969,5 @@ export async function sendDirectGuestEmail(data: {
   subject: string;
   message: string;
 }): Promise<boolean> {
-  const paragraphs = escapeHtml(data.message)
-    .split(/\n+/)
-    .filter((p) => p.trim())
-    .map((p) => `<p style="margin:0 0 16px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#555; font-size:14px; line-height:1.7;">${p}</p>`)
-    .join("");
-
-  const body = `<div style="padding:4px 0;">${paragraphs}</div>`;
-
-  return send(data.to, data.subject, emailLayout(body));
+  return send(data.to, data.subject, buildGuestEmailHtml(data.message), { type: "direct" });
 }

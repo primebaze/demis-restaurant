@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
-import { sendDirectGuestEmail } from "@/lib/email";
+import { sendDirectGuestEmail, buildGuestEmailHtml } from "@/lib/email";
 export const dynamic = "force-dynamic";
-
-const BATCH_SIZE = 10;
-const BATCH_DELAY_MS = 1000; // 1 second between batches = max 10/second
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export async function POST(req: Request) {
   const { unauthorized } = await requireAdmin();
@@ -38,34 +31,23 @@ export async function POST(req: Request) {
     if (guests.length === 0)
       return NextResponse.json({ error: "No guests with email addresses found" }, { status: 400 });
 
-    const failures: { name: string; email: string }[] = [];
-    let sent = 0;
+    // Queue the blast — the hourly cron drains it at max 15/hour so we never
+    // exceed the SMTP per-hour cap. Render the HTML once and store per recipient.
+    const html = buildGuestEmailHtml(message.trim());
+    const campaign = `${subject.trim()} · ${new Date().toISOString().slice(0, 16).replace("T", " ")}`;
 
-    // Send in batches of BATCH_SIZE with a delay between batches
-    for (let i = 0; i < guests.length; i += BATCH_SIZE) {
-      const batch = guests.slice(i, i + BATCH_SIZE);
+    await prisma.emailLog.createMany({
+      data: guests.map((g) => ({
+        recipient: g.email,
+        subject: subject.trim(),
+        type: "bulk",
+        status: "queued",
+        bodyHtml: html,
+        campaign,
+      })),
+    });
 
-      const results = await Promise.allSettled(
-        batch.map((g) =>
-          sendDirectGuestEmail({ to: g.email, subject: subject.trim(), message: message.trim() })
-        )
-      );
-
-      results.forEach((result, idx) => {
-        if (result.status === "fulfilled") {
-          sent++;
-        } else {
-          failures.push({ name: batch[idx].name, email: batch[idx].email });
-        }
-      });
-
-      // Delay between batches (skip after the last batch)
-      if (i + BATCH_SIZE < guests.length) {
-        await sleep(BATCH_DELAY_MS);
-      }
-    }
-
-    return NextResponse.json({ sent, failed: failures.length, failures });
+    return NextResponse.json({ queued: guests.length });
   }
 
   if (guestId) {
