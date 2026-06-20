@@ -24,11 +24,15 @@ const TYPE_COLORS: Record<string, string> = {
 
 interface DashboardData {
   today: {
+    date: string;
+    isToday: boolean;
     bookings: TodayBooking[];
     totalCovers: number;
     totalBookings: number;
   };
   stats: {
+    todayBookings: number;
+    todayCovers: number;
     totalBookings30d: number;
     confirmedBookings30d: number;
     noShows30d: number;
@@ -38,6 +42,21 @@ interface DashboardData {
     upcomingNext7Days: number;
     totalGuests: number;
   };
+}
+
+function addDays(dateStr: string, n: number): string {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split("T")[0];
+}
+
+function formatDayLabel(dateStr: string): string {
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -52,13 +71,21 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  // null = today; otherwise a YYYY-MM-DD string for the day being viewed
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [dayLoading, setDayLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/dashboard")
+    const url = selectedDate ? `/api/admin/dashboard?date=${selectedDate}` : "/api/admin/dashboard";
+    setDayLoading(true);
+    fetch(url)
       .then((r) => r.json())
       .then(setData)
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => {
+        setLoading(false);
+        setDayLoading(false);
+      });
+  }, [selectedDate]);
 
   if (loading) {
     return (
@@ -71,8 +98,8 @@ export default function AdminDashboard() {
   if (!data) return null;
 
   const statCards = [
-    { label: "Today's Bookings", value: data.today.totalBookings, accent: true },
-    { label: "Today's Covers", value: data.today.totalCovers, accent: true },
+    { label: "Today's Bookings", value: data.stats.todayBookings, accent: true },
+    { label: "Today's Covers", value: data.stats.todayCovers, accent: true },
     { label: "Next 7 Days", value: data.stats.upcomingNext7Days },
     { label: "30d Bookings", value: data.stats.totalBookings30d },
     { label: "30d Covers", value: data.stats.totalCovers30d },
@@ -109,15 +136,53 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Today's bookings table */}
+      {/* Day bookings table */}
       <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-800">
-          <h2 className="text-lg font-semibold text-white">Today&apos;s Bookings</h2>
+        <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <h2 className="text-lg font-semibold text-white truncate">
+              {data.today.isToday ? "Today's Bookings" : formatDayLabel(data.today.date)}
+            </h2>
+            {data.today.isToday ? (
+              <span className="text-xs text-gray-500 hidden sm:inline">{formatDayLabel(data.today.date)}</span>
+            ) : (
+              <button
+                onClick={() => setSelectedDate(null)}
+                className="text-xs px-2.5 py-1 rounded-lg bg-gold-300/10 text-gold-300 hover:bg-gold-300/20 transition shrink-0"
+              >
+                Today
+              </button>
+            )}
+            {dayLoading && <span className="text-xs text-gray-600 shrink-0">…</span>}
+            <span className="text-xs text-gray-500 shrink-0 hidden md:inline">
+              {data.today.totalBookings} booking{data.today.totalBookings === 1 ? "" : "s"} &middot; {data.today.totalCovers} covers
+            </span>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => setSelectedDate(addDays(data.today.date, -1))}
+              title="Previous day"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#0f0f0f] border border-gray-700 text-gray-300 hover:border-gold-400 hover:text-white transition"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setSelectedDate(addDays(data.today.date, 1))}
+              title="Next day"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#0f0f0f] border border-gray-700 text-gray-300 hover:border-gold-400 hover:text-white transition"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {data.today.bookings.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            No bookings for today
+            No bookings for this day
           </div>
         ) : (
           <div className="overflow-x-auto">

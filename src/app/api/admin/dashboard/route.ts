@@ -7,34 +7,22 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/admin/dashboard — Dashboard stats
  */
-export async function GET() {
+export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const today = new Date().toISOString().split("T")[0];
+
+  // Selected day for the bookings list — defaults to today, navigable via ?date=
+  const { searchParams } = new URL(req.url);
+  const dateParam = searchParams.get("date");
+  const targetDate = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : today;
 
   // Location slug → display name (set-menu / buffet store slug, not a relation)
   const locations = await prisma.location.findMany({ select: { slug: true, name: true } });
   const slugToName: Record<string, string> = {};
   for (const l of locations) slugToName[l.slug] = l.name;
   const locName = (slug: string) => slugToName[slug] || slug;
-
-  // Today's bookings — merge website bookings, set-menu groups, and buffet bookings.
-  // Buffet is wrapped defensively: if the table isn't migrated yet it must not break the dashboard.
-  const [websiteBookings, todaySetMenu, todayBuffet] = await Promise.all([
-    prisma.booking.findMany({
-      where: { date: today, status: { in: ["confirmed", "modified", "pending_payment"] } },
-      include: { location: true, guest: true, timeSlot: true },
-      orderBy: { time: "asc" },
-    }),
-    prisma.setMenuGroup.findMany({
-      where: { date: today, status: "active" },
-      include: { selections: true },
-    }),
-    prisma.buffetBooking
-      .findMany({ where: { date: today, status: "confirmed" } })
-      .catch(() => []),
-  ]);
 
   type TodayRow = {
     id: string;
@@ -51,56 +39,79 @@ export async function GET() {
     sortKey: string;
   };
 
-  const websiteRows: TodayRow[] = websiteBookings.map((b) => ({
-    id: b.id,
-    confirmationCode: b.confirmationCode,
-    guest: b.guest.name,
-    phone: b.guest.phone || "",
-    email: b.guest.email || "",
-    location: b.location.name,
-    time: b.time,
-    slot: `${b.timeSlot.startTime} – ${b.timeSlot.endTime}`,
-    partySize: b.partySize,
-    status: b.status,
-    type: "Website",
-    sortKey: b.time,
-  }));
+  // Build the merged, sorted bookings (website + set-menu + buffet) for one date.
+  // Buffet is wrapped defensively: if the table isn't migrated yet it must not break the dashboard.
+  async function buildDayRows(date: string): Promise<TodayRow[]> {
+    const [websiteBookings, setMenu, buffet] = await Promise.all([
+      prisma.booking.findMany({
+        where: { date, status: { in: ["confirmed", "modified", "pending_payment"] } },
+        include: { location: true, guest: true, timeSlot: true },
+        orderBy: { time: "asc" },
+      }),
+      prisma.setMenuGroup.findMany({
+        where: { date, status: "active" },
+        include: { selections: true },
+      }),
+      prisma.buffetBooking
+        .findMany({ where: { date, status: "confirmed" } })
+        .catch(() => []),
+    ]);
 
-  const setMenuRows: TodayRow[] = todaySetMenu.map((g) => ({
-    id: g.id,
-    confirmationCode: g.groupCode,
-    guest: g.organizerName,
-    phone: g.organizerPhone || "",
-    email: g.organizerEmail || "",
-    location: locName(g.locationSlug),
-    time: "",
-    slot: "All day",
-    partySize: g.selections.length || g.partySize,
-    status: "confirmed",
-    type: "Set Menu",
-    sortKey: "99:98",
-  }));
+    const websiteRows: TodayRow[] = websiteBookings.map((b) => ({
+      id: b.id,
+      confirmationCode: b.confirmationCode,
+      guest: b.guest.name,
+      phone: b.guest.phone || "",
+      email: b.guest.email || "",
+      location: b.location.name,
+      time: b.time,
+      slot: `${b.timeSlot.startTime} – ${b.timeSlot.endTime}`,
+      partySize: b.partySize,
+      status: b.status,
+      type: "Website",
+      sortKey: b.time,
+    }));
 
-  const buffetRows: TodayRow[] = todayBuffet.map((b) => ({
-    id: b.id,
-    confirmationCode: b.bookingCode,
-    guest: b.name,
-    phone: b.phone || "",
-    email: b.email || "",
-    location: locName(b.locationSlug),
-    time: b.time,
-    slot: b.time,
-    partySize: b.partySize,
-    status: b.status,
-    type: "Buffet",
-    sortKey: b.time || "99:99",
-  }));
+    const setMenuRows: TodayRow[] = setMenu.map((g) => ({
+      id: g.id,
+      confirmationCode: g.groupCode,
+      guest: g.organizerName,
+      phone: g.organizerPhone || "",
+      email: g.organizerEmail || "",
+      location: locName(g.locationSlug),
+      time: "",
+      slot: "All day",
+      partySize: g.selections.length || g.partySize,
+      status: "confirmed",
+      type: "Set Menu",
+      sortKey: "99:98",
+    }));
 
-  const todayRows = [...websiteRows, ...setMenuRows, ...buffetRows].sort((a, b) =>
-    a.sortKey.localeCompare(b.sortKey)
-  );
+    const buffetRows: TodayRow[] = buffet.map((b) => ({
+      id: b.id,
+      confirmationCode: b.bookingCode,
+      guest: b.name,
+      phone: b.phone || "",
+      email: b.email || "",
+      location: locName(b.locationSlug),
+      time: b.time,
+      slot: b.time,
+      partySize: b.partySize,
+      status: b.status,
+      type: "Buffet",
+      sortKey: b.time || "99:99",
+    }));
 
-  const todayCovers = todayRows.reduce((sum, b) => sum + b.partySize, 0);
+    return [...websiteRows, ...setMenuRows, ...buffetRows].sort((a, b) =>
+      a.sortKey.localeCompare(b.sortKey)
+    );
+  }
+
+  // Selected-day rows for the table; actual-today rows for the stat cards.
+  const targetRows = await buildDayRows(targetDate);
+  const actualTodayRows = targetDate === today ? targetRows : await buildDayRows(today);
+  const targetCovers = targetRows.reduce((sum, b) => sum + b.partySize, 0);
+  const todayCovers = actualTodayRows.reduce((sum, b) => sum + b.partySize, 0);
 
   // Stats for last 30 days
   const thirtyDaysAgo = new Date();
@@ -151,7 +162,9 @@ export async function GET() {
 
   return NextResponse.json({
     today: {
-      bookings: todayRows.map((r) => ({
+      date: targetDate,
+      isToday: targetDate === today,
+      bookings: targetRows.map((r) => ({
         id: r.id,
         confirmationCode: r.confirmationCode,
         guest: r.guest,
@@ -164,10 +177,12 @@ export async function GET() {
         status: r.status,
         type: r.type,
       })),
-      totalCovers: todayCovers,
-      totalBookings: todayRows.length,
+      totalCovers: targetCovers,
+      totalBookings: targetRows.length,
     },
     stats: {
+      todayBookings: actualTodayRows.length,
+      todayCovers,
       totalBookings30d,
       confirmedBookings30d,
       noShows30d,
