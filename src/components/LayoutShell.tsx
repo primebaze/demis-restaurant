@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { Footer } from "@/components/Footer";
 import { FloatingMenu } from "@/components/FloatingMenu";
 
-const ADMIN_PREFIXES = ["/admin", "/blog/admin"];
+const ADMIN_PREFIXES = ["/admin", "/blog/admin", "/checkin"];
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
