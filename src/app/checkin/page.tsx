@@ -13,6 +13,13 @@ function fmtTime(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
+// £20 = the deal (green), £25 = amber, £30 = red
+function tierColor(tier: number): string {
+  if (tier === 20) return "text-emerald-300";
+  if (tier === 25) return "text-amber-300";
+  return "text-red-300";
+}
+
 export default function CheckinKioskPage() {
   const [unlocked, setUnlocked] = useState<boolean | null>(null);
   const [pin, setPin] = useState("");
@@ -108,38 +115,49 @@ export default function CheckinKioskPage() {
     <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-6">
       <head><meta name="robots" content="noindex, nofollow" /></head>
       <div className="w-full max-w-sm text-center">
-        <h1 className="text-xl font-bold text-gold-300 mb-6">Buffet Check-in</h1>
+        <h1 className="text-xl font-bold text-gold-300 mb-8 tracking-wide">Buffet Check-in</h1>
 
-        {result && (
-          <div className="mb-6 p-6 bg-[#1a1a1a] border border-gold-300/30 rounded-3xl">
-            <p className="text-sm text-gray-400">You are</p>
-            <p className="text-6xl font-extrabold text-white my-1">No. {result.number}</p>
-            <p className="text-3xl font-bold text-gold-300">£{result.priceTier}</p>
-            <p className="mt-3 text-sm text-gray-300">
-              In {fmtTime(result.checkedInAt)} · finish by <span className="text-white font-semibold">{fmtTime(result.endsAt)}</span>
-            </p>
-          </div>
+        {result ? (
+          /* ── Confirmation: one guest, then "Next guest" resets ── */
+          <>
+            <div className="mb-8 p-8 bg-[#161616] border border-white/10 rounded-3xl">
+              <p className="text-sm text-gray-500">You are</p>
+              <p className="text-7xl font-extrabold text-white my-2 tracking-tight">No. {result.number}</p>
+              <p className={`text-5xl font-extrabold ${tierColor(result.priceTier)}`}>£{result.priceTier}</p>
+              <div className="mt-6 pt-5 border-t border-white/10 text-sm text-gray-400 leading-relaxed">
+                Checked in <span className="text-gray-200 font-medium">{fmtTime(result.checkedInAt)}</span>
+                <br />
+                Please finish by <span className="text-white font-semibold">{fmtTime(result.endsAt)}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => { setResult(null); setError(""); }}
+              className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition"
+            >
+              Next guest
+            </button>
+          </>
+        ) : (
+          /* ── Ready: optional name, then big Check In ── */
+          <>
+            <p className="text-gray-500 mb-6">Tap to check in</p>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Name (optional)"
+              className="w-full mb-5 px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white text-center placeholder-gray-600 focus:outline-none focus:border-gold-400"
+            />
+            {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
+            <button
+              onClick={checkIn}
+              disabled={busy}
+              className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-50"
+            >
+              {busy ? "…" : "Check In"}
+            </button>
+          </>
         )}
-
-        <div className="mb-5">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name (optional)"
-            className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white text-center placeholder-gray-600 focus:outline-none focus:border-gold-400"
-          />
-        </div>
-
-        {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
-
-        <button
-          onClick={checkIn}
-          disabled={busy}
-          className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-50"
-        >
-          {busy ? "…" : "Check In"}
-        </button>
       </div>
     </div>
   );
