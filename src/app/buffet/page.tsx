@@ -70,7 +70,14 @@ export default function BuffetPage() {
           </h1>
           <p className="mt-4 body-text max-w-xl mx-auto">
             Celebrate with bold Nigerian flavours. Our buffet is perfect for parties,
-            private events and gatherings — all prepared fresh by our kitchen.
+            private events and gatherings — all prepared fresh by our kitchen. Choose
+            your date, party size and location, and our team will tailor the spread to
+            suit your occasion.
+          </p>
+          <p className="mt-4 text-sm text-stone-400 max-w-xl mx-auto">
+            Please note: this is a <span className="text-gold-300">private buffet booking</span> for
+            your own event — it&apos;s separate from our weekly all-you-can-eat
+            <span className="text-gold-300"> Sunday Buffet</span> at the Streatham Hill branch.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
