@@ -13,7 +13,7 @@ function fmtTime(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
-const BG = "bg-[#0b1120]";
+const BG = "bg-[#0f0f0f]";
 
 export default function CheckinKioskPage() {
   const [unlocked, setUnlocked] = useState<boolean | null>(null);
