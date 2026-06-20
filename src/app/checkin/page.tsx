@@ -159,42 +159,36 @@ export default function CheckinKioskPage() {
   return (
     <div
       onClick={() => { if (busy) return; if (unlocked) checkIn(); else setShowPin(true); }}
-      className={`relative min-h-screen ${BG} text-white flex flex-col items-center justify-center p-6 select-none cursor-pointer overflow-hidden`}
+      className={`min-h-screen ${BG} text-white flex flex-col items-center justify-center p-6 select-none cursor-pointer`}
     >
       <head><meta name="robots" content="noindex, nofollow" /></head>
 
-      {/* soft gold glow */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="w-[42rem] h-[42rem] rounded-full bg-gold-300/[0.06] blur-3xl" />
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <p className="text-[11px] sm:text-xs font-semibold tracking-[0.4em] uppercase text-gold-300/80 mb-8">
+      <div className="flex flex-col items-center text-center">
+        <p className="text-[11px] sm:text-xs font-semibold tracking-[0.4em] uppercase text-gold-300/80 mb-6">
           Demi&apos;s &middot; Sunday Buffet
         </p>
 
         <div className="flex items-start">
-          <span className="text-[5.5rem] sm:text-[9rem] leading-none font-extralight tracking-tight tabular-nums">{hh}:{mm}</span>
-          <span className="text-2xl sm:text-4xl text-gold-300/70 ml-2 sm:ml-3 mt-3 tabular-nums">{ss}</span>
+          <span className="text-[3.25rem] sm:text-[5rem] leading-none font-extralight tracking-tight tabular-nums">{hh}:{mm}</span>
+          <span className="text-lg sm:text-2xl text-gold-300/70 ml-2 mt-1.5 tabular-nums">{ss}</span>
         </div>
-        <p className="text-gray-400 mt-3 text-base sm:text-lg">{dateStr}</p>
+        <p className="text-gray-500 mt-2 text-sm sm:text-base">{dateStr}</p>
 
-        {/* pulsing gold tap target */}
-        <div className="relative mt-14 mb-5 flex items-center justify-center">
-          {!busy && <span className="absolute inline-flex h-20 w-20 rounded-full bg-gold-300/20 animate-ping" />}
-          <div className="relative w-20 h-20 rounded-full bg-gold-300 text-[#1a1a1a] flex items-center justify-center shadow-[0_0_45px_rgba(232,204,156,0.35)]">
+        {/* big tap target */}
+        <div className="mt-12 mb-6 flex items-center justify-center">
+          <div className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gold-300 text-[#1a1a1a] flex items-center justify-center active:scale-95 transition">
             {busy ? (
-              <div className="w-7 h-7 rounded-full border-2 border-[#1a1a1a]/30 border-t-[#1a1a1a] animate-spin" />
+              <div className="w-16 h-16 rounded-full border-[3px] border-[#1a1a1a]/30 border-t-[#1a1a1a] animate-spin" />
             ) : (
-              <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
+              <svg className="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
               </svg>
             )}
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold">{busy ? "Checking you in…" : "Tap to check in"}</h2>
-        <p className="text-gray-500 mt-1">{unlocked ? "Touch anywhere on the screen" : "Enter the 4-digit staff PIN to start"}</p>
+        <h2 className="text-3xl sm:text-4xl font-bold">{busy ? "Checking you in…" : "Tap to check in"}</h2>
+        <p className="text-gray-500 mt-2 text-base">{unlocked ? "Touch anywhere on the screen" : "Enter the 4-digit staff PIN to start"}</p>
         {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
       </div>
     </div>
