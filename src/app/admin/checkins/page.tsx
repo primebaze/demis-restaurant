@@ -118,9 +118,10 @@ export default function AdminCheckinsPage() {
             <input
               type="password"
               inputMode="numeric"
+              maxLength={4}
               value={newPin}
-              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-              placeholder="4–8 digits"
+              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="4 digits"
               className="w-32 px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
             />
             <button onClick={savePin} disabled={!newPin} className="px-4 py-2 bg-gold-300 text-[#1a1a1a] rounded-lg text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">

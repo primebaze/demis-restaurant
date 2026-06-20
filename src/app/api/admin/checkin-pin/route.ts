@@ -32,8 +32,8 @@ export async function POST(req: Request) {
   }
 
   const pin = (body.pin || "").trim();
-  if (!/^\d{4,8}$/.test(pin))
-    return NextResponse.json({ error: "PIN must be 4 to 8 digits" }, { status: 400 });
+  if (!/^\d{4}$/.test(pin))
+    return NextResponse.json({ error: "PIN must be 4 digits" }, { status: 400 });
 
   const hash = hashSync(pin, 10);
   await prisma.appSetting.upsert({

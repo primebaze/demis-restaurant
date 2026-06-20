@@ -39,12 +39,18 @@ export default function CheckinKioskPage() {
         body: JSON.stringify({ pin }),
       });
       const d = await res.json();
-      if (!res.ok) setError(d.error || "Could not unlock");
+      if (!res.ok) { setError(d.error || "Could not unlock"); setPin(""); }
       else { setUnlocked(true); setPin(""); }
     } finally {
       setBusy(false);
     }
   }
+
+  // Auto-submit once 4 digits are entered — no manual tap.
+  useEffect(() => {
+    if (pin.length === 4 && !busy && !unlocked) unlock();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin]);
 
   async function checkIn() {
     setError("");
@@ -85,10 +91,11 @@ export default function CheckinKioskPage() {
               type="password"
               inputMode="numeric"
               enterKeyHint="go"
+              maxLength={4}
               value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-              placeholder="PIN"
-              className="w-full text-center text-2xl tracking-[0.5em] px-4 py-4 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white focus:outline-none focus:border-gold-400"
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="••••"
+              className="w-full text-center text-3xl tracking-[0.6em] px-4 py-4 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white focus:outline-none focus:border-gold-400"
               autoFocus
             />
             {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
