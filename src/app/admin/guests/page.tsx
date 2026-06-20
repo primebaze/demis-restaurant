@@ -476,7 +476,6 @@ export default function AdminGuestsPage() {
                     Resend <span className="text-xs opacity-70">· fast, no cap</span>
                   </button>
                 </div>
-                <p className="mt-1.5 text-xs text-gray-600">Resend needs RESEND_API_KEY. {compose.mode === "all" ? "SMTP queues bulk at 15/hour to stay under the host limit." : "Both send immediately for a single email."}</p>
               </div>
             </div>
 
