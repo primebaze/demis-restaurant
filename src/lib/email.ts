@@ -484,10 +484,12 @@ export async function sendAdminNewBooking(data: {
   confirmationCode: string;
   guestName: string;
   guestEmail: string;
+  guestPhone?: string;
   location: string;
   date: string;
   slot: string;
   partySize: number;
+  notes?: string;
   depositRequired: boolean;
   depositAmountPence: number;
   addOns: { name: string; pricePence: number; quantity: number }[];
@@ -512,6 +514,7 @@ export async function sendAdminNewBooking(data: {
     <p style="margin:2px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">
       ${escapeHtml(data.guestEmail)}
     </p>
+    ${data.guestPhone ? `<p style="margin:2px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#999; font-size:12px;">${escapeHtml(data.guestPhone)}</p>` : ""}
 
     <!-- Date -->
     <p style="margin:20px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#333; font-size:16px; font-weight:700;">
@@ -527,6 +530,22 @@ export async function sendAdminNewBooking(data: {
     <p style="margin:8px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:13px;">
       ${escapeHtml(data.location)}
     </p>
+
+    ${data.notes && data.notes.trim() ? `
+    <hr style="border:none; border-top:1px solid #eee; margin:24px 0;" />
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border-radius:8px;">
+      <tr>
+        <td style="padding:18px 24px;">
+          <h3 style="margin:0 0 8px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12px; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px;">
+            Guest Notes / Special Requests
+          </h3>
+          <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:14px; color:#555; line-height:1.6;">
+            ${escapeHtml(data.notes.trim())}
+          </p>
+        </td>
+      </tr>
+    </table>
+    ` : ""}
 
     ${(data.addOns.length > 0 || data.depositRequired) ? `
     <hr style="border:none; border-top:1px solid #eee; margin:24px 0;" />

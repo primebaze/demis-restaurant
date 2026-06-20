@@ -336,10 +336,12 @@ export async function POST(req: Request) {
         confirmationCode: booking.confirmationCode,
         guestName: name,
         guestEmail: email,
+        guestPhone: phone,
         location: booking.location.name,
         date: booking.date,
         slot: formatTime24(booking.timeSlot.startTime),
         partySize,
+        notes: booking.notes,
         depositRequired: false,
         depositAmountPence: 0,
         addOns: bookingAddOns.map((ba) => ({
