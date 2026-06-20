@@ -52,6 +52,13 @@ export default function CheckinKioskPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin]);
 
+  // After a check-in, auto-reset for the next guest (a few seconds to read it).
+  useEffect(() => {
+    if (!result) return;
+    const t = setTimeout(() => setResult(null), 6000);
+    return () => clearTimeout(t);
+  }, [result]);
+
   async function checkIn() {
     setError("");
     setBusy(true);
