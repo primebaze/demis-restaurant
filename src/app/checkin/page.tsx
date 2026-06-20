@@ -139,12 +139,10 @@ export default function CheckinKioskPage() {
                 Please finish by <span className="text-white font-semibold">{fmtTime(result.endsAt)}</span>
               </div>
             </div>
-            <button
-              onClick={() => { setResult(null); setError(""); }}
-              className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition"
-            >
-              Next guest
-            </button>
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 rounded-full border-2 border-gray-700 border-t-gold-300 animate-spin" />
+              <p className="text-sm text-gray-500">Please wait, ready for the next guest…</p>
+            </div>
           </>
         ) : (
           /* ── Ready: optional name, then big Check In ── */
