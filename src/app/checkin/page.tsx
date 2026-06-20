@@ -13,13 +13,6 @@ function fmtTime(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
-// £20 = the deal (green), £25 = amber, £30 = red
-function tierColor(tier: number): string {
-  if (tier === 20) return "text-emerald-300";
-  if (tier === 25) return "text-amber-300";
-  return "text-red-300";
-}
-
 export default function CheckinKioskPage() {
   const [unlocked, setUnlocked] = useState<boolean | null>(null);
   const [pin, setPin] = useState("");
@@ -87,24 +80,26 @@ export default function CheckinKioskPage() {
         <div className="w-full max-w-xs text-center">
           <h1 className="text-2xl font-bold text-gold-300 mb-1">Demi&apos;s Check-in</h1>
           <p className="text-sm text-gray-500 mb-6">Enter the staff PIN to start.</p>
-          <input
-            type="password"
-            inputMode="numeric"
-            value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-            onKeyDown={(e) => e.key === "Enter" && unlock()}
-            placeholder="PIN"
-            className="w-full text-center text-2xl tracking-[0.5em] px-4 py-4 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white focus:outline-none focus:border-gold-400"
-            autoFocus
-          />
-          {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-          <button
-            onClick={unlock}
-            disabled={busy || !pin}
-            className="mt-5 w-full py-4 bg-gold-300 text-[#1a1a1a] rounded-2xl font-semibold hover:bg-gold-200 transition disabled:opacity-50"
-          >
-            {busy ? "…" : "Unlock"}
-          </button>
+          <form onSubmit={(e) => { e.preventDefault(); unlock(); }}>
+            <input
+              type="password"
+              inputMode="numeric"
+              enterKeyHint="go"
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+              placeholder="PIN"
+              className="w-full text-center text-2xl tracking-[0.5em] px-4 py-4 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white focus:outline-none focus:border-gold-400"
+              autoFocus
+            />
+            {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+            <button
+              type="submit"
+              disabled={busy || !pin}
+              className="mt-5 w-full py-4 bg-gold-300 text-[#1a1a1a] rounded-2xl font-semibold hover:bg-gold-200 transition disabled:opacity-50"
+            >
+              {busy ? "…" : "Start"}
+            </button>
+          </form>
         </div>
       </div>
     );
@@ -123,7 +118,7 @@ export default function CheckinKioskPage() {
             <div className="mb-8 p-8 bg-[#161616] border border-white/10 rounded-3xl">
               <p className="text-sm text-gray-500">You are</p>
               <p className="text-7xl font-extrabold text-white my-2 tracking-tight">No. {result.number}</p>
-              <p className={`text-5xl font-extrabold ${tierColor(result.priceTier)}`}>£{result.priceTier}</p>
+              <p className="text-5xl font-extrabold text-emerald-400">£{result.priceTier}</p>
               <div className="mt-6 pt-5 border-t border-white/10 text-sm text-gray-400 leading-relaxed">
                 Checked in <span className="text-gray-200 font-medium">{fmtTime(result.checkedInAt)}</span>
                 <br />
