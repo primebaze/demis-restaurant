@@ -103,10 +103,6 @@ export default function CheckinKioskPage() {
   const ss = now ? String(now.getSeconds()).padStart(2, "0") : "--";
   const dateStr = now ? now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
 
-  if (unlocked === null) {
-    return <div className={`min-h-screen ${BG} flex items-center justify-center text-gray-500`}>Loading…</div>;
-  }
-
   // ── PIN keypad (after tapping the locked screensaver) ──
   if (!unlocked && showPin) {
     return (
@@ -161,7 +157,7 @@ export default function CheckinKioskPage() {
   // ── Idle screensaver: branded clock, tap to check in (or enter PIN if locked) ──
   return (
     <div
-      onClick={() => { if (busy) return; if (unlocked) checkIn(); else setShowPin(true); }}
+      onClick={() => { if (busy || unlocked === null) return; if (unlocked) checkIn(); else setShowPin(true); }}
       className={`min-h-screen ${BG} text-white flex flex-col items-center justify-center p-6 select-none cursor-pointer`}
     >
       <head><meta name="robots" content="noindex, nofollow" /></head>
