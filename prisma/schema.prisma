@@ -281,6 +281,30 @@ model EmailLog {
   @@index([createdAt])
 }
 
+// ─── APP SETTINGS (small key/value store) ───
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// ─── BUFFET CHECK-INS (door kiosk) ───
+model BuffetCheckIn {
+  id          String   @id @default(cuid())
+  date        String // service date "2026-06-21"
+  number      Int // sequential per date, starts at 1
+  name        String   @default("")
+  partySize   Int      @default(1)
+  priceTier   Int      @default(20) // 20, 25 or 30
+  checkedInAt DateTime @default(now())
+  endsAt      DateTime // checkedInAt + 90 min
+  status      String   @default("active") // active, finished
+  createdAt   DateTime @default(now())
+
+  @@unique([date, number])
+  @@index([date])
+}
+
 // ─── BUFFET BOOKINGS (staff-entered) ───
 model BuffetBooking {
   id           String   @id @default(cuid())
