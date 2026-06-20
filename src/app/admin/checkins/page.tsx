@@ -58,6 +58,16 @@ export default function AdminCheckinsPage() {
     return () => clearInterval(t);
   }, []);
 
+  async function resetDay() {
+    if (!confirm(`Clear all check-ins for ${date}? Numbering starts again at 1.`)) return;
+    await fetch("/api/checkin/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date }),
+    });
+    fetchData();
+  }
+
   async function savePin() {
     setPinMsg("");
     const res = await fetch("/api/admin/checkin-pin", {
@@ -79,12 +89,20 @@ export default function AdminCheckinsPage() {
           <h1 className="text-2xl font-bold text-white">Buffet Check-ins</h1>
           <p className="text-sm text-gray-500 mt-0.5">Door kiosk at <span className="text-gold-300">/checkin</span></p>
         </div>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm [color-scheme:dark] focus:outline-none focus:border-gold-400"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm [color-scheme:dark] focus:outline-none focus:border-gold-400"
+          />
+          <button
+            onClick={resetDay}
+            className="px-3 py-2 text-sm bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition"
+          >
+            Reset day
+          </button>
+        </div>
       </div>
 
       {/* PIN management */}

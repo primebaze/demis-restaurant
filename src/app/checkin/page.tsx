@@ -68,17 +68,6 @@ export default function CheckinKioskPage() {
     }
   }
 
-  async function reset() {
-    if (!confirm("Reset today's check-ins? Numbering starts again at 1.")) return;
-    setBusy(true);
-    try {
-      await fetch("/api/checkin/reset", { method: "POST" });
-      setResult(null);
-    } finally {
-      setBusy(false);
-    }
-  }
-
   if (unlocked === null) {
     return <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center text-gray-400">Loading…</div>;
   }
@@ -150,10 +139,6 @@ export default function CheckinKioskPage() {
           className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-50"
         >
           {busy ? "…" : "Check In"}
-        </button>
-
-        <button onClick={reset} disabled={busy} className="mt-6 text-xs text-gray-600 hover:text-red-400 transition">
-          Reset today (testing)
         </button>
       </div>
     </div>

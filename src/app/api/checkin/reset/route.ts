@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { isCheckinUnlocked } from "@/lib/checkin-auth";
+import { requireAdmin } from "@/lib/admin-auth";
 export const dynamic = "force-dynamic";
 
-/** POST /api/checkin/reset — clear a day's check-ins (for testing). Kiosk-PIN gated. */
+/** POST /api/checkin/reset — clear a day's check-ins (admin only). */
 export async function POST(req: Request) {
-  if (!(await isCheckinUnlocked()))
-    return NextResponse.json({ error: "Locked" }, { status: 401 });
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   let date = new Date().toISOString().split("T")[0];
   try {
