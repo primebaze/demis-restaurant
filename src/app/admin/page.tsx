@@ -190,9 +190,13 @@ export default function AdminDashboard() {
             ) : (
               <button
                 onClick={() => setSelectedDate(null)}
-                className="text-xs px-2.5 py-1 rounded-lg bg-gold-300/10 text-gold-300 hover:bg-gold-300/20 transition shrink-0"
+                title="Jump back to today"
+                className="text-xs px-2.5 py-1 rounded-lg border border-gold-300/30 bg-gold-300/10 text-gold-300 hover:bg-gold-300/20 transition shrink-0 inline-flex items-center gap-1"
               >
-                Today
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+                Go to today
               </button>
             )}
             {dayLoading && <span className="text-xs text-gray-600 shrink-0">…</span>}
