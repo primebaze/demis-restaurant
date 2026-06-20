@@ -13,14 +13,25 @@ function fmtTime(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
+const BG = "bg-[#0b1120]";
+
 export default function CheckinKioskPage() {
   const [unlocked, setUnlocked] = useState<boolean | null>(null);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPin, setShowPin] = useState(false);
 
   const [name, setName] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+
+  // Live clock for the screensaver (set after mount to avoid hydration mismatch)
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     fetch("/api/checkin/unlock")
@@ -39,20 +50,20 @@ export default function CheckinKioskPage() {
         body: JSON.stringify({ pin }),
       });
       const d = await res.json();
-      if (!res.ok) { setError(d.error || "Could not unlock"); setPin(""); }
-      else { setUnlocked(true); setPin(""); }
+      if (!res.ok) { setError(d.error || "Incorrect PIN"); setPin(""); }
+      else { setUnlocked(true); setPin(""); setShowPin(false); }
     } finally {
       setBusy(false);
     }
   }
 
-  // Auto-submit once 4 digits are entered — no manual tap.
+  // Auto-submit once 4 digits are entered.
   useEffect(() => {
     if (pin.length === 4 && !busy && !unlocked) unlock();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin]);
 
-  // After a check-in, auto-reset for the next guest (a few seconds to read it).
+  // After a check-in, auto-reset for the next guest.
   useEffect(() => {
     if (!result) return;
     const t = setTimeout(() => setResult(null), 6000);
@@ -70,7 +81,7 @@ export default function CheckinKioskPage() {
       });
       const d = await res.json();
       if (!res.ok) {
-        if (res.status === 401) setUnlocked(false);
+        if (res.status === 401) { setUnlocked(false); setShowPin(false); }
         setError(d.error || "Check-in failed");
       } else {
         setResult(d);
@@ -81,55 +92,90 @@ export default function CheckinKioskPage() {
     }
   }
 
-  if (unlocked === null) {
-    return <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center text-gray-400">Loading…</div>;
+  function press(d: string) {
+    setError("");
+    if (d === "back") { setPin((p) => p.slice(0, -1)); return; }
+    setPin((p) => (p.length < 4 ? p + d : p));
   }
 
-  // ── PIN screen ──
+  const hh = now ? String(now.getHours()).padStart(2, "0") : "--";
+  const mm = now ? String(now.getMinutes()).padStart(2, "0") : "--";
+  const ss = now ? String(now.getSeconds()).padStart(2, "0") : "--";
+  const dateStr = now ? now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
+
+  if (unlocked === null) {
+    return <div className={`min-h-screen ${BG} flex items-center justify-center text-gray-500`}>Loading…</div>;
+  }
+
+  // ── Locked: clock screensaver, tap to enter PIN ──
   if (!unlocked) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-6">
+      <div
+        onClick={() => !showPin && setShowPin(true)}
+        className={`min-h-screen ${BG} text-white flex items-center justify-center p-6 select-none ${showPin ? "" : "cursor-pointer"}`}
+      >
         <head><meta name="robots" content="noindex, nofollow" /></head>
-        <div className="w-full max-w-xs text-center">
-          <h1 className="text-2xl font-bold text-gold-300 mb-1">Demi&apos;s Check-in</h1>
-          <p className="text-sm text-gray-500 mb-6">Enter the staff PIN to start.</p>
-          <form onSubmit={(e) => { e.preventDefault(); unlock(); }}>
-            <input
-              type="password"
-              inputMode="numeric"
-              enterKeyHint="go"
-              maxLength={4}
-              value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              placeholder="••••"
-              className="w-full text-center text-3xl tracking-[0.6em] px-4 py-4 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white focus:outline-none focus:border-gold-400"
-              autoFocus
-            />
-            {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-            <button
-              type="submit"
-              disabled={busy || !pin}
-              className="mt-5 w-full py-4 bg-gold-300 text-[#1a1a1a] rounded-2xl font-semibold hover:bg-gold-200 transition disabled:opacity-50"
-            >
-              {busy ? "…" : "Start"}
-            </button>
-          </form>
-        </div>
+
+        {!showPin ? (
+          /* Screensaver */
+          <div className="flex items-center gap-8 sm:gap-12">
+            <div className="text-right">
+              <div className="flex items-start justify-end">
+                <span className="text-[5rem] sm:text-[8rem] leading-none font-light tracking-tight tabular-nums">{hh}:{mm}</span>
+                <span className="text-xl sm:text-3xl text-gray-500 ml-2 mt-2 tabular-nums">{ss}</span>
+              </div>
+              <p className="text-gray-400 mt-3 text-base sm:text-lg">{dateStr}</p>
+            </div>
+
+            <div className="w-px h-36 sm:h-44 bg-white/10" />
+
+            <div className="max-w-[16rem]">
+              <div className="w-16 h-16 rounded-full border border-white/15 flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold">Tap to Check In</h2>
+              <p className="text-gray-500 mt-1">Enter the 4-digit PIN to start</p>
+            </div>
+          </div>
+        ) : (
+          /* PIN keypad */
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-xs text-center">
+            <p className="text-gray-400 mb-6">Enter PIN</p>
+            <div className="flex justify-center gap-4 mb-2">
+              {[0, 1, 2, 3].map((i) => (
+                <span key={i} className={`w-4 h-4 rounded-full transition ${i < pin.length ? "bg-gold-300" : "bg-white/15"}`} />
+              ))}
+            </div>
+            <p className="h-6 mt-2 text-sm text-red-400">{error}</p>
+
+            <div className="grid grid-cols-3 gap-3 mt-2">
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
+                <button key={d} onClick={() => press(d)} className="py-5 rounded-2xl bg-white/[0.04] border border-white/10 text-2xl font-medium text-white hover:bg-white/[0.08] transition">
+                  {d}
+                </button>
+              ))}
+              <button onClick={() => setShowPin(false)} className="py-5 rounded-2xl text-sm text-gray-500 hover:text-white transition">Cancel</button>
+              <button onClick={() => press("0")} className="py-5 rounded-2xl bg-white/[0.04] border border-white/10 text-2xl font-medium text-white hover:bg-white/[0.08] transition">0</button>
+              <button onClick={() => press("back")} className="py-5 rounded-2xl text-xl text-gray-400 hover:text-white transition">⌫</button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   // ── Check-in screen ──
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-6">
+    <div className={`min-h-screen ${BG} flex items-center justify-center p-6`}>
       <head><meta name="robots" content="noindex, nofollow" /></head>
       <div className="w-full max-w-sm text-center">
         <h1 className="text-xl font-bold text-gold-300 mb-8 tracking-wide">Buffet Check-in</h1>
 
         {result ? (
-          /* ── Confirmation: one guest, then "Next guest" resets ── */
           <>
-            <div className="mb-8 p-8 bg-[#161616] border border-white/10 rounded-3xl">
+            <div className="mb-8 p-8 bg-white/[0.03] border border-white/10 rounded-3xl">
               <p className="text-sm text-gray-500">You are</p>
               <p className="text-7xl font-extrabold text-white my-2 tracking-tight">No. {result.number}</p>
               <p className="text-5xl font-extrabold text-emerald-400">£{result.priceTier}</p>
@@ -140,12 +186,11 @@ export default function CheckinKioskPage() {
               </div>
             </div>
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 rounded-full border-2 border-gray-700 border-t-gold-300 animate-spin" />
+              <div className="w-8 h-8 rounded-full border-2 border-white/15 border-t-gold-300 animate-spin" />
               <p className="text-sm text-gray-500">Please wait, ready for the next guest…</p>
             </div>
           </>
         ) : (
-          /* ── Ready: optional name, then big Check In ── */
           <>
             <p className="text-gray-500 mb-6">Tap to check in</p>
             <input
@@ -153,7 +198,7 @@ export default function CheckinKioskPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name (optional)"
-              className="w-full mb-5 px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white text-center placeholder-gray-600 focus:outline-none focus:border-gold-400"
+              className="w-full mb-5 px-4 py-3 bg-white/[0.04] border border-white/10 rounded-2xl text-white text-center placeholder-gray-600 focus:outline-none focus:border-gold-400"
             />
             {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
             <button
