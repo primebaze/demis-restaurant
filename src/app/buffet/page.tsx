@@ -70,9 +70,7 @@ export default function BuffetPage() {
           </h1>
           <p className="mt-4 body-text max-w-xl mx-auto">
             Celebrate with bold Nigerian flavours. Our buffet is perfect for parties,
-            private events and gatherings — all prepared fresh by our kitchen. Choose
-            your date, party size and location, and our team will tailor the spread to
-            suit your occasion.
+            private events and gatherings — all prepared fresh by our kitchen.
           </p>
           <p className="mt-4 text-sm text-stone-400 max-w-xl mx-auto">
             Please note: this is a <span className="text-gold-300">private buffet booking</span> for
