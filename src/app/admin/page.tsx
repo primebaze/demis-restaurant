@@ -75,6 +75,45 @@ export default function AdminDashboard() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dayLoading, setDayLoading] = useState(false);
 
+  // In-app email composer (dashboard contact icon)
+  const [email, setEmail] = useState<{
+    to: string;
+    name: string;
+    subject: string;
+    message: string;
+    provider: "smtp" | "resend";
+    sending: boolean;
+    error: string;
+    success: string;
+  } | null>(null);
+
+  function openEmail(to: string, name: string) {
+    setEmail({ to, name, subject: "", message: "", provider: "smtp", sending: false, error: "", success: "" });
+  }
+
+  async function sendDashboardEmail() {
+    if (!email) return;
+    if (!email.subject.trim()) { setEmail((e) => e && { ...e, error: "Subject is required" }); return; }
+    if (!email.message.trim()) { setEmail((e) => e && { ...e, error: "Message is required" }); return; }
+    setEmail((e) => e && { ...e, sending: true, error: "" });
+    try {
+      const res = await fetch("/api/admin/email/guests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: email.to, subject: email.subject, message: email.message, provider: email.provider }),
+      });
+      const d = await res.json();
+      if (!res.ok || d.failed) {
+        setEmail((e) => e && { ...e, sending: false, error: d.error || "Failed to send" });
+      } else {
+        setEmail((e) => e && { ...e, sending: false, success: "Email sent" });
+        setTimeout(() => setEmail(null), 1800);
+      }
+    } catch {
+      setEmail((e) => e && { ...e, sending: false, error: "Failed to send" });
+    }
+  }
+
   useEffect(() => {
     const url = selectedDate ? `/api/admin/dashboard?date=${selectedDate}` : "/api/admin/dashboard";
     setDayLoading(true);
@@ -243,15 +282,15 @@ export default function AdminDashboard() {
                           </span>
                         )}
                         {b.email ? (
-                          <a
-                            href={`mailto:${b.email}`}
+                          <button
+                            onClick={() => openEmail(b.email, b.guest)}
                             title={`Email ${b.email}`}
                             className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gold-300/10 text-gold-300 hover:bg-gold-300/20 transition"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                          </a>
+                          </button>
                         ) : (
                           <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-800/50 text-gray-700">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,6 +307,66 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* In-app email composer */}
+      {email && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setEmail(null)}>
+          <div className="w-full max-w-lg bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-white mb-1">Email guest</h2>
+            <p className="text-xs text-gray-500 mb-4">To: {email.name} &lt;{email.to}&gt;</p>
+
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={email.subject}
+                onChange={(e) => setEmail((s) => s && { ...s, subject: e.target.value })}
+                placeholder="Subject"
+                className="w-full px-3 py-2.5 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400"
+                autoFocus
+              />
+              <textarea
+                value={email.message}
+                onChange={(e) => setEmail((s) => s && { ...s, message: e.target.value })}
+                rows={6}
+                placeholder="Write your message…"
+                className="w-full px-3 py-2.5 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400 resize-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEmail((s) => s && { ...s, provider: "smtp" })}
+                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                >
+                  SMTP
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEmail((s) => s && { ...s, provider: "resend" })}
+                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                >
+                  Resend
+                </button>
+              </div>
+            </div>
+
+            {email.error && <p className="mt-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{email.error}</p>}
+            {email.success && <p className="mt-3 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">{email.success}</p>}
+
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={sendDashboardEmail}
+                disabled={email.sending}
+                className="px-5 py-2 bg-gold-300 text-[#1a1a1a] rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50"
+              >
+                {email.sending ? "Sending…" : "Send"}
+              </button>
+              <button onClick={() => setEmail(null)} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

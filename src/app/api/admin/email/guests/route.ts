@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
-import { sendDirectGuestEmail, buildGuestEmailHtml, sendResendBatch, isResendConfigured } from "@/lib/email";
+import { buildGuestEmailHtml, sendResendBatch, sendByProvider, isResendConfigured } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  let body: { guestId?: string; all?: boolean; subject: string; message: string; provider?: string };
+  let body: { guestId?: string; to?: string; all?: boolean; subject: string; message: string; provider?: string };
   try {
     body = await req.json();
   } catch {
@@ -79,18 +79,42 @@ export async function POST(req: Request) {
     return NextResponse.json({ queued: guests.length, provider: "smtp" });
   }
 
+  // Single recipient: by guestId, or a raw `to` address (used by the dashboard icon)
+  let recipient = "";
+  let recipientName = "";
   if (guestId) {
     const guest = await prisma.guest.findUnique({ where: { id: guestId }, select: { email: true, name: true } });
     if (!guest) return NextResponse.json({ error: "Guest not found" }, { status: 404 });
     if (!guest.email) return NextResponse.json({ error: "This guest has no email address on file" }, { status: 400 });
-
-    try {
-      await sendDirectGuestEmail({ to: guest.email, subject: subject.trim(), message: message.trim() });
-      return NextResponse.json({ sent: 1, failed: 0, failures: [] });
-    } catch {
-      return NextResponse.json({ sent: 0, failed: 1, failures: [{ name: guest.name, email: guest.email }] });
-    }
+    recipient = guest.email;
+    recipientName = guest.name;
+  } else if (typeof body.to === "string" && body.to.trim()) {
+    const to = body.to.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to))
+      return NextResponse.json({ error: "Invalid recipient email" }, { status: 400 });
+    recipient = to;
+    recipientName = to;
+  } else {
+    return NextResponse.json({ error: "Provide guestId, to, or all: true" }, { status: 400 });
   }
 
-  return NextResponse.json({ error: "Provide guestId or all: true" }, { status: 400 });
+  const html = buildGuestEmailHtml(message.trim());
+  const ok = await sendByProvider(recipient, subject.trim(), html, provider);
+
+  await prisma.emailLog.create({
+    data: {
+      recipient,
+      subject: subject.trim(),
+      type: "direct",
+      provider,
+      status: ok ? "sent" : "failed",
+      error: ok ? "" : "send failed",
+      bodyHtml: html,
+      sentAt: ok ? new Date() : null,
+    },
+  }).catch(() => {});
+
+  return ok
+    ? NextResponse.json({ sent: 1, failed: 0, failures: [], provider })
+    : NextResponse.json({ sent: 0, failed: 1, failures: [{ name: recipientName, email: recipient }], provider });
 }

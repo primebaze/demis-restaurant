@@ -458,28 +458,26 @@ export default function AdminGuestsPage() {
                 />
               </div>
 
-              {compose.mode === "all" && (
-                <div>
-                  <label className="text-xs text-gray-500 uppercase tracking-wider">Send via</label>
-                  <div className="mt-1.5 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setCompose((c) => c && { ...c, provider: "smtp" })}
-                      className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
-                    >
-                      SMTP <span className="text-xs opacity-70">· 15/hour, queued</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCompose((c) => c && { ...c, provider: "resend" })}
-                      className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
-                    >
-                      Resend <span className="text-xs opacity-70">· fast, no cap</span>
-                    </button>
-                  </div>
-                  <p className="mt-1.5 text-xs text-gray-600">Resend sends immediately (needs RESEND_API_KEY). SMTP queues at 15/hour to stay under the host limit.</p>
+              <div>
+                <label className="text-xs text-gray-500 uppercase tracking-wider">Send via</label>
+                <div className="mt-1.5 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCompose((c) => c && { ...c, provider: "smtp" })}
+                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                  >
+                    SMTP <span className="text-xs opacity-70">{compose.mode === "all" ? "· 15/hour, queued" : "· inbox-friendly"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCompose((c) => c && { ...c, provider: "resend" })}
+                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                  >
+                    Resend <span className="text-xs opacity-70">· fast, no cap</span>
+                  </button>
                 </div>
-              )}
+                <p className="mt-1.5 text-xs text-gray-600">Resend needs RESEND_API_KEY. {compose.mode === "all" ? "SMTP queues bulk at 15/hour to stay under the host limit." : "Both send immediately for a single email."}</p>
+              </div>
             </div>
 
             {compose.error && (
