@@ -22,6 +22,7 @@ export default function CheckinKioskPage() {
   const [busy, setBusy] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  const [countdown, setCountdown] = useState(6);
 
   // Live clock for the screensaver (set after mount to avoid hydration mismatch)
   const [now, setNow] = useState<Date | null>(null);
@@ -60,11 +61,13 @@ export default function CheckinKioskPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin]);
 
-  // After a check-in, auto-reset to the screensaver.
+  // After a check-in, count down then auto-reset to the screensaver.
   useEffect(() => {
     if (!result) return;
-    const t = setTimeout(() => setResult(null), 6000);
-    return () => clearTimeout(t);
+    setCountdown(6);
+    const timeout = setTimeout(() => setResult(null), 6000);
+    const tick = setInterval(() => setCountdown((c) => Math.max(0, c - 1)), 1000);
+    return () => { clearTimeout(timeout); clearInterval(tick); };
   }, [result]);
 
   async function checkIn() {
@@ -147,8 +150,8 @@ export default function CheckinKioskPage() {
             </div>
           </div>
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-white/15 border-t-gold-300 animate-spin" />
-            <p className="text-sm text-gray-500">Please wait, ready for the next guest…</p>
+            <div className="w-12 h-12 rounded-full border-2 border-white/15 flex items-center justify-center text-xl font-bold text-gold-300">{countdown}</div>
+            <p className="text-sm text-gray-500">Ready for the next guest in {countdown}s</p>
           </div>
         </div>
       </div>
