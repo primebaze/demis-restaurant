@@ -137,7 +137,6 @@ export default function AdminCheckinsPage() {
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
                   <th className="px-4 py-3">No.</th>
                   <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Party</th>
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">In</th>
                   <th className="px-4 py-3">Finish by</th>
@@ -151,7 +150,6 @@ export default function AdminCheckinsPage() {
                     <tr key={c.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
                       <td className="px-4 py-3 text-sm font-bold text-white">{c.number}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{c.name || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{c.partySize}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TIER_COLORS[c.priceTier] || "bg-gray-700 text-gray-300"}`}>£{c.priceTier}</span>
                       </td>

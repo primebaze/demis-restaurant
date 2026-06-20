@@ -20,7 +20,6 @@ export default function CheckinKioskPage() {
   const [busy, setBusy] = useState(false);
 
   const [name, setName] = useState("");
-  const [party, setParty] = useState(1);
   const [result, setResult] = useState<Result | null>(null);
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export default function CheckinKioskPage() {
       const res = await fetch("/api/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() || undefined, partySize: party }),
+        body: JSON.stringify({ name: name.trim() || undefined }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -63,7 +62,6 @@ export default function CheckinKioskPage() {
       } else {
         setResult(d);
         setName("");
-        setParty(1);
       }
     } finally {
       setBusy(false);
@@ -134,7 +132,7 @@ export default function CheckinKioskPage() {
           </div>
         )}
 
-        <div className="space-y-3 mb-5">
+        <div className="mb-5">
           <input
             type="text"
             value={name}
@@ -142,11 +140,6 @@ export default function CheckinKioskPage() {
             placeholder="Name (optional)"
             className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-2xl text-white text-center placeholder-gray-600 focus:outline-none focus:border-gold-400"
           />
-          <div className="flex items-center justify-center gap-4">
-            <button onClick={() => setParty((p) => Math.max(1, p - 1))} className="w-12 h-12 rounded-full bg-[#1a1a1a] border border-gray-700 text-white text-xl">−</button>
-            <span className="text-white text-lg w-24">Party: <span className="font-bold">{party}</span></span>
-            <button onClick={() => setParty((p) => Math.min(50, p + 1))} className="w-12 h-12 rounded-full bg-[#1a1a1a] border border-gray-700 text-white text-xl">+</button>
-          </div>
         </div>
 
         {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
