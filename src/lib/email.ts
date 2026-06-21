@@ -124,6 +124,7 @@ async function recordEmailLog(entry: {
   type?: string;
   status: "sent" | "failed";
   error?: string;
+  bodyHtml?: string;
 }) {
   try {
     await prisma.emailLog.create({
@@ -133,6 +134,7 @@ async function recordEmailLog(entry: {
         type: entry.type || "transactional",
         status: entry.status,
         error: entry.error || "",
+        bodyHtml: entry.bodyHtml || "",
         sentAt: entry.status === "sent" ? new Date() : null,
       },
     });
@@ -155,7 +157,7 @@ async function send(
       html,
     });
     console.log(`[Email] Sent: "${subject}" → ${to}`);
-    if (!opts?.skipLog) await recordEmailLog({ recipient: to, subject, type: opts?.type, status: "sent" });
+    if (!opts?.skipLog) await recordEmailLog({ recipient: to, subject, type: opts?.type, status: "sent", bodyHtml: html });
     return true;
   } catch (error) {
     console.error(`[Email] Failed: "${subject}" → ${to}`, error);
@@ -166,6 +168,7 @@ async function send(
         type: opts?.type,
         status: "failed",
         error: error instanceof Error ? error.message : String(error),
+        bodyHtml: html,
       });
     }
     return false;

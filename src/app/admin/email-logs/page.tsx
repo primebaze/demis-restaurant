@@ -64,6 +64,21 @@ export default function EmailLogsPage() {
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
   const [resending, setResending] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<{ subject: string; recipient: string; bodyHtml: string } | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
+
+  async function viewEmail(id: string) {
+    setViewLoading(true);
+    setViewing({ subject: "", recipient: "", bodyHtml: "" });
+    try {
+      const res = await fetch(`/api/admin/email-logs/${id}`);
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || "Could not load email"); setViewing(null); return; }
+      setViewing({ subject: data.subject, recipient: data.recipient, bodyHtml: data.bodyHtml || "" });
+    } finally {
+      setViewLoading(false);
+    }
+  }
 
   async function resend(id: string) {
     setResending(id);
@@ -160,16 +175,25 @@ export default function EmailLogsPage() {
                     <td className="px-4 py-3 text-sm text-gray-400">{fmt(l.createdAt)}</td>
                     <td className="px-4 py-3 text-sm text-gray-400">{fmt(l.sentAt)}</td>
                     <td className="px-4 py-3">
-                      {l.type === "bulk" && (
+                      <div className="flex items-center gap-2">
                         <button
-                          onClick={() => resend(l.id)}
-                          disabled={resending === l.id}
-                          className="text-xs px-3 py-1.5 bg-gold-300/10 text-gold-300 rounded-lg hover:bg-gold-300/20 transition disabled:opacity-50"
-                          title="Send this email again now"
+                          onClick={() => viewEmail(l.id)}
+                          className="text-xs px-3 py-1.5 bg-white/[0.04] border border-gray-700 text-gray-300 rounded-lg hover:bg-white/[0.08] transition"
+                          title="View the full email"
                         >
-                          {resending === l.id ? "…" : "Resend"}
+                          View
                         </button>
-                      )}
+                        {l.type === "bulk" && (
+                          <button
+                            onClick={() => resend(l.id)}
+                            disabled={resending === l.id}
+                            className="text-xs px-3 py-1.5 bg-gold-300/10 text-gold-300 rounded-lg hover:bg-gold-300/20 transition disabled:opacity-50"
+                            title="Send this email again now"
+                          >
+                            {resending === l.id ? "…" : "Resend"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -190,6 +214,30 @@ export default function EmailLogsPage() {
           </div>
         )}
       </div>
+
+      {/* View email modal */}
+      {viewing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setViewing(null)}>
+          <div className="w-full max-w-2xl bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden flex flex-col max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-gray-800">
+              <p className="text-sm font-semibold text-white truncate">{viewing.subject || "…"}</p>
+              <p className="text-xs text-gray-500 truncate">To: {viewing.recipient}</p>
+            </div>
+            <div className="flex-1 overflow-auto bg-white">
+              {viewLoading ? (
+                <div className="p-8 text-center text-gray-400">Loading…</div>
+              ) : viewing.bodyHtml ? (
+                <iframe title="Email preview" srcDoc={viewing.bodyHtml} className="w-full h-[60vh]" sandbox="" />
+              ) : (
+                <div className="p-8 text-center text-gray-500">No stored body for this email (logged before full-body capture).</div>
+              )}
+            </div>
+            <div className="px-5 py-3 border-t border-gray-800 text-right">
+              <button onClick={() => setViewing(null)} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
