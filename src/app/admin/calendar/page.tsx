@@ -16,6 +16,7 @@ interface BookingEntry {
   time: string;
   location: string;
   status: string;
+  notes: string;
 }
 
 interface DateEntry {
@@ -247,6 +248,7 @@ export default function CalendarPage() {
                         <div className="text-xs text-gray-500 space-y-0.5">
                           <p>{b.time} · {b.partySize} guest{b.partySize !== 1 ? "s" : ""}</p>
                           <p>{b.location} · #{b.code}</p>
+                          {b.notes && <p className="text-amber-400/80">📝 {b.notes}</p>}
                         </div>
                       </div>
                     ))}

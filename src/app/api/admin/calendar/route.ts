@@ -43,6 +43,7 @@ export async function GET(req: Request) {
       time: true,
       partySize: true,
       status: true,
+      notes: true,
       confirmationCode: true,
       guest: { select: { name: true } },
       location: { select: { name: true, slug: true } },
@@ -71,6 +72,7 @@ export async function GET(req: Request) {
       time: b.timeSlot ? b.timeSlot.startTime : b.time,
       location: b.location.name,
       status: b.status,
+      notes: b.notes,
     })),
   }));
 

@@ -13,6 +13,7 @@ interface TodayBooking {
   slot: string;
   partySize: number;
   status: string;
+  notes: string;
   type: string;
 }
 
@@ -256,7 +257,10 @@ export default function AdminDashboard() {
                         {b.type}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-white">{b.guest}</td>
+                    <td className="px-6 py-4 text-sm text-white">
+                      {b.guest}
+                      {b.notes && <span className="block text-xs text-amber-400/80 font-normal mt-0.5">📝 {b.notes}</span>}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-400">{b.location}</td>
                     <td className="px-6 py-4 text-sm text-gray-300">{b.slot}</td>
                     <td className="px-6 py-4 text-sm text-white">{b.partySize}</td>

@@ -48,6 +48,7 @@ export async function GET(req: Request) {
     slot: string;
     partySize: number;
     status: string;
+    notes: string;
     type: string;
     sortKey: string;
   };
@@ -81,6 +82,7 @@ export async function GET(req: Request) {
       slot: `${b.timeSlot.startTime} – ${b.timeSlot.endTime}`,
       partySize: b.partySize,
       status: b.status,
+      notes: b.notes || "",
       type: "Website",
       sortKey: b.time,
     }));
@@ -96,6 +98,7 @@ export async function GET(req: Request) {
       slot: "All day",
       partySize: g.selections.length || g.partySize,
       status: "confirmed",
+      notes: g.notes || "",
       type: "Set Menu",
       sortKey: "99:98",
     }));
@@ -111,6 +114,7 @@ export async function GET(req: Request) {
       slot: b.time,
       partySize: b.partySize,
       status: b.status,
+      notes: b.notes || "",
       type: "Buffet",
       sortKey: b.time || "99:99",
     }));
@@ -184,6 +188,7 @@ export async function GET(req: Request) {
         slot: r.slot,
         partySize: r.partySize,
         status: r.status,
+        notes: r.notes,
         type: r.type,
       })),
       totalCovers: targetCovers,
