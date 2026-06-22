@@ -16,11 +16,23 @@ export async function GET(req: Request) {
   const date = searchParams.get("date");
   const locationSlug = searchParams.get("location");
   const status = searchParams.get("status");
+  const past = searchParams.get("past") === "true"; // show past bookings instead of upcoming
   const page = parseInt(searchParams.get("page") || "1");
   const limit = 20;
 
+  const ukToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+
   const where: Record<string, unknown> = {};
-  if (date) where.date = date;
+  if (date) {
+    // Specific day selected
+    where.date = date;
+  } else if (past) {
+    // Past bookings, most recent first
+    where.date = { lt: ukToday };
+  } else {
+    // Default (OpenTable-style): upcoming bookings from today, soonest first
+    where.date = { gte: ukToday };
+  }
   if (locationSlug) where.location = { slug: locationSlug };
   if (status) where.status = status;
 
@@ -33,7 +45,7 @@ export async function GET(req: Request) {
         timeSlot: true,
         addOns: { include: { addOn: true } },
       },
-      orderBy: [{ date: "asc" }, { time: "asc" }],
+      orderBy: past && !date ? [{ date: "desc" }, { time: "desc" }] : [{ date: "asc" }, { time: "asc" }],
       skip: (page - 1) * limit,
       take: limit,
     }),

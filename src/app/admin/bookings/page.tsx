@@ -47,6 +47,7 @@ export default function AdminBookingsPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   // Filters
+  const [view, setView] = useState<"upcoming" | "past">("upcoming");
   const [filterDate, setFilterDate] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -61,6 +62,7 @@ export default function AdminBookingsPage() {
     setLoading(true);
     const params = new URLSearchParams();
     if (filterDate) params.set("date", filterDate);
+    else if (view === "past") params.set("past", "true");
     if (filterLocation) params.set("location", filterLocation);
     if (filterStatus) params.set("status", filterStatus);
     params.set("page", String(page));
@@ -71,7 +73,7 @@ export default function AdminBookingsPage() {
     setTotal(data.total || 0);
     setTotalPages(data.totalPages || 1);
     setLoading(false);
-  }, [filterDate, filterLocation, filterStatus, page]);
+  }, [filterDate, filterLocation, filterStatus, view, page]);
 
   useEffect(() => {
     fetchBookings();
@@ -97,6 +99,18 @@ export default function AdminBookingsPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
+        {/* Upcoming / Past toggle (only when no specific date is picked) */}
+        <div className="inline-flex rounded-lg border border-gray-700 overflow-hidden">
+          {(["upcoming", "past"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => { setView(v); setPage(1); }}
+              className={`px-3 py-2 text-sm capitalize transition ${view === v && !filterDate ? "bg-gold-300 text-[#1a1a1a] font-semibold" : "bg-[#1a1a1a] text-gray-400 hover:text-white"}`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
         <input
           type="date"
           value={filterDate}

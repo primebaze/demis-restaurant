@@ -66,52 +66,50 @@ export async function PATCH(
     include: { location: true, guest: true },
   });
 
-  // Write audit log
-  for (const change of changes) {
-    await prisma.bookingChange.create({
-      data: {
-        bookingId: id,
-        changedBy: admin!.email,
-        fieldChanged: change.field,
-        oldValue: change.oldVal,
-        newValue: change.newVal,
-      },
-    });
+  // Side effects run in parallel (was sequential, which made completion slow).
+  const tasks: Promise<unknown>[] = [];
+
+  // Audit log — one createMany instead of a loop of awaits
+  if (changes.length > 0) {
+    tasks.push(
+      prisma.bookingChange.createMany({
+        data: changes.map((c) => ({
+          bookingId: id,
+          changedBy: admin!.email,
+          fieldChanged: c.field,
+          oldValue: c.oldVal,
+          newValue: c.newVal,
+        })),
+      })
+    );
   }
 
-  // If marking no-show, capture deposit
+  // No-show: capture deposit
   if (data.status === "no_show" && booking.stripePaymentIntentId && booking.depositAmountPence > 0) {
-    const captured = await captureDeposit(booking.stripePaymentIntentId);
-    if (captured) {
-      await prisma.booking.update({
-        where: { id },
-        data: { depositStatus: "captured" },
-      });
-    }
+    tasks.push(
+      captureDeposit(booking.stripePaymentIntentId).then((captured) =>
+        captured ? prisma.booking.update({ where: { id }, data: { depositStatus: "captured" } }) : null
+      )
+    );
   }
 
-  // If marking completed (and not already completed), record visit, release hold, email guest.
+  // Completed (and not already): record visit, release hold, email guest.
   if (data.status === "completed" && booking.status !== "completed") {
-    await prisma.visit.create({
-      data: {
-        guestId: booking.guestId,
-        bookingId: booking.id,
-        visitDate: booking.date,
-      },
-    });
+    tasks.push(
+      prisma.visit.create({
+        data: { guestId: booking.guestId, bookingId: booking.id, visitDate: booking.date },
+      })
+    );
 
-    // Release the deposit hold (guest showed up)
     if (booking.stripePaymentIntentId && booking.depositAmountPence > 0) {
-      const released = await cancelDeposit(booking.stripePaymentIntentId);
-      if (released) {
-        await prisma.booking.update({
-          where: { id },
-          data: { depositStatus: "refunded" },
-        });
-      }
+      tasks.push(
+        cancelDeposit(booking.stripePaymentIntentId).then((released) =>
+          released ? prisma.booking.update({ where: { id }, data: { depositStatus: "refunded" } }) : null
+        )
+      );
     }
 
-    // Thank-you email to the guest (non-blocking)
+    // Thank-you email (non-blocking, fires in the background)
     if (booking.guest.email) {
       sendBookingCompleted({
         guestName: booking.guest.name,
@@ -122,6 +120,8 @@ export async function PATCH(
       }).catch(console.error);
     }
   }
+
+  await Promise.all(tasks);
 
   return NextResponse.json({
     success: true,
