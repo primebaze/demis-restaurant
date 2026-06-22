@@ -132,7 +132,10 @@ export default function CheckinKioskPage() {
   // ── Confirmation ──
   if (result) {
     return (
-      <div className={`min-h-screen ${BG} flex items-center justify-center p-6`}>
+      <div
+        onClick={() => setResult(null)}
+        className={`min-h-screen ${BG} flex items-center justify-center p-6 cursor-pointer select-none`}
+      >
         <head><meta name="robots" content="noindex, nofollow" /></head>
         <div className="w-full max-w-sm text-center">
           <div className="mb-8 p-8 bg-white/[0.03] border border-white/10 rounded-3xl">
@@ -148,6 +151,7 @@ export default function CheckinKioskPage() {
           <div className="flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full border-2 border-white/15 flex items-center justify-center text-xl font-bold text-gold-300">{countdown}</div>
             <p className="text-sm text-gray-500">Ready for the next guest in {countdown}s</p>
+            <p className="text-xs text-gray-600">or tap anywhere to start now</p>
           </div>
         </div>
       </div>
