@@ -66,6 +66,49 @@ export default function EmailLogsPage() {
   const [resending, setResending] = useState<string | null>(null);
   const [viewing, setViewing] = useState<{ subject: string; recipient: string; bodyHtml: string } | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+
+  function toggleSelect(id: string) {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelected((s) => (s.size === logs.length ? new Set() : new Set(logs.map((l) => l.id))));
+  }
+
+  async function deleteLogs(payload: { ids?: string[]; all?: boolean }) {
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/admin/email-logs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) { const d = await res.json(); alert(d.error || "Delete failed"); return; }
+      setSelected(new Set());
+      setPage(1);
+      await fetchLogs();
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function deleteSelected() {
+    if (selected.size === 0) return;
+    if (!confirm(`Delete ${selected.size} selected log${selected.size === 1 ? "" : "s"}?`)) return;
+    await deleteLogs({ ids: Array.from(selected) });
+  }
+
+  async function deleteAll() {
+    if (!confirm("Delete ALL email logs? This cannot be undone.")) return;
+    await deleteLogs({ all: true });
+  }
 
   async function viewEmail(id: string) {
     setViewLoading(true);
@@ -133,6 +176,17 @@ export default function EmailLogsPage() {
             Clear
           </button>
         )}
+        <div className="flex-1" />
+        {selected.size > 0 && (
+          <button onClick={deleteSelected} disabled={deleting} className="px-3 py-2 text-sm bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition disabled:opacity-50">
+            Delete selected ({selected.size})
+          </button>
+        )}
+        {total > 0 && (
+          <button onClick={deleteAll} disabled={deleting} className="px-3 py-2 text-sm text-gray-500 hover:text-red-400 transition disabled:opacity-50">
+            Delete all
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -146,6 +200,14 @@ export default function EmailLogsPage() {
             <table className="w-full">
               <thead>
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                  <th className="px-4 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      checked={logs.length > 0 && selected.size === logs.length}
+                      onChange={toggleSelectAll}
+                      className="accent-gold-300 w-4 h-4 align-middle"
+                    />
+                  </th>
                   <th className="px-4 py-3">Recipient</th>
                   <th className="px-4 py-3">Subject</th>
                   <th className="px-4 py-3">Type</th>
@@ -159,6 +221,14 @@ export default function EmailLogsPage() {
               <tbody>
                 {logs.map((l) => (
                   <tr key={l.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(l.id)}
+                        onChange={() => toggleSelect(l.id)}
+                        className="accent-gold-300 w-4 h-4 align-middle"
+                      />
+                    </td>
                     <td className="px-4 py-3 text-sm text-white">{l.recipient}</td>
                     <td className="px-4 py-3 text-sm text-gray-300 max-w-xs truncate" title={l.subject}>{l.subject}</td>
                     <td className="px-4 py-3">

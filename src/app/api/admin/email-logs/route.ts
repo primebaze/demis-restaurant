@@ -3,6 +3,34 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 export const dynamic = "force-dynamic";
 
+/**
+ * DELETE /api/admin/email-logs — delete logs to free space.
+ * Body: { ids: string[] } to delete specific rows, or { all: true } to clear everything.
+ */
+export async function DELETE(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let body: { ids?: string[]; all?: boolean };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  if (body.all === true) {
+    const { count } = await prisma.emailLog.deleteMany({});
+    return NextResponse.json({ deleted: count });
+  }
+
+  if (Array.isArray(body.ids) && body.ids.length > 0) {
+    const { count } = await prisma.emailLog.deleteMany({ where: { id: { in: body.ids } } });
+    return NextResponse.json({ deleted: count });
+  }
+
+  return NextResponse.json({ error: "Provide ids or all: true" }, { status: 400 });
+}
+
 /** GET /api/admin/email-logs — paginated email log + summary counts */
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
