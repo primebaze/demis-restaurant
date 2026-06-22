@@ -655,6 +655,48 @@ export async function sendAdminNewBooking(data: {
   );
 }
 
+// ─── GUEST: VISIT COMPLETED (thank you) ───
+
+export async function sendBookingCompleted(data: {
+  guestName: string;
+  guestEmail: string;
+  confirmationCode: string;
+  date: string;
+  location: string;
+}) {
+  const body = `
+    <h2 style="margin:0 0 20px; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#333;">
+      Thank You for Visiting
+    </h2>
+
+    <p style="margin:0 0 20px; text-align:center; font-family:'Georgia','Times New Roman',serif; color:#666; font-size:16px;">
+      ${escapeHtml(data.guestName)}
+    </p>
+
+    <p style="margin:0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#555; font-size:14px; line-height:1.7;">
+      It was a pleasure having you at <strong style="color:#333;">Demi's ${escapeHtml(data.location)}</strong> on ${formatDate(data.date)}.
+      We hope you enjoyed the food and the experience.
+    </p>
+
+    <p style="margin:20px 0 0; text-align:center; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#555; font-size:14px; line-height:1.7;">
+      We would love to welcome you back soon. If you have a moment, we would really
+      appreciate a review, and do reach out any time to book your next table.
+    </p>
+
+    <p style="margin:28px 0 0; text-align:center;">
+      <a href="${SITE_URL}/booking" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; display:inline-block; background-color:#e8cc9c; color:#1a1a1a; text-decoration:none; font-weight:600; font-size:13px; padding:12px 32px; border-radius:6px;">
+        Book Again
+      </a>
+    </p>
+  `;
+
+  await send(
+    data.guestEmail,
+    `Thank you for visiting Demi's, ${data.guestName.split(" ")[0] || "guest"}`,
+    emailLayout(body, data.confirmationCode)
+  );
+}
+
 // ─── ADMIN: NEW SET MENU GROUP ───
 
 export async function sendAdminNewSetMenuGroup(data: {

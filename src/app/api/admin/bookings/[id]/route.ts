@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { captureDeposit, cancelDeposit } from "@/lib/stripe";
+import { sendBookingCompleted } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
 
@@ -78,8 +79,8 @@ export async function PATCH(
     }
   }
 
-  // If marking completed, create visit record + release deposit hold
-  if (data.status === "completed") {
+  // If marking completed (and not already completed), record visit, release hold, email guest.
+  if (data.status === "completed" && booking.status !== "completed") {
     await prisma.visit.create({
       data: {
         guestId: booking.guestId,
@@ -97,6 +98,17 @@ export async function PATCH(
           data: { depositStatus: "refunded" },
         });
       }
+    }
+
+    // Thank-you email to the guest (non-blocking)
+    if (booking.guest.email) {
+      sendBookingCompleted({
+        guestName: booking.guest.name,
+        guestEmail: booking.guest.email,
+        confirmationCode: booking.confirmationCode,
+        date: booking.date,
+        location: updated.location.name,
+      }).catch(console.error);
     }
   }
 
