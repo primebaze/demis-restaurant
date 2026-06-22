@@ -5,18 +5,13 @@ import { useEffect, useState, useCallback } from "react";
 type CheckIn = {
   id: string;
   number: number;
+  endCover: number;
   name: string;
   partySize: number;
-  priceTier: number;
+  price: number;
   checkedInAt: string;
   endsAt: string;
   status: string;
-};
-
-const TIER_COLORS: Record<number, string> = {
-  20: "bg-emerald-500/15 text-emerald-300",
-  25: "bg-amber-500/15 text-amber-300",
-  30: "bg-red-500/15 text-red-300",
 };
 
 function fmt(d: string) {
@@ -140,7 +135,7 @@ export default function AdminCheckinsPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="rounded-xl p-4 border bg-gold-300/5 border-gold-300/20">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Checked in {isToday ? "today" : ""}</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">People in {isToday ? "today" : ""}</p>
           <p className="text-2xl font-bold text-gold-300">{data?.total ?? 0}</p>
         </div>
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800"><p className="text-xs text-gray-500 uppercase tracking-wider mb-1">£20 (1–20)</p><p className="text-2xl font-bold text-emerald-300">{data?.tiers.t20 ?? 0}</p></div>
@@ -161,6 +156,7 @@ export default function AdminCheckinsPage() {
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
                   <th className="px-4 py-3">No.</th>
                   <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Party</th>
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">In</th>
                   <th className="px-4 py-3">Finish by</th>
@@ -172,10 +168,11 @@ export default function AdminCheckinsPage() {
                   const left = remaining(c.endsAt, now);
                   return (
                     <tr key={c.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
-                      <td className="px-4 py-3 text-sm font-bold text-white">{c.number}</td>
+                      <td className="px-4 py-3 text-sm font-bold text-white">{c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{c.name || "—"}</td>
+                      <td className="px-4 py-3 text-sm text-gray-300">{c.partySize}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TIER_COLORS[c.priceTier] || "bg-gray-700 text-gray-300"}`}>£{c.priceTier}</span>
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300">£{c.price}</span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-400">{fmt(c.checkedInAt)}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{fmt(c.endsAt)}</td>

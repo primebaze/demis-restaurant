@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { isCheckinUnlocked, priceTierFor, serviceDate, CHECKIN_WINDOW_MIN } from "@/lib/checkin-auth";
+import { isCheckinUnlocked, priceTierFor, groupPrice, serviceDate, CHECKIN_WINDOW_MIN } from "@/lib/checkin-auth";
 export const dynamic = "force-dynamic";
 
 function isUniqueViolation(e: unknown): boolean {
@@ -30,18 +30,23 @@ export async function POST(req: Request) {
   const date = serviceDate();
   const endsAt = new Date(Date.now() + CHECKIN_WINDOW_MIN * 60 * 1000);
 
-  // Atomic numbering: the unique (date, number) constraint prevents duplicates
-  // even under simultaneous taps; on collision we recount and retry.
+  // The group occupies covers [startCover .. startCover+partySize-1]. number =
+  // startCover (the running people total + 1). The unique (date, number)
+  // constraint prevents two groups taking the same start under simultaneous
+  // taps; on collision we recompute and retry.
   for (let attempt = 0; attempt < 12; attempt++) {
-    const count = await prisma.buffetCheckIn.count({ where: { date } });
-    const number = count + 1;
+    const agg = await prisma.buffetCheckIn.aggregate({ where: { date }, _sum: { partySize: true } });
+    const startCover = (agg._sum.partySize || 0) + 1;
     try {
       const row = await prisma.buffetCheckIn.create({
-        data: { date, number, name, partySize, priceTier: priceTierFor(number), endsAt },
+        data: { date, number: startCover, name, partySize, priceTier: priceTierFor(startCover), endsAt },
       });
+      const endCover = startCover + partySize - 1;
       return NextResponse.json({
-        number: row.number,
-        priceTier: row.priceTier,
+        number: startCover,
+        endCover,
+        partySize,
+        totalPrice: groupPrice(startCover, partySize),
         checkedInAt: row.checkedInAt,
         endsAt: row.endsAt,
         windowMin: CHECKIN_WINDOW_MIN,
@@ -52,5 +57,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ error: "Could not assign a number, try again." }, { status: 503 });
+  return NextResponse.json({ error: "Could not check in, please try again." }, { status: 503 });
 }

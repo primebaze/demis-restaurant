@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 
 type Result = {
   number: number;
-  priceTier: number;
+  endCover: number;
+  partySize: number;
+  totalPrice: number;
   checkedInAt: string;
   endsAt: string;
 };
@@ -23,6 +25,8 @@ export default function CheckinKioskPage() {
   const [showPin, setShowPin] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [countdown, setCountdown] = useState(6);
+  const [choosing, setChoosing] = useState(false); // party-size step
+  const [party, setParty] = useState(1);
 
   // Live clock for the screensaver (set after mount to avoid hydration mismatch)
   const [now, setNow] = useState<Date | null>(null);
@@ -78,7 +82,7 @@ export default function CheckinKioskPage() {
       const res = await fetch("/api/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ partySize: party }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -86,6 +90,8 @@ export default function CheckinKioskPage() {
         setError(d.error || "Check-in failed");
       } else {
         setResult(d);
+        setChoosing(false);
+        setParty(1);
       }
     } finally {
       setBusy(false);
@@ -139,9 +145,12 @@ export default function CheckinKioskPage() {
         <head><meta name="robots" content="noindex, nofollow" /></head>
         <div className="w-full max-w-sm text-center">
           <div className="mb-8 p-8 bg-white/[0.03] border border-white/10 rounded-3xl">
-            <p className="text-sm text-gray-500">You are</p>
-            <p className="text-7xl font-extrabold text-white my-2 tracking-tight">No. {result.number}</p>
-            <p className="text-5xl font-extrabold text-emerald-400">£{result.priceTier}</p>
+            <p className="text-sm text-gray-500">{result.partySize > 1 ? "You are" : "You are"}</p>
+            <p className="text-7xl font-extrabold text-white my-2 tracking-tight">
+              No. {result.number}{result.partySize > 1 ? `–${result.endCover}` : ""}
+            </p>
+            <p className="text-5xl font-extrabold text-emerald-400">£{result.totalPrice}</p>
+            {result.partySize > 1 && <p className="text-sm text-gray-400 mt-2">Party of {result.partySize}</p>}
             <div className="mt-6 pt-5 border-t border-white/10 text-sm text-gray-400 leading-relaxed">
               Checked in <span className="text-gray-200 font-medium">{fmtTime(result.checkedInAt)}</span>
               <br />
@@ -158,10 +167,51 @@ export default function CheckinKioskPage() {
     );
   }
 
+  // ── Party-size step: how many people, then confirm ──
+  if (choosing) {
+    return (
+      <div className={`min-h-screen ${BG} text-white flex items-center justify-center p-6 select-none`}>
+        <head><meta name="robots" content="noindex, nofollow" /></head>
+        <div className="w-full max-w-sm text-center">
+          <h2 className="text-2xl font-bold mb-1">How many people?</h2>
+          <p className="text-sm text-gray-500 mb-8">For this check-in</p>
+
+          <div className="flex items-center justify-center gap-6 mb-10">
+            <button
+              onClick={() => setParty((p) => Math.max(1, p - 1))}
+              className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 text-3xl text-white active:scale-95 transition"
+            >−</button>
+            <span className="text-7xl font-extrabold tabular-nums w-24">{party}</span>
+            <button
+              onClick={() => setParty((p) => Math.min(20, p + 1))}
+              className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 text-3xl text-white active:scale-95 transition"
+            >+</button>
+          </div>
+
+          {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
+
+          <button
+            onClick={checkIn}
+            disabled={busy}
+            className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-50"
+          >
+            {busy ? "…" : `Check in ${party} ${party === 1 ? "person" : "people"}`}
+          </button>
+          <button
+            onClick={() => { setChoosing(false); setParty(1); setError(""); }}
+            className="mt-4 text-sm text-gray-500 hover:text-white transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ── Idle screensaver: branded clock, tap to check in (or enter PIN if locked) ──
   return (
     <div
-      onClick={() => { if (busy || unlocked === null) return; if (unlocked) checkIn(); else setShowPin(true); }}
+      onClick={() => { if (busy || unlocked === null) return; if (unlocked) setChoosing(true); else setShowPin(true); }}
       className={`min-h-screen ${BG} text-white flex flex-col items-center justify-center p-6 select-none cursor-pointer`}
     >
       <head><meta name="robots" content="noindex, nofollow" /></head>

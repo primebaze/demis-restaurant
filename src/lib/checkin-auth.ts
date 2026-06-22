@@ -39,11 +39,18 @@ export async function isCheckinUnlocked(): Promise<boolean> {
   return tokenValid(store.get(CHECKIN_COOKIE)?.value || "");
 }
 
-/** Price tier (£) for a given check-in number: 1-20 = 20, 21-45 = 25, 46+ = 30. */
+/** Price tier (£) for a given cover position: 1-20 = 20, 21-45 = 25, 46+ = 30. */
 export function priceTierFor(n: number): number {
   if (n <= 20) return 20;
   if (n <= 45) return 25;
   return 30;
+}
+
+/** Total £ for a group occupying covers [startCover .. startCover+partySize-1], priced per person. */
+export function groupPrice(startCover: number, partySize: number): number {
+  let total = 0;
+  for (let c = startCover; c < startCover + partySize; c++) total += priceTierFor(c);
+  return total;
 }
 
 export const CHECKIN_WINDOW_MIN = 90; // 1h 30m dining window
