@@ -29,6 +29,17 @@ export async function PATCH(
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
+  // A booking can only be completed once its date has passed (not today or future).
+  if (body.status === "completed") {
+    const ukToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+    if (booking.date >= ukToday) {
+      return NextResponse.json(
+        { error: "A booking can only be marked completed after its date has passed." },
+        { status: 400 }
+      );
+    }
+  }
+
   // Build update data + audit log
   const data: Record<string, unknown> = {};
   const changes: { field: string; oldVal: string; newVal: string }[] = [];
