@@ -39,6 +39,14 @@ const STATUS_OPTIONS = [
   "completed",
 ];
 
+// Upcoming / Today / Past tag based on the booking date vs UK today
+function dayTag(date: string): { label: string; cls: string } {
+  const ukToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+  if (date > ukToday) return { label: "Upcoming", cls: "bg-emerald-500/15 text-emerald-300" };
+  if (date === ukToday) return { label: "Today", cls: "bg-gold-300/15 text-gold-300" };
+  return { label: "Past", cls: "bg-gray-600/20 text-gray-400" };
+}
+
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,7 +206,13 @@ export default function AdminBookingsPage() {
                         <p className="text-sm text-white">{b.guest.name}</p>
                         <p className="text-xs text-gray-500">{b.guest.email}</p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{b.date}</td>
+                      <td className="px-4 py-3 text-sm text-gray-300">
+                        <p>{b.date}</p>
+                        {(() => {
+                          const t = dayTag(b.date);
+                          return <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${t.cls}`}>{t.label}</span>;
+                        })()}
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-300">{b.slot}</td>
                       <td className="px-4 py-3 text-sm text-gray-400">{b.location}</td>
                       <td className="px-4 py-3 text-sm text-white">{b.partySize}</td>
