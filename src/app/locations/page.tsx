@@ -22,8 +22,8 @@ const LOCATIONS = [
   {
     name: "Streatham Hill",
     area: "South London",
-    address: "345 Streatham High Road",
-    city: "London, SW16 3NJ",
+    address: "67 Streatham Hill",
+    city: "London SW2 4TX",
     href: "/locations/streatham",
     badge: null,
   },
