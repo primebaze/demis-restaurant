@@ -11,8 +11,8 @@ const EXPERIENCES = [
 /** Visual cross-promotion band ("Come taste it for yourself"), shared across blog pages. */
 export function ExploreDemis() {
   return (
-    <section className="mt-16 -mx-6 px-6 py-12 bg-gradient-to-b from-[#161616] to-[#0f0f0f] border-y border-white/5">
-      <div className="max-w-6xl mx-auto">
+    <section className="mt-16 pt-10 border-t border-white/5">
+      <div>
         <h2 className="text-2xl font-bold text-white mb-1 font-[family-name:var(--font-display)]">
           Come taste it for yourself
         </h2>

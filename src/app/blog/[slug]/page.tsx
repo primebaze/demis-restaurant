@@ -204,7 +204,8 @@ export default async function BlogPostPage({
       />
       <ViewTracker slug={slug} />
 
-      <article className="mx-auto max-w-3xl px-6">
+      <div className="mx-auto max-w-6xl px-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-10 lg:gap-14">
+      <article className="min-w-0">
         {/* Breadcrumb */}
         <nav className="mb-8 text-sm text-stone-500">
           <Link href="/blog" className="hover:text-white transition">Blog</Link>
@@ -384,11 +385,23 @@ export default async function BlogPostPage({
           <CommentForm postSlug={slug} />
         </section>
 
+        {/* Most read — full-width on mobile only (sidebar handles desktop) */}
+        <div className="lg:hidden">
+          <MostRead posts={mostRead} />
+        </div>
+
         {/* Discovery sections (same as the blog index) */}
-        <MostRead posts={mostRead} />
         <InstagramShorts items={shorts} />
         <ExploreDemis />
       </article>
+
+      {/* Sidebar — Most read (desktop only), sticky as you scroll */}
+      <aside className="hidden lg:block">
+        <div className="sticky top-28">
+          <MostRead posts={mostRead} variant="sidebar" />
+        </div>
+      </aside>
+      </div>
     </div>
   );
 }
