@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CommentForm } from "./CommentForm";
+import { ViewTracker } from "./ViewTracker";
 import { cache } from "react";
 
 export const dynamic = "force-dynamic";
@@ -68,11 +69,7 @@ export default async function BlogPostPage({
 
   if (!post) notFound();
 
-  // Count this view (fire-and-forget so it never blocks the render)
-  prisma.blogPost
-    .update({ where: { slug }, data: { views: { increment: 1 } } })
-    .catch(() => {});
-  const viewCount = post.views + 1;
+  const viewCount = post.views;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -100,6 +97,7 @@ export default async function BlogPostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <ViewTracker slug={slug} />
 
       <article className="mx-auto max-w-3xl px-6">
         {/* Breadcrumb */}
