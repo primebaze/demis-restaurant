@@ -45,7 +45,10 @@ export default async function BlogPage({
     ];
   }
 
-  const [posts, total, categories] = await Promise.all([
+  // "Most read" only shows on the unfiltered first page (the index view).
+  const showExtras = page === 1 && !category && !search;
+
+  const [posts, total, categories, mostRead] = await Promise.all([
     prisma.blogPost.findMany({
       where,
       select: {
@@ -63,9 +66,25 @@ export default async function BlogPage({
     }),
     prisma.blogPost.count({ where }),
     prisma.blogCategory.findMany({ orderBy: { sortOrder: "asc" } }),
+    showExtras
+      ? prisma.blogPost.findMany({
+          where: { status: "published" },
+          select: { slug: true, title: true, views: true },
+          orderBy: [{ views: "desc" }, { publishedAt: "desc" }],
+          take: 5,
+        })
+      : Promise.resolve([]),
   ]);
 
   const totalPages = Math.ceil(total / limit);
+
+  // Cross-promotion to the main site (the "Elsewhere on the BBC" equivalent).
+  const moreFromDemis = [
+    { title: "Book a Table", desc: "Reserve at Cricklewood or Streatham Hill.", href: "/booking" },
+    { title: "Our Menu", desc: "Jollof, suya, egusi, pounded yam and more.", href: "/menu" },
+    { title: "Sunday Buffet", desc: "All-you-can-eat Nigerian feast.", href: "/buffet" },
+    { title: "Events & Private Dining", desc: "Parties, celebrations and set menus.", href: "/events" },
+  ];
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] pt-32 pb-20">
@@ -117,6 +136,12 @@ export default async function BlogPage({
         {posts.length === 0 ? (
           <p className="text-center text-stone-500 py-20">No posts found.</p>
         ) : (
+          <>
+          {showExtras && (
+            <h2 className="text-2xl font-bold text-white mb-6 font-[family-name:var(--font-display)]">
+              Latest stories
+            </h2>
+          )}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
@@ -168,6 +193,7 @@ export default async function BlogPage({
               </Link>
             ))}
           </div>
+          </>
         )}
 
         {/* Pagination */}
@@ -191,6 +217,56 @@ export default async function BlogPage({
               </Link>
             )}
           </div>
+        )}
+
+        {/* Most read */}
+        {showExtras && mostRead.length > 0 && (
+          <section className="mt-20 pt-10 border-t border-white/5">
+            <h2 className="text-2xl font-bold text-white mb-6 font-[family-name:var(--font-display)]">
+              Most read
+            </h2>
+            <ol className="grid sm:grid-cols-2 gap-x-10 gap-y-1">
+              {mostRead.map((p, i) => (
+                <li key={p.slug} className="flex items-start gap-4 py-3 border-b border-white/5">
+                  <span className="text-3xl font-bold text-gold-300/70 leading-none w-8 shrink-0 font-[family-name:var(--font-display)]">
+                    {i + 1}
+                  </span>
+                  <Link
+                    href={`/blog/${p.slug}`}
+                    className="text-white font-medium hover:text-gold-300 transition leading-snug"
+                  >
+                    {p.title}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {/* More from Demi's (cross-promotion) */}
+        {showExtras && (
+          <section className="mt-16 pt-10 border-t border-white/5">
+            <h2 className="text-2xl font-bold text-white mb-6 font-[family-name:var(--font-display)]">
+              More from Demi&apos;s
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {moreFromDemis.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="group flex flex-col justify-between p-5 rounded-2xl bg-[#1a1a1a] border border-white/5 hover:border-gold-300/40 transition"
+                >
+                  <span className="text-base font-semibold text-white group-hover:text-gold-300 transition">
+                    {item.title}
+                  </span>
+                  <span className="mt-2 text-sm text-stone-400">{item.desc}</span>
+                  <span className="mt-4 text-xs uppercase tracking-widest text-gold-300 font-semibold">
+                    Explore →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </div>
