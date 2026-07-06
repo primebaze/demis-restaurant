@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 const EXPERIENCES = [
-  { title: "Book a Table", desc: "Cricklewood & Streatham Hill", href: "/booking", img: "/reel-1.jpg", cta: "Reserve" },
-  { title: "Sunday Buffet", desc: "All-you-can-eat Nigerian feast", href: "/buffet", img: "/reel-2.jpg", cta: "See buffet" },
+  { title: "Book a Table", desc: "Cricklewood & Streatham Hill", href: "/booking", img: "/og-image.jpg", cta: "Reserve" },
+  { title: "Sunday Buffet", desc: "All-you-can-eat Nigerian feast", href: "/buffet", img: "/streatham.jpeg", cta: "See buffet" },
   { title: "Events & Private Dining", desc: "Parties, celebrations & set menus", href: "/events", img: "/events.jpeg", cta: "Enquire" },
-  { title: "Bulk Catering", desc: "Party food delivered across London", href: "/bulk-orders", img: "/reel-3.jpg", cta: "Order" },
+  { title: "Bulk Catering", desc: "Party food delivered across London", href: "/bulk-orders", img: "/her0-streatham.jpeg", cta: "Order" },
 ];
 
 /** Visual cross-promotion band ("Come taste it for yourself"), shared across blog pages. */
