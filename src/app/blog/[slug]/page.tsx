@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CommentForm } from "./CommentForm";
 import { ViewTracker } from "./ViewTracker";
+import { ShareButtons } from "./ShareButtons";
 import { cache } from "react";
 
 // ISR: serve a cached page (fast, good for SEO), rebuild at most once a minute.
@@ -205,6 +206,11 @@ export default async function BlogPostPage({
           </div>
         </header>
 
+        {/* Share (top) */}
+        <div className="mb-10">
+          <ShareButtons url={`${SITE}/blog/${slug}`} title={post.title} />
+        </div>
+
         {/* Featured Image */}
         {post.featuredImage && (
           <div className="relative mb-10 w-full h-[220px] sm:h-[280px] md:h-[360px] max-h-[400px] rounded-2xl overflow-hidden">
@@ -234,6 +240,11 @@ export default async function BlogPostPage({
           "
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
+
+        {/* Share (bottom) */}
+        <div className="mt-12 pt-8 border-t border-white/5">
+          <ShareButtons url={`${SITE}/blog/${slug}`} title={post.title} />
+        </div>
 
         {/* Author Bio */}
         {post.author.bio && (
