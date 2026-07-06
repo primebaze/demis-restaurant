@@ -10,6 +10,7 @@ type Post = {
   status: string;
   publishedAt: string | null;
   createdAt: string;
+  views: number;
   author: { name: string };
   category: { name: string; slug: string } | null;
 };
@@ -98,6 +99,7 @@ export default function BlogPostsPage() {
                     <span className="text-xs text-gray-600">
                       {new Date(post.publishedAt || post.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
+                    <span className="text-xs text-gray-500">{post.views.toLocaleString("en-GB")} views</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 ml-4">

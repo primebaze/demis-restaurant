@@ -68,6 +68,12 @@ export default async function BlogPostPage({
 
   if (!post) notFound();
 
+  // Count this view (fire-and-forget so it never blocks the render)
+  prisma.blogPost
+    .update({ where: { slug }, data: { views: { increment: 1 } } })
+    .catch(() => {});
+  const viewCount = post.views + 1;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -134,11 +140,15 @@ export default async function BlogPostPage({
             )}
             <div>
               <p className="text-sm font-medium text-white">{post.author.name}</p>
-              {post.publishedAt && (
-                <time className="text-xs text-stone-500" dateTime={post.publishedAt.toISOString()}>
-                  {new Date(post.publishedAt).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                </time>
-              )}
+              <div className="flex items-center gap-2 text-xs text-stone-500">
+                {post.publishedAt && (
+                  <time dateTime={post.publishedAt.toISOString()}>
+                    {new Date(post.publishedAt).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  </time>
+                )}
+                {post.publishedAt && <span aria-hidden>·</span>}
+                <span>{viewCount.toLocaleString("en-GB")} {viewCount === 1 ? "view" : "views"}</span>
+              </div>
             </div>
           </div>
         </header>
