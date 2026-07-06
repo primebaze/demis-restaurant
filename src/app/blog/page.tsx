@@ -78,12 +78,12 @@ export default async function BlogPage({
 
   const totalPages = Math.ceil(total / limit);
 
-  // Cross-promotion to the main site (the "Elsewhere on the BBC" equivalent).
-  const moreFromDemis = [
-    { title: "Book a Table", desc: "Reserve at Cricklewood or Streatham Hill.", href: "/booking" },
-    { title: "Our Menu", desc: "Jollof, suya, egusi, pounded yam and more.", href: "/menu" },
-    { title: "Sunday Buffet", desc: "All-you-can-eat Nigerian feast.", href: "/buffet" },
-    { title: "Events & Private Dining", desc: "Parties, celebrations and set menus.", href: "/events" },
+  // Visual cross-promotion band (the "Stay up or catch up on iPlayer" equivalent).
+  const experiences = [
+    { title: "Book a Table", desc: "Cricklewood & Streatham Hill", href: "/booking", img: "/reel-1.jpg", cta: "Reserve" },
+    { title: "Sunday Buffet", desc: "All-you-can-eat Nigerian feast", href: "/buffet", img: "/reel-2.jpg", cta: "See buffet" },
+    { title: "Events & Private Dining", desc: "Parties, celebrations & set menus", href: "/events", img: "/events.jpeg", cta: "Enquire" },
+    { title: "Bulk Catering", desc: "Party food delivered across London", href: "/bulk-orders", img: "/reel-3.jpg", cta: "Order" },
   ];
 
   return (
@@ -243,28 +243,48 @@ export default async function BlogPage({
           </section>
         )}
 
-        {/* More from Demi's (cross-promotion) */}
+        {/* Experience Demi's — visual cross-promotion band */}
         {showExtras && (
-          <section className="mt-16 pt-10 border-t border-white/5">
-            <h2 className="text-2xl font-bold text-white mb-6 font-[family-name:var(--font-display)]">
-              More from Demi&apos;s
-            </h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {moreFromDemis.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group flex flex-col justify-between p-5 rounded-2xl bg-[#1a1a1a] border border-white/5 hover:border-gold-300/40 transition"
-                >
-                  <span className="text-base font-semibold text-white group-hover:text-gold-300 transition">
-                    {item.title}
-                  </span>
-                  <span className="mt-2 text-sm text-stone-400">{item.desc}</span>
-                  <span className="mt-4 text-xs uppercase tracking-widest text-gold-300 font-semibold">
-                    Explore →
-                  </span>
-                </Link>
-              ))}
+          <section className="mt-16 -mx-6 px-6 py-12 bg-gradient-to-b from-[#161616] to-[#0f0f0f] border-y border-white/5">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-2xl font-bold text-white mb-1 font-[family-name:var(--font-display)]">
+                Come taste it for yourself
+              </h2>
+              <p className="text-sm text-stone-400 mb-8">Reading&apos;s good — dining&apos;s better. Here&apos;s how to visit Demi&apos;s.</p>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                {experiences.map((item) => (
+                  <div
+                    key={item.href}
+                    className="flex flex-col bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden hover:border-gold-300/40 transition"
+                  >
+                    <Link href={item.href} className="group block">
+                      <div className="relative aspect-[16/10] overflow-hidden">
+                        <Image
+                          src={item.img}
+                          alt={item.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition duration-500"
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                        />
+                      </div>
+                    </Link>
+                    <div className="flex flex-col flex-1 p-4">
+                      <Link href={item.href} className="group">
+                        <h3 className="text-sm sm:text-base font-semibold text-white group-hover:text-gold-300 transition leading-snug">
+                          {item.title}
+                        </h3>
+                      </Link>
+                      <p className="mt-1 text-xs text-stone-400 flex-1">{item.desc}</p>
+                      <Link
+                        href={item.href}
+                        className="mt-3 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-gold-300 text-black text-xs font-semibold hover:bg-gold-400 transition"
+                      >
+                        {item.cta} →
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
