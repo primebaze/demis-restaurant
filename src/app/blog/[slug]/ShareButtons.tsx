@@ -8,6 +8,7 @@ import { useState } from "react";
  */
 export function ShareButtons({ url, title }: { url: string; title: string }) {
   const [copied, setCopied] = useState(false);
+  const [igHint, setIgHint] = useState(false);
 
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(title);
@@ -65,6 +66,26 @@ export function ShareButtons({ url, title }: { url: string; title: string }) {
     }
   }
 
+  // Instagram has no web link-share URL. On mobile, open the native share
+  // sheet (which lists Instagram). On desktop, copy the link to paste into a story/bio.
+  async function shareInstagram() {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch {
+        /* user cancelled — ignore */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setIgHint(true);
+      setTimeout(() => setIgHint(false), 2600);
+    } catch {
+      /* clipboard blocked — ignore */
+    }
+  }
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-xs uppercase tracking-widest text-stone-500 mr-1">Share</span>
@@ -83,6 +104,23 @@ export function ShareButtons({ url, title }: { url: string; title: string }) {
           </svg>
         </a>
       ))}
+      <div className="relative">
+        <button
+          onClick={shareInstagram}
+          aria-label="Share on Instagram"
+          title="Share on Instagram"
+          className="flex items-center justify-center w-9 h-9 rounded-full border border-white/10 bg-white/[0.03] text-stone-400 transition hover:bg-[#E4405F]/15 hover:text-[#E4405F]"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden>
+            <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 1.62c-3.15 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.59-.07-4.74-.07Zm0 2.76a5.3 5.3 0 1 1 0 10.6 5.3 5.3 0 0 1 0-10.6Zm0 1.62a3.68 3.68 0 1 0 0 7.36 3.68 3.68 0 0 0 0-7.36Zm5.48-.29a1.24 1.24 0 1 1-2.48 0 1.24 1.24 0 0 1 2.48 0Z" />
+          </svg>
+        </button>
+        {igHint && (
+          <span className="absolute left-1/2 -translate-x-1/2 top-11 z-10 whitespace-nowrap rounded-lg bg-[#1a1a1a] border border-white/10 px-3 py-1.5 text-[11px] text-white shadow-lg">
+            Link copied — paste into your Instagram story or bio
+          </span>
+        )}
+      </div>
       <button
         onClick={copy}
         aria-label="Copy link"
