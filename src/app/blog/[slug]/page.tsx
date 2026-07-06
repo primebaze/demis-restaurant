@@ -7,7 +7,9 @@ import { CommentForm } from "./CommentForm";
 import { ViewTracker } from "./ViewTracker";
 import { cache } from "react";
 
-export const dynamic = "force-dynamic";
+// ISR: serve a cached page (fast, good for SEO), rebuild at most once a minute.
+// View-counting is a client-side ping, so the page itself no longer needs to be dynamic.
+export const revalidate = 60;
 
 const getPost = cache(async (slug: string) => {
   return prisma.blogPost.findFirst({
@@ -49,6 +51,10 @@ export async function generateMetadata({
       type: "article",
       url: `https://www.demisrestaurant.co.uk/blog/${slug}`,
       images: post.featuredImage ? [{ url: post.featuredImage }] : [{ url: "/og-image.jpg" }],
+      publishedTime: post.publishedAt?.toISOString(),
+      modifiedTime: post.updatedAt.toISOString(),
+      authors: [post.author.name],
+      section: post.category?.name,
     },
     twitter: {
       card: "summary_large_image",
@@ -71,14 +77,34 @@ export default async function BlogPostPage({
 
   const viewCount = post.views;
 
+  // Related posts: same category first, fall back to most recent (excluding this one).
+  const baseWhere = { status: "published" as const, slug: { not: slug } };
+  let related = await prisma.blogPost.findMany({
+    where: post.categoryId ? { ...baseWhere, categoryId: post.categoryId } : baseWhere,
+    select: { slug: true, title: true, excerpt: true, featuredImage: true },
+    orderBy: { publishedAt: "desc" },
+    take: 3,
+  });
+  if (related.length === 0 && post.categoryId) {
+    related = await prisma.blogPost.findMany({
+      where: baseWhere,
+      select: { slug: true, title: true, excerpt: true, featuredImage: true },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+    });
+  }
+
+  const SITE = "https://www.demisrestaurant.co.uk";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
-    image: post.featuredImage || undefined,
+    image: post.featuredImage ? [post.featuredImage] : [`${SITE}/og-image.jpg`],
     datePublished: post.publishedAt?.toISOString(),
     dateModified: post.updatedAt.toISOString(),
+    ...(post.category ? { articleSection: post.category.name } : {}),
     author: {
       "@type": "Person",
       name: post.author.name,
@@ -86,9 +112,25 @@ export default async function BlogPostPage({
     publisher: {
       "@type": "Organization",
       name: "Demi's Restaurant",
-      url: "https://www.demisrestaurant.co.uk",
+      url: SITE,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE}/og-image.jpg`,
+      },
     },
-    mainEntityOfPage: `https://www.demisrestaurant.co.uk/blog/${slug}`,
+    mainEntityOfPage: `${SITE}/blog/${slug}`,
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Blog", item: `${SITE}/blog` },
+      ...(post.category
+        ? [{ "@type": "ListItem", position: 2, name: post.category.name, item: `${SITE}/blog?category=${post.category.slug}` }]
+        : []),
+      { "@type": "ListItem", position: post.category ? 3 : 2, name: post.title, item: `${SITE}/blog/${slug}` },
+    ],
   };
 
   return (
@@ -96,6 +138,10 @@ export default async function BlogPostPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <ViewTracker slug={slug} />
 
@@ -200,6 +246,42 @@ export default async function BlogPostPage({
               </div>
             </div>
           </div>
+        )}
+
+        {/* Related posts */}
+        {related.length > 0 && (
+          <section className="mt-16 pt-10 border-t border-white/5">
+            <h2 className="text-2xl font-bold text-white mb-6 font-[family-name:var(--font-display)]">
+              You might also like
+            </h2>
+            <div className="grid sm:grid-cols-3 gap-6">
+              {related.map((r) => (
+                <Link key={r.slug} href={`/blog/${r.slug}`} className="group">
+                  <article className="h-full bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition">
+                    {r.featuredImage && (
+                      <div className="aspect-[16/9] overflow-hidden relative">
+                        <Image
+                          src={r.featuredImage}
+                          alt={r.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition duration-500"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                        />
+                      </div>
+                    )}
+                    <div className="p-5">
+                      <h3 className="text-sm font-semibold text-white group-hover:text-gold-300 transition line-clamp-2">
+                        {r.title}
+                      </h3>
+                      {r.excerpt && (
+                        <p className="mt-2 text-xs text-stone-400 line-clamp-2">{r.excerpt}</p>
+                      )}
+                    </div>
+                  </article>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* Comments Section */}
