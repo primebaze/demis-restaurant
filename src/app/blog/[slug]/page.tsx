@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CommentForm } from "./CommentForm";
 import { ViewTracker } from "./ViewTracker";
 import { ShareButtons } from "./ShareButtons";
+import { AdCarousel } from "../AdCarousel";
 import { cache } from "react";
 
 // ISR: pages are pre-built at deploy (see generateStaticParams) and served as
@@ -95,8 +96,8 @@ export default async function BlogPostPage({
 
   const viewCount = post.views;
 
-  // Related posts: same category first, then top up with other recent posts to reach 3.
-  // Both queries run in parallel, then merge + dedupe in JS.
+  // Related posts: pull a larger pool (same category first, then other recent),
+  // shuffle it, and pick 3. Rotates over time so it isn't always the same three.
   const relatedSelect = { slug: true, title: true, excerpt: true, featuredImage: true };
   const baseWhere = { status: "published" as const, slug: { not: slug } };
 
@@ -106,20 +107,30 @@ export default async function BlogPostPage({
           where: { ...baseWhere, categoryId: post.categoryId },
           select: relatedSelect,
           orderBy: { publishedAt: "desc" },
-          take: 3,
+          take: 12,
         })
       : Promise.resolve([]),
     prisma.blogPost.findMany({
       where: baseWhere,
       select: relatedSelect,
       orderBy: { publishedAt: "desc" },
-      take: 4,
+      take: 12,
     }),
   ]);
 
+  const shuffle = <T,>(arr: T[]): T[] => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  // Randomised same-category first, then randomised others, deduped to 3.
   const related: typeof recent = [];
   const seen = new Set<string>();
-  for (const r of [...sameCategory, ...recent]) {
+  for (const r of [...shuffle(sameCategory), ...shuffle(recent)]) {
     if (seen.has(r.slug)) continue;
     seen.add(r.slug);
     related.push(r);
@@ -268,6 +279,9 @@ export default async function BlogPostPage({
         <div className="mt-12 pt-8 border-t border-white/5">
           <ShareButtons url={`${SITE}/blog/${slug}`} title={post.title} />
         </div>
+
+        {/* Sponsored ad */}
+        <AdCarousel />
 
         {/* Author Bio */}
         {post.author.bio && (

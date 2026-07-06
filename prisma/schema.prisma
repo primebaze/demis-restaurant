@@ -326,6 +326,20 @@ model BuffetBooking {
   @@index([status])
 }
 
+// ─── BLOG ADS ───
+model BlogAd {
+  id        String   @id @default(cuid())
+  title     String   @default("")
+  imageUrl  String
+  linkUrl   String   @default("")
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([active, sortOrder])
+}
+
 // ─── BLOG COMMENTS ───
 model BlogComment {
   id        String   @id @default(cuid())

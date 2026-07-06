@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/blog/admin/authors", label: "Authors", icon: "✍️" },
   { href: "/blog/admin/categories", label: "Categories", icon: "🏷️" },
   { href: "/blog/admin/comments", label: "Comments", icon: "💬" },
+  { href: "/blog/admin/ads", label: "Ads", icon: "📢" },
   { href: "/blog/admin/settings", label: "Settings", icon: "⚙️" },
 ];
 

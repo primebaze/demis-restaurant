@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getInstagramPosts } from "@/lib/instagram";
 import { InstagramShorts } from "./InstagramShorts";
+import { AdCarousel } from "./AdCarousel";
 
 export const metadata: Metadata = {
   title: "Blog | Demi's Restaurant",
@@ -223,6 +224,9 @@ export default async function BlogPage({
             )}
           </div>
         )}
+
+        {/* Sponsored ad */}
+        {showExtras && <AdCarousel />}
 
         {/* Most read */}
         {showExtras && mostRead.length > 0 && (
