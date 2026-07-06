@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { getInstagramPosts } from "@/lib/instagram";
+import { InstagramShorts } from "./InstagramShorts";
 
 export const metadata: Metadata = {
   title: "Blog | Demi's Restaurant",
@@ -77,6 +79,9 @@ export default async function BlogPage({
   ]);
 
   const totalPages = Math.ceil(total / limit);
+
+  // Instagram "Shorts" — cached hourly, falls back to manual reels without a token.
+  const shorts = showExtras ? (await getInstagramPosts(8)).items : [];
 
   // Visual cross-promotion band (the "Stay up or catch up on iPlayer" equivalent).
   const experiences = [
@@ -242,6 +247,9 @@ export default async function BlogPage({
             </ol>
           </section>
         )}
+
+        {/* Instagram Shorts */}
+        {showExtras && <InstagramShorts items={shorts} />}
 
         {/* Experience Demi's — visual cross-promotion band */}
         {showExtras && (
