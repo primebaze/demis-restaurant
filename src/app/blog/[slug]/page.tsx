@@ -8,9 +8,26 @@ import { ViewTracker } from "./ViewTracker";
 import { ShareButtons } from "./ShareButtons";
 import { cache } from "react";
 
-// ISR: serve a cached page (fast, good for SEO), rebuild at most once a minute.
-// View-counting is a client-side ping, so the page itself no longer needs to be dynamic.
+// ISR: pages are pre-built at deploy (see generateStaticParams) and served as
+// static HTML from the CDN, so navigation is instant. They rebuild in the
+// background at most once a minute to pick up edits and new comments.
 export const revalidate = 60;
+
+// Pre-render every published post at build time so the first visit is instant,
+// not rendered on demand. New posts published later fall back to on-demand ISR
+// and get pre-built on the next deploy.
+export async function generateStaticParams() {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: { status: "published" },
+      select: { slug: true },
+    });
+    return posts.map((p) => ({ slug: p.slug }));
+  } catch {
+    // DB unreachable during build — posts still render on demand via ISR.
+    return [];
+  }
+}
 
 const getPost = cache(async (slug: string) => {
   return prisma.blogPost.findFirst({
@@ -79,28 +96,34 @@ export default async function BlogPostPage({
   const viewCount = post.views;
 
   // Related posts: same category first, then top up with other recent posts to reach 3.
+  // Both queries run in parallel, then merge + dedupe in JS.
   const relatedSelect = { slug: true, title: true, excerpt: true, featuredImage: true };
   const baseWhere = { status: "published" as const, slug: { not: slug } };
 
-  const sameCategory = post.categoryId
-    ? await prisma.blogPost.findMany({
-        where: { ...baseWhere, categoryId: post.categoryId },
-        select: relatedSelect,
-        orderBy: { publishedAt: "desc" },
-        take: 3,
-      })
-    : [];
-
-  let related = sameCategory;
-  if (related.length < 3) {
-    const seen = new Set(related.map((r) => r.slug));
-    const fill = await prisma.blogPost.findMany({
-      where: { ...baseWhere, slug: { notIn: [slug, ...related.map((r) => r.slug)] } },
+  const [sameCategory, recent] = await Promise.all([
+    post.categoryId
+      ? prisma.blogPost.findMany({
+          where: { ...baseWhere, categoryId: post.categoryId },
+          select: relatedSelect,
+          orderBy: { publishedAt: "desc" },
+          take: 3,
+        })
+      : Promise.resolve([]),
+    prisma.blogPost.findMany({
+      where: baseWhere,
       select: relatedSelect,
       orderBy: { publishedAt: "desc" },
-      take: 3,
-    });
-    related = [...related, ...fill.filter((r) => !seen.has(r.slug))].slice(0, 3);
+      take: 4,
+    }),
+  ]);
+
+  const related: typeof recent = [];
+  const seen = new Set<string>();
+  for (const r of [...sameCategory, ...recent]) {
+    if (seen.has(r.slug)) continue;
+    seen.add(r.slug);
+    related.push(r);
+    if (related.length === 3) break;
   }
 
   const SITE = "https://www.demisrestaurant.co.uk";
