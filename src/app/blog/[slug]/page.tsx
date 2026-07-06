@@ -7,6 +7,10 @@ import { CommentForm } from "./CommentForm";
 import { ViewTracker } from "./ViewTracker";
 import { ShareButtons } from "./ShareButtons";
 import { AdCarousel } from "../AdCarousel";
+import { MostRead } from "../MostRead";
+import { InstagramShorts } from "../InstagramShorts";
+import { ExploreDemis } from "../ExploreDemis";
+import { getInstagramPosts } from "@/lib/instagram";
 import { cache } from "react";
 
 // ISR: pages are pre-built at deploy (see generateStaticParams) and served as
@@ -136,6 +140,18 @@ export default async function BlogPostPage({
     related.push(r);
     if (related.length === 3) break;
   }
+
+  // Discovery sections shown at the bottom of the post (same as the blog index).
+  const [mostRead, shortsResult] = await Promise.all([
+    prisma.blogPost.findMany({
+      where: { status: "published", slug: { not: slug } },
+      select: { slug: true, title: true },
+      orderBy: [{ views: "desc" }, { publishedAt: "desc" }],
+      take: 5,
+    }),
+    getInstagramPosts(8),
+  ]);
+  const shorts = shortsResult.items;
 
   const SITE = "https://www.demisrestaurant.co.uk";
 
@@ -367,6 +383,11 @@ export default async function BlogPostPage({
           {/* Comment Form */}
           <CommentForm postSlug={slug} />
         </section>
+
+        {/* Discovery sections (same as the blog index) */}
+        <MostRead posts={mostRead} />
+        <InstagramShorts items={shorts} />
+        <ExploreDemis />
       </article>
     </div>
   );
