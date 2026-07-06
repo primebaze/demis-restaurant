@@ -77,21 +77,29 @@ export default async function BlogPostPage({
 
   const viewCount = post.views;
 
-  // Related posts: same category first, fall back to most recent (excluding this one).
+  // Related posts: same category first, then top up with other recent posts to reach 3.
+  const relatedSelect = { slug: true, title: true, excerpt: true, featuredImage: true };
   const baseWhere = { status: "published" as const, slug: { not: slug } };
-  let related = await prisma.blogPost.findMany({
-    where: post.categoryId ? { ...baseWhere, categoryId: post.categoryId } : baseWhere,
-    select: { slug: true, title: true, excerpt: true, featuredImage: true },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-  });
-  if (related.length === 0 && post.categoryId) {
-    related = await prisma.blogPost.findMany({
-      where: baseWhere,
-      select: { slug: true, title: true, excerpt: true, featuredImage: true },
+
+  const sameCategory = post.categoryId
+    ? await prisma.blogPost.findMany({
+        where: { ...baseWhere, categoryId: post.categoryId },
+        select: relatedSelect,
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+      })
+    : [];
+
+  let related = sameCategory;
+  if (related.length < 3) {
+    const seen = new Set(related.map((r) => r.slug));
+    const fill = await prisma.blogPost.findMany({
+      where: { ...baseWhere, slug: { notIn: [slug, ...related.map((r) => r.slug)] } },
+      select: relatedSelect,
       orderBy: { publishedAt: "desc" },
       take: 3,
     });
+    related = [...related, ...fill.filter((r) => !seen.has(r.slug))].slice(0, 3);
   }
 
   const SITE = "https://www.demisrestaurant.co.uk";
