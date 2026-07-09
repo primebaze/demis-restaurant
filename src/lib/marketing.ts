@@ -117,8 +117,13 @@ export function buildMarketingEmail(opts: {
       </td></tr>
 
       <!-- Body -->
-      <tr><td style="background-color:#fff;padding:8px 40px 40px;border-radius:0 0 12px 12px;font-family:${SANS};font-size:15px;line-height:1.75;color:#333;">
+      <tr><td style="background-color:#fff;padding:8px 40px 4px;font-family:${SANS};font-size:15px;line-height:1.75;color:#333;">
         ${opts.bodyHtml}
+      </td></tr>
+
+      <!-- Book now button -->
+      <tr><td align="center" style="background-color:#fff;padding:20px 40px 40px;border-radius:0 0 12px 12px;">
+        <a href="${SITE_URL}/booking" style="display:inline-block;background:#e3c07a;color:#141210;font-family:${SANS};font-size:14px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:6px;">Book now</a>
       </td></tr>
 
       <!-- Footer -->
