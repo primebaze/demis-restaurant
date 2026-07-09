@@ -42,6 +42,33 @@ export default function MailingPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<string | null>(null);
 
+  // Add one contact by hand
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [addingContact, setAddingContact] = useState(false);
+
+  async function addContact() {
+    if (!newEmail.trim()) return;
+    setAddingContact(true);
+    setUploadResult(null);
+    try {
+      const res = await fetch("/api/admin/mailing/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newEmail, name: newName }),
+      });
+      const d = await res.json();
+      if (!res.ok) { setUploadResult(d.error || "Could not add contact"); return; }
+      setUploadResult(d.existed ? `${newEmail.trim()} is already on the list.` : `Added ${newEmail.trim()}.`);
+      setNewEmail("");
+      setNewName("");
+      setPage(1);
+      await fetchContacts();
+    } finally {
+      setAddingContact(false);
+    }
+  }
+
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -172,6 +199,37 @@ export default function MailingPage() {
             {uploading ? "Reading file…" : "Click to upload .xlsx, .csv or .pdf"}
             <input type="file" accept=".xlsx,.xls,.csv,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/pdf" onChange={handleUpload} className="hidden" disabled={uploading} />
           </label>
+
+          {/* Add one by hand */}
+          <div className="mt-4 pt-4 border-t border-gray-800">
+            <p className="text-xs text-gray-500 mb-2">Or add one contact by hand</p>
+            <div className="flex flex-wrap gap-2">
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") addContact(); }}
+                placeholder="email@example.com"
+                className="flex-1 min-w-[150px] px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              />
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") addContact(); }}
+                placeholder="Name (optional)"
+                className="flex-1 min-w-[120px] px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              />
+              <button
+                onClick={addContact}
+                disabled={addingContact || !newEmail.trim()}
+                className="px-4 py-2 bg-gold-300 text-black font-semibold rounded-lg text-sm hover:bg-gold-400 transition disabled:opacity-40"
+              >
+                {addingContact ? "Adding…" : "Add"}
+              </button>
+            </div>
+          </div>
+
           {uploadResult && <p className="mt-3 text-xs text-gray-300">{uploadResult}</p>}
         </div>
 

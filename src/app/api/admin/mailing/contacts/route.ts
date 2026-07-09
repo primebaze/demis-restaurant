@@ -49,6 +49,35 @@ export async function GET(req: Request) {
   }
 }
 
+const ONE_EMAIL_RE = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+
+/** POST /api/admin/mailing/contacts — add one contact by hand ({ email, name? }) */
+export async function POST(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { email, name } = await req.json();
+  const e = String(email || "").trim().toLowerCase();
+  if (!ONE_EMAIL_RE.test(e)) {
+    return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
+  }
+  const cleanName = String(name || "").trim().slice(0, 60);
+
+  const existing = await prisma.mailingContact.findUnique({ where: { email: e } });
+  if (existing) {
+    // Already on the list — fill in a name if it was missing, but don't duplicate.
+    if (cleanName && !existing.name) {
+      await prisma.mailingContact.update({ where: { email: e }, data: { name: cleanName } });
+    }
+    return NextResponse.json({ existed: true, message: "Already on the list" });
+  }
+
+  const contact = await prisma.mailingContact.create({
+    data: { email: e, name: cleanName, source: "manual" },
+  });
+  return NextResponse.json({ contact }, { status: 201 });
+}
+
 /** DELETE /api/admin/mailing/contacts — { ids } or { all: true } */
 export async function DELETE(req: Request) {
   const { unauthorized } = await requireAdmin();
