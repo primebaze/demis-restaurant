@@ -6,6 +6,7 @@ import {
   buildMarketingEmail,
   buildPlainEmail,
   formatBody,
+  personalize,
   unsubscribeUrl,
   sendMarketingBatch,
 } from "@/lib/marketing";
@@ -34,33 +35,39 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
   }
 
-  const bodyHtml = formatBody(body);
   const preheader = body.trim().replace(/\s+/g, " ").slice(0, 110);
   const plain = style === "plain";
-  const render = (to: string) =>
-    plain
-      ? buildPlainEmail({ bodyHtml, unsubUrl: unsubscribeUrl(to) })
-      : buildMarketingEmail({ subject, bodyHtml, unsubUrl: unsubscribeUrl(to), preheader });
+
+  // Renders a personalised email for one recipient ({name} → their first name).
+  const render = (to: string, name: string) => {
+    const bodyHtml = formatBody(personalize(body, name));
+    const unsubUrl = unsubscribeUrl(to);
+    const subj = personalize(subject, name);
+    const html = plain
+      ? buildPlainEmail({ bodyHtml, unsubUrl })
+      : buildMarketingEmail({ subject: subj, bodyHtml, unsubUrl, preheader: personalize(preheader, name) });
+    return { subject: subj, html, unsubUrl };
+  };
 
   // Test send — one email, no logging, no contact list.
   if (test) {
     const to = String(test).trim().toLowerCase();
-    const html = render(to);
-    const r = await sendMarketingBatch([{ to, subject, html, unsubUrl: unsubscribeUrl(to) }]);
+    const r0 = render(to, "");
+    const r = await sendMarketingBatch([{ to, subject: r0.subject, html: r0.html, unsubUrl: r0.unsubUrl }]);
     return NextResponse.json(r.sent > 0 ? { test: true, sent: 1 } : { error: "Test send failed" }, { status: r.sent > 0 ? 200 : 502 });
   }
 
   const contacts = await prisma.mailingContact.findMany({
     where: { unsubscribed: false },
-    select: { email: true },
+    select: { email: true, name: true },
   });
   if (contacts.length === 0) {
     return NextResponse.json({ error: "No subscribed contacts to send to." }, { status: 400 });
   }
 
   const messages = contacts.map((c) => {
-    const unsubUrl = unsubscribeUrl(c.email);
-    return { to: c.email, subject, html: render(c.email), unsubUrl };
+    const r = render(c.email, c.name);
+    return { to: c.email, subject: r.subject, html: r.html, unsubUrl: r.unsubUrl };
   });
 
   const result = await sendMarketingBatch(messages);

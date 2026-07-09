@@ -49,6 +49,18 @@ export function unsubscribeUrl(email: string): string {
   return `${SITE_URL}/api/mail/unsubscribe?e=${e}&t=${unsubToken(email)}`;
 }
 
+// ── Personalisation ──
+/** First name for a friendly greeting; "there" when we have no name. */
+export function firstName(name: string): string {
+  const n = (name || "").trim().split(/\s+/)[0];
+  return n || "there";
+}
+
+/** Replace {name} / {{name}} (any casing/spacing) with the recipient's first name. */
+export function personalize(text: string, name: string): string {
+  return text.replace(/\{\{?\s*name\s*\}?\}/gi, firstName(name));
+}
+
 // ── Body formatting: treat the admin's input as plain text, safely ──
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

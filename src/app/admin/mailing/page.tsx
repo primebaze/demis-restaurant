@@ -156,10 +156,13 @@ export default function MailingPage() {
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Write your message… (plain text — links become clickable, blank lines start new paragraphs)"
+              placeholder={"Hi {name},\n\nWrite your message here… links become clickable, blank lines start new paragraphs."}
               rows={7}
               className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-y"
             />
+            <p className="text-[11px] text-gray-500">
+              Tip: type <code className="text-gold-300">{"{name}"}</code> in the subject or message and it becomes each person&apos;s first name (e.g. &ldquo;Hi Cordelia,&rdquo;). No name on file falls back to &ldquo;there&rdquo;.
+            </p>
             {/* Email style */}
             <div>
               <div className="inline-flex rounded-lg border border-gray-700 overflow-hidden">
