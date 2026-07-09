@@ -15,15 +15,41 @@ function looksLikeName(c: string): boolean {
   return c.length > 0 && c.length <= 60 && !c.includes("@") && /[a-zA-Z]/.test(c);
 }
 
-/** From rows of cells (any column order): an email + optional name per row. */
+/** Trim junk/numbers off a candidate name and cap its length. Keeps common accents. */
+function cleanName(s: string): string {
+  return s
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^[^A-Za-zÀ-ÿ]+/, "")
+    .replace(/[^A-Za-zÀ-ÿ.'-]+$/, "")
+    .slice(0, 60)
+    .trim();
+}
+
+/**
+ * From rows of cells: an email + optional name per row.
+ * Handles both tidy columns (separate Name / Email cells) AND messy single-column
+ * data where the name and email share one cell, e.g. "Cordelia Adoli  x@y.co.uk".
+ */
 function rowsToPairs(rows: string[][]): Pair[] {
   const out: Pair[] = [];
   for (const row of rows) {
     if (!Array.isArray(row)) continue;
-    const cells = row.map((c) => (c || "").trim());
-    const email = cells.find((c) => ONE_EMAIL_RE.test(c));
-    if (!email) continue;
-    const name = cells.find((c) => c !== email && !ONE_EMAIL_RE.test(c) && looksLikeName(c)) || "";
+    const cells = row.map((c) => (c || "").trim()).filter(Boolean);
+    if (cells.length === 0) continue;
+
+    const joined = cells.join("  ");
+    const found = joined.match(EMAIL_RE);
+    if (!found || found.length === 0) continue;
+    const email = found[0];
+
+    // Prefer a clean, separate name cell; otherwise take the text before the email.
+    let name = cells.find((c) => !c.includes("@") && looksLikeName(c)) || "";
+    if (!name) {
+      const idx = joined.toLowerCase().indexOf(email.toLowerCase());
+      name = cleanName(joined.slice(0, idx));
+    }
+
     out.push({ email, name });
   }
   return out;
