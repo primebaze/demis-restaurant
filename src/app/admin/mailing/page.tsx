@@ -134,10 +134,10 @@ export default function MailingPage() {
         {/* Upload */}
         <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-white mb-1">Upload a client list</h2>
-          <p className="text-xs text-gray-500 mb-4">CSV or PDF. Emails are extracted and duplicates are merged automatically.</p>
+          <p className="text-xs text-gray-500 mb-4">Excel (.xlsx), CSV, or PDF. Emails are extracted and duplicates are merged automatically.</p>
           <label className="flex items-center justify-center h-28 border border-dashed border-gray-700 rounded-xl cursor-pointer text-sm text-gray-500 hover:border-gold-400 transition">
-            {uploading ? "Reading file…" : "Click to upload .csv or .pdf"}
-            <input type="file" accept=".csv,.pdf,text/csv,application/pdf" onChange={handleUpload} className="hidden" disabled={uploading} />
+            {uploading ? "Reading file…" : "Click to upload .xlsx, .csv or .pdf"}
+            <input type="file" accept=".xlsx,.xls,.csv,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/pdf" onChange={handleUpload} className="hidden" disabled={uploading} />
           </label>
           {uploadResult && <p className="mt-3 text-xs text-gray-300">{uploadResult}</p>}
         </div>

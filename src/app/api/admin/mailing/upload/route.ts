@@ -15,9 +15,8 @@ function looksLikeName(c: string): boolean {
   return c.length > 0 && c.length <= 60 && !c.includes("@") && /[a-zA-Z]/.test(c);
 }
 
-/** CSV: pull an email + optional name from each row, any column order. */
-function parseCsv(text: string): Pair[] {
-  const rows = Papa.parse<string[]>(text, { skipEmptyLines: true }).data;
+/** From rows of cells (any column order): an email + optional name per row. */
+function rowsToPairs(rows: string[][]): Pair[] {
   const out: Pair[] = [];
   for (const row of rows) {
     if (!Array.isArray(row)) continue;
@@ -30,10 +29,46 @@ function parseCsv(text: string): Pair[] {
   return out;
 }
 
+/** CSV. */
+function parseCsv(text: string): Pair[] {
+  const rows = Papa.parse<string[]>(text, { skipEmptyLines: true }).data;
+  return rowsToPairs(rows.filter(Array.isArray));
+}
+
+/** Coerce an ExcelJS cell value (string, number, hyperlink, rich text, formula) to plain text. */
+function cellText(v: unknown): string {
+  if (v == null) return "";
+  if (typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    if (typeof o.text === "string") return o.text;
+    if (typeof o.hyperlink === "string") return o.hyperlink.replace(/^mailto:/i, "");
+    if (o.result != null) return String(o.result);
+    if (Array.isArray(o.richText)) return o.richText.map((r) => (r as { text?: string }).text || "").join("");
+    return "";
+  }
+  return String(v);
+}
+
+/** XLSX (Excel): read every sheet's rows. */
+async function parseXlsx(buffer: Uint8Array): Promise<Pair[]> {
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+  const rows: string[][] = [];
+  wb.eachSheet((sheet) => {
+    sheet.eachRow({ includeEmpty: false }, (row) => {
+      const cells: string[] = [];
+      row.eachCell({ includeEmpty: true }, (cell) => cells.push(cellText(cell.value).trim()));
+      rows.push(cells);
+    });
+  });
+  return rowsToPairs(rows);
+}
+
 /** PDF: extract text, then pull every email (names aren't reliable from PDFs). */
-async function parsePdf(buffer: Buffer): Promise<Pair[]> {
+async function parsePdf(buffer: Uint8Array): Promise<Pair[]> {
   const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
+  const parser = new PDFParse({ data: buffer as Buffer });
   const result = await parser.getText();
   const emails = (result.text || "").match(EMAIL_RE) || [];
   return emails.map((email) => ({ email, name: "" }));
@@ -48,23 +83,24 @@ export async function POST(req: Request) {
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
   const name = file.name.toLowerCase();
-  const isCsv = name.endsWith(".csv") || file.type.includes("csv") || file.type.includes("text");
+  const isXlsx = name.endsWith(".xlsx") || name.endsWith(".xls") || file.type.includes("spreadsheet") || file.type.includes("excel");
   const isPdf = name.endsWith(".pdf") || file.type.includes("pdf");
-  if (!isCsv && !isPdf) {
-    return NextResponse.json({ error: "Please upload a .csv or .pdf file" }, { status: 400 });
+  const isCsv = !isXlsx && !isPdf && (name.endsWith(".csv") || file.type.includes("csv") || file.type.includes("text"));
+  if (!isCsv && !isPdf && !isXlsx) {
+    return NextResponse.json({ error: "Please upload a .csv, .xlsx, or .pdf file" }, { status: 400 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
   let pairs: Pair[];
   try {
-    pairs = isCsv ? parseCsv(buffer.toString("utf8")) : await parsePdf(buffer);
+    pairs = isXlsx ? await parseXlsx(buffer) : isPdf ? await parsePdf(buffer) : parseCsv(buffer.toString("utf8"));
   } catch (e) {
     console.error("Mailing upload parse error:", e);
-    return NextResponse.json({ error: "Could not read that file. Check it's a valid CSV or PDF." }, { status: 400 });
+    return NextResponse.json({ error: "Could not read that file. Check it's a valid CSV, Excel, or PDF." }, { status: 400 });
   }
 
-  const source = isCsv ? "csv" : "pdf";
+  const source = isXlsx ? "xlsx" : isPdf ? "pdf" : "csv";
 
   // Normalise + validate + dedupe within the file (keep the first non-empty name seen).
   const seen = new Map<string, string>();
