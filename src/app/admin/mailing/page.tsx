@@ -70,6 +70,7 @@ export default function MailingPage() {
   // ── Compose / send ──
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [emailStyle, setEmailStyle] = useState<"plain" | "branded">("plain");
   const [testEmail, setTestEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
@@ -86,7 +87,7 @@ export default function MailingPage() {
       const res = await fetch("/api/admin/mailing/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, body, test: test || undefined }),
+        body: JSON.stringify({ subject, body, style: emailStyle, test: test || undefined }),
       });
       const d = await res.json();
       if (!res.ok) setSendResult(d.error || "Send failed");
@@ -159,6 +160,27 @@ export default function MailingPage() {
               rows={7}
               className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-y"
             />
+            {/* Email style */}
+            <div>
+              <div className="inline-flex rounded-lg border border-gray-700 overflow-hidden">
+                {([
+                  { key: "plain", label: "Plain (better for inbox)" },
+                  { key: "branded", label: "Branded" },
+                ] as const).map((o) => (
+                  <button
+                    key={o.key}
+                    type="button"
+                    onClick={() => setEmailStyle(o.key)}
+                    className={`px-3 py-1.5 text-xs transition ${emailStyle === o.key ? "bg-gold-300 text-[#1a1a1a] font-semibold" : "bg-[#0f0f0f] text-gray-400 hover:text-white"}`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-1.5">
+                Plain looks like a personal note and lands in the main inbox more often. Branded uses the Demi&apos;s logo template (more likely to be filed under Promotions).
+              </p>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <input
                 value={testEmail}

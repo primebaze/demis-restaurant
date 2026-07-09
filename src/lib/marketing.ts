@@ -127,6 +127,25 @@ export function buildMarketingEmail(opts: {
 </html>`;
 }
 
+/**
+ * Plain / personal template — minimal HTML, no images, no button, no logo band.
+ * Reads like a normal one-to-one email, which Gmail is far more likely to place
+ * in the Primary tab than a designed marketing template.
+ */
+export function buildPlainEmail(opts: { bodyHtml: string; unsubUrl: string }): string {
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;background:#ffffff;">
+<div style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222222;max-width:560px;margin:0 auto;padding:20px;">
+  ${opts.bodyHtml}
+  <p style="color:#9a9a9a;font-size:12px;line-height:1.5;margin-top:28px;">
+    Demi's Nigerian Restaurant, Cricklewood &amp; Streatham Hill.
+    <a href="${opts.unsubUrl}" style="color:#9a9a9a;">Unsubscribe</a>.
+  </p>
+</div>
+</body></html>`;
+}
+
 // ── Send via Resend batch (up to 100 per call), personalised unsubscribe headers ──
 type Msg = { to: string; subject: string; html: string; unsubUrl: string };
 

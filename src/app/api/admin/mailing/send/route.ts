@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import {
   isMarketingConfigured,
   buildMarketingEmail,
+  buildPlainEmail,
   formatBody,
   unsubscribeUrl,
   sendMarketingBatch,
@@ -28,18 +29,23 @@ export async function POST(req: Request) {
     );
   }
 
-  const { subject, body, test } = await req.json();
+  const { subject, body, test, style } = await req.json();
   if (!subject?.trim() || !body?.trim()) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
   }
 
   const bodyHtml = formatBody(body);
   const preheader = body.trim().replace(/\s+/g, " ").slice(0, 110);
+  const plain = style === "plain";
+  const render = (to: string) =>
+    plain
+      ? buildPlainEmail({ bodyHtml, unsubUrl: unsubscribeUrl(to) })
+      : buildMarketingEmail({ subject, bodyHtml, unsubUrl: unsubscribeUrl(to), preheader });
 
   // Test send — one email, no logging, no contact list.
   if (test) {
     const to = String(test).trim().toLowerCase();
-    const html = buildMarketingEmail({ subject, bodyHtml, unsubUrl: unsubscribeUrl(to), preheader });
+    const html = render(to);
     const r = await sendMarketingBatch([{ to, subject, html, unsubUrl: unsubscribeUrl(to) }]);
     return NextResponse.json(r.sent > 0 ? { test: true, sent: 1 } : { error: "Test send failed" }, { status: r.sent > 0 ? 200 : 502 });
   }
@@ -54,12 +60,7 @@ export async function POST(req: Request) {
 
   const messages = contacts.map((c) => {
     const unsubUrl = unsubscribeUrl(c.email);
-    return {
-      to: c.email,
-      subject,
-      html: buildMarketingEmail({ subject, bodyHtml, unsubUrl, preheader }),
-      unsubUrl,
-    };
+    return { to: c.email, subject, html: render(c.email), unsubUrl };
   });
 
   const result = await sendMarketingBatch(messages);
