@@ -30,10 +30,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const { subject, body, test, style } = await req.json();
+  const { subject, body, test, style, ids } = await req.json();
   if (!subject?.trim() || !body?.trim()) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
   }
+  const selectedIds = Array.isArray(ids) && ids.length > 0 ? (ids as string[]) : null;
 
   const preheader = body.trim().replace(/\s+/g, " ").slice(0, 110);
   const plain = style === "plain";
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
   }
 
   const contacts = await prisma.mailingContact.findMany({
-    where: { unsubscribed: false },
+    where: { unsubscribed: false, ...(selectedIds ? { id: { in: selectedIds } } : {}) },
     select: { email: true, name: true },
   });
   if (contacts.length === 0) {

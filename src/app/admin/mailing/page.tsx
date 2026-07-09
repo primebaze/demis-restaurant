@@ -75,6 +75,27 @@ export default function MailingPage() {
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  function toggleSelect(id: string) {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+  // Select / clear all subscribed contacts on the current page.
+  function toggleSelectPage() {
+    const pageIds = contacts.filter((c) => !c.unsubscribed).map((c) => c.id);
+    setSelected((s) => {
+      const allOn = pageIds.every((id) => s.has(id));
+      const next = new Set(s);
+      if (allOn) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  }
 
   async function send(test?: string) {
     if (!subject.trim() || !body.trim()) {
@@ -84,15 +105,19 @@ export default function MailingPage() {
     setSending(true);
     setSendResult(null);
     try {
+      const ids = !test && selected.size > 0 ? Array.from(selected) : undefined;
       const res = await fetch("/api/admin/mailing/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, body, style: emailStyle, test: test || undefined }),
+        body: JSON.stringify({ subject, body, style: emailStyle, test: test || undefined, ids }),
       });
       const d = await res.json();
       if (!res.ok) setSendResult(d.error || "Send failed");
       else if (d.test) setSendResult(`Test sent to ${test}. Check the inbox.`);
-      else setSendResult(`Sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+      else {
+        setSendResult(`Sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+        setSelected(new Set());
+      }
     } finally {
       setSending(false);
     }
@@ -200,6 +225,11 @@ export default function MailingPage() {
 
           {/* Send — separated + two-step confirm to prevent accidental blasts */}
           <div className="mt-8 pt-6 border-t border-gray-800">
+            {selected.size > 0 && (
+              <p className="text-xs text-center text-gray-400 mb-2">
+                Sending to <span className="text-gold-300 font-semibold">{selected.size} selected</span> · <button onClick={() => setSelected(new Set())} className="underline hover:text-white">clear</button>
+              </p>
+            )}
             {!confirming ? (
               <button
                 onClick={() => {
@@ -210,12 +240,14 @@ export default function MailingPage() {
                 disabled={sending}
                 className="w-full px-4 py-3 bg-gold-300 text-black font-semibold rounded-lg text-sm hover:bg-gold-400 transition disabled:opacity-50"
               >
-                {sending ? "Sending…" : `Send to ${summary.subscribed} subscribers`}
+                {sending ? "Sending…" : selected.size > 0 ? `Send to ${selected.size} selected` : `Send to all ${summary.subscribed} subscribers`}
               </button>
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-center text-white">
-                  Send this to all <span className="font-semibold text-gold-300">{summary.subscribed}</span> subscribers? This can&apos;t be undone.
+                  {selected.size > 0
+                    ? <>Send this to the <span className="font-semibold text-gold-300">{selected.size} selected</span> {selected.size === 1 ? "contact" : "contacts"}? This can&apos;t be undone.</>
+                    : <>Send this to all <span className="font-semibold text-gold-300">{summary.subscribed}</span> subscribers? This can&apos;t be undone.</>}
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -242,7 +274,7 @@ export default function MailingPage() {
 
       {/* Contacts */}
       <div className="mt-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-1">
           <h2 className="text-sm font-semibold text-white">Contacts ({total})</h2>
           <input
             value={search}
@@ -251,6 +283,10 @@ export default function MailingPage() {
             className="px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 w-64 max-w-full"
           />
         </div>
+        <p className="text-xs text-gray-500 mb-3">
+          Tick contacts to send to just them (e.g. a warm-up batch). Leave everything unticked to send to all subscribers.
+          {selected.size > 0 && <span className="text-gold-300"> · {selected.size} selected</span>}
+        </p>
 
         <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
           {loading ? (
@@ -262,6 +298,15 @@ export default function MailingPage() {
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                    <th className="px-4 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all on this page"
+                        checked={contacts.some((c) => !c.unsubscribed) && contacts.filter((c) => !c.unsubscribed).every((c) => selected.has(c.id))}
+                        onChange={toggleSelectPage}
+                        className="accent-gold-300 w-4 h-4 align-middle"
+                      />
+                    </th>
                     <th className="px-4 py-3">Email</th>
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3">Source</th>
@@ -271,7 +316,17 @@ export default function MailingPage() {
                 </thead>
                 <tbody>
                   {contacts.map((c) => (
-                    <tr key={c.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
+                    <tr key={c.id} className={`border-b border-gray-800/50 hover:bg-white/[0.02] ${selected.has(c.id) ? "bg-gold-300/[0.06]" : ""}`}>
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${c.email}`}
+                          checked={selected.has(c.id)}
+                          disabled={c.unsubscribed}
+                          onChange={() => toggleSelect(c.id)}
+                          className="accent-gold-300 w-4 h-4 align-middle disabled:opacity-30"
+                        />
+                      </td>
                       <td className="px-4 py-3 text-sm text-white">{c.email}</td>
                       <td className="px-4 py-3 text-sm text-gray-400">{c.name || "—"}</td>
                       <td className="px-4 py-3 text-xs text-gray-500 uppercase">{c.source}</td>
