@@ -30,11 +30,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const { subject, body, test, style, ids } = await req.json();
+  const { subject, body, test, style, ids, limit } = await req.json();
   if (!subject?.trim() || !body?.trim()) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
   }
   const selectedIds = Array.isArray(ids) && ids.length > 0 ? (ids as string[]) : null;
+  const batchLimit = typeof limit === "number" && limit > 0 ? Math.floor(limit) : null;
 
   const preheader = body.trim().replace(/\s+/g, " ").slice(0, 110);
   const plain = style === "plain";
@@ -58,12 +59,28 @@ export async function POST(req: Request) {
     return NextResponse.json(r.sent > 0 ? { test: true, sent: 1 } : { error: "Test send failed" }, { status: r.sent > 0 ? 200 : 502 });
   }
 
-  const contacts = await prisma.mailingContact.findMany({
+  // Who already received THIS email (matched by subject)? Skip them so warm-up
+  // batches over several days never double-send to the same person.
+  const sentRows = await prisma.emailLog.findMany({
+    where: { subject, type: "marketing", status: "sent" },
+    select: { recipient: true },
+  });
+  const alreadySent = new Set(sentRows.map((r) => r.recipient.toLowerCase()));
+
+  const pool = await prisma.mailingContact.findMany({
     where: { unsubscribed: false, ...(selectedIds ? { id: { in: selectedIds } } : {}) },
     select: { email: true, name: true },
+    orderBy: { createdAt: "asc" }, // stable order so "next N" always continues where it left off
   });
+  const notYetSent = pool.filter((c) => !alreadySent.has(c.email.toLowerCase()));
+  const skipped = pool.length - notYetSent.length;
+  const contacts = batchLimit ? notYetSent.slice(0, batchLimit) : notYetSent;
+
   if (contacts.length === 0) {
-    return NextResponse.json({ error: "No subscribed contacts to send to." }, { status: 400 });
+    return NextResponse.json(
+      { error: skipped > 0 ? "Everyone here has already received this email." : "No subscribed contacts to send to." },
+      { status: 400 }
+    );
   }
 
   const messages = contacts.map((c) => {
@@ -88,5 +105,6 @@ export async function POST(req: Request) {
     })),
   });
 
-  return NextResponse.json({ sent: result.sent, failed: result.failed, total: messages.length });
+  const remaining = notYetSent.length - contacts.length;
+  return NextResponse.json({ sent: result.sent, failed: result.failed, total: messages.length, skipped, remaining });
 }

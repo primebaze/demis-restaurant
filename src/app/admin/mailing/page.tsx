@@ -75,6 +75,8 @@ export default function MailingPage() {
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [pendingLimit, setPendingLimit] = useState<number | null>(null);
+  const [batchSize, setBatchSize] = useState(50);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   function toggleSelect(id: string) {
@@ -97,7 +99,7 @@ export default function MailingPage() {
     });
   }
 
-  async function send(test?: string) {
+  async function send(test?: string, limit?: number) {
     if (!subject.trim() || !body.trim()) {
       setSendResult("Add a subject and a message first.");
       return;
@@ -109,13 +111,18 @@ export default function MailingPage() {
       const res = await fetch("/api/admin/mailing/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, body, style: emailStyle, test: test || undefined, ids }),
+        body: JSON.stringify({ subject, body, style: emailStyle, test: test || undefined, ids, limit }),
       });
       const d = await res.json();
       if (!res.ok) setSendResult(d.error || "Send failed");
       else if (d.test) setSendResult(`Test sent to ${test}. Check the inbox.`);
       else {
-        setSendResult(`Sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+        const parts = [`Sent to ${d.sent} of ${d.total}`];
+        if (d.failed) parts.push(`${d.failed} failed`);
+        if (d.skipped) parts.push(`skipped ${d.skipped} already emailed`);
+        let msg = parts.join(", ") + ".";
+        if (d.remaining) msg += ` ${d.remaining} still to go.`;
+        setSendResult(msg);
         setSelected(new Set());
       }
     } finally {
@@ -231,23 +238,50 @@ export default function MailingPage() {
               </p>
             )}
             {!confirming ? (
-              <button
-                onClick={() => {
-                  if (!subject.trim() || !body.trim()) { setSendResult("Add a subject and a message first."); return; }
-                  setSendResult(null);
-                  setConfirming(true);
-                }}
-                disabled={sending}
-                className="w-full px-4 py-3 bg-gold-300 text-black font-semibold rounded-lg text-sm hover:bg-gold-400 transition disabled:opacity-50"
-              >
-                {sending ? "Sending…" : selected.size > 0 ? `Send to ${selected.size} selected` : `Send to all ${summary.subscribed} subscribers`}
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    if (!subject.trim() || !body.trim()) { setSendResult("Add a subject and a message first."); return; }
+                    setSendResult(null); setPendingLimit(null); setConfirming(true);
+                  }}
+                  disabled={sending}
+                  className="w-full px-4 py-3 bg-gold-300 text-black font-semibold rounded-lg text-sm hover:bg-gold-400 transition disabled:opacity-50"
+                >
+                  {sending ? "Sending…" : selected.size > 0 ? `Send to ${selected.size} selected` : `Send to all ${summary.subscribed} subscribers`}
+                </button>
+
+                {/* Warm-up: send the next N who haven't received it yet */}
+                {selected.size === 0 && (
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                    <span>or send the next</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={batchSize}
+                      onChange={(e) => setBatchSize(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-16 px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-center focus:outline-none focus:border-gold-400"
+                    />
+                    <button
+                      onClick={() => {
+                        if (!subject.trim() || !body.trim()) { setSendResult("Add a subject and a message first."); return; }
+                        setSendResult(null); setPendingLimit(batchSize); setConfirming(true);
+                      }}
+                      disabled={sending}
+                      className="px-3 py-1.5 border border-gray-700 rounded-lg text-gray-300 hover:bg-white/5 transition disabled:opacity-50"
+                    >
+                      Send next {batchSize} not yet emailed
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-center text-white">
-                  {selected.size > 0
-                    ? <>Send this to the <span className="font-semibold text-gold-300">{selected.size} selected</span> {selected.size === 1 ? "contact" : "contacts"}? This can&apos;t be undone.</>
-                    : <>Send this to all <span className="font-semibold text-gold-300">{summary.subscribed}</span> subscribers? This can&apos;t be undone.</>}
+                  {pendingLimit != null
+                    ? <>Send to the next <span className="font-semibold text-gold-300">{pendingLimit}</span> who haven&apos;t received this yet? This can&apos;t be undone.</>
+                    : selected.size > 0
+                    ? <>Send this to the <span className="font-semibold text-gold-300">{selected.size} selected</span> {selected.size === 1 ? "contact" : "contacts"}? Anyone who already got it is skipped. This can&apos;t be undone.</>
+                    : <>Send this to all <span className="font-semibold text-gold-300">{summary.subscribed}</span> subscribers? Anyone who already got it is skipped. This can&apos;t be undone.</>}
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -258,7 +292,7 @@ export default function MailingPage() {
                     Cancel
                   </button>
                   <button
-                    onClick={() => { setConfirming(false); send(); }}
+                    onClick={() => { setConfirming(false); send(undefined, pendingLimit ?? undefined); }}
                     disabled={sending}
                     className="flex-1 px-4 py-3 bg-red-500 text-white font-semibold rounded-lg text-sm hover:bg-red-600 transition disabled:opacity-50"
                   >
