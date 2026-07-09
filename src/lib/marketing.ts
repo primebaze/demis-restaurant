@@ -81,7 +81,10 @@ export function formatBody(text: string): string {
     .join("");
 }
 
-// ── Branded email template ──
+// ── Branded email template (matches the booking-confirmation look that lands in the inbox) ──
+const SERIF = "'Georgia','Times New Roman',serif";
+const SANS = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+
 export function buildMarketingEmail(opts: {
   subject: string;
   bodyHtml: string;
@@ -91,10 +94,10 @@ export function buildMarketingEmail(opts: {
   const logoUrl = process.env.MARKETING_LOGO_URL;
   const header = logoUrl
     ? `<img src="${logoUrl}" alt="Demi's Restaurant" width="150" style="display:block;margin:0 auto;border:0;">`
-    : `<div style="font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1;letter-spacing:14px;color:#e3c07a;font-weight:normal;padding-left:14px;">DEMI'S</div>
-       <div style="font-size:9px;letter-spacing:6px;color:#b79a5f;text-transform:uppercase;margin-top:10px;padding-left:6px;">Nigerian Restaurant</div>`;
+    : `<h1 style="margin:0;font-family:${SERIF};font-size:36px;font-weight:400;color:#e8cc9c;letter-spacing:2px;">Demi&rsquo;s</h1>
+       <p style="margin:4px 0 0;font-family:${SANS};font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#999;">Restaurant</p>`;
 
-  return `<!doctype html>
+  return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -102,36 +105,55 @@ export function buildMarketingEmail(opts: {
 <meta name="color-scheme" content="light">
 <title>${escapeHtml(opts.subject)}</title>
 </head>
-<body style="margin:0;padding:0;background:#f1ede4;">
+<body style="margin:0;padding:0;background-color:#f0f0f0;font-family:${SERIF};">
 <span style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(opts.preheader || "")}</span>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1ede4;padding:24px 0;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f0f0;padding:40px 20px;">
   <tr><td align="center">
-    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-      <!-- Header -->
-      <tr><td align="center" style="background:#141210;padding:34px 24px;">
+    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;">
+
+      <!-- Logo header -->
+      <tr><td align="center" style="padding:40px 40px 28px;background-color:#fff;border-radius:12px 12px 0 0;">
         ${header}
       </td></tr>
-      <!-- Gold rule -->
-      <tr><td style="height:3px;background:linear-gradient(90deg,#e3c07a,#b8862f);font-size:0;line-height:0;">&nbsp;</td></tr>
+
       <!-- Body -->
-      <tr><td style="padding:36px 40px 28px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2b2620;">
+      <tr><td style="background-color:#fff;padding:8px 40px 8px;font-family:${SANS};font-size:15px;line-height:1.75;color:#333;">
         ${opts.bodyHtml}
       </td></tr>
-      <!-- CTA to book -->
-      <tr><td align="center" style="padding:4px 40px 40px;">
-        <a href="${SITE_URL}/booking" style="display:inline-block;background:#e3c07a;color:#141210;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:13px 30px;border-radius:8px;">Book a Table</a>
+
+      <!-- Book a table link -->
+      <tr><td align="center" style="background-color:#fff;padding:12px 40px 40px;border-radius:0 0 0 0;">
+        <a href="${SITE_URL}/booking" style="font-family:${SANS};color:#8b0000;font-size:14px;font-weight:700;text-decoration:none;">Book a table &rarr;</a>
       </td></tr>
+
       <!-- Footer -->
-      <tr><td style="background:#faf7f0;padding:24px 40px;border-top:1px solid #eadfce;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:12px;line-height:1.6;color:#8a8172;text-align:center;">
-        <strong style="color:#6b6355;">Demi's Nigerian Restaurant</strong><br>
-        89 Cricklewood Broadway, London NW2 3JG &middot; 67 Streatham Hill, London SW2 4TX<br>
-        <a href="tel:+442039046977" style="color:#8a8172;text-decoration:none;">020 3904 6977</a>
-        &middot;
-        <a href="${SITE_URL}" style="color:#8a8172;text-decoration:none;">demisrestaurant.co.uk</a>
-        <br><br>
-        You're receiving this because you joined our list.
-        <a href="${opts.unsubUrl}" style="color:#b8862f;text-decoration:underline;">Unsubscribe</a>.
+      <tr><td align="center" style="padding:28px 40px 36px;background-color:#f0f0f0;">
+        <p style="margin:0;font-family:${SANS};color:#666;font-size:12px;font-weight:700;letter-spacing:0.5px;">Demi&rsquo;s Nigerian Restaurant</p>
+        <p style="margin:8px 0 0;font-family:${SANS};color:#999;font-size:11px;line-height:1.7;">
+          89 Cricklewood Broadway, London NW2 3JG<br/>
+          67 Streatham Hill, London SW2 4TX
+        </p>
+        <p style="margin:10px 0 0;font-family:${SANS};color:#999;font-size:11px;line-height:1.7;">
+          <a href="tel:+442039046977" style="color:#999;text-decoration:none;">020 3904 6977</a>
+          &middot;
+          <a href="mailto:bookings@demisrestaurant.co.uk" style="color:#999;text-decoration:none;">bookings@demisrestaurant.co.uk</a>
+        </p>
+        <p style="margin:12px 0 0;font-family:${SANS};font-size:11px;line-height:1.7;">
+          <a href="${SITE_URL}" style="color:#8b0000;text-decoration:none;">Website</a>
+          &middot;
+          <a href="${SITE_URL}/menu" style="color:#8b0000;text-decoration:none;">Menu</a>
+          &middot;
+          <a href="https://www.instagram.com/demisrestaurant/" style="color:#8b0000;text-decoration:none;">Instagram</a>
+          &middot;
+          <a href="${SITE_URL}/booking" style="color:#8b0000;text-decoration:none;">Book</a>
+        </p>
+        <p style="margin:18px 0 0;font-family:${SANS};color:#bbb;font-size:10px;line-height:1.7;">
+          Real Nigerian cuisine in the heart of London &mdash; jollof, suya, egusi, pounded yam &amp; more.<br/>
+          You&rsquo;re receiving this because you joined Demi&rsquo;s mailing list.
+          <a href="${opts.unsubUrl}" style="color:#bbb;text-decoration:underline;">Unsubscribe</a>.
+        </p>
       </td></tr>
+
     </table>
   </td></tr>
 </table>
@@ -150,8 +172,10 @@ export function buildPlainEmail(opts: { bodyHtml: string; unsubUrl: string }): s
 <body style="margin:0;background:#ffffff;">
 <div style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222222;max-width:560px;margin:0 auto;padding:20px;">
   ${opts.bodyHtml}
-  <p style="color:#9a9a9a;font-size:12px;line-height:1.5;margin-top:28px;">
-    Demi's Nigerian Restaurant, Cricklewood &amp; Streatham Hill.
+  <p style="color:#9a9a9a;font-size:12px;line-height:1.6;margin-top:28px;">
+    Demi's Nigerian Restaurant &mdash; Cricklewood &amp; Streatham Hill, London.<br>
+    <a href="tel:+442039046977" style="color:#9a9a9a;">020 3904 6977</a> &middot;
+    <a href="${SITE_URL}" style="color:#9a9a9a;">demisrestaurant.co.uk</a> &middot;
     <a href="${opts.unsubUrl}" style="color:#9a9a9a;">Unsubscribe</a>.
   </p>
 </div>

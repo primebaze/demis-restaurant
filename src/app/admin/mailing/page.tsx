@@ -70,7 +70,7 @@ export default function MailingPage() {
   // ── Compose / send ──
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [emailStyle, setEmailStyle] = useState<"plain" | "branded">("plain");
+  const [emailStyle, setEmailStyle] = useState<"plain" | "branded">("branded");
   const [testEmail, setTestEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
@@ -167,8 +167,8 @@ export default function MailingPage() {
             <div>
               <div className="inline-flex rounded-lg border border-gray-700 overflow-hidden">
                 {([
-                  { key: "plain", label: "Plain (better for inbox)" },
-                  { key: "branded", label: "Branded" },
+                  { key: "branded", label: "Demi's template" },
+                  { key: "plain", label: "Plain / personal" },
                 ] as const).map((o) => (
                   <button
                     key={o.key}
@@ -181,7 +181,7 @@ export default function MailingPage() {
                 ))}
               </div>
               <p className="text-[11px] text-gray-500 mt-1.5">
-                Plain looks like a personal note and lands in the main inbox more often. Branded uses the Demi&apos;s logo template (more likely to be filed under Promotions).
+                Demi&apos;s template matches the booking-confirmation email (gold logo, clean white layout). Plain looks like a personal note, useful if you want the most inbox-like feel.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
