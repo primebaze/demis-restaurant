@@ -117,13 +117,8 @@ export function buildMarketingEmail(opts: {
       </td></tr>
 
       <!-- Body -->
-      <tr><td style="background-color:#fff;padding:8px 40px 8px;font-family:${SANS};font-size:15px;line-height:1.75;color:#333;">
+      <tr><td style="background-color:#fff;padding:8px 40px 40px;border-radius:0 0 12px 12px;font-family:${SANS};font-size:15px;line-height:1.75;color:#333;">
         ${opts.bodyHtml}
-      </td></tr>
-
-      <!-- Book a table link -->
-      <tr><td align="center" style="background-color:#fff;padding:12px 40px 40px;border-radius:0 0 0 0;">
-        <a href="${SITE_URL}/booking" style="font-family:${SANS};color:#8b0000;font-size:14px;font-weight:700;text-decoration:none;">Book a table &rarr;</a>
       </td></tr>
 
       <!-- Footer -->
@@ -138,17 +133,7 @@ export function buildMarketingEmail(opts: {
           &middot;
           <a href="mailto:bookings@demisrestaurant.co.uk" style="color:#999;text-decoration:none;">bookings@demisrestaurant.co.uk</a>
         </p>
-        <p style="margin:12px 0 0;font-family:${SANS};font-size:11px;line-height:1.7;">
-          <a href="${SITE_URL}" style="color:#8b0000;text-decoration:none;">Website</a>
-          &middot;
-          <a href="${SITE_URL}/menu" style="color:#8b0000;text-decoration:none;">Menu</a>
-          &middot;
-          <a href="https://www.instagram.com/demisrestaurant/" style="color:#8b0000;text-decoration:none;">Instagram</a>
-          &middot;
-          <a href="${SITE_URL}/booking" style="color:#8b0000;text-decoration:none;">Book</a>
-        </p>
-        <p style="margin:18px 0 0;font-family:${SANS};color:#bbb;font-size:10px;line-height:1.7;">
-          Real Nigerian cuisine in the heart of London &mdash; jollof, suya, egusi, pounded yam &amp; more.<br/>
+        <p style="margin:16px 0 0;font-family:${SANS};color:#bbb;font-size:10px;line-height:1.7;">
           You&rsquo;re receiving this because you joined Demi&rsquo;s mailing list.
           <a href="${opts.unsubUrl}" style="color:#bbb;text-decoration:underline;">Unsubscribe</a>.
         </p>
