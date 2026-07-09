@@ -74,13 +74,13 @@ export default function MailingPage() {
   const [testEmail, setTestEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   async function send(test?: string) {
     if (!subject.trim() || !body.trim()) {
       setSendResult("Add a subject and a message first.");
       return;
     }
-    if (!test && !confirm(`Send this email to all ${summary.subscribed} subscribed contacts?`)) return;
     setSending(true);
     setSendResult(null);
     try {
@@ -196,14 +196,46 @@ export default function MailingPage() {
                 Send test
               </button>
             </div>
-            <button
-              onClick={() => send()}
-              disabled={sending}
-              className="w-full px-4 py-2.5 bg-gold-300 text-black font-semibold rounded-lg text-sm hover:bg-gold-400 transition disabled:opacity-50"
-            >
-              {sending ? "Sending…" : `Send to ${summary.subscribed} subscribers`}
-            </button>
-            {sendResult && <p className="text-xs text-gray-300">{sendResult}</p>}
+          </div>
+
+          {/* Send — separated + two-step confirm to prevent accidental blasts */}
+          <div className="mt-8 pt-6 border-t border-gray-800">
+            {!confirming ? (
+              <button
+                onClick={() => {
+                  if (!subject.trim() || !body.trim()) { setSendResult("Add a subject and a message first."); return; }
+                  setSendResult(null);
+                  setConfirming(true);
+                }}
+                disabled={sending}
+                className="w-full px-4 py-3 bg-gold-300 text-black font-semibold rounded-lg text-sm hover:bg-gold-400 transition disabled:opacity-50"
+              >
+                {sending ? "Sending…" : `Send to ${summary.subscribed} subscribers`}
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-center text-white">
+                  Send this to all <span className="font-semibold text-gold-300">{summary.subscribed}</span> subscribers? This can&apos;t be undone.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setConfirming(false)}
+                    disabled={sending}
+                    className="flex-1 px-4 py-3 border border-gray-700 text-gray-300 rounded-lg text-sm hover:bg-white/5 transition disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => { setConfirming(false); send(); }}
+                    disabled={sending}
+                    className="flex-1 px-4 py-3 bg-red-500 text-white font-semibold rounded-lg text-sm hover:bg-red-600 transition disabled:opacity-50"
+                  >
+                    {sending ? "Sending…" : "Yes, send now"}
+                  </button>
+                </div>
+              </div>
+            )}
+            {sendResult && <p className="text-xs text-gray-300 mt-3 text-center">{sendResult}</p>}
           </div>
         </div>
       </div>
