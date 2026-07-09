@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
   if (!isMarketingConfigured()) {
     return NextResponse.json(
-      { error: "Marketing email isn't set up yet. Add RESEND_MARKETING_API_KEY (and MARKETING_EMAIL_FROM) for hello.demisrestaurant.co.uk." },
+      { error: "Marketing email isn't set up yet. Verify hello.demisrestaurant.co.uk in Resend and set MARKETING_EMAIL_FROM (your existing Resend key is reused)." },
       { status: 400 }
     );
   }

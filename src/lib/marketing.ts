@@ -3,15 +3,24 @@ import crypto from "crypto";
 /**
  * Marketing / email-blast helpers.
  *
- * Sends from a SEPARATE Resend domain (hello.demisrestaurant.co.uk) so marketing
- * mail is isolated from transactional booking mail. Requires:
- *   RESEND_MARKETING_API_KEY   — Resend key for the verified hello. domain
+ * Sends from the hello.demisrestaurant.co.uk domain so marketing mail is separate
+ * from transactional booking mail. A Resend API key is account-level, so the SAME
+ * key sends from any verified domain — the "from" address picks the domain.
+ *
+ * Requires:
  *   MARKETING_EMAIL_FROM       — e.g. "Demi's Restaurant <hello@hello.demisrestaurant.co.uk>"
+ *                                (the hello. domain must be verified in your Resend account)
+ *   a Resend key               — reuses RESEND_API_KEY; set RESEND_MARKETING_API_KEY only
+ *                                if you want a separate/domain-scoped key
  * Optional:
  *   MARKETING_LOGO_URL         — hosted logo image for the email header
  *   UNSUBSCRIBE_SECRET         — falls back to ADMIN_JWT_SECRET
  *   NEXT_PUBLIC_SITE_URL       — used to build unsubscribe links
  */
+
+function resendKey(): string | undefined {
+  return process.env.RESEND_MARKETING_API_KEY || process.env.RESEND_API_KEY;
+}
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.demisrestaurant.co.uk").replace(/\/$/, "");
 const MARKETING_FROM =
@@ -19,7 +28,7 @@ const MARKETING_FROM =
 const UNSUB_SECRET = process.env.UNSUBSCRIBE_SECRET || process.env.ADMIN_JWT_SECRET || "demis-marketing-fallback";
 
 export function isMarketingConfigured(): boolean {
-  return !!process.env.RESEND_MARKETING_API_KEY;
+  return !!resendKey();
 }
 
 // ── Unsubscribe tokens (HMAC of the email, no DB lookup needed to verify) ──
@@ -124,7 +133,7 @@ type Msg = { to: string; subject: string; html: string; unsubUrl: string };
 export async function sendMarketingBatch(
   messages: Msg[]
 ): Promise<{ sent: number; failed: number }> {
-  const key = process.env.RESEND_MARKETING_API_KEY;
+  const key = resendKey();
   if (!key) return { sent: 0, failed: messages.length };
 
   let sent = 0;
