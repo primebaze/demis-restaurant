@@ -47,6 +47,7 @@ export default function AdminGuestsPage() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [exporting, setExporting] = useState(false);
+  const [exportingCsv, setExportingCsv] = useState(false);
 
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -135,6 +136,50 @@ export default function AdminGuestsPage() {
       doc.save(`demis-guests-${new Date().toISOString().slice(0, 10)}.pdf`);
     } finally {
       setExporting(false);
+    }
+  }
+
+  async function exportCsv() {
+    setExportingCsv(true);
+    try {
+      const res = await fetch("/api/admin/guests?export=true&page=1");
+      const data = await res.json();
+      const allGuests: GuestRow[] = data.guests || [];
+
+      const headers = [
+        "Name", "Email", "Phone", "Tags", "Notes",
+        "Bookings", "Visits", "Spend (GBP)", "Last Booking Date", "Last Booking Status", "Added",
+      ];
+      const esc = (v: unknown) => {
+        const s = String(v ?? "");
+        return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const rows = allGuests.map((g) =>
+        [
+          g.name,
+          g.email,
+          g.phone,
+          g.tags,
+          g.notes,
+          g.totalBookings,
+          g.totalVisits,
+          (g.totalSpendPence / 100).toFixed(2),
+          g.lastBooking?.date || "",
+          g.lastBooking?.status || "",
+          new Date(g.createdAt).toLocaleDateString("en-GB"),
+        ].map(esc).join(",")
+      );
+      // Prepend a BOM so Excel reads accented characters correctly.
+      const csv = "﻿" + [headers.join(","), ...rows].join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `demis-guests-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportingCsv(false);
     }
   }
 
@@ -236,6 +281,16 @@ export default function AdminGuestsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             {exporting ? "Exporting…" : "Export PDF"}
+          </button>
+          <button
+            onClick={exportCsv}
+            disabled={exportingCsv}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            {exportingCsv ? "Exporting…" : "Export CSV"}
           </button>
           <button
             onClick={openComposeAll}
