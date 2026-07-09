@@ -79,8 +79,8 @@ export function buildMarketingEmail(opts: {
   const logoUrl = process.env.MARKETING_LOGO_URL;
   const header = logoUrl
     ? `<img src="${logoUrl}" alt="Demi's Restaurant" width="150" style="display:block;margin:0 auto;border:0;">`
-    : `<div style="font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1;letter-spacing:6px;color:#e3c07a;font-weight:bold;">DEMI'S</div>
-       <div style="font-size:10px;letter-spacing:4px;color:#b79a5f;text-transform:uppercase;margin-top:6px;">Nigerian Restaurant</div>`;
+    : `<div style="font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1;letter-spacing:14px;color:#e3c07a;font-weight:normal;padding-left:14px;">DEMI'S</div>
+       <div style="font-size:9px;letter-spacing:6px;color:#b79a5f;text-transform:uppercase;margin-top:10px;padding-left:6px;">Nigerian Restaurant</div>`;
 
   return `<!doctype html>
 <html>

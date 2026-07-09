@@ -8,8 +8,8 @@ function page(message: string, sub: string): Response {
 <meta name="robots" content="noindex"><title>Unsubscribe · Demi's Restaurant</title></head>
 <body style="margin:0;background:#0f0f0f;color:#f4efe4;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;">
   <div style="max-width:440px;text-align:center;padding:40px 24px;">
-    <div style="font-family:Georgia,serif;font-size:26px;letter-spacing:5px;color:#e3c07a;font-weight:bold;">DEMI'S</div>
-    <div style="font-size:10px;letter-spacing:4px;color:#b79a5f;text-transform:uppercase;margin-top:6px;margin-bottom:28px;">Nigerian Restaurant</div>
+    <div style="font-family:Georgia,serif;font-size:26px;letter-spacing:12px;color:#e3c07a;font-weight:normal;padding-left:12px;">DEMI'S</div>
+    <div style="font-size:9px;letter-spacing:6px;color:#b79a5f;text-transform:uppercase;margin-top:8px;margin-bottom:28px;padding-left:6px;">Nigerian Restaurant</div>
     <h1 style="font-size:20px;margin:0 0 10px;">${message}</h1>
     <p style="color:#a49c88;font-size:14px;line-height:1.6;margin:0 0 24px;">${sub}</p>
     <a href="https://www.demisrestaurant.co.uk" style="display:inline-block;background:#e3c07a;color:#141210;font-weight:bold;text-decoration:none;padding:12px 26px;border-radius:8px;font-size:14px;">Back to our website</a>
