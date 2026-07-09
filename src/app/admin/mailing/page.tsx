@@ -161,7 +161,7 @@ export default function MailingPage() {
               className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-y"
             />
             <p className="text-[11px] text-gray-500">
-              Tip: type <code className="text-gold-300">{"{name}"}</code> in the subject or message and it becomes each person&apos;s first name (e.g. &ldquo;Hi Cordelia,&rdquo;). No name on file falls back to &ldquo;there&rdquo;.
+              Use <code className="text-gold-300">{"{name}"}</code> for the recipient&apos;s first name.
             </p>
             {/* Email style */}
             <div>
@@ -180,9 +180,6 @@ export default function MailingPage() {
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-gray-500 mt-1.5">
-                Demi&apos;s template matches the booking-confirmation email (gold logo, clean white layout). Plain looks like a personal note, useful if you want the most inbox-like feel.
-              </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <input
