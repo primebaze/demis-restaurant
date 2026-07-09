@@ -340,6 +340,19 @@ model BlogAd {
   @@index([active, sortOrder])
 }
 
+// ─── MAILING LIST (marketing / email blast) ───
+// Separate from Guest so uploaded lists never affect bookings or the website.
+model MailingContact {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String   @default("")
+  source       String   @default("manual") // csv, pdf, manual
+  unsubscribed Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([unsubscribed])
+}
+
 // ─── BLOG COMMENTS ───
 model BlogComment {
   id        String   @id @default(cuid())

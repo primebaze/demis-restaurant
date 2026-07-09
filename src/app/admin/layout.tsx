@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/admin/calendar", label: "Calendar", icon: "🗓️" },
   { href: "/admin/guests", label: "Guests", icon: "👥" },
   { href: "/admin/email-logs", label: "Email Logs", icon: "📧" },
+  { href: "/admin/mailing", label: "Email Blast", icon: "📣" },
   { href: "/admin/settings", label: "Settings", icon: "⚙️" },
 ];
 
