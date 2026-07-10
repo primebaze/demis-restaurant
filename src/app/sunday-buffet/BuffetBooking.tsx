@@ -67,8 +67,17 @@ export function BuffetBooking() {
     };
   })();
 
+  function validate(): string | null {
+    if (!name.trim()) return "Please enter your name";
+    if (!phone.trim()) return "Please enter your phone number";
+    if ((phone.match(/\d/g) || []).length < 7) return "Please enter a valid phone number";
+    if (email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) return "Please enter a valid email";
+    return null;
+  }
+
   async function reserve() {
-    if (!name.trim()) { setError("Please enter your name"); return; }
+    const problem = validate();
+    if (problem) { setError(problem); return; }
     setSubmitting(true);
     setError("");
     try {
@@ -175,9 +184,9 @@ export function BuffetBooking() {
       )}
 
       <div className="space-y-3">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className={inputCls} />
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (for your confirmation)" className={inputCls} />
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (optional)" className={inputCls} />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className={inputCls} />
+        <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
+        <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (optional, for your confirmation)" autoComplete="email" className={inputCls} />
         <div className="flex items-center justify-between px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
           <span className="text-sm text-stone-400">How many of you?</span>
           <div className="flex items-center gap-4">

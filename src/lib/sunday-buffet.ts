@@ -15,11 +15,22 @@ export const TIERS = [
   { price: 30, upto: Infinity }, // 46+
 ];
 
-/** The upcoming Sunday (UK time), YYYY-MM-DD. Returns today if today is Sunday. */
+/**
+ * The upcoming Sunday (UK time), YYYY-MM-DD. Today if it's Sunday and the buffet
+ * hasn't finished yet; once today's service is over (after 4pm), rolls to next Sunday.
+ */
 export function upcomingSunday(from: Date = new Date()): string {
   const [y, m, d] = serviceDate(from).split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
-  const add = (7 - dt.getUTCDay()) % 7; // 0 = Sunday
+  let add = (7 - dt.getUTCDay()) % 7; // 0 = Sunday
+  if (add === 0) {
+    // It's Sunday — roll to next week once today's buffet has ended (after 4pm London).
+    const hour = parseInt(
+      new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hour12: false }).format(from),
+      10
+    );
+    if (hour >= 16) add = 7;
+  }
   dt.setUTCDate(dt.getUTCDate() + add);
   return dt.toISOString().slice(0, 10);
 }

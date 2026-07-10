@@ -58,6 +58,10 @@ export async function POST(req: Request) {
   const partySize = Math.min(20, Math.max(1, parseInt(body.partySize) || 1));
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
+  if (!phone) return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
+  if ((phone.match(/\d/g) || []).length < 7) {
+    return NextResponse.json({ error: "Please enter a valid phone number" }, { status: 400 });
+  }
   if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
   }
