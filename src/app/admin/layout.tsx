@@ -86,7 +86,7 @@ export default function AdminLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#141414] border-r border-gray-800 transform transition-transform lg:transform-none ${
+        className={`fixed lg:sticky lg:top-0 lg:self-start lg:h-screen inset-y-0 left-0 z-50 w-64 bg-[#141414] border-r border-gray-800 transform transition-transform lg:transform-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -100,7 +100,7 @@ export default function AdminLayout({
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {NAV_ITEMS.map((item) => {
               const isActive =
                 item.href === "/admin"
