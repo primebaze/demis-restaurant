@@ -29,17 +29,19 @@ const cardCls = "relative rounded-2xl border border-white/[0.08] bg-gradient-to-
 export default function SundayBuffetPage() {
   return (
     <div className="min-h-screen bg-[#0b0a09] pb-24">
-      <style>{`
-        @keyframes kbZoom { from { transform: scale(1); } to { transform: scale(1.14); } }
-        .kb-zoom { animation: kbZoom 26s ease-in-out infinite alternate; }
-        @media (prefers-reduced-motion: reduce) { .kb-zoom { animation: none; } }
-      `}</style>
-
-      {/* ── Hero with Ken Burns image ── */}
+      {/* ── Hero video ── */}
       <section className="relative h-[62vh] min-h-[440px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/buffet.jpg" alt="Demi's Sunday buffet spread" className="w-full h-full object-cover kb-zoom" />
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/buffet.jpg"
+          >
+            <source src="/buffet.mp4" type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-[#0b0a09]" />
         </div>
         <div className="relative text-center px-6">
@@ -56,7 +58,7 @@ export default function SundayBuffetPage() {
       <div className="mx-auto max-w-6xl px-6 -mt-16 relative">
         <div className="grid lg:grid-cols-[1fr_460px] gap-8 lg:gap-12 items-start">
           {/* ── Info column ── */}
-          <div className="space-y-8">
+          <div className="space-y-8 order-2 lg:order-1">
             {/* Pricing */}
             <section className={`${cardCls} p-8 sm:p-10`}>
               <div className="absolute top-0 left-8 sm:left-10 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
@@ -120,7 +122,7 @@ export default function SundayBuffetPage() {
           </div>
 
           {/* ── Booking ── */}
-          <div className="lg:sticky lg:top-28">
+          <div className="order-1 lg:order-2 lg:sticky lg:top-28">
             <BuffetBooking />
           </div>
         </div>
