@@ -353,6 +353,24 @@ model MailingContact {
   @@index([unsubscribed])
 }
 
+// ─── SUNDAY BUFFET PRE-BOOKINGS ───
+// Reserve a spot for the Sunday buffet. Each cover gets a sequential number for
+// the date; the number sets the price tier (1-20 £20, 21-45 £25, 46+ £30), paid on arrival.
+model SundayBuffetBooking {
+  id        String   @id @default(cuid())
+  date      String   // the Sunday, "2026-07-12"
+  number    Int      // starting cover number for this booking
+  partySize Int      @default(1)
+  name      String
+  email     String   @default("")
+  phone     String   @default("")
+  status    String   @default("booked") // booked, arrived, cancelled
+  createdAt DateTime @default(now())
+
+  @@unique([date, number])
+  @@index([date])
+}
+
 // ─── BLOG COMMENTS ───
 model BlogComment {
   id        String   @id @default(cuid())
