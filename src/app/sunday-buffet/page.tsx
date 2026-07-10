@@ -120,7 +120,7 @@ export default async function SundayBuffetPage() {
               <div className="absolute top-0 left-8 sm:left-10 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
               <div className="grid sm:grid-cols-3 gap-6">
                 {[
-                  { k: "When", v: ["Every Sunday", "12:30pm – 4:00pm"] },
+                  { k: "When", v: ["Every Sunday", "From 12:30pm"] },
                   { k: "Where", v: ["Streatham Hill", "67 Streatham Hill, SW2 4TX"] },
                   { k: "Payment", v: ["At the door", "Cash or card"] },
                 ].map((d) => (

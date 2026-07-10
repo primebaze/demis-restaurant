@@ -12,7 +12,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
     q: "How does the Sunday buffet work?",
     a: (
       <>
-        All-you-can-eat every Sunday, 12:30pm to 4:00pm. The earlier you arrive, the less you pay: first 20 people £20, next 25 £25, then £30, paid at the door.{" "}
+        All-you-can-eat every Sunday, from 12:30pm. The earlier you arrive, the less you pay: first 20 people £20, next 25 £25, then £30, paid at the door.{" "}
         <Link href="/sunday-buffet" className="text-gold-300 underline">Reserve a spot</Link> to guarantee your table.
       </>
     ),
@@ -23,7 +23,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "What time & where?",
-    a: "Sundays, 12:30pm to 4:00pm (the buffet ends at 4pm) at our Streatham Hill branch, 67 Streatham Hill, London SW2 4TX.",
+    a: "Sundays, from 12:30pm at our Streatham Hill branch, 67 Streatham Hill, London SW2 4TX.",
   },
   {
     q: "Do I need to book?",
