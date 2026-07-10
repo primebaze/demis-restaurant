@@ -136,7 +136,7 @@ export default async function SundayBuffetPage() {
           </div>
 
           {/* ── Booking ── */}
-          <div className="order-1 lg:order-2 lg:sticky lg:top-28">
+          <div id="book" className="order-1 lg:order-2 lg:sticky lg:top-28 scroll-mt-24">
             <BuffetBooking />
           </div>
         </div>
@@ -162,6 +162,17 @@ export default async function SundayBuffetPage() {
             </div>
           </section>
         )}
+
+        {/* Bottom CTA back to the form */}
+        <div className="mt-16 text-center">
+          <p className="text-lg text-stone-300 mb-4 font-[family-name:var(--font-display)]">Ready for Sunday?</p>
+          <a
+            href="#book"
+            className="inline-block px-8 py-4 bg-gold-300 text-black font-semibold rounded-xl hover:bg-gold-400 transition"
+          >
+            Book now
+          </a>
+        </div>
       </div>
 
       <LiveChat />
