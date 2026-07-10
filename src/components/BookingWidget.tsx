@@ -314,7 +314,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-gold-300/30 bg-gradient-to-br from-gold-300/[0.10] to-[#222] hover:border-gold-300/50 transition-all"
           >
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-gold-300 font-semibold mb-1">Every Sunday · Streatham Hill</p>
+              <p className="text-[10px] uppercase tracking-widest text-gold-300 font-semibold mb-1">Every Sunday</p>
               <h3 className="text-lg font-bold text-white">Sunday All-You-Can-Eat Buffet</h3>
               <p className="text-sm text-stone-400 mt-1">Reserve your spot, the earlier you book, the less you pay.</p>
             </div>
