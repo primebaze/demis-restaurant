@@ -4,20 +4,23 @@ import { upcomingSunday, prettyDate, groupPrice, priceTierFor, tiersLeft, BUFFET
 import { sendRawEmail } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
-async function bookedCoversFor(date: string): Promise<number> {
-  const agg = await prisma.sundayBuffetBooking.aggregate({
-    where: { date, status: { not: "cancelled" } },
-    _sum: { partySize: true },
+/** Next starting cover number for a date — based on the highest number assigned so
+ *  far, so cancelling or deleting a booking never causes number collisions. */
+async function nextCover(date: string): Promise<number> {
+  const last = await prisma.sundayBuffetBooking.findFirst({
+    where: { date },
+    orderBy: { number: "desc" },
+    select: { number: true, partySize: true },
   });
-  return agg._sum.partySize || 0;
+  return last ? last.number + last.partySize : 1;
 }
 
 /** GET — availability for the upcoming Sunday. */
 export async function GET() {
   const date = upcomingSunday();
   try {
-    const booked = await bookedCoversFor(date);
-    const nextNumber = booked + 1;
+    const nextNumber = await nextCover(date);
+    const booked = nextNumber - 1;
     return NextResponse.json({
       date,
       prettyDate: prettyDate(date),
@@ -57,7 +60,7 @@ export async function POST(req: Request) {
 
   // Assign the next cover number; retry if two people grab the same slot at once.
   for (let attempt = 0; attempt < 6; attempt++) {
-    const startCover = (await bookedCoversFor(date)) + 1;
+    const startCover = await nextCover(date);
     try {
       const booking = await prisma.sundayBuffetBooking.create({
         data: { date, number: startCover, partySize, name, email, phone },

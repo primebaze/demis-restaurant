@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/admin/bookings", label: "Bookings", icon: "📅" },
   { href: "/admin/set-menu", label: "Set Menu", icon: "🍽️" },
   { href: "/admin/buffet", label: "Buffet", icon: "🍲" },
+  { href: "/admin/sunday-buffet", label: "Sunday Buffet", icon: "🍛" },
   { href: "/admin/checkins", label: "Check-ins", icon: "✅" },
   { href: "/admin/calendar", label: "Calendar", icon: "🗓️" },
   { href: "/admin/guests", label: "Guests", icon: "👥" },
