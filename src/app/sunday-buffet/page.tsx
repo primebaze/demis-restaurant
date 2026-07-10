@@ -41,9 +41,9 @@ const MENU = [
 ];
 
 const TIERS = [
-  { n: "1–20", p: "20", note: "Early birds", highlight: true },
-  { n: "21–45", p: "25", note: "Still a steal", highlight: false },
-  { n: "46+", p: "30", note: "Latecomers", highlight: false },
+  { n: "First 20", p: "20", note: "Early birds", highlight: true },
+  { n: "Next 25", p: "25", note: "Still a steal", highlight: false },
+  { n: "After that", p: "30", note: "Latecomers", highlight: false },
 ];
 
 const cardCls = "relative rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent";
@@ -77,9 +77,9 @@ export default async function SundayBuffetPage() {
             <section className={`${cardCls} p-8 sm:p-10`}>
               <div className="absolute top-0 left-8 sm:left-10 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
               <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/60 mb-3">The deal</p>
-              <h2 className="text-2xl font-bold text-white">The earlier you book, the less you pay</h2>
+              <h2 className="text-2xl font-bold text-white">The earlier you arrive, the less you pay</h2>
               <p className="mt-2 text-[15px] text-stone-400 leading-relaxed max-w-md">
-                Reserving gives you a number for the day. Your number sets your price, paid at the door.
+                It&apos;s first-come on the day. Reserve to guarantee your spot, then pay your price at the door based on how early you arrive.
               </p>
               <div className="mt-6 grid grid-cols-3 gap-3">
                 {TIERS.map((t) => (
@@ -91,7 +91,7 @@ export default async function SundayBuffetPage() {
                         : "border-white/[0.08] bg-white/[0.02]"
                     }`}
                   >
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-stone-500">No. {t.n}</p>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-stone-500">{t.n}</p>
                     <p className={`mt-2 text-3xl font-semibold ${t.highlight ? "text-gold-300" : "text-white"}`}>£{t.p}</p>
                     <p className="mt-1.5 text-[11px] text-stone-500">{t.note}</p>
                   </div>

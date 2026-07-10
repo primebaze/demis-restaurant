@@ -359,8 +359,6 @@ model MailingContact {
 model SundayBuffetBooking {
   id        String   @id @default(cuid())
   date      String   // the Sunday, "2026-07-12"
-  number    Int      // starting cover number for this booking
-  partySize Int      @default(1)
   name      String
   email     String   @default("")
   phone     String   @default("")
@@ -368,7 +366,6 @@ model SundayBuffetBooking {
   status    String   @default("booked") // booked, arrived, cancelled
   createdAt DateTime @default(now())
 
-  @@unique([date, number])
   @@index([date])
   @@index([date, email])
 }
