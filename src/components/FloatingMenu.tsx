@@ -9,9 +9,7 @@ type NavLink = { label: string; href: string; comingSoon?: boolean };
 
 const DESKTOP_LINKS: NavLink[] = [
   { label: "Menu", href: "/menu" },
-  { label: "Drinks", href: "/drinks" },
   { label: "Set Menu", href: "/set-menu" },
-  { label: "Buffet", href: "/buffet" },
   { label: "Locations", href: "/locations" },
   { label: "Events", href: "/events" },
   { label: "Blog", href: "/blog" },
