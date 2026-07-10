@@ -81,8 +81,8 @@ export async function POST(req: Request) {
         deliver(email, `You're booked for Sunday buffet — ${range}`, buffetEmailHtml({ name, range, total, partySize, date })).catch(() => {});
       }
 
-      // Admin notification (fire-and-forget)
-      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@demisrestaurant.co.uk";
+      // Admin notification (fire-and-forget) — defaults to the monitored bookings@ inbox
+      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bookings@demisrestaurant.co.uk";
       deliver(
         adminEmail,
         `New Sunday buffet booking — ${range} · ${name}`,
