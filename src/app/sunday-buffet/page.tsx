@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { BuffetBooking } from "./BuffetBooking";
 import { HeroVideo } from "./HeroVideo";
+import { LiveChat } from "@/components/LiveChat";
 
 type Review = { id: string; author: string; rating: number; body: string; location: string };
 
@@ -162,6 +163,8 @@ export default async function SundayBuffetPage() {
           </section>
         )}
       </div>
+
+      <LiveChat />
     </div>
   );
 }

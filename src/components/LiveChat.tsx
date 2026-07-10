@@ -109,7 +109,7 @@ export function LiveChat() {
               <button
                 key={f.q}
                 onClick={() => ask(f.q, f.a)}
-                className="text-xs px-3 py-1.5 rounded-full border border-gold-300/30 text-gold-200 hover:bg-gold-300/10 transition"
+                className="text-xs px-3 py-1.5 rounded-full border border-white/15 bg-white/[0.04] text-stone-200 hover:border-gold-300/50 hover:text-white hover:bg-white/[0.08] transition"
               >
                 {f.q}
               </button>
