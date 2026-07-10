@@ -38,7 +38,7 @@ export default function SundayBuffetPage() {
             Sunday Buffet
           </h1>
           <p className="mt-6 text-lg text-stone-400 max-w-xl mx-auto leading-relaxed">
-            All-you-can-eat Afro-Caribbean home cooking, Nigerian and Caribbean side by side. We switch the menu up every week.
+            All-you-can-eat Afro-Caribbean buffet, every Sunday.
           </p>
         </div>
 
