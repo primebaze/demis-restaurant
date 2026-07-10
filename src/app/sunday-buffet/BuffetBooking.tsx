@@ -29,7 +29,6 @@ export function BuffetBooking() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [partySize, setPartySize] = useState(1);
   const [website, setWebsite] = useState(""); // honeypot — real users never fill this
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -92,7 +91,7 @@ export function BuffetBooking() {
       const res = await fetch("/api/sunday-buffet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize, website }),
+        body: JSON.stringify({ name, email, phone, website }),
       });
       const d = await res.json();
       if (!res.ok) { setError(d.error || "Could not book"); return; }
@@ -114,9 +113,8 @@ export function BuffetBooking() {
         <p className="text-[11px] uppercase tracking-[0.25em] text-gold-300 mb-4">You&apos;re in</p>
         <p className="text-5xl font-semibold text-white font-[family-name:var(--font-display)]">{range}</p>
         <p className="mt-4 text-stone-300">
-          Party of {result.partySize} · <span className="text-gold-300 font-semibold">£{result.total} total</span>
+          <span className="text-gold-300 font-semibold">£{result.total}</span>, paid when you arrive
         </p>
-        <p className="text-xs text-stone-500 mt-1">paid when you arrive</p>
         <div className="mt-7 pt-6 border-t border-white/10 text-sm text-stone-400 space-y-1.5">
           <p className="text-white">{result.prettyDate}</p>
           <p>Doors {result.start} – {result.end}</p>
@@ -126,7 +124,7 @@ export function BuffetBooking() {
           The lower your number, the less you pay. {email ? "A confirmation is on its way to your inbox." : ""}
         </p>
         <button
-          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); }}
+          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); }}
           className="mt-6 text-sm text-gold-300 hover:text-gold-200 transition"
         >
           Book another spot
@@ -206,14 +204,7 @@ export function BuffetBooking() {
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className={inputCls} />
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />
-        <div className="flex items-center justify-between px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
-          <span className="text-sm text-stone-400">How many of you?</span>
-          <div className="flex items-center gap-4">
-            <button onClick={() => setPartySize((p) => Math.max(1, p - 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">−</button>
-            <span className="w-6 text-center text-white font-semibold tabular-nums">{partySize}</span>
-            <button onClick={() => setPartySize((p) => Math.min(20, p + 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">+</button>
-          </div>
-        </div>
+        <p className="text-xs text-stone-500 text-center">One spot per booking. Booking for others? They each reserve on their own phone.</p>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 

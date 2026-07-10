@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   const name = String(body.name || "").trim().slice(0, 80);
   const email = String(body.email || "").trim().toLowerCase().slice(0, 120);
   const phone = String(body.phone || "").trim().slice(0, 30);
-  const partySize = Math.min(20, Math.max(1, parseInt(body.partySize) || 1));
+  const partySize = 1; // one spot per booking — book individually
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
