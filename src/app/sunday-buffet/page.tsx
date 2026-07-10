@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: "Sunday Buffet at Demi's, Streatham Hill",
     description: "All-you-can-eat Nigerian & Caribbean buffet. Reserve your spot and pay less the earlier you book.",
     url: "https://www.demisrestaurant.co.uk/sunday-buffet",
-    images: [{ url: "/streatham.jpeg" }],
+    images: [{ url: "/buffet.jpg" }],
   },
 };
 
@@ -39,7 +39,7 @@ export default function SundayBuffetPage() {
       <section className="relative h-[62vh] min-h-[440px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/streatham.jpeg" alt="Demi's Sunday buffet spread" className="w-full h-full object-cover kb-zoom" />
+          <img src="/buffet.jpg" alt="Demi's Sunday buffet spread" className="w-full h-full object-cover kb-zoom" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-[#0b0a09]" />
         </div>
         <div className="relative text-center px-6">
