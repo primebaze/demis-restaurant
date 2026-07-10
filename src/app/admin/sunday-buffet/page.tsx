@@ -67,6 +67,27 @@ export default function AdminSundayBuffetPage() {
     fetchData();
   }
 
+  const [adjustN, setAdjustN] = useState(1);
+
+  async function adjust() {
+    await fetch("/api/admin/sunday-buffet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "adjust", date: resolvedDate, covers: adjustN }),
+    });
+    fetchData();
+  }
+
+  async function resetDay() {
+    if (!confirm(`Reset ${prettyDate}? This deletes ALL bookings for that Sunday and restarts the count at No. 1. This cannot be undone.`)) return;
+    await fetch("/api/admin/sunday-buffet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reset", date: resolvedDate }),
+    });
+    fetchData();
+  }
+
   const stats = [
     { label: "Parties", value: summary.parties },
     { label: "People", value: summary.covers },
@@ -96,6 +117,22 @@ export default function AdminSundayBuffetPage() {
             <p className="text-2xl font-bold text-white">{s.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Count controls */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 bg-[#1a1a1a] border border-gray-800 rounded-xl px-3 py-2">
+          <span className="text-xs text-gray-500">Add walk-ins:</span>
+          <button onClick={() => setAdjustN((n) => Math.max(1, n - 1))} className="w-7 h-7 rounded-full border border-gray-700 text-white leading-none hover:bg-white/5">−</button>
+          <span className="w-6 text-center text-white text-sm font-semibold tabular-nums">{adjustN}</span>
+          <button onClick={() => setAdjustN((n) => n + 1)} className="w-7 h-7 rounded-full border border-gray-700 text-white leading-none hover:bg-white/5">+</button>
+          <button onClick={adjust} className="ml-1 px-3 py-1.5 text-xs bg-gold-300 text-black font-semibold rounded-lg hover:bg-gold-400 transition">Add</button>
+        </div>
+        <p className="text-xs text-gray-500">Bumps the count so the next number goes up (accounts for people who didn&apos;t pre-book).</p>
+        <div className="flex-1" />
+        <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">
+          Reset day
+        </button>
       </div>
 
       {/* Table */}

@@ -4,6 +4,48 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { upcomingSunday, prettyDate, groupPrice } from "@/lib/sunday-buffet";
 export const dynamic = "force-dynamic";
 
+/**
+ * POST /api/admin/sunday-buffet — admin actions on a Sunday's count.
+ * Body: { action: "reset", date } — clear all bookings for that Sunday (back to No. 1).
+ *       { action: "adjust", date, covers } — add N covers (e.g. walk-ins), bumping the count.
+ */
+export async function POST(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await req.json();
+  const date = body.date || upcomingSunday();
+
+  if (body.action === "reset") {
+    const { count } = await prisma.sundayBuffetBooking.deleteMany({ where: { date } });
+    return NextResponse.json({ ok: true, deleted: count });
+  }
+
+  if (body.action === "adjust") {
+    const covers = Math.max(1, Math.min(500, parseInt(body.covers) || 1));
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const last = await prisma.sundayBuffetBooking.findFirst({
+        where: { date },
+        orderBy: { number: "desc" },
+        select: { number: true, partySize: true },
+      });
+      const startCover = last ? last.number + last.partySize : 1;
+      try {
+        await prisma.sundayBuffetBooking.create({
+          data: { date, number: startCover, partySize: covers, name: "Manual (walk-ins)", status: "booked" },
+        });
+        return NextResponse.json({ ok: true });
+      } catch (e: unknown) {
+        if ((e as { code?: string }).code === "P2002") continue;
+        throw e;
+      }
+    }
+    return NextResponse.json({ error: "Please try again" }, { status: 409 });
+  }
+
+  return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+}
+
 /** GET /api/admin/sunday-buffet?date=YYYY-MM-DD — bookings for a Sunday + summary. */
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
