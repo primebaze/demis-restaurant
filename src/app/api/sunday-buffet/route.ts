@@ -111,7 +111,7 @@ function guestEmailHtml(o: { name: string; date: string }): string {
   <p style="margin:0 0 16px;">Your reservation for our Sunday buffet is <strong>confirmed</strong>. We can't wait to have you.</p>
   <table width="100%" style="background:#faf7f0;border-radius:8px;margin:0 0 16px;"><tr><td style="padding:20px;text-align:center;">
     <div style="font-family:Georgia,serif;font-size:22px;color:#8b0000;">${prettyDate(o.date)}</div>
-    <div style="font-size:13px;color:#666;margin-top:6px;">Doors from ${BUFFET_START}</div>
+    <div style="font-size:13px;color:#666;margin-top:6px;">Doors 12pm &middot; buffet from 12:30pm</div>
   </td></tr></table>
   <p style="margin:0;color:#666;font-size:13px;">${BUFFET_ADDRESS}. See you Sunday!</p>
 </td></tr>

@@ -72,7 +72,7 @@ export function BuffetBooking() {
         <p className="text-2xl font-semibold text-white font-[family-name:var(--font-display)]">Reservation confirmed</p>
         <div className="mt-5 pt-5 border-t border-white/10 text-sm text-stone-400 space-y-1.5">
           <p className="text-white">{result.prettyDate}</p>
-          <p>Doors from {result.start}</p>
+          <p>Doors 12pm · buffet from 12:30pm</p>
           <p>{result.address}</p>
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
@@ -93,7 +93,7 @@ export function BuffetBooking() {
       <div className="pb-5 mb-5 border-b border-white/[0.08]">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your spot</p>
         <p className="text-lg font-semibold text-white">{avail ? avail.prettyDate : "This Sunday"}</p>
-        <p className="text-[13px] text-stone-500 mt-0.5">Doors from {avail?.start || "12:30pm"}</p>
+        <p className="text-[13px] text-stone-500 mt-0.5">Doors 12pm · buffet from 12:30pm</p>
       </div>
 
       <div className="space-y-3">
