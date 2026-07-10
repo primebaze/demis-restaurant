@@ -229,12 +229,9 @@ export function FloatingMenu() {
 
           <div className="mx-auto max-w-7xl px-8 flex items-center justify-between h-20">
             {/* Logo */}
-            <Link href="/" className="group flex items-center gap-3 shrink-0">
+            <Link href="/" className="group shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Demi's Nigerian Restaurant" className="h-6 w-auto transition-opacity duration-300 group-hover:opacity-80" />
-              <span className="text-[9px] tracking-[0.35em] uppercase text-gold-300/60 font-medium hidden xl:inline transition-colors duration-300 group-hover:text-gold-300/90">
-                Nigerian Restaurant
-              </span>
+              <img src="/logo.png" alt="Demi's Nigerian Restaurant" className="h-7 w-auto transition-opacity duration-300 group-hover:opacity-80" />
             </Link>
 
             {/* Centre nav links with sliding pill + spotlight */}
