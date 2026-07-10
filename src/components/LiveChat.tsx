@@ -12,25 +12,25 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
     q: "How does the Sunday buffet work?",
     a: (
       <>
-        All-you-can-eat every Sunday. The earlier you arrive, the less you pay: first 20 people £20, next 25 £25, then £30, paid at the door.{" "}
-        <Link href="/sunday-buffet" className="text-gold-300 underline">Reserve a spot</Link> to lock in a low number.
+        All-you-can-eat every Sunday, 12:30pm to 4:00pm. The earlier you arrive, the less you pay: first 20 people £20, next 25 £25, then £30, paid at the door.{" "}
+        <Link href="/sunday-buffet" className="text-gold-300 underline">Reserve a spot</Link> to guarantee your table.
       </>
     ),
   },
   {
     q: "How much is it?",
-    a: "£20 for the first 20 guests, £25 for the next 25, then £30 after. You pay your tier price when you arrive.",
+    a: "It depends when you arrive: £20 for the first 20 guests, £25 for the next 25, then £30 after. Paid at the door.",
   },
   {
     q: "What time & where?",
-    a: "Sundays, 12:30pm to 4:00pm at our Streatham Hill branch, 67 Streatham Hill, London SW2 4TX.",
+    a: "Sundays, 12:30pm to 4:00pm (the buffet ends at 4pm) at our Streatham Hill branch, 67 Streatham Hill, London SW2 4TX.",
   },
   {
     q: "Do I need to book?",
     a: (
       <>
-        Walk-ins are welcome, but booking on the{" "}
-        <Link href="/sunday-buffet" className="text-gold-300 underline">Sunday Buffet page</Link> gives you a lower number and a lower price.
+        Walk-ins are welcome, but reserving on the{" "}
+        <Link href="/sunday-buffet" className="text-gold-300 underline">Sunday Buffet page</Link> guarantees your spot. Your price depends on how early you arrive, not when you book.
       </>
     ),
   },
