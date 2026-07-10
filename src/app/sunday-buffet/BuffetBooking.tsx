@@ -30,6 +30,7 @@ export function BuffetBooking() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [partySize, setPartySize] = useState(1);
+  const [website, setWebsite] = useState(""); // honeypot — real users never fill this
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
@@ -91,7 +92,7 @@ export function BuffetBooking() {
       const res = await fetch("/api/sunday-buffet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize }),
+        body: JSON.stringify({ name, email, phone, partySize, website }),
       });
       const d = await res.json();
       if (!res.ok) { setError(d.error || "Could not book"); return; }
@@ -191,6 +192,17 @@ export function BuffetBooking() {
       )}
 
       <div className="space-y-3">
+        {/* Honeypot — hidden from real users, bots fill it and get rejected */}
+        <input
+          type="text"
+          name="website"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="absolute left-[-9999px] w-px h-px opacity-0"
+        />
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className={inputCls} />
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />

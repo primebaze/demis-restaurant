@@ -4,6 +4,15 @@ import { upcomingSunday, prettyDate, groupPrice, priceTierFor, tiersLeft, BUFFET
 import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
 export const dynamic = "force-dynamic";
 
+/** Escape user-supplied text before putting it into email HTML. */
+function esc(s: string): string {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /** Send via Resend (from bookings@demisrestaurant.co.uk) when configured, else SMTP. */
 async function deliver(to: string, subject: string, html: string): Promise<void> {
   if (isResendConfigured() && (await sendViaResend(to, subject, html))) return;
@@ -52,9 +61,15 @@ export async function GET() {
 /** POST — reserve a spot; assigns the next cover number(s) atomically. */
 export async function POST(req: Request) {
   const body = await req.json();
-  const name = String(body.name || "").trim();
-  const email = String(body.email || "").trim().toLowerCase();
-  const phone = String(body.phone || "").trim();
+
+  // Honeypot: a hidden field real users never fill. If it has a value, it's a bot.
+  if (String(body.website || "").trim()) {
+    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 400 });
+  }
+
+  const name = String(body.name || "").trim().slice(0, 80);
+  const email = String(body.email || "").trim().toLowerCase().slice(0, 120);
+  const phone = String(body.phone || "").trim().slice(0, 30);
   const partySize = Math.min(20, Math.max(1, parseInt(body.partySize) || 1));
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
@@ -69,12 +84,27 @@ export async function POST(req: Request) {
 
   const date = upcomingSunday();
 
+  // Client IP (Vercel sets x-forwarded-for). One booking per IP per Sunday.
+  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
+  if (ip) {
+    const already = await prisma.sundayBuffetBooking.findFirst({
+      where: { date, ip, status: { not: "cancelled" } },
+      select: { id: true },
+    });
+    if (already) {
+      return NextResponse.json(
+        { error: "Looks like you've already reserved for this Sunday. See you there! To change your booking, give us a call." },
+        { status: 429 }
+      );
+    }
+  }
+
   // Assign the next cover number; retry if two people grab the same slot at once.
   for (let attempt = 0; attempt < 6; attempt++) {
     const startCover = await nextCover(date);
     try {
       const booking = await prisma.sundayBuffetBooking.create({
-        data: { date, number: startCover, partySize, name, email, phone },
+        data: { date, number: startCover, partySize, name, email, phone, ip },
       });
       const endCover = startCover + partySize - 1;
       const total = groupPrice(startCover, partySize);
@@ -127,12 +157,12 @@ function buffetAdminHtml(o: { name: string; email: string; phone: string; range:
   <tr><td style="padding:22px 28px;">
     <p style="margin:0 0 14px;font-size:22px;color:#8b0000;font-weight:700;">${o.range}</p>
     <table width="100%" cellpadding="0" cellspacing="0">
-      ${row("Name", o.name)}
+      ${row("Name", esc(o.name))}
       ${row("Party size", String(o.partySize))}
       ${row("Total (at door)", "£" + o.total)}
       ${row("Date", prettyDate(o.date))}
-      ${row("Email", o.email || "—")}
-      ${row("Phone", o.phone || "—")}
+      ${row("Email", o.email ? esc(o.email) : "—")}
+      ${row("Phone", o.phone ? esc(o.phone) : "—")}
     </table>
   </td></tr>
 </table></td></tr></table></body></html>`;
@@ -147,7 +177,7 @@ function buffetEmailHtml(o: { name: string; range: string; total: number; partyS
   <div style="font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:3px;color:#999;text-transform:uppercase;margin-top:4px;">Restaurant</div>
 </td></tr>
 <tr><td style="padding:8px 44px 36px;font-family:Helvetica,Arial,sans-serif;color:#333;font-size:15px;line-height:1.7;">
-  <p style="margin:0 0 16px;">Hi ${o.name},</p>
+  <p style="margin:0 0 16px;">Hi ${esc(o.name)},</p>
   <p style="margin:0 0 16px;">You're booked in for our Sunday buffet at Streatham Hill. Here's your spot:</p>
   <table width="100%" style="background:#faf7f0;border-radius:8px;margin:0 0 16px;"><tr><td style="padding:20px;text-align:center;">
     <div style="font-family:Georgia,serif;font-size:30px;color:#8b0000;">${o.range}</div>

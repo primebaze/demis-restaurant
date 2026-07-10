@@ -364,11 +364,13 @@ model SundayBuffetBooking {
   name      String
   email     String   @default("")
   phone     String   @default("")
+  ip        String   @default("")
   status    String   @default("booked") // booked, arrived, cancelled
   createdAt DateTime @default(now())
 
   @@unique([date, number])
   @@index([date])
+  @@index([date, ip])
 }
 
 // ─── REVIEWS (admin-authored, shown on the site) ───
