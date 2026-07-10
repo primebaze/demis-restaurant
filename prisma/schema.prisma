@@ -371,6 +371,20 @@ model SundayBuffetBooking {
   @@index([date])
 }
 
+// ─── REVIEWS (admin-authored, shown on the site) ───
+model Review {
+  id        String   @id @default(cuid())
+  author    String
+  rating    Int      @default(5) // 1-5
+  body      String
+  location  String   @default("")
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([active, sortOrder])
+}
+
 // ─── BLOG COMMENTS ───
 model BlogComment {
   id        String   @id @default(cuid())

@@ -1,6 +1,22 @@
 import type { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
 import { BuffetBooking } from "./BuffetBooking";
 import { HeroVideo } from "./HeroVideo";
+
+type Review = { id: string; author: string; rating: number; body: string; location: string };
+
+async function getReviews(): Promise<Review[]> {
+  try {
+    return await prisma.review.findMany({
+      where: { active: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      take: 12,
+      select: { id: true, author: true, rating: true, body: true, location: true },
+    });
+  } catch {
+    return []; // table not migrated yet
+  }
+}
 
 export const metadata: Metadata = {
   title: "Sunday Buffet | Demi's Restaurant Streatham Hill",
@@ -27,7 +43,8 @@ const TIERS = [
 
 const cardCls = "relative rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent";
 
-export default function SundayBuffetPage() {
+export default async function SundayBuffetPage() {
+  const reviews = await getReviews();
   return (
     <div className="min-h-screen bg-[#0b0a09] pb-24">
       {/* ── Hero video ── */}
@@ -118,6 +135,28 @@ export default function SundayBuffetPage() {
             <BuffetBooking />
           </div>
         </div>
+
+        {/* ── Reviews ── */}
+        {reviews.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold text-white font-[family-name:var(--font-display)] mb-6 text-center">What guests say</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {reviews.map((r) => (
+                <div key={r.id} className="relative rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent p-6">
+                  <div className="text-sm mb-3" aria-label={`${r.rating} out of 5`}>
+                    <span className="text-gold-300">{"★".repeat(r.rating)}</span>
+                    <span className="text-gray-700">{"★".repeat(5 - r.rating)}</span>
+                  </div>
+                  <p className="text-[15px] text-stone-300 leading-relaxed whitespace-pre-wrap break-words">{r.body}</p>
+                  <p className="mt-4 text-sm font-medium text-white">
+                    {r.author}
+                    {r.location ? <span className="text-stone-500 font-normal"> · {r.location}</span> : null}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
