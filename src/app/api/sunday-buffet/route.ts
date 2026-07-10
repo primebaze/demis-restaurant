@@ -91,7 +91,7 @@ export async function POST(req: Request) {
   });
   if (already) {
     return NextResponse.json(
-      { error: "This email has already reserved for this Sunday. See you there! To change your booking, give us a call." },
+      { error: "You have already reserved for Sunday. See you there! To change your booking, give us a call." },
       { status: 429 }
     );
   }
