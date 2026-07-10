@@ -9,6 +9,7 @@ export function Footer() {
           <Link href="/menu" className="hover:text-white transition-colors">Menu</Link>
           <Link href="/set-menu" className="hover:text-white transition-colors">Set Menu</Link>
           <Link href="/buffet" className="hover:text-white transition-colors">Buffet</Link>
+          <Link href="/sunday-buffet" className="hover:text-white transition-colors">Sunday Buffet</Link>
           <span className="text-stone-600 cursor-not-allowed">Bulk Order <span className="text-[10px]">(Coming Soon)</span></span>
           <Link href="/locations/cricklewood" className="hover:text-white transition-colors">Cricklewood</Link>
           <Link href="/locations/streatham" className="hover:text-white transition-colors">Streatham Hill</Link>

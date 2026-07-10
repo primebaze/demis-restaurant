@@ -24,6 +24,7 @@ const MOBILE_LINKS: NavLink[] = [
   { label: "Drinks", href: "/drinks" },
   { label: "Set Menu", href: "/set-menu" },
   { label: "Buffet", href: "/buffet" },
+  { label: "Sunday Buffet", href: "/sunday-buffet" },
   { label: "Blog", href: "/blog" },
   { label: "Bulk Order", href: "/bulk-orders", comingSoon: true },
   { label: "Cricklewood", href: "/locations/cricklewood" },
