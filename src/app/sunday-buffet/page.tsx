@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BuffetBooking } from "./BuffetBooking";
+import { HeroVideo } from "./HeroVideo";
 
 export const metadata: Metadata = {
   title: "Sunday Buffet | Demi's Restaurant Streatham Hill",
@@ -32,16 +33,7 @@ export default function SundayBuffetPage() {
       {/* ── Hero video ── */}
       <section className="relative h-[62vh] min-h-[440px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <video
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="/buffet.jpg"
-          >
-            <source src="/buffet.mp4" type="video/mp4" />
-          </video>
+          <HeroVideo />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-[#0b0a09]" />
         </div>
         <div className="relative text-center px-6">
