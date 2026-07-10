@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 type Avail = {
   date: string;
@@ -33,6 +33,12 @@ export function BuffetBooking() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // When the booking succeeds, bring the "You're in" card into view.
+  useEffect(() => {
+    if (result) cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [result]);
 
   const loadAvail = useCallback(async () => {
     try {
@@ -103,7 +109,7 @@ export function BuffetBooking() {
   if (result) {
     const range = result.partySize === 1 ? `No. ${result.number}` : `No. ${result.number}–${result.endCover}`;
     return (
-      <div className="rounded-3xl border border-gold-300/30 bg-gradient-to-b from-gold-300/[0.06] to-white/[0.02] p-8 text-center">
+      <div ref={cardRef} className="scroll-mt-28 rounded-3xl border border-gold-300/30 bg-gradient-to-b from-gold-300/[0.06] to-white/[0.02] p-8 text-center">
         <p className="text-[11px] uppercase tracking-[0.25em] text-gold-300 mb-4">You&apos;re in</p>
         <p className="text-5xl font-semibold text-white font-[family-name:var(--font-display)]">{range}</p>
         <p className="mt-4 text-stone-300">
