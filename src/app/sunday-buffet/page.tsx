@@ -33,7 +33,11 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-const MENU = ["Jollof Rice", "Fried Rice", "Rice & Peas", "Grilled Turkey", "Oxtail", "Beef Ribs", "Plantain", "Salad"];
+const MENU = [
+  "Jollof Rice", "Fried Rice", "Rice & Peas", "Pounded Yam",
+  "Eforiro", "Moi Moi", "Pepper Soup", "Grilled Turkey",
+  "Oxtail", "Beef Ribs", "Plantain", "and plenty more",
+];
 
 const TIERS = [
   { n: "1–20", p: "20", note: "Early birds", highlight: true },

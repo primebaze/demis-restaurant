@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Footer } from "@/components/Footer";
 import { FloatingMenu } from "@/components/FloatingMenu";
+import { LiveChat } from "@/components/LiveChat";
 
 const ADMIN_PREFIXES = ["/admin", "/blog/admin", "/checkin"];
 
@@ -15,6 +16,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       {!isAdmin && <Footer />}
       {!isAdmin && <FloatingMenu />}
+      {!isAdmin && <LiveChat />}
     </>
   );
 }

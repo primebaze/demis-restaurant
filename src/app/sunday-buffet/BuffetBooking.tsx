@@ -35,9 +35,9 @@ export function BuffetBooking() {
   const [result, setResult] = useState<Result | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // When the booking succeeds, bring the "You're in" card into view.
+  // When the booking succeeds, bring the "You're in" card near the top of view.
   useEffect(() => {
-    if (result) cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (result) cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [result]);
 
   const loadAvail = useCallback(async () => {
