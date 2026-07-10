@@ -26,11 +26,8 @@ const TIERS = [
 
 export default function SundayBuffetPage() {
   return (
-    <div className="relative min-h-screen bg-[#0d0c0b] pt-32 pb-24 overflow-hidden">
-      {/* warm ambient glow */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-40 h-[520px] bg-[radial-gradient(60%_100%_at_50%_0%,rgba(227,192,122,0.10),transparent_70%)]" />
-
-      <div className="relative mx-auto max-w-6xl px-6">
+    <div className="min-h-screen bg-[#0d0c0b] pt-32 pb-24">
+      <div className="mx-auto max-w-6xl px-6">
         {/* Hero */}
         <div className="text-center mb-16">
           <p className="text-xs uppercase tracking-[0.35em] text-gold-300/90 font-semibold mb-5">Streatham Hill · Every Sunday</p>
