@@ -370,7 +370,7 @@ model SundayBuffetBooking {
 
   @@unique([date, number])
   @@index([date])
-  @@index([date, ip])
+  @@index([date, email])
 }
 
 // ─── REVIEWS (admin-authored, shown on the site) ───

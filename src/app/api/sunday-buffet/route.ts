@@ -84,20 +84,20 @@ export async function POST(req: Request) {
 
   const date = upcomingSunday();
 
-  // Client IP (Vercel sets x-forwarded-for). One booking per IP per Sunday.
-  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
-  if (ip) {
-    const already = await prisma.sundayBuffetBooking.findFirst({
-      where: { date, ip, status: { not: "cancelled" } },
-      select: { id: true },
-    });
-    if (already) {
-      return NextResponse.json(
-        { error: "Looks like you've already reserved for this Sunday. See you there! To change your booking, give us a call." },
-        { status: 429 }
-      );
-    }
+  // One booking per email per Sunday.
+  const already = await prisma.sundayBuffetBooking.findFirst({
+    where: { date, email, status: { not: "cancelled" } },
+    select: { id: true },
+  });
+  if (already) {
+    return NextResponse.json(
+      { error: "This email has already reserved for this Sunday. See you there! To change your booking, give us a call." },
+      { status: 429 }
+    );
   }
+
+  // IP is still recorded (for abuse checks), just not used for the limit.
+  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
 
   // Assign the next cover number; retry if two people grab the same slot at once.
   for (let attempt = 0; attempt < 6; attempt++) {
