@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 
 type Avail = {
+  date: string;
   prettyDate: string;
   start: string;
   end: string;
@@ -43,6 +44,28 @@ export function BuffetBooking() {
   }, []);
 
   useEffect(() => { loadAvail(); }, [loadAvail]);
+
+  // Live ticking clock for the countdown (client-only to avoid hydration mismatch)
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const countdown = (() => {
+    if (!avail || now == null) return null;
+    const target = new Date(`${avail.date}T12:30:00`).getTime(); // this Sunday, doors open
+    const diff = target - now;
+    if (diff <= 0) return { over: true, d: 0, h: 0, m: 0, s: 0 };
+    return {
+      over: false,
+      d: Math.floor(diff / 86400000),
+      h: Math.floor(diff / 3600000) % 24,
+      m: Math.floor(diff / 60000) % 60,
+      s: Math.floor(diff / 1000) % 60,
+    };
+  })();
 
   async function reserve() {
     if (!name.trim()) { setError("Please enter your name"); return; }
@@ -98,6 +121,36 @@ export function BuffetBooking() {
   return (
     <div className="relative rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-6 sm:p-7 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)]">
       <div className="absolute top-0 left-7 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
+
+      {/* Countdown to doors opening */}
+      {countdown && (
+        <div className="mb-5 rounded-2xl border border-gold-300/25 bg-gold-300/[0.06] px-4 py-3.5 text-center">
+          {countdown.over ? (
+            <p className="text-sm font-semibold text-gold-300">Serving now, come on down!</p>
+          ) : (
+            <>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-gold-300/80 mb-2">Doors open in</p>
+              <div className="flex items-center justify-center gap-2.5 tabular-nums">
+                {[
+                  { v: countdown.d, l: "days" },
+                  { v: countdown.h, l: "hrs" },
+                  { v: countdown.m, l: "min" },
+                  { v: countdown.s, l: "sec" },
+                ].map((u, i) => (
+                  <div key={u.l} className="flex items-center gap-2.5">
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-semibold text-white leading-none">{String(u.v).padStart(2, "0")}</span>
+                      <span className="text-[9px] uppercase tracking-wide text-stone-500 mt-1">{u.l}</span>
+                    </div>
+                    {i < 3 && <span className="text-lg text-stone-600 leading-none -mt-2">:</span>}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-stone-400 mt-2.5">Book now to lock in a lower number.</p>
+            </>
+          )}
+        </div>
+      )}
       {avail && (
         <div className="flex flex-wrap items-start justify-between gap-3 pb-5 mb-5 border-b border-white/[0.08]">
           <div>
