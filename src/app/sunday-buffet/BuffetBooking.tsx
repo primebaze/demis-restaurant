@@ -96,7 +96,8 @@ export function BuffetBooking() {
   }
 
   return (
-    <div className="rounded-3xl border border-white/[0.09] bg-white/[0.03] p-6 sm:p-7 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]">
+    <div className="relative rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-6 sm:p-7 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)]">
+      <div className="absolute top-0 left-7 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
       {avail && (
         <div className="flex flex-wrap items-start justify-between gap-3 pb-5 mb-5 border-b border-white/[0.08]">
           <div>
