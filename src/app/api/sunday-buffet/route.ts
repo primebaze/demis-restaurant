@@ -62,7 +62,8 @@ export async function POST(req: Request) {
   if ((phone.match(/\d/g) || []).length < 7) {
     return NextResponse.json({ error: "Please enter a valid phone number" }, { status: 400 });
   }
-  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+  if (!email) return NextResponse.json({ error: "Please enter your email" }, { status: 400 });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
   }
 
