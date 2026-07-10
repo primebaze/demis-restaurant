@@ -204,8 +204,6 @@ export function BuffetBooking() {
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className={inputCls} />
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />
-        <p className="text-xs text-stone-500 text-center">One spot per booking. Booking for others? They each reserve on their own phone.</p>
-
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <button
