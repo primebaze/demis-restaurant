@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { upcomingSunday, prettyDate, groupPrice, priceTierFor, tiersLeft, BUFFET_START, BUFFET_END, BUFFET_LOCATION, BUFFET_ADDRESS } from "@/lib/sunday-buffet";
-import { sendRawEmail } from "@/lib/email";
+import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
 export const dynamic = "force-dynamic";
+
+/** Send via Resend (from bookings@demisrestaurant.co.uk) when configured, else SMTP. */
+async function deliver(to: string, subject: string, html: string): Promise<void> {
+  if (isResendConfigured() && (await sendViaResend(to, subject, html))) return;
+  await sendRawEmail(to, subject, html);
+}
 
 /** Next starting cover number for a date — based on the highest number assigned so
  *  far, so cancelling or deleting a booking never causes number collisions. */
@@ -68,15 +74,20 @@ export async function POST(req: Request) {
       const endCover = startCover + partySize - 1;
       const total = groupPrice(startCover, partySize);
 
-      // Fire-and-forget confirmation email
+      const range = partySize === 1 ? `No. ${startCover}` : `No. ${startCover}–${endCover}`;
+
+      // Guest confirmation (fire-and-forget)
       if (email) {
-        const range = partySize === 1 ? `No. ${startCover}` : `No. ${startCover}–${endCover}`;
-        sendRawEmail(
-          email,
-          `You're booked for Sunday buffet — ${range}`,
-          buffetEmailHtml({ name, range, total, partySize, date })
-        ).catch(() => {});
+        deliver(email, `You're booked for Sunday buffet — ${range}`, buffetEmailHtml({ name, range, total, partySize, date })).catch(() => {});
       }
+
+      // Admin notification (fire-and-forget)
+      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@demisrestaurant.co.uk";
+      deliver(
+        adminEmail,
+        `New Sunday buffet booking — ${range} · ${name}`,
+        buffetAdminHtml({ name, email, phone, range, total, partySize, date })
+      ).catch(() => {});
 
       return NextResponse.json({
         id: booking.id,
@@ -99,6 +110,27 @@ export async function POST(req: Request) {
     }
   }
   return NextResponse.json({ error: "Too busy right now, please try again." }, { status: 409 });
+}
+
+function buffetAdminHtml(o: { name: string; email: string; phone: string; range: string; total: number; partySize: number; date: string }): string {
+  const row = (k: string, v: string) =>
+    `<tr><td style="padding:6px 0;color:#888;font-size:13px;width:120px;">${k}</td><td style="padding:6px 0;color:#111;font-size:14px;font-weight:600;">${v}</td></tr>`;
+  return `<!DOCTYPE html><html><body style="margin:0;background:#f4f4f4;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 20px;"><tr><td align="center">
+<table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fff;border-radius:10px;overflow:hidden;">
+  <tr><td style="background:#141210;padding:18px 28px;color:#e8cc9c;font-size:14px;font-weight:700;letter-spacing:1px;">NEW SUNDAY BUFFET BOOKING</td></tr>
+  <tr><td style="padding:22px 28px;">
+    <p style="margin:0 0 14px;font-size:22px;color:#8b0000;font-weight:700;">${o.range}</p>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${row("Name", o.name)}
+      ${row("Party size", String(o.partySize))}
+      ${row("Total (at door)", "£" + o.total)}
+      ${row("Date", prettyDate(o.date))}
+      ${row("Email", o.email || "—")}
+      ${row("Phone", o.phone || "—")}
+    </table>
+  </td></tr>
+</table></td></tr></table></body></html>`;
 }
 
 function buffetEmailHtml(o: { name: string; range: string; total: number; partySize: number; date: string }): string {
