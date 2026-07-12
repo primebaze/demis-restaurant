@@ -16,21 +16,14 @@ export const TIERS = [
 ];
 
 /**
- * The upcoming Sunday (UK time), YYYY-MM-DD. Today if it's Sunday and the buffet
- * hasn't finished yet; once today's service is over (after 4pm), rolls to next Sunday.
+ * The Sunday people can reserve for (UK time), YYYY-MM-DD. On any weekday it's the
+ * coming Sunday; on Sunday itself it rolls to the NEXT Sunday (that day is walk-in).
  */
 export function upcomingSunday(from: Date = new Date()): string {
   const [y, m, d] = serviceDate(from).split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
-  let add = (7 - dt.getUTCDay()) % 7; // 0 = Sunday
-  if (add === 0) {
-    // It's Sunday — roll to next week once today's buffet has ended (after 4pm London).
-    const hour = parseInt(
-      new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hour12: false }).format(from),
-      10
-    );
-    if (hour >= 16) add = 7;
-  }
+  let add = (7 - dt.getUTCDay()) % 7; // 0 = today is Sunday
+  if (add === 0) add = 7; // on Sunday, take reservations for next Sunday
   dt.setUTCDate(dt.getUTCDate() + add);
   return dt.toISOString().slice(0, 10);
 }
