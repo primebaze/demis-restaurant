@@ -50,7 +50,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
     q: "Talk to a person",
     a: (
       <>
-        Call <a href="tel:+442039046977" className="text-gold-300 underline">020 3904 6977</a>, email{" "}
+        Call Streatham Hill on <a href="tel:+442082136357" className="text-gold-300 underline">020 8213 6357</a>, email{" "}
         <a href="mailto:bookings@demisrestaurant.co.uk" className="text-gold-300 underline">bookings@demisrestaurant.co.uk</a>, or DM us on{" "}
         <a href="https://www.instagram.com/demisrestaurant/" target="_blank" rel="noopener noreferrer" className="text-gold-300 underline">Instagram</a>.
       </>

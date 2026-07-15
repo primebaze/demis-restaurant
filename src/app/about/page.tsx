@@ -86,7 +86,7 @@ export default function AboutPage() {
           <div className="mt-6 space-y-2 text-sm text-stone-400">
             <address className="not-italic">89 Cricklewood Broadway, London NW2 3JG</address>
             <p>Monday &ndash; Sunday: 12:00 PM &ndash; Late</p>
-            <p><a href="tel:02039046977" className="hover:text-white transition-colors">020 3904 6977</a></p>
+            <p>Cricklewood <a href="tel:02039046977" className="text-white hover:text-stone-300 transition-colors">020 3904 6977</a> &middot; Streatham Hill <a href="tel:02082136357" className="text-white hover:text-stone-300 transition-colors">020 8213 6357</a></p>
             <p><a href="mailto:bookings@demisrestaurant.co.uk" className="hover:text-white transition-colors">bookings@demisrestaurant.co.uk</a></p>
           </div>
 

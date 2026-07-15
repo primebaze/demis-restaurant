@@ -84,7 +84,7 @@ export default function StreathamPage() {
               </p>
               <p className="mt-5 text-[10px] font-semibold tracking-[0.25em] uppercase text-gold-300">Contact</p>
               <p className="mt-3 text-sm text-stone-300">
-                <a href="tel:02039046977" className="hover:text-white transition-colors">020 3904 6977</a>
+                <a href="tel:02082136357" className="hover:text-white transition-colors">020 8213 6357</a>
               </p>
               <p className="text-sm text-stone-300">
                 <a href="mailto:bookings@demisrestaurant.co.uk" className="hover:text-white transition-colors">bookings@demisrestaurant.co.uk</a>

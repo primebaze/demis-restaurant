@@ -60,8 +60,13 @@ export default function ContactPage() {
             <div className="text-center sm:text-left">
               <h2 className="font-semibold text-white">Call Us</h2>
               <p className="mt-2 text-sm text-stone-400">Reservations, takeaway, or general enquiries.</p>
-              <a href="tel:02039046977" className="mt-1 inline-block font-semibold text-white hover:text-stone-400 transition-colors">
+              <p className="mt-2 text-[11px] uppercase tracking-widest text-gold-300/70">Cricklewood</p>
+              <a href="tel:02039046977" className="inline-block font-semibold text-white hover:text-stone-400 transition-colors">
                 020 3904 6977
+              </a>
+              <p className="mt-3 text-[11px] uppercase tracking-widest text-gold-300/70">Streatham Hill</p>
+              <a href="tel:02082136357" className="inline-block font-semibold text-white hover:text-stone-400 transition-colors">
+                020 8213 6357
               </a>
             </div>
 
