@@ -26,16 +26,16 @@ export function CallButton({ className = "", label = "Call Us" }: { className?: 
         {label}
       </button>
       {open && (
-        <div role="menu" className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-60 rounded-xl border border-stone-200 bg-white shadow-xl overflow-hidden z-30">
-          <p className="px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-stone-400">Which branch?</p>
+        <div role="menu" className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-xl border border-stone-200 bg-white shadow-xl overflow-hidden z-30">
           {NUMBERS.map((n) => (
             <a
               key={n.tel}
               href={`tel:${n.tel}`}
-              className="flex items-center justify-between px-4 py-3 text-sm hover:bg-stone-100 transition"
+              title={`Call ${n.label} on ${n.display}`}
+              className="group flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-stone-100 transition"
             >
-              <span className="font-semibold text-stone-800">{n.label}</span>
-              <span className="text-stone-500">{n.display}</span>
+              <span className="text-sm font-semibold text-stone-800">{n.label}</span>
+              <span className="text-xs text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity">{n.display}</span>
             </a>
           ))}
         </div>
