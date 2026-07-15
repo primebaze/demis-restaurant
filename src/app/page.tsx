@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CallButton } from "@/components/CallButton";
 
 // SERVER COMPONENT — fully rendered HTML for maximum SEO
 export default function HomePage() {
@@ -529,9 +530,7 @@ export default function HomePage() {
               >
                 Reserve a Table
               </Link>
-              <a href="tel:02039046977" className="inline-flex items-center gap-2 rounded-full border-2 border-stone-300 px-7 py-3 text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-all">
-                Call 020 3904 6977
-              </a>
+              <CallButton className="inline-flex items-center gap-2 rounded-full border-2 border-stone-300 px-7 py-3 text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-all cursor-pointer" />
             </div>
           </div>
         </div>
