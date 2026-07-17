@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { upcomingSunday, prettyDate, BUFFET_START, BUFFET_END, BUFFET_LOCATION, BUFFET_ADDRESS } from "@/lib/sunday-buffet";
 import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
+
+// Max reservations accepted from one IP per hour (blocks scripted floods).
+const RESERVE_RATE_LIMIT = { maxRequests: 5, windowMs: 60 * 60 * 1000 };
 
 /** Escape user-supplied text before putting it into email HTML. */
 function esc(s: string): string {
@@ -37,6 +41,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 400 });
   }
 
+  // Rate limit by IP to block scripted reservation floods.
+  const ip = getClientIp(req);
+  const limit = rateLimit(`buffet:${ip}`, RESERVE_RATE_LIMIT);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many reservations from this device. Please try again in a little while, or give us a call." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(limit.resetMs / 1000)) } }
+    );
+  }
+
   const name = String(body.name || "").trim().slice(0, 80);
   const email = String(body.email || "").trim().toLowerCase().slice(0, 120);
   const phone = String(body.phone || "").trim().slice(0, 30);
@@ -60,8 +74,6 @@ export async function POST(req: Request) {
       { status: 429 }
     );
   }
-
-  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
 
   const booking = await prisma.sundayBuffetBooking.create({
     data: { date, name, email, phone, ip },
