@@ -5,6 +5,12 @@ import { useEffect, useState, useCallback, useRef } from "react";
 type Avail = { date: string; prettyDate: string; start: string; end: string };
 type Result = { prettyDate: string; start: string; end: string; address: string };
 
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+type TurnstileApi = {
+  render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+  reset: (id?: string) => void;
+};
+
 export function BuffetBooking() {
   const [avail, setAvail] = useState<Avail | null>(null);
   const [name, setName] = useState("");
@@ -15,6 +21,38 @@ export function BuffetBooking() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Cloudflare Turnstile (only when configured)
+  const [token, setToken] = useState("");
+  const widgetRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || result) return; // widget only shows on the form view
+    const w = window as unknown as { turnstile?: TurnstileApi };
+    const render = () => {
+      if (!widgetRef.current || !w.turnstile) return;
+      widgetRef.current.innerHTML = "";
+      setToken("");
+      w.turnstile.render(widgetRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: "dark",
+        callback: (t: string) => setToken(t),
+        "expired-callback": () => setToken(""),
+        "error-callback": () => setToken(""),
+      });
+    };
+    if (w.turnstile) { render(); return; }
+    let s = document.getElementById("cf-turnstile-script") as HTMLScriptElement | null;
+    if (!s) {
+      s = document.createElement("script");
+      s.id = "cf-turnstile-script";
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      s.async = true; s.defer = true;
+      document.head.appendChild(s);
+    }
+    s.addEventListener("load", render);
+    return () => s?.removeEventListener("load", render);
+  }, [result]);
 
   useEffect(() => {
     if (result) cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -37,6 +75,7 @@ export function BuffetBooking() {
     if ((phone.match(/\d/g) || []).length < 7) return "Please enter a valid phone number";
     if (!email.trim()) return "Please enter your email";
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) return "Please enter a valid email";
+    if (TURNSTILE_SITE_KEY && !token) return "Please complete the verification below";
     return null;
   }
 
@@ -49,10 +88,16 @@ export function BuffetBooking() {
       const res = await fetch("/api/sunday-buffet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, website }),
+        body: JSON.stringify({ name, email, phone, website, turnstileToken: token }),
       });
       const d = await res.json();
-      if (!res.ok) { setError(d.error || "Could not book"); return; }
+      if (!res.ok) {
+        setError(d.error || "Could not book");
+        // the token is single-use, get a fresh one for the retry
+        (window as unknown as { turnstile?: TurnstileApi }).turnstile?.reset();
+        setToken("");
+        return;
+      }
       setResult(d);
     } finally {
       setSubmitting(false);
@@ -105,6 +150,8 @@ export function BuffetBooking() {
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className={inputCls} />
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />
+
+        {TURNSTILE_SITE_KEY && <div ref={widgetRef} className="flex justify-center pt-1" />}
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 

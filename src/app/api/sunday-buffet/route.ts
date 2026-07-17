@@ -51,6 +51,27 @@ export async function POST(req: Request) {
     );
   }
 
+  // Cloudflare Turnstile — blocks scripts that skip the honeypot. Only enforced
+  // when TURNSTILE_SECRET_KEY is configured (until then the other checks apply).
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecret) {
+    const token = String(body.turnstileToken || "");
+    if (!token) return NextResponse.json({ error: "Please complete the verification and try again." }, { status: 400 });
+    try {
+      const verify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ secret: turnstileSecret, response: token, remoteip: ip }),
+      });
+      const outcome = (await verify.json()) as { success?: boolean };
+      if (!outcome.success) {
+        return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 400 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Could not verify. Please try again." }, { status: 400 });
+    }
+  }
+
   const name = String(body.name || "").trim().slice(0, 80);
   const email = String(body.email || "").trim().toLowerCase().slice(0, 120);
   const phone = String(body.phone || "").trim().slice(0, 30);
