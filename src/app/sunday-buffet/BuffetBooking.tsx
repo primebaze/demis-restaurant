@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 
 type Avail = { date: string; prettyDate: string; start: string; end: string };
-type Result = { prettyDate: string; start: string; end: string; address: string };
+type Result = { prettyDate: string; start: string; end: string; address: string; partySize: number };
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 type TurnstileApi = {
@@ -16,6 +16,7 @@ export function BuffetBooking() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [partySize, setPartySize] = useState(1);
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -88,7 +89,7 @@ export function BuffetBooking() {
       const res = await fetch("/api/sunday-buffet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, website, turnstileToken: token }),
+        body: JSON.stringify({ name, email, phone, partySize, website, turnstileToken: token }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -117,12 +118,12 @@ export function BuffetBooking() {
         <p className="text-2xl font-semibold text-white font-[family-name:var(--font-display)]">Reservation confirmed</p>
         <div className="mt-5 pt-5 border-t border-white/10 text-sm text-stone-400 space-y-1.5">
           <p className="text-white">{result.prettyDate}</p>
-          <p>Doors 12pm · buffet from 12:30pm</p>
+          <p>Party of {result.partySize} · Doors 12pm, buffet from 12:30pm</p>
           <p>{result.address}</p>
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
         <button
-          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); }}
+          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); }}
           className="mt-6 text-sm text-gold-300 hover:text-gold-200 transition"
         >
           Book another spot
@@ -150,6 +151,15 @@ export function BuffetBooking() {
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className={inputCls} />
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />
+
+        <div className="flex items-center justify-between px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
+          <span className="text-sm text-stone-400">How many of you?</span>
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={() => setPartySize((p) => Math.max(1, p - 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">−</button>
+            <span className="w-6 text-center text-white font-semibold tabular-nums">{partySize}</span>
+            <button type="button" onClick={() => setPartySize((p) => Math.min(10, p + 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">+</button>
+          </div>
+        </div>
 
         {TURNSTILE_SITE_KEY && <div ref={widgetRef} className="flex justify-center pt-1" />}
 

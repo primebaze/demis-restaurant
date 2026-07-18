@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-type Booking = { id: string; name: string; email: string; phone: string; status: string; createdAt: string };
-type Summary = { reservations: number; cancelled: number };
+type Booking = { id: string; name: string; email: string; phone: string; partySize: number; status: string; createdAt: string };
+type Summary = { reservations: number; people: number; cancelled: number };
 
 const STATUS_COLORS: Record<string, string> = {
   booked: "bg-gold-300/15 text-gold-300",
@@ -27,7 +27,7 @@ export default function AdminSundayBuffetPage() {
   const [resolvedDate, setResolvedDate] = useState("");
   const [prettyDate, setPrettyDate] = useState("");
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [summary, setSummary] = useState<Summary>({ reservations: 0, cancelled: 0 });
+  const [summary, setSummary] = useState<Summary>({ reservations: 0, people: 0, cancelled: 0 });
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -35,7 +35,7 @@ export default function AdminSundayBuffetPage() {
     const res = await fetch(`/api/admin/sunday-buffet${date ? `?date=${date}` : ""}`);
     const d = await res.json();
     setBookings(d.bookings || []);
-    setSummary(d.summary || { reservations: 0, cancelled: 0 });
+    setSummary(d.summary || { reservations: 0, people: 0, cancelled: 0 });
     setResolvedDate(d.date || "");
     setPrettyDate(d.prettyDate || "");
     setLoading(false);
@@ -77,10 +77,14 @@ export default function AdminSundayBuffetPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6 max-w-md">
+      <div className="grid grid-cols-3 gap-4 mb-6 max-w-lg">
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Reservations</p>
           <p className="text-2xl font-bold text-white">{summary.reservations}</p>
+        </div>
+        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">People</p>
+          <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
         </div>
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Cancelled</p>
@@ -103,6 +107,7 @@ export default function AdminSundayBuffetPage() {
               <thead>
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
                   <th className="px-4 py-3">Guest</th>
+                  <th className="px-4 py-3">Party</th>
                   <th className="px-4 py-3">Contact</th>
                   <th className="px-4 py-3">Booked</th>
                   <th className="px-4 py-3">Status</th>
@@ -113,6 +118,7 @@ export default function AdminSundayBuffetPage() {
                 {bookings.map((b) => (
                   <tr key={b.id} className={`border-b border-gray-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 text-sm text-white">{b.name}</td>
+                    <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">

@@ -362,6 +362,7 @@ model SundayBuffetBooking {
   name      String
   email     String   @default("")
   phone     String   @default("")
+  partySize Int      @default(1)
   ip        String   @default("")
   status    String   @default("booked") // booked, arrived, cancelled
   createdAt DateTime @default(now())
