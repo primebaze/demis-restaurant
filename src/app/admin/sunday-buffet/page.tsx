@@ -219,26 +219,7 @@ export default function AdminSundayBuffetPage() {
                   <tr key={b.id} className={`border-b border-gray-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 text-sm text-white">{b.name}</td>
                     <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">
-                      <div className="flex items-center gap-2">
-                        <span>{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</span>
-                        {b.email && b.status !== "cancelled" && (
-                          <span className="flex items-center gap-1.5 shrink-0">
-                            <button
-                              onClick={() => emailOne(b)} title={`Email ${b.name}`}
-                              className="text-gold-300/80 hover:text-gold-300 transition"
-                              aria-label={`Email ${b.name}`}
-                            >✉</button>
-                            <button
-                              onClick={() => askToConfirm(b)} disabled={confirmingId === b.id}
-                              title={b.confirmedAt ? `Confirmed — resend request to ${b.name}` : `Ask ${b.name} to confirm attendance`}
-                              className="text-emerald-400/80 hover:text-emerald-400 transition disabled:opacity-40"
-                              aria-label={`Ask ${b.name} to confirm`}
-                            >{confirmingId === b.id ? "…" : "✓"}</button>
-                          </span>
-                        )}
-                      </div>
-                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col items-start gap-1">
@@ -252,6 +233,12 @@ export default function AdminSundayBuffetPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-xs">
+                        {b.email && b.status !== "cancelled" && (
+                          <>
+                            <button onClick={() => emailOne(b)} title={`Email ${b.name}`} className="text-gold-300 hover:text-gold-200">✉ Email</button>
+                            <button onClick={() => askToConfirm(b)} disabled={confirmingId === b.id} title={b.confirmedAt ? `Confirmed — resend request to ${b.name}` : `Ask ${b.name} to confirm attendance`} className="text-emerald-400 hover:text-emerald-300 disabled:opacity-40">{confirmingId === b.id ? "…" : "✓ Confirm"}</button>
+                          </>
+                        )}
                         {b.status !== "arrived" && <button onClick={() => setStatus(b.id, "arrived")} className="text-emerald-400 hover:text-emerald-300">Arrived</button>}
                         {b.status !== "cancelled" ? (
                           <button onClick={() => setStatus(b.id, "cancelled")} className="text-gray-400 hover:text-white">Cancel</button>
