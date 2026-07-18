@@ -147,11 +147,11 @@ async function send(
   to: string,
   subject: string,
   html: string,
-  opts?: { type?: string; skipLog?: boolean }
+  opts?: { type?: string; skipLog?: boolean; from?: string }
 ): Promise<boolean> {
   try {
     await transporter.sendMail({
-      from: FROM_EMAIL,
+      from: opts?.from || FROM_EMAIL,
       to,
       subject,
       html,
@@ -186,8 +186,8 @@ export function buildGuestEmailHtml(message: string): string {
 }
 
 /** Low-level sender for the queue processor — sends pre-rendered HTML, no auto-logging. */
-export async function sendRawEmail(to: string, subject: string, html: string): Promise<boolean> {
-  return send(to, subject, html, { skipLog: true });
+export async function sendRawEmail(to: string, subject: string, html: string, from?: string): Promise<boolean> {
+  return send(to, subject, html, { skipLog: true, from });
 }
 
 export function isResendConfigured(): boolean {
@@ -197,14 +197,14 @@ export function isResendConfigured(): boolean {
 const RESEND_FROM = process.env.RESEND_FROM || FROM_EMAIL;
 
 /** Send one email via the Resend HTTP API. No auto-logging. */
-export async function sendViaResend(to: string, subject: string, html: string): Promise<boolean> {
+export async function sendViaResend(to: string, subject: string, html: string, from?: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   if (!key) return false;
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: RESEND_FROM, to, subject, html }),
+      body: JSON.stringify({ from: from || RESEND_FROM, to, subject, html }),
     });
     if (!res.ok) {
       console.error(`[Resend] Failed (${res.status}): "${subject}" → ${to}`);

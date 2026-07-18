@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { upcomingSunday, prettyDate, BUFFET_START, BUFFET_END, BUFFET_LOCATION, BUFFET_ADDRESS } from "@/lib/sunday-buffet";
+import { upcomingSunday, prettyDate, BUFFET_START, BUFFET_END, BUFFET_LOCATION, BUFFET_ADDRESS, BOOKINGS_FROM } from "@/lib/sunday-buffet";
 import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
@@ -15,8 +15,8 @@ function esc(s: string): string {
 
 /** Send via Resend (from bookings@demisrestaurant.co.uk) when configured, else SMTP. */
 async function deliver(to: string, subject: string, html: string): Promise<void> {
-  if (isResendConfigured() && (await sendViaResend(to, subject, html))) return;
-  await sendRawEmail(to, subject, html);
+  if (isResendConfigured() && (await sendViaResend(to, subject, html, BOOKINGS_FROM))) return;
+  await sendRawEmail(to, subject, html, BOOKINGS_FROM);
 }
 
 /** GET — the Sunday people are booking for. */
