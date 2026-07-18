@@ -30,6 +30,15 @@ export default function AdminSundayBuffetPage() {
   const [summary, setSummary] = useState<Summary>({ reservations: 0, people: 0, cancelled: 0 });
   const [loading, setLoading] = useState(true);
 
+  // "Email everyone" composer
+  const [mailOpen, setMailOpen] = useState(false);
+  const [mailSubject, setMailSubject] = useState("");
+  const [mailMessage, setMailMessage] = useState("");
+  const [mailing, setMailing] = useState(false);
+  const [mailNote, setMailNote] = useState("");
+
+  const withEmail = bookings.filter((b) => b.status !== "cancelled" && b.email).length;
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     const res = await fetch(`/api/admin/sunday-buffet${date ? `?date=${date}` : ""}`);
@@ -54,6 +63,25 @@ export default function AdminSundayBuffetPage() {
     await fetch(`/api/admin/sunday-buffet/${id}`, { method: "DELETE" });
     fetchData();
   }
+  async function sendMailAll() {
+    if (!mailSubject.trim() || !mailMessage.trim()) { setMailNote("Add a subject and a message first."); return; }
+    if (!confirm(`Email all ${withEmail} guest${withEmail === 1 ? "" : "s"} booked for ${prettyDate}?`)) return;
+    setMailing(true);
+    setMailNote("");
+    try {
+      const res = await fetch("/api/admin/sunday-buffet/mail", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: resolvedDate, subject: mailSubject, message: mailMessage }),
+      });
+      const d = await res.json();
+      if (!res.ok) { setMailNote(d.error || "Could not send."); return; }
+      setMailNote(`Sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+      setMailSubject(""); setMailMessage("");
+    } finally {
+      setMailing(false);
+    }
+  }
+
   async function resetDay() {
     if (!confirm(`Clear ALL reservations for ${prettyDate}? This cannot be undone.`)) return;
     await fetch("/api/admin/sunday-buffet", {
@@ -92,9 +120,35 @@ export default function AdminSundayBuffetPage() {
         </div>
       </div>
 
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-wrap justify-end gap-2 mb-4">
+        <button onClick={() => setMailOpen((v) => !v)} disabled={withEmail === 0} className="px-3 py-2 text-xs text-gold-300 border border-gold-300/30 rounded-xl hover:bg-gold-300/10 transition disabled:opacity-40">
+          ✉ Email everyone{withEmail ? ` (${withEmail})` : ""}
+        </button>
         <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this Sunday</button>
       </div>
+
+      {mailOpen && (
+        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
+          <p className="text-sm text-white font-semibold mb-1">Email everyone booked for {prettyDate}</p>
+          <p className="text-xs text-gray-500 mb-4">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
+          <input
+            value={mailSubject} onChange={(e) => setMailSubject(e.target.value)} placeholder="Subject"
+            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-300/60"
+          />
+          <textarea
+            value={mailMessage} onChange={(e) => setMailMessage(e.target.value)} rows={6}
+            placeholder="Your message. Line breaks are kept. Each guest is greeted by name automatically."
+            className="w-full px-3 py-2.5 bg-black/40 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-300/60 resize-y"
+          />
+          <div className="flex items-center gap-3 mt-3">
+            <button onClick={sendMailAll} disabled={mailing} className="px-4 py-2 text-sm bg-gold-300 text-black font-semibold rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
+              {mailing ? "Sending…" : `Send to ${withEmail}`}
+            </button>
+            <button onClick={() => { setMailOpen(false); setMailNote(""); }} className="text-sm text-gray-400 hover:text-white">Cancel</button>
+            {mailNote && <span className="text-xs text-gray-400">{mailNote}</span>}
+          </div>
+        </div>
+      )}
 
       <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
         {loading ? (
