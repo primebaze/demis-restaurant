@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       await prisma.sundayBuffetBooking.update({ where: { id: b.id }, data: { confirmToken: token } });
     }
     const html = confirmEmailHtml(b.name, prettyDate(b.date), confirmUrl(token));
-    const ok = await deliver(b.email, "Are you coming to Sunday's buffet? Please confirm", html).catch(() => false);
+    const ok = await deliver(b.email, "Confirm buffet attendance", html).catch(() => false);
     if (ok) sent++; else failed++;
   }
 
