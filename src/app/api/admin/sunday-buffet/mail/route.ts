@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { sendViaResend, sendRawEmail, isResendConfigured } from "@/lib/email";
-import { upcomingSunday, prettyDate, BOOKINGS_FROM } from "@/lib/sunday-buffet";
+import { upcomingSunday, prettyDate } from "@/lib/sunday-buffet";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
@@ -12,8 +12,8 @@ function esc(s: string): string {
 
 /** Normal transactional delivery (Resend bookings@ domain, SMTP fallback). NOT the marketing domain. */
 async function deliver(to: string, subject: string, html: string): Promise<boolean> {
-  if (isResendConfigured() && (await sendViaResend(to, subject, html, BOOKINGS_FROM))) return true;
-  return sendRawEmail(to, subject, html, BOOKINGS_FROM);
+  if (isResendConfigured() && (await sendViaResend(to, subject, html))) return true;
+  return sendRawEmail(to, subject, html);
 }
 
 /** Branded email wrapping the admin's message. Escapes name + message. */

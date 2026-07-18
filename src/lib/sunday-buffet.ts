@@ -4,9 +4,6 @@ export { priceTierFor, groupPrice };
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.demisrestaurant.co.uk").replace(/\/$/, "");
 
-/** Always send buffet emails from the bookings address (EMAIL_FROM), not the marketing (hello@) sender. */
-export const BOOKINGS_FROM = process.env.EMAIL_FROM || "Demi's Restaurant <bookings@demisrestaurant.co.uk>";
-
 /** The link a guest clicks to confirm they're coming. */
 export function confirmUrl(token: string): string {
   return `${SITE_URL}/sunday-buffet/confirm?token=${encodeURIComponent(token)}`;
