@@ -16,25 +16,22 @@ async function deliver(to: string, subject: string, html: string): Promise<boole
   return sendRawEmail(to, subject, html);
 }
 
-/** Branded email wrapping the admin's message. Escapes name + message. */
+/**
+ * Plain, personal-note style email (no logo/banner/buttons) so Gmail is more
+ * likely to file it under Primary rather than Promotions. Escapes name + message.
+ */
 function buildHtml(name: string, message: string): string {
   const body = esc(message)
     .split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 16px;">${p.replace(/\n/g, "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 14px;">${p.replace(/\n/g, "<br>")}</p>`)
     .join("");
-  return `<!DOCTYPE html><html><body style="margin:0;background:#f0f0f0;font-family:Georgia,serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:40px 20px;"><tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:12px;overflow:hidden;">
-<tr><td align="center" style="padding:36px 40px 20px;">
-  <div style="font-family:Georgia,serif;font-size:34px;color:#e8cc9c;letter-spacing:2px;">Demi&rsquo;s</div>
-  <div style="font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:3px;color:#999;text-transform:uppercase;margin-top:4px;">Restaurant</div>
-</td></tr>
-<tr><td style="padding:8px 44px 36px;font-family:Helvetica,Arial,sans-serif;color:#333;font-size:15px;line-height:1.7;">
-  <p style="margin:0 0 16px;">Hi ${esc(name) || "there"},</p>
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;">
+<div style="max-width:560px;margin:0 auto;padding:20px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#222;font-size:15px;line-height:1.6;">
+  <p style="margin:0 0 14px;">Hi ${esc(name) || "there"},</p>
   ${body}
-  <p style="margin:24px 0 0;color:#888;font-size:12px;">Demi&rsquo;s Nigerian Restaurant &middot; Streatham Hill</p>
-</td></tr>
-</table></td></tr></table></body></html>`;
+  <p style="margin:18px 0 0;">Thanks,<br>Demi&rsquo;s Restaurant, Streatham Hill</p>
+</div>
+</body></html>`;
 }
 
 /** POST /api/admin/sunday-buffet/mail — email everyone booked for a Sunday. */
