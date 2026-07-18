@@ -60,7 +60,7 @@ export async function POST(req: Request) {
   let sent = 0, failed = 0;
   for (const b of bookings) {
     const ok = await deliver(b.email, subj, buildHtml(b.name, message)).catch(() => false);
-    ok ? sent++ : failed++;
+    if (ok) sent++; else failed++;
   }
 
   return NextResponse.json({ sent, failed, total: bookings.length, date, prettyDate: prettyDate(date) });
