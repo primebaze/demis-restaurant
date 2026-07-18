@@ -41,7 +41,6 @@ export default function AdminSundayBuffetPage() {
   // "Ask guests to confirm attendance"
   const [confirming, setConfirming] = useState(false);
   const [confirmNote, setConfirmNote] = useState("");
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const withEmail = bookings.filter((b) => b.status !== "cancelled" && b.email).length;
 
@@ -100,23 +99,20 @@ export default function AdminSundayBuffetPage() {
     }
   }
 
-  async function askToConfirm(b?: Booking) {
-    const prompt = b
-      ? `Send ${b.name} a link to confirm they're coming?`
-      : `Email all ${withEmail} guest${withEmail === 1 ? "" : "s"} a link to confirm they're coming on ${prettyDate}?`;
-    if (!confirm(prompt)) return;
-    if (b) setConfirmingId(b.id); else setConfirming(true);
+  async function askToConfirm() {
+    if (!confirm(`Email all ${withEmail} guest${withEmail === 1 ? "" : "s"} a link to confirm they're coming on ${prettyDate}?`)) return;
+    setConfirming(true);
     setConfirmNote("");
     try {
       const res = await fetch("/api/admin/sunday-buffet/confirm-request", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: resolvedDate, id: b?.id }),
+        body: JSON.stringify({ date: resolvedDate }),
       });
       const d = await res.json();
       if (!res.ok) { setConfirmNote(d.error || "Could not send."); return; }
-      setConfirmNote(b ? `Confirmation request sent to ${b.name}.` : `Confirmation request sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+      setConfirmNote(`Confirmation request sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
     } finally {
-      if (b) setConfirmingId(null); else setConfirming(false);
+      setConfirming(false);
     }
   }
 
@@ -234,10 +230,7 @@ export default function AdminSundayBuffetPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-xs">
                         {b.email && b.status !== "cancelled" && (
-                          <>
-                            <button onClick={() => emailOne(b)} title={`Email ${b.name}`} className="text-gold-300 hover:text-gold-200">✉ Email</button>
-                            <button onClick={() => askToConfirm(b)} disabled={confirmingId === b.id} title={b.confirmedAt ? `Confirmed — resend request to ${b.name}` : `Ask ${b.name} to confirm attendance`} className="text-emerald-400 hover:text-emerald-300 disabled:opacity-40">{confirmingId === b.id ? "…" : "✓ Confirm"}</button>
-                          </>
+                          <button onClick={() => emailOne(b)} title={`Email ${b.name}`} className="text-gold-300 hover:text-gold-200">✉ Email</button>
                         )}
                         {b.status !== "arrived" && <button onClick={() => setStatus(b.id, "arrived")} className="text-emerald-400 hover:text-emerald-300">Arrived</button>}
                         {b.status !== "cancelled" ? (
