@@ -365,10 +365,13 @@ model SundayBuffetBooking {
   partySize Int      @default(1)
   ip        String   @default("")
   status    String   @default("booked") // booked, arrived, cancelled
+  confirmToken String @default("") // per-booking token for the "confirm attendance" link
+  confirmedAt DateTime? // set when the guest clicks "I'll be there"
   createdAt DateTime @default(now())
 
   @@index([date])
   @@index([date, email])
+  @@index([confirmToken])
 }
 
 // ─── REVIEWS (admin-authored, shown on the site) ───

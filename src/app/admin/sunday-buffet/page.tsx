@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-type Booking = { id: string; name: string; email: string; phone: string; partySize: number; status: string; createdAt: string };
-type Summary = { reservations: number; people: number; cancelled: number };
+type Booking = { id: string; name: string; email: string; phone: string; partySize: number; status: string; confirmedAt: string | null; createdAt: string };
+type Summary = { reservations: number; people: number; confirmed: number; cancelled: number };
 
 const STATUS_COLORS: Record<string, string> = {
   booked: "bg-gold-300/15 text-gold-300",
@@ -27,7 +27,7 @@ export default function AdminSundayBuffetPage() {
   const [resolvedDate, setResolvedDate] = useState("");
   const [prettyDate, setPrettyDate] = useState("");
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [summary, setSummary] = useState<Summary>({ reservations: 0, people: 0, cancelled: 0 });
+  const [summary, setSummary] = useState<Summary>({ reservations: 0, people: 0, confirmed: 0, cancelled: 0 });
   const [loading, setLoading] = useState(true);
 
   // "Email everyone" composer
@@ -37,6 +37,10 @@ export default function AdminSundayBuffetPage() {
   const [mailing, setMailing] = useState(false);
   const [mailNote, setMailNote] = useState("");
 
+  // "Ask guests to confirm attendance"
+  const [confirming, setConfirming] = useState(false);
+  const [confirmNote, setConfirmNote] = useState("");
+
   const withEmail = bookings.filter((b) => b.status !== "cancelled" && b.email).length;
 
   const fetchData = useCallback(async () => {
@@ -44,7 +48,7 @@ export default function AdminSundayBuffetPage() {
     const res = await fetch(`/api/admin/sunday-buffet${date ? `?date=${date}` : ""}`);
     const d = await res.json();
     setBookings(d.bookings || []);
-    setSummary(d.summary || { reservations: 0, people: 0, cancelled: 0 });
+    setSummary(d.summary || { reservations: 0, people: 0, confirmed: 0, cancelled: 0 });
     setResolvedDate(d.date || "");
     setPrettyDate(d.prettyDate || "");
     setLoading(false);
@@ -82,6 +86,23 @@ export default function AdminSundayBuffetPage() {
     }
   }
 
+  async function askToConfirm() {
+    if (!confirm(`Email all ${withEmail} guest${withEmail === 1 ? "" : "s"} a link to confirm they're coming on ${prettyDate}?`)) return;
+    setConfirming(true);
+    setConfirmNote("");
+    try {
+      const res = await fetch("/api/admin/sunday-buffet/confirm-request", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: resolvedDate }),
+      });
+      const d = await res.json();
+      if (!res.ok) { setConfirmNote(d.error || "Could not send."); return; }
+      setConfirmNote(`Confirmation request sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+    } finally {
+      setConfirming(false);
+    }
+  }
+
   async function resetDay() {
     if (!confirm(`Clear ALL reservations for ${prettyDate}? This cannot be undone.`)) return;
     await fetch("/api/admin/sunday-buffet", {
@@ -105,7 +126,7 @@ export default function AdminSundayBuffetPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6 max-w-lg">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Reservations</p>
           <p className="text-2xl font-bold text-white">{summary.reservations}</p>
@@ -115,12 +136,20 @@ export default function AdminSundayBuffetPage() {
           <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
         </div>
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Confirmed</p>
+          <p className="text-2xl font-bold text-emerald-400">{summary.confirmed}</p>
+        </div>
+        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Cancelled</p>
           <p className="text-2xl font-bold text-white">{summary.cancelled}</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-end gap-2 mb-4">
+      <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+        {confirmNote && <span className="text-xs text-gray-400 mr-auto">{confirmNote}</span>}
+        <button onClick={askToConfirm} disabled={withEmail === 0 || confirming} className="px-3 py-2 text-xs text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/10 transition disabled:opacity-40">
+          {confirming ? "Sending…" : `✓ Ask guests to confirm${withEmail ? ` (${withEmail})` : ""}`}
+        </button>
         <button onClick={() => setMailOpen((v) => !v)} disabled={withEmail === 0} className="px-3 py-2 text-xs text-gold-300 border border-gold-300/30 rounded-xl hover:bg-gold-300/10 transition disabled:opacity-40">
           ✉ Email everyone{withEmail ? ` (${withEmail})` : ""}
         </button>
@@ -176,7 +205,14 @@ export default function AdminSundayBuffetPage() {
                     <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-700 text-gray-300"}`}>{b.status}</span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-700 text-gray-300"}`}>{b.status}</span>
+                        {b.status !== "cancelled" && (
+                          b.confirmedAt
+                            ? <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400" title={`Confirmed ${fmt(b.confirmedAt)}`}>✓ confirmed</span>
+                            : <span className="text-[11px] text-gray-600">awaiting</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-xs">

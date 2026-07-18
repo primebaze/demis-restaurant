@@ -2,6 +2,13 @@ import { serviceDate, priceTierFor, groupPrice } from "@/lib/checkin-auth";
 
 export { priceTierFor, groupPrice };
 
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.demisrestaurant.co.uk").replace(/\/$/, "");
+
+/** The link a guest clicks to confirm they're coming. */
+export function confirmUrl(token: string): string {
+  return `${SITE_URL}/sunday-buffet/confirm?token=${encodeURIComponent(token)}`;
+}
+
 // Buffet service details
 export const BUFFET_LOCATION = "Streatham Hill";
 export const BUFFET_ADDRESS = "67 Streatham Hill, London SW2 4TX";

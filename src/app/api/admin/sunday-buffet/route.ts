@@ -38,20 +38,22 @@ export async function GET(req: Request) {
       phone: b.phone,
       partySize: b.partySize,
       status: b.status,
+      confirmedAt: b.confirmedAt,
       createdAt: b.createdAt,
     }));
     const active = rows.filter((b) => b.status !== "cancelled");
     const people = active.reduce((s, b) => s + b.partySize, 0);
+    const confirmed = active.filter((b) => b.confirmedAt).length;
     return NextResponse.json({
       date,
       prettyDate: prettyDate(date),
       bookings,
-      summary: { reservations: active.length, people, cancelled: rows.length - active.length },
+      summary: { reservations: active.length, people, confirmed, cancelled: rows.length - active.length },
     });
   } catch {
     return NextResponse.json({
       date, prettyDate: prettyDate(date), bookings: [],
-      summary: { reservations: 0, people: 0, cancelled: 0 }, notMigrated: true,
+      summary: { reservations: 0, people: 0, confirmed: 0, cancelled: 0 }, notMigrated: true,
     });
   }
 }
