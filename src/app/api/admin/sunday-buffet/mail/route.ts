@@ -42,18 +42,21 @@ export async function POST(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { date: rawDate, subject, message } = await req.json();
+  const { date: rawDate, subject, message, id } = await req.json();
   const date = rawDate || upcomingSunday();
   if (!subject?.trim() || !message?.trim()) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
   }
 
+  // With an `id`, email just that one guest; otherwise everyone booked for the Sunday.
   const bookings = await prisma.sundayBuffetBooking.findMany({
-    where: { date, status: { not: "cancelled" }, email: { not: "" } },
+    where: id
+      ? { id: String(id), status: { not: "cancelled" }, email: { not: "" } }
+      : { date, status: { not: "cancelled" }, email: { not: "" } },
     select: { email: true, name: true },
   });
   if (bookings.length === 0) {
-    return NextResponse.json({ error: "No reservations with an email for this Sunday." }, { status: 400 });
+    return NextResponse.json({ error: "No reservation with an email to send to." }, { status: 400 });
   }
 
   const subj = String(subject).slice(0, 150);

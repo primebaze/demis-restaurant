@@ -44,16 +44,19 @@ export async function POST(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { date: rawDate } = await req.json().catch(() => ({}));
+  const { date: rawDate, id } = await req.json().catch(() => ({}));
   const date = rawDate || upcomingSunday();
   const dateLabel = prettyDate(date);
 
+  // With an `id`, ask just that one guest to confirm; otherwise everyone booked.
   const bookings = await prisma.sundayBuffetBooking.findMany({
-    where: { date, status: { not: "cancelled" }, email: { not: "" } },
-    select: { id: true, name: true, email: true, confirmToken: true },
+    where: id
+      ? { id: String(id), status: { not: "cancelled" }, email: { not: "" } }
+      : { date, status: { not: "cancelled" }, email: { not: "" } },
+    select: { id: true, name: true, email: true, confirmToken: true, date: true },
   });
   if (bookings.length === 0) {
-    return NextResponse.json({ error: "No reservations with an email for this Sunday." }, { status: 400 });
+    return NextResponse.json({ error: "No reservation with an email to send to." }, { status: 400 });
   }
 
   let sent = 0, failed = 0;
@@ -64,7 +67,7 @@ export async function POST(req: Request) {
       token = randomUUID();
       await prisma.sundayBuffetBooking.update({ where: { id: b.id }, data: { confirmToken: token } });
     }
-    const html = confirmEmailHtml(b.name, dateLabel, confirmUrl(token));
+    const html = confirmEmailHtml(b.name, prettyDate(b.date), confirmUrl(token));
     const ok = await deliver(b.email, "Are you coming to Sunday's buffet? Please confirm", html).catch(() => false);
     if (ok) sent++; else failed++;
   }
