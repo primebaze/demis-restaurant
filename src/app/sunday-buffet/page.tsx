@@ -22,7 +22,7 @@ async function getReviews(): Promise<Review[]> {
 export const metadata: Metadata = {
   title: "Sunday Buffet | Demi's Restaurant Streatham Hill",
   description:
-    "All-you-can-eat Afro-Caribbean Sunday buffet at Demi's Streatham Hill. Reserve your spot, the earlier you book, the lower your number and the less you pay. £20 for the first 20, then £25, then £30.",
+    "All-you-can-eat Afro-Caribbean Sunday buffet at Demi's Streatham Hill. Reserve your spot, the earlier you book, the lower your number and the less you pay. £20 for the first 10, then £25, then £30.",
   alternates: { canonical: "https://www.demisrestaurant.co.uk/sunday-buffet" },
   openGraph: {
     title: "Sunday Buffet at Demi's, Streatham Hill",
@@ -41,8 +41,8 @@ const MENU = [
 ];
 
 const TIERS = [
-  { n: "First 20", p: "20", note: "Early birds", highlight: true },
-  { n: "Next 25", p: "25", note: "Still a steal", highlight: false },
+  { n: "First 10", p: "20", note: "Early birds", highlight: true },
+  { n: "Next 12", p: "25", note: "Still a steal", highlight: false },
   { n: "After that", p: "30", note: "Latecomers", highlight: false },
 ];
 

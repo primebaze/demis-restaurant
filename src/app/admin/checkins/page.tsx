@@ -138,9 +138,9 @@ export default function AdminCheckinsPage() {
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">People in {isToday ? "today" : ""}</p>
           <p className="text-2xl font-bold text-gold-300">{data?.total ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800"><p className="text-xs text-gray-500 uppercase tracking-wider mb-1">£20 (1–20)</p><p className="text-2xl font-bold text-emerald-300">{data?.tiers.t20 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800"><p className="text-xs text-gray-500 uppercase tracking-wider mb-1">£25 (21–45)</p><p className="text-2xl font-bold text-amber-300">{data?.tiers.t25 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800"><p className="text-xs text-gray-500 uppercase tracking-wider mb-1">£30 (46+)</p><p className="text-2xl font-bold text-red-300">{data?.tiers.t30 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800"><p className="text-xs text-gray-500 uppercase tracking-wider mb-1">£20 (1–10)</p><p className="text-2xl font-bold text-emerald-300">{data?.tiers.t20 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800"><p className="text-xs text-gray-500 uppercase tracking-wider mb-1">£25 (11–22)</p><p className="text-2xl font-bold text-amber-300">{data?.tiers.t25 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800"><p className="text-xs text-gray-500 uppercase tracking-wider mb-1">£30 (23+)</p><p className="text-2xl font-bold text-red-300">{data?.tiers.t30 ?? 0}</p></div>
       </div>
 
       {/* Table */}
