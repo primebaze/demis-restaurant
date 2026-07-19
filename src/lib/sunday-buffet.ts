@@ -17,9 +17,9 @@ export const BUFFET_END = "4:00pm";
 
 // Tier structure (matches the door check-in)
 export const TIERS = [
-  { price: 20, upto: 10 },   // covers 1-10
-  { price: 25, upto: 22 },   // covers 11-22
-  { price: 30, upto: Infinity }, // 23+
+  { price: 20, upto: 20 },   // covers 1-20
+  { price: 25, upto: 45 },   // covers 21-45
+  { price: 30, upto: Infinity }, // 46+
 ];
 
 /**
@@ -56,7 +56,7 @@ export function prettyDate(iso: string): string {
 /** How many covers remain at each tier given how many are already booked. */
 export function tiersLeft(bookedCovers: number) {
   return [
-    { price: 20, left: Math.max(0, 10 - bookedCovers) },
-    { price: 25, left: Math.max(0, 22 - Math.max(bookedCovers, 10)) },
+    { price: 20, left: Math.max(0, 20 - bookedCovers) },
+    { price: 25, left: Math.max(0, 45 - Math.max(bookedCovers, 20)) },
   ];
 }
