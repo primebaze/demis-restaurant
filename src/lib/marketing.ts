@@ -123,7 +123,7 @@ export function buildMarketingEmail(opts: {
 
       <!-- Book now button -->
       <tr><td align="center" style="background-color:#fff;padding:20px 40px 40px;border-radius:0 0 12px 12px;">
-        <a href="${SITE_URL}/booking" style="display:inline-block;background:#e3c07a;color:#141210;font-family:${SANS};font-size:14px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:6px;">Book now</a>
+        <a href="${SITE_URL}/sunday-buffet" style="display:inline-block;background:#e3c07a;color:#141210;font-family:${SANS};font-size:14px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:6px;">Book now</a>
       </td></tr>
 
       <!-- Footer -->
