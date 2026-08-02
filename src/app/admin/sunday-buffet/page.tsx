@@ -225,7 +225,14 @@ export default function AdminSundayBuffetPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-xs">
                         {b.email && b.status !== "cancelled" && (
-                          <button onClick={() => askToConfirm(b)} disabled={confirmingId === b.id} title={b.confirmedAt ? `Resend confirmation email to ${b.name}` : `Send ${b.name} the confirmation email`} className="text-gold-300 hover:text-gold-200 disabled:opacity-40 text-lg leading-none">{confirmingId === b.id ? "…" : "✉"}</button>
+                          <button
+                            onClick={() => askToConfirm(b)}
+                            disabled={confirmingId === b.id}
+                            title={b.confirmedAt ? `Resend the confirmation email to ${b.name}` : `Email ${b.name} a link to confirm they're coming`}
+                            className="text-gold-300 hover:text-gold-200 disabled:opacity-40 whitespace-nowrap"
+                          >
+                            {confirmingId === b.id ? "Sending…" : b.confirmSentAt ? "✉ Resend" : "✉ Confirm"}
+                          </button>
                         )}
                         {b.status !== "arrived" && <button onClick={() => setStatus(b.id, "arrived")} className="text-emerald-400 hover:text-emerald-300">Arrived</button>}
                         {b.status !== "cancelled" ? (
