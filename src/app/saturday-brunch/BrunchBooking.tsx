@@ -150,7 +150,7 @@ export function BrunchBooking() {
       <div className="pb-5 mb-5 border-b border-white/[0.08]">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your table</p>
         <p className="text-lg font-semibold text-white">{avail ? avail.prettyDate : "This Saturday"}</p>
-        <p className="text-[13px] text-stone-500 mt-0.5">£{avail?.price ?? 35} per person · 11am – 4pm</p>
+        <p className="text-[13px] text-stone-500 mt-0.5">£{avail?.price ?? 35} per person</p>
         <p className="text-[12px] text-stone-500 mt-2">This booking is for the Saturday bottomless brunch.</p>
       </div>
 
