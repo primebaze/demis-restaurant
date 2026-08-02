@@ -19,7 +19,7 @@ export function BuffetBooking() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [partySize, setPartySize] = useState(1);
-  const [arrivalTime, setArrivalTime] = useState(ARRIVAL_SLOTS[0]);
+  const [arrivalTime, setArrivalTime] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -79,6 +79,7 @@ export function BuffetBooking() {
     if ((phone.match(/\d/g) || []).length < 7) return "Please enter a valid phone number";
     if (!email.trim()) return "Please enter your email";
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) return "Please enter a valid email";
+    if (!arrivalTime) return "Please choose what time you'll arrive";
     if (TURNSTILE_SITE_KEY && !token) return "Please complete the verification below";
     return null;
   }
@@ -127,7 +128,7 @@ export function BuffetBooking() {
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
         <button
-          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); setArrivalTime(ARRIVAL_SLOTS[0]); }}
+          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); setArrivalTime(""); }}
           className="mt-6 text-sm text-gold-300 hover:text-gold-200 transition"
         >
           Book another spot
@@ -166,9 +167,8 @@ export function BuffetBooking() {
         </div>
 
         <div className="px-4 py-3.5 bg-black/40 border border-white/[0.09] rounded-xl">
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3">
             <span className="text-sm text-stone-400">What time will you arrive?</span>
-            <span className="text-[11px] text-stone-600">Doors 12pm</span>
           </div>
           <div className="grid grid-cols-3 gap-2">
             {(avail?.arrivalSlots || ARRIVAL_SLOTS).map((t) => (

@@ -77,14 +77,14 @@ export async function POST(req: Request) {
   const email = String(body.email || "").trim().toLowerCase().slice(0, 120);
   const phone = String(body.phone || "").trim().slice(0, 30);
   const partySize = Math.min(10, Math.max(1, parseInt(body.partySize) || 1));
-  const rawArrival = String(body.arrivalTime || "").trim();
-  const arrivalTime = isArrivalSlot(rawArrival) ? rawArrival : ARRIVAL_SLOTS[0];
+  const arrivalTime = String(body.arrivalTime || "").trim();
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
   if ((phone.match(/\d/g) || []).length < 7) return NextResponse.json({ error: "Please enter a valid phone number" }, { status: 400 });
   if (!email) return NextResponse.json({ error: "Please enter your email" }, { status: 400 });
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
+  if (!isArrivalSlot(arrivalTime)) return NextResponse.json({ error: "Please choose what time you'll arrive" }, { status: 400 });
 
   const date = upcomingSunday();
 
