@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; status: string; confirmedAt: string | null; createdAt: string };
+type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
 type Summary = { reservations: number; people: number; confirmed: number; cancelled: number };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -216,7 +216,9 @@ export default function AdminSundayBuffetPage() {
                         {b.status !== "cancelled" && (
                           b.confirmedAt
                             ? <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400" title={`Confirmed ${fmt(b.confirmedAt)}`}>✓ confirmed</span>
-                            : <span className="text-[11px] text-gray-600">awaiting</span>
+                            : b.confirmSentAt
+                              ? <span className="text-[11px] text-gray-600" title={`Confirmation requested ${fmt(b.confirmSentAt)}`}>awaiting</span>
+                              : null
                         )}
                       </div>
                     </td>

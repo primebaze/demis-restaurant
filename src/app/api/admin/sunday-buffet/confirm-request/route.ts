@@ -69,7 +69,13 @@ export async function POST(req: Request) {
     }
     const html = confirmEmailHtml(b.name, prettyDate(b.date), confirmUrl(token));
     const ok = await deliver(b.email, "Confirm buffet attendance", html).catch(() => false);
-    if (ok) sent++; else failed++;
+    if (ok) {
+      sent++;
+      // Only now is the guest genuinely "awaiting" a reply.
+      await prisma.sundayBuffetBooking.update({ where: { id: b.id }, data: { confirmSentAt: new Date() } });
+    } else {
+      failed++;
+    }
   }
 
   return NextResponse.json({ sent, failed, total: bookings.length, date, prettyDate: dateLabel });

@@ -39,6 +39,7 @@ export async function GET(req: Request) {
       partySize: b.partySize,
       arrivalTime: b.arrivalTime,
       status: b.status,
+      confirmSentAt: b.confirmSentAt,
       confirmedAt: b.confirmedAt,
       createdAt: b.createdAt,
     }));

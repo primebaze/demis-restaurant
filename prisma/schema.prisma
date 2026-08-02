@@ -367,6 +367,7 @@ model SundayBuffetBooking {
   ip        String   @default("")
   status    String   @default("booked") // booked, arrived, cancelled
   confirmToken String @default("") // per-booking token for the "confirm attendance" link
+  confirmSentAt DateTime? // set when we email them the confirm-attendance request
   confirmedAt DateTime? // set when the guest clicks "I'll be there"
   createdAt DateTime @default(now())
 
