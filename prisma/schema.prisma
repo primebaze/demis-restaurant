@@ -376,6 +376,44 @@ model SundayBuffetBooking {
   @@index([confirmToken])
 }
 
+// ─── SATURDAY BOTTOMLESS BRUNCH ───
+model SaturdayBrunchBooking {
+  id        String   @id @default(cuid())
+  date      String // the Saturday, "2026-08-08"
+  name      String
+  email     String   @default("")
+  phone     String   @default("")
+  partySize Int      @default(1)
+  arrivalTime String @default("")
+  ip        String   @default("")
+  status    String   @default("booked") // booked, arrived, cancelled
+  confirmToken String @default("")
+  confirmSentAt DateTime?
+  confirmedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@index([date, email])
+  @@index([confirmToken])
+}
+
+/** Door check-in for the Saturday brunch. Flat price per head, no tiers. */
+model BrunchCheckIn {
+  id          String   @id @default(cuid())
+  date        String // service date "2026-08-08"
+  number      Int // sequential per date, starts at 1
+  name        String   @default("")
+  partySize   Int      @default(1)
+  pricePerHead Int     @default(35)
+  checkedInAt DateTime @default(now())
+  endsAt      DateTime
+  status      String   @default("active") // active, finished
+  createdAt   DateTime @default(now())
+
+  @@unique([date, number])
+  @@index([date])
+}
+
 // ─── REVIEWS (admin-authored, shown on the site) ───
 model Review {
   id        String   @id @default(cuid())
