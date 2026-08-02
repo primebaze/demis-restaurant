@@ -6,7 +6,7 @@ type Avail = { date: string; prettyDate: string; start: string; end: string; arr
 type Result = { prettyDate: string; start: string; end: string; address: string; partySize: number; arrivalTime: string };
 
 const ARRIVAL_SLOTS = [
-  "12:00", "12:30",
+  "12:30",
   "13:00", "13:30",
   "14:00", "14:30",
   "15:00", "15:30",
