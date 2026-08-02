@@ -4,6 +4,7 @@ import { upcomingSunday, prettyDate, BUFFET_START, BUFFET_END, BUFFET_LOCATION, 
 import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 // Max reservations accepted from one IP per hour (blocks scripted floods).
 const RESERVE_RATE_LIMIT = { maxRequests: 5, windowMs: 60 * 60 * 1000 };
@@ -14,9 +15,14 @@ function esc(s: string): string {
 }
 
 /** Send via Resend (from bookings@demisrestaurant.co.uk) when configured, else SMTP. */
-async function deliver(to: string, subject: string, html: string): Promise<void> {
-  if (isResendConfigured() && (await sendViaResend(to, subject, html))) return;
-  await sendRawEmail(to, subject, html);
+async function deliver(to: string, subject: string, html: string): Promise<boolean> {
+  if (isResendConfigured() && (await sendViaResend(to, subject, html))) return true;
+  return sendRawEmail(to, subject, html);
+}
+
+/** Cap how long a hung mail server can stall the booking response. */
+function withTimeout(p: Promise<boolean>, ms = 8000): Promise<boolean> {
+  return Promise.race([p, new Promise<boolean>((r) => setTimeout(() => r(false), ms))]);
 }
 
 /** GET — the Sunday people are booking for. */
@@ -104,10 +110,18 @@ export async function POST(req: Request) {
     data: { date, name, email, phone, partySize, arrivalTime, ip },
   });
 
-  // Guest confirmation + admin notification (fire-and-forget)
-  deliver(email, "Your Sunday buffet reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime })).catch(() => {});
+  // Guest confirmation + admin notification.
+  // These MUST be awaited: on Vercel the function is frozen once the response is
+  // returned, which kills any in-flight request mid-TLS-handshake. Sent in
+  // parallel so the guest only waits for one round-trip.
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bookings@demisrestaurant.co.uk";
-  deliver(adminEmail, `New Sunday buffet reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime })).catch(() => {});
+  const [guestSent, adminSent] = await Promise.all([
+    withTimeout(deliver(email, "Your Sunday buffet reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime }))).catch(() => false),
+    withTimeout(deliver(adminEmail, `New Sunday buffet reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime }))).catch(() => false),
+  ]);
+  // Never fail the booking over email, but do surface the problem in the logs.
+  if (!guestSent) console.error(`[Buffet] Guest confirmation email FAILED → ${email}`);
+  if (!adminSent) console.error(`[Buffet] Admin notification email FAILED → ${adminEmail}`);
 
   return NextResponse.json({
     id: booking.id,
