@@ -5,7 +5,14 @@ import { useEffect, useState, useCallback, useRef } from "react";
 type Avail = { date: string; prettyDate: string; start: string; end: string; arrivalSlots?: string[] };
 type Result = { prettyDate: string; start: string; end: string; address: string; partySize: number; arrivalTime: string };
 
-const ARRIVAL_SLOTS = ["12:00", "12:15", "12:30"];
+const ARRIVAL_SLOTS = [
+  "12:00", "12:30",
+  "13:00", "13:30",
+  "14:00", "14:30",
+  "15:00", "15:30",
+  "16:00", "16:30",
+  "17:00",
+];
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 type TurnstileApi = {
@@ -170,13 +177,13 @@ export function BuffetBooking() {
           <div className="mb-3">
             <span className="text-sm text-stone-400">What time will you arrive?</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {(avail?.arrivalSlots || ARRIVAL_SLOTS).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setArrivalTime(t)}
-                className={`py-2.5 rounded-lg text-sm font-semibold transition border ${
+                className={`py-2.5 rounded-lg text-[13px] font-semibold tabular-nums transition border ${
                   arrivalTime === t
                     ? "bg-gold-300 text-black border-gold-300"
                     : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"

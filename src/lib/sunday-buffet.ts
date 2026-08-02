@@ -14,8 +14,15 @@ export const BUFFET_LOCATION = "Streatham Hill";
 export const BUFFET_ADDRESS = "67 Streatham Hill, London SW2 4TX";
 export const BUFFET_START = "12:30pm";
 
-/** Arrival slots guests pick from — doors open 12pm, buffet starts 12:30pm. */
-export const ARRIVAL_SLOTS = ["12:00", "12:15", "12:30"];
+/** Arrival slots guests pick from — every 30 minutes from doors (12pm) until 5pm. */
+export const ARRIVAL_SLOTS = [
+  "12:00", "12:30",
+  "13:00", "13:30",
+  "14:00", "14:30",
+  "15:00", "15:30",
+  "16:00", "16:30",
+  "17:00",
+];
 export function isArrivalSlot(t: string): boolean {
   return ARRIVAL_SLOTS.includes(t);
 }
