@@ -6,8 +6,12 @@ export const BRUNCH_ADDRESS = "67 Streatham Hill, London SW2 4TX";
 export const BRUNCH_PRICE = 35; // £ per person, flat
 export const BRUNCH_WINDOW_MIN = 90; // dining window at the door
 
-/** Arrival slots guests pick from. */
+export const BRUNCH_START = "11:00am";
+export const BRUNCH_END = "4:00pm";
+
+/** Arrival slots guests pick from — every 30 minutes across the 11am–4pm service. */
 export const ARRIVAL_SLOTS = [
+  "11:00", "11:30",
   "12:00", "12:30",
   "13:00", "13:30",
   "14:00", "14:30",
@@ -20,7 +24,7 @@ export function isArrivalSlot(t: string): boolean {
 
 /**
  * The upcoming Saturday (UK time), YYYY-MM-DD. Today if it's Saturday and
- * service hasn't finished; once today's service is over (after 5pm), rolls on.
+ * service hasn't finished; once today's brunch has ended (after 4pm), rolls on.
  */
 export function upcomingSaturday(from: Date = new Date()): string {
   const [y, m, d] = serviceDate(from).split("-").map(Number);
@@ -31,7 +35,7 @@ export function upcomingSaturday(from: Date = new Date()): string {
       new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hour12: false }).format(from),
       10
     );
-    if (hour >= 17) add = 7;
+    if (hour >= 16) add = 7;
   }
   dt.setUTCDate(dt.getUTCDate() + add);
   return dt.toISOString().slice(0, 10);

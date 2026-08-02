@@ -161,6 +161,7 @@ function guestEmailHtml(o: { name: string; date: string; partySize: number; arri
     <div style="font-family:Georgia,serif;font-size:22px;color:#8b0000;">${prettyDate(o.date)}</div>
     <div style="font-size:13px;color:#666;margin-top:6px;">Party of ${o.partySize} &middot; arriving ${esc(o.arrivalTime)}</div>
     <div style="font-size:13px;color:#666;margin-top:4px;">&pound;${BRUNCH_PRICE} per person, paid at the door</div>
+    <div style="font-size:13px;color:#666;margin-top:4px;">Served 11am &ndash; 4pm</div>
   </td></tr></table>
   <p style="margin:0;color:#666;font-size:13px;">${BRUNCH_ADDRESS}. See you Saturday!</p>
 </td></tr>

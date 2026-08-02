@@ -6,6 +6,7 @@ type Avail = { date: string; prettyDate: string; price: number; arrivalSlots?: s
 type Result = { prettyDate: string; address: string; partySize: number; arrivalTime: string; price: number };
 
 const ARRIVAL_SLOTS = [
+  "11:00", "11:30",
   "12:00", "12:30",
   "13:00", "13:30",
   "14:00", "14:30",
@@ -149,7 +150,7 @@ export function BrunchBooking() {
       <div className="pb-5 mb-5 border-b border-white/[0.08]">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your table</p>
         <p className="text-lg font-semibold text-white">{avail ? avail.prettyDate : "This Saturday"}</p>
-        <p className="text-[13px] text-stone-500 mt-0.5">£{avail?.price ?? 35} per person</p>
+        <p className="text-[13px] text-stone-500 mt-0.5">£{avail?.price ?? 35} per person · 11am – 4pm</p>
       </div>
 
       <div className="space-y-3">
