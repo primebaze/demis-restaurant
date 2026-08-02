@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { upcomingSunday, prettyDate, BUFFET_START, BUFFET_END, BUFFET_LOCATION, BUFFET_ADDRESS } from "@/lib/sunday-buffet";
+import { upcomingSunday, prettyDate, BUFFET_START, BUFFET_END, BUFFET_LOCATION, BUFFET_ADDRESS, ARRIVAL_SLOTS, isArrivalSlot } from "@/lib/sunday-buffet";
 import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
@@ -29,6 +29,7 @@ export async function GET() {
     end: BUFFET_END,
     location: BUFFET_LOCATION,
     address: BUFFET_ADDRESS,
+    arrivalSlots: ARRIVAL_SLOTS,
   });
 }
 
@@ -76,6 +77,8 @@ export async function POST(req: Request) {
   const email = String(body.email || "").trim().toLowerCase().slice(0, 120);
   const phone = String(body.phone || "").trim().slice(0, 30);
   const partySize = Math.min(10, Math.max(1, parseInt(body.partySize) || 1));
+  const rawArrival = String(body.arrivalTime || "").trim();
+  const arrivalTime = isArrivalSlot(rawArrival) ? rawArrival : ARRIVAL_SLOTS[0];
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
@@ -98,18 +101,19 @@ export async function POST(req: Request) {
   }
 
   const booking = await prisma.sundayBuffetBooking.create({
-    data: { date, name, email, phone, partySize, ip },
+    data: { date, name, email, phone, partySize, arrivalTime, ip },
   });
 
   // Guest confirmation + admin notification (fire-and-forget)
-  deliver(email, "Your Sunday buffet reservation is confirmed", guestEmailHtml({ name, date, partySize })).catch(() => {});
+  deliver(email, "Your Sunday buffet reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime })).catch(() => {});
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bookings@demisrestaurant.co.uk";
-  deliver(adminEmail, `New Sunday buffet reservation · ${name} (party of ${partySize})`, adminEmailHtml({ name, email, phone, date, partySize })).catch(() => {});
+  deliver(adminEmail, `New Sunday buffet reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime })).catch(() => {});
 
   return NextResponse.json({
     id: booking.id,
     date,
     partySize,
+    arrivalTime,
     prettyDate: prettyDate(date),
     start: BUFFET_START,
     end: BUFFET_END,
@@ -117,7 +121,7 @@ export async function POST(req: Request) {
   });
 }
 
-function adminEmailHtml(o: { name: string; email: string; phone: string; date: string; partySize: number }): string {
+function adminEmailHtml(o: { name: string; email: string; phone: string; date: string; partySize: number; arrivalTime: string }): string {
   const row = (k: string, v: string) =>
     `<tr><td style="padding:6px 0;color:#888;font-size:13px;width:120px;">${k}</td><td style="padding:6px 0;color:#111;font-size:14px;font-weight:600;">${v}</td></tr>`;
   return `<!DOCTYPE html><html><body style="margin:0;background:#f4f4f4;font-family:Helvetica,Arial,sans-serif;">
@@ -127,6 +131,7 @@ function adminEmailHtml(o: { name: string; email: string; phone: string; date: s
   <tr><td style="padding:22px 28px;"><table width="100%" cellpadding="0" cellspacing="0">
     ${row("Name", esc(o.name))}
     ${row("Party size", String(o.partySize))}
+    ${row("Arriving", esc(o.arrivalTime))}
     ${row("Date", prettyDate(o.date))}
     ${row("Email", esc(o.email))}
     ${row("Phone", esc(o.phone))}
@@ -134,7 +139,7 @@ function adminEmailHtml(o: { name: string; email: string; phone: string; date: s
 </table></td></tr></table></body></html>`;
 }
 
-function guestEmailHtml(o: { name: string; date: string; partySize: number }): string {
+function guestEmailHtml(o: { name: string; date: string; partySize: number; arrivalTime: string }): string {
   return `<!DOCTYPE html><html><body style="margin:0;background:#f0f0f0;font-family:Georgia,serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:40px 20px;"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:12px;overflow:hidden;">
@@ -147,7 +152,8 @@ function guestEmailHtml(o: { name: string; date: string; partySize: number }): s
   <p style="margin:0 0 16px;">Your reservation for our Sunday buffet is <strong>confirmed</strong>. We can't wait to have you.</p>
   <table width="100%" style="background:#faf7f0;border-radius:8px;margin:0 0 16px;"><tr><td style="padding:20px;text-align:center;">
     <div style="font-family:Georgia,serif;font-size:22px;color:#8b0000;">${prettyDate(o.date)}</div>
-    <div style="font-size:13px;color:#666;margin-top:6px;">Party of ${o.partySize} &middot; Doors 12pm &middot; buffet from 12:30pm</div>
+    <div style="font-size:13px;color:#666;margin-top:6px;">Party of ${o.partySize} &middot; arriving ${esc(o.arrivalTime)}</div>
+    <div style="font-size:13px;color:#666;margin-top:4px;">Doors 12pm &middot; buffet from 12:30pm</div>
   </td></tr></table>
   <p style="margin:0;color:#666;font-size:13px;">${BUFFET_ADDRESS}. See you Sunday!</p>
 </td></tr>

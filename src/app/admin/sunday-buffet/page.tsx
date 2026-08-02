@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-type Booking = { id: string; name: string; email: string; phone: string; partySize: number; status: string; confirmedAt: string | null; createdAt: string };
+type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; status: string; confirmedAt: string | null; createdAt: string };
 type Summary = { reservations: number; people: number; confirmed: number; cancelled: number };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -194,6 +194,7 @@ export default function AdminSundayBuffetPage() {
               <thead>
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
                   <th className="px-4 py-3">Guest</th>
+                  <th className="px-4 py-3">Arrives</th>
                   <th className="px-4 py-3">Party</th>
                   <th className="px-4 py-3">Contact</th>
                   <th className="px-4 py-3">Booked</th>
@@ -205,6 +206,7 @@ export default function AdminSundayBuffetPage() {
                 {bookings.map((b) => (
                   <tr key={b.id} className={`border-b border-gray-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 text-sm text-white">{b.name}</td>
+                    <td className="px-4 py-3 text-sm text-white font-semibold tabular-nums">{b.arrivalTime}</td>
                     <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>

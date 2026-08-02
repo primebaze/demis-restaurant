@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   try {
     const rows = await prisma.sundayBuffetBooking.findMany({
       where: { date },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ arrivalTime: "asc" }, { createdAt: "asc" }],
     });
     const bookings = rows.map((b) => ({
       id: b.id,
@@ -37,6 +37,7 @@ export async function GET(req: Request) {
       email: b.email,
       phone: b.phone,
       partySize: b.partySize,
+      arrivalTime: b.arrivalTime,
       status: b.status,
       confirmedAt: b.confirmedAt,
       createdAt: b.createdAt,

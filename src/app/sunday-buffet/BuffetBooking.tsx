@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 
-type Avail = { date: string; prettyDate: string; start: string; end: string };
-type Result = { prettyDate: string; start: string; end: string; address: string; partySize: number };
+type Avail = { date: string; prettyDate: string; start: string; end: string; arrivalSlots?: string[] };
+type Result = { prettyDate: string; start: string; end: string; address: string; partySize: number; arrivalTime: string };
+
+const ARRIVAL_SLOTS = ["12:00", "12:15", "12:30"];
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 type TurnstileApi = {
@@ -17,6 +19,7 @@ export function BuffetBooking() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [partySize, setPartySize] = useState(1);
+  const [arrivalTime, setArrivalTime] = useState(ARRIVAL_SLOTS[0]);
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -89,7 +92,7 @@ export function BuffetBooking() {
       const res = await fetch("/api/sunday-buffet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize, website, turnstileToken: token }),
+        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, website, turnstileToken: token }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -118,12 +121,13 @@ export function BuffetBooking() {
         <p className="text-2xl font-semibold text-white font-[family-name:var(--font-display)]">Reservation confirmed</p>
         <div className="mt-5 pt-5 border-t border-white/10 text-sm text-stone-400 space-y-1.5">
           <p className="text-white">{result.prettyDate}</p>
-          <p>Party of {result.partySize} · Doors 12pm, buffet from 12:30pm</p>
+          <p>Party of {result.partySize} · arriving {result.arrivalTime}</p>
+          <p>Doors 12pm, buffet from 12:30pm</p>
           <p>{result.address}</p>
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
         <button
-          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); }}
+          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); setArrivalTime(ARRIVAL_SLOTS[0]); }}
           className="mt-6 text-sm text-gold-300 hover:text-gold-200 transition"
         >
           Book another spot
@@ -158,6 +162,29 @@ export function BuffetBooking() {
             <button type="button" onClick={() => setPartySize((p) => Math.max(1, p - 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">−</button>
             <span className="w-6 text-center text-white font-semibold tabular-nums">{partySize}</span>
             <button type="button" onClick={() => setPartySize((p) => Math.min(10, p + 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">+</button>
+          </div>
+        </div>
+
+        <div className="px-4 py-3.5 bg-black/40 border border-white/[0.09] rounded-xl">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-stone-400">What time will you arrive?</span>
+            <span className="text-[11px] text-stone-600">Doors 12pm</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {(avail?.arrivalSlots || ARRIVAL_SLOTS).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setArrivalTime(t)}
+                className={`py-2.5 rounded-lg text-sm font-semibold transition border ${
+                  arrivalTime === t
+                    ? "bg-gold-300 text-black border-gold-300"
+                    : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
           </div>
         </div>
 

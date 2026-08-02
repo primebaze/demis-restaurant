@@ -363,6 +363,7 @@ model SundayBuffetBooking {
   email     String   @default("")
   phone     String   @default("")
   partySize Int      @default(1)
+  arrivalTime String @default("12:00") // when they plan to arrive: 12:00, 12:15 or 12:30
   ip        String   @default("")
   status    String   @default("booked") // booked, arrived, cancelled
   confirmToken String @default("") // per-booking token for the "confirm attendance" link

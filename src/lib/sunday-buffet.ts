@@ -13,6 +13,12 @@ export function confirmUrl(token: string): string {
 export const BUFFET_LOCATION = "Streatham Hill";
 export const BUFFET_ADDRESS = "67 Streatham Hill, London SW2 4TX";
 export const BUFFET_START = "12:30pm";
+
+/** Arrival slots guests pick from — doors open 12pm, buffet starts 12:30pm. */
+export const ARRIVAL_SLOTS = ["12:00", "12:15", "12:30"];
+export function isArrivalSlot(t: string): boolean {
+  return ARRIVAL_SLOTS.includes(t);
+}
 export const BUFFET_END = "4:00pm";
 
 // Tier structure (matches the door check-in)
