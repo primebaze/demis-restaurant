@@ -103,21 +103,28 @@ export default function EventsPage() {
               </div>
             </div>
 
-            {/* Afromic Night */}
+            {/* Saturday Bottomless Brunch */}
             <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🎤</span>
+                <span className="text-3xl">🥂</span>
                 <div>
-                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Last Saturday of Month</p>
-                  <p className="text-xs text-stone-500">7 PM &ndash; Late</p>
+                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Saturday</p>
+                  <p className="text-xs text-stone-500">1 PM &ndash; 4:30 PM</p>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white">Afromic Night</h3>
+              <h3 className="text-2xl font-bold text-white">Bottomless Brunch</h3>
+              <p className="mt-1 text-sm font-semibold text-gold-300">£35 food only &middot; £50 with drinks</p>
               <p className="mt-3 text-sm text-stone-400 leading-relaxed">
-                Our open-mic celebration of African talent &mdash; singers, spoken word, comedy
-                and Afrobeats performers take the stage. Grab the mic or just soak up the vibes
-                over cocktails and our full menu. Book early &mdash; these nights always sell out.
+                Choose Team Seafood or Team Meaty, then one starter, one main and any three
+                sides from that menu. Make it £50 and you get 90 minutes of bottomless
+                prosecco, wine, cocktails and mocktails with it.
               </p>
+              <a
+                href="/saturday-brunch"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
+              >
+                Book a Table &rarr;
+              </a>
               <div className="mt-5 flex items-center gap-4">
                 <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Streatham Hill</span>
               </div>
