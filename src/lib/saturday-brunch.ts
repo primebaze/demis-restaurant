@@ -3,7 +3,8 @@ import { serviceDate } from "@/lib/checkin-auth";
 // Brunch service details
 export const BRUNCH_LOCATION = "Streatham Hill";
 export const BRUNCH_ADDRESS = "67 Streatham Hill, London SW2 4TX";
-export const BRUNCH_PRICE = 35; // £ per person, flat
+export const BRUNCH_PRICE = 35; // £ per person, food only
+export const BRUNCH_PRICE_DRINKS = 50; // £ per person, food + 90 minutes of bottomless drinks
 export const BRUNCH_WINDOW_MIN = 90; // dining window at the door
 
 export const BRUNCH_START = "11:00am";

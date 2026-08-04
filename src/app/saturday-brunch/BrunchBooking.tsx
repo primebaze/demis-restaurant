@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 
-type Avail = { date: string; prettyDate: string; price: number; arrivalSlots?: string[] };
-type Result = { prettyDate: string; address: string; partySize: number; arrivalTime: string; price: number };
+type Avail = { date: string; prettyDate: string; price: number; priceWithDrinks?: number; arrivalSlots?: string[] };
+type Result = { prettyDate: string; address: string; partySize: number; arrivalTime: string; price: number; priceWithDrinks?: number };
 
 const ARRIVAL_SLOTS = [
   "11:00", "11:30",
@@ -129,7 +129,7 @@ export function BrunchBooking() {
         <div className="mt-5 pt-5 border-t border-white/10 text-sm text-stone-400 space-y-1.5">
           <p className="text-white">{result.prettyDate}</p>
           <p>Party of {result.partySize} · arriving {result.arrivalTime}</p>
-          <p>£{result.price} per person, paid at the door</p>
+          <p>£{result.price} food only · £{result.priceWithDrinks ?? 50} with bottomless drinks, paid at the door</p>
           <p>{result.address}</p>
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
@@ -150,8 +150,10 @@ export function BrunchBooking() {
       <div className="pb-5 mb-5 border-b border-white/[0.08]">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your table</p>
         <p className="text-lg font-semibold text-white">{avail ? avail.prettyDate : "This Saturday"}</p>
-        <p className="text-[13px] text-stone-500 mt-0.5">£{avail?.price ?? 35} per person</p>
-        <p className="text-[12px] text-stone-500 mt-2">This booking is for the Saturday bottomless brunch.</p>
+        <p className="text-[13px] text-stone-500 mt-0.5">
+          £{avail?.price ?? 35} food only · £{avail?.priceWithDrinks ?? 50} with bottomless drinks
+        </p>
+        <p className="text-[12px] text-stone-500 mt-2">This booking is for the Saturday bottomless brunch. Choose your package and team at the table.</p>
       </div>
 
       <div className="space-y-3">

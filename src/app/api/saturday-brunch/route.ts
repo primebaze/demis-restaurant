@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { upcomingSaturday, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, ARRIVAL_SLOTS, isArrivalSlot } from "@/lib/saturday-brunch";
+import { upcomingSaturday, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, BRUNCH_PRICE_DRINKS, ARRIVAL_SLOTS, isArrivalSlot } from "@/lib/saturday-brunch";
 import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
@@ -32,6 +32,7 @@ export async function GET() {
     date,
     prettyDate: prettyDate(date),
     price: BRUNCH_PRICE,
+    priceWithDrinks: BRUNCH_PRICE_DRINKS,
     location: BRUNCH_LOCATION,
     address: BRUNCH_ADDRESS,
     arrivalSlots: ARRIVAL_SLOTS,
@@ -123,6 +124,7 @@ export async function POST(req: Request) {
     partySize,
     arrivalTime,
     price: BRUNCH_PRICE,
+    priceWithDrinks: BRUNCH_PRICE_DRINKS,
     prettyDate: prettyDate(date),
     address: BRUNCH_ADDRESS,
   });
@@ -160,7 +162,7 @@ function guestEmailHtml(o: { name: string; date: string; partySize: number; arri
   <table width="100%" style="background:#faf7f0;border-radius:8px;margin:0 0 16px;"><tr><td style="padding:20px;text-align:center;">
     <div style="font-family:Georgia,serif;font-size:22px;color:#8b0000;">${prettyDate(o.date)}</div>
     <div style="font-size:13px;color:#666;margin-top:6px;">Party of ${o.partySize} &middot; arriving ${esc(o.arrivalTime)}</div>
-    <div style="font-size:13px;color:#666;margin-top:4px;">&pound;${BRUNCH_PRICE} per person, paid at the door</div>
+    <div style="font-size:13px;color:#666;margin-top:4px;">&pound;${BRUNCH_PRICE} per person food only, or &pound;${BRUNCH_PRICE_DRINKS} with 90 minutes of bottomless drinks &mdash; paid at the door</div>
     <div style="font-size:13px;color:#666;margin-top:4px;">Served 11am &ndash; 4pm</div>
   </td></tr></table>
   <p style="margin:0;color:#666;font-size:13px;">${BRUNCH_ADDRESS}. See you Saturday!</p>
