@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { subject, body, test, style, ids, limit, ctaUrl, ctaLabel } = await req.json();
+  const { subject, body, test, style, ids, limit } = await req.json();
   if (!subject?.trim() || !body?.trim()) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
   }
@@ -47,14 +47,7 @@ export async function POST(req: Request) {
     const subj = personalize(subject, name);
     const html = plain
       ? buildPlainEmail({ bodyHtml, unsubUrl })
-      : buildMarketingEmail({
-          subject: subj,
-          bodyHtml,
-          unsubUrl,
-          preheader: personalize(preheader, name),
-          ctaUrl: typeof ctaUrl === "string" ? ctaUrl : undefined,
-          ctaLabel: typeof ctaLabel === "string" ? ctaLabel : undefined,
-        });
+      : buildMarketingEmail({ subject: subj, bodyHtml, unsubUrl, preheader: personalize(preheader, name) });
     return { subject: subj, html, unsubUrl };
   };
 

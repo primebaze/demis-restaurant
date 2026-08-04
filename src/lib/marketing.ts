@@ -90,13 +90,7 @@ export function buildMarketingEmail(opts: {
   bodyHtml: string;
   unsubUrl: string;
   preheader?: string;
-  /** Where the "Book now" button goes. Pass a path or a full URL; defaults to the Saturday brunch. */
-  ctaUrl?: string;
-  ctaLabel?: string;
 }): string {
-  const rawCta = (opts.ctaUrl || "/saturday-brunch").trim();
-  const ctaUrl = /^https?:\/\//i.test(rawCta) ? rawCta : `${SITE_URL}${rawCta.startsWith("/") ? "" : "/"}${rawCta}`;
-  const ctaLabel = (opts.ctaLabel || "Book now").trim();
   const logoUrl = process.env.MARKETING_LOGO_URL;
   const header = logoUrl
     ? `<img src="${logoUrl}" alt="Demi's Restaurant" width="150" style="display:block;margin:0 auto;border:0;">`
@@ -122,14 +116,9 @@ export function buildMarketingEmail(opts: {
         ${header}
       </td></tr>
 
-      <!-- Body -->
-      <tr><td style="background-color:#fff;padding:8px 40px 4px;font-family:${SANS};font-size:15px;line-height:1.75;color:#333;">
+      <!-- Body. No CTA button by design: the message links to wherever it needs to. -->
+      <tr><td style="background-color:#fff;padding:8px 40px 36px;font-family:${SANS};font-size:15px;line-height:1.75;color:#333;border-radius:0 0 12px 12px;">
         ${opts.bodyHtml}
-      </td></tr>
-
-      <!-- Book now button -->
-      <tr><td align="center" style="background-color:#fff;padding:20px 40px 40px;border-radius:0 0 12px 12px;">
-        <a href="${escapeHtml(ctaUrl)}" style="display:inline-block;background:#e3c07a;color:#141210;font-family:${SANS};font-size:14px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:6px;">${escapeHtml(ctaLabel)}</a>
       </td></tr>
 
       <!-- Footer -->
