@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
-type Summary = { reservations: number; people: number; confirmed: number; cancelled: number; revenue: number };
+type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; package: string; packageLabel: string; pricePerHead: number; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
+type Summary = { reservations: number; people: number; drinkers: number; confirmed: number; cancelled: number; revenue: number };
 
 const STATUS_COLORS: Record<string, string> = {
   booked: "bg-gold-300/15 text-gold-300",
@@ -22,7 +22,7 @@ function fmt(s: string) {
   return new Date(s).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-const EMPTY: Summary = { reservations: 0, people: 0, confirmed: 0, cancelled: 0, revenue: 0 };
+const EMPTY: Summary = { reservations: 0, people: 0, drinkers: 0, confirmed: 0, cancelled: 0, revenue: 0 };
 
 export default function AdminSaturdayBrunchPage() {
   const [date, setDate] = useState("");
@@ -87,6 +87,7 @@ export default function AdminSaturdayBrunchPage() {
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">People</p>
           <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
+          <p className="text-[11px] text-gray-500 mt-0.5">{summary.drinkers} on drinks</p>
         </div>
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Expected</p>
@@ -115,6 +116,7 @@ export default function AdminSaturdayBrunchPage() {
                   <th className="px-4 py-3">Guest</th>
                   <th className="px-4 py-3">Arrives</th>
                   <th className="px-4 py-3">Party</th>
+                  <th className="px-4 py-3">Package</th>
                   <th className="px-4 py-3">Contact</th>
                   <th className="px-4 py-3">Booked</th>
                   <th className="px-4 py-3">Status</th>
@@ -127,6 +129,13 @@ export default function AdminSaturdayBrunchPage() {
                     <td className="px-4 py-3 text-sm text-white">{b.name}</td>
                     <td className="px-4 py-3 text-sm text-white font-semibold tabular-nums">{b.arrivalTime}</td>
                     <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
+                    <td className="px-4 py-3 text-xs">
+                      <span className={b.package === "drinks" ? "text-gold-300" : "text-gray-400"}>
+                        {b.package === "drinks" ? "Food & drinks" : "Food only"}
+                      </span>
+                      <br />
+                      <span className="text-gray-500">£{b.pricePerHead} pp · £{b.pricePerHead * b.partySize}</span>
+                    </td>
                     <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">

@@ -385,6 +385,8 @@ model SaturdayBrunchBooking {
   phone     String   @default("")
   partySize Int      @default(1)
   arrivalTime String @default("")
+  package   String   @default("food") // food | drinks — rows predating packages were flat-price food
+  pricePerHead Int   @default(35) // £ per head for the chosen package, at the time of booking
   ip        String   @default("")
   status    String   @default("booked") // booked, arrived, cancelled
   confirmToken String @default("")
@@ -397,14 +399,17 @@ model SaturdayBrunchBooking {
   @@index([confirmToken])
 }
 
-/** Door check-in for the Saturday brunch. Flat price per head, no tiers. */
+/** Door check-in for the Saturday brunch. A group can mix both packages. */
 model BrunchCheckIn {
   id          String   @id @default(cuid())
   date        String // service date "2026-08-08"
   number      Int // sequential per date, starts at 1
   name        String   @default("")
-  partySize   Int      @default(1)
-  pricePerHead Int     @default(35)
+  partySize   Int      @default(1) // always foodOnly + withDrinks
+  foodOnly    Int      @default(0) // heads on the £35 package
+  withDrinks  Int      @default(0) // heads on the £50 package
+  totalPrice  Int      @default(0) // £ charged for the group; 0 on rows predating packages
+  pricePerHead Int     @default(35) // legacy flat price, kept so old rows still total correctly
   checkedInAt DateTime @default(now())
   endsAt      DateTime
   status      String   @default("active") // active, finished

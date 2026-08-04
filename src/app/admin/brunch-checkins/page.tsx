@@ -8,13 +8,15 @@ type CheckIn = {
   endCover: number;
   name: string;
   partySize: number;
+  foodOnly: number;
+  withDrinks: number;
   price: number;
   checkedInAt: string;
   endsAt: string;
   status: string;
 };
 
-type Data = { date: string; total: number; groups: number; takings: number; pricePerHead: number; checkins: CheckIn[] };
+type Data = { date: string; total: number; groups: number; takings: number; drinkers: number; pricePerHead: number; checkins: CheckIn[] };
 
 function fmt(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -92,8 +94,8 @@ export default function AdminBrunchCheckinsPage() {
           <p className="text-2xl font-bold text-emerald-300">£{data?.takings ?? 0}</p>
         </div>
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Per head</p>
-          <p className="text-2xl font-bold text-white">£{data?.pricePerHead ?? 35}</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">On drinks</p>
+          <p className="text-2xl font-bold text-white">{data?.drinkers ?? 0}</p>
         </div>
       </div>
 
@@ -113,6 +115,7 @@ export default function AdminBrunchCheckinsPage() {
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
                   <th className="px-4 py-3">No.</th>
                   <th className="px-4 py-3">Party</th>
+                  <th className="px-4 py-3">Mix</th>
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">In</th>
                   <th className="px-4 py-3">Finish by</th>
@@ -128,6 +131,11 @@ export default function AdminBrunchCheckinsPage() {
                         {c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}
                       </td>
                       <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{c.partySize}</td>
+                      <td className="px-4 py-3 text-xs text-gray-400">
+                        {c.foodOnly > 0 && <span>{c.foodOnly} food</span>}
+                        {c.foodOnly > 0 && c.withDrinks > 0 && <span className="text-gray-600"> · </span>}
+                        {c.withDrinks > 0 && <span className="text-gold-300/80">{c.withDrinks} drinks</span>}
+                      </td>
                       <td className="px-4 py-3 text-sm text-emerald-300 font-semibold">£{c.price}</td>
                       <td className="px-4 py-3 text-xs text-gray-400 tabular-nums">{fmt(c.checkedInAt)}</td>
                       <td className="px-4 py-3 text-xs text-gray-400 tabular-nums">{fmt(c.endsAt)}</td>

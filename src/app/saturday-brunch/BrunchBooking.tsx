@@ -3,15 +3,16 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 
 type Avail = { date: string; prettyDate: string; price: number; priceWithDrinks?: number; arrivalSlots?: string[] };
-type Result = { prettyDate: string; address: string; partySize: number; arrivalTime: string; price: number; priceWithDrinks?: number };
+type Result = {
+  prettyDate: string; address: string; partySize: number; arrivalTime: string;
+  packageLabel?: string; pricePerHead?: number; price: number;
+};
 
 const ARRIVAL_SLOTS = [
-  "11:00", "11:30",
-  "12:00", "12:30",
   "13:00", "13:30",
   "14:00", "14:30",
   "15:00", "15:30",
-  "16:00",
+  "16:00", "16:30",
 ];
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -27,6 +28,7 @@ export function BrunchBooking() {
   const [phone, setPhone] = useState("");
   const [partySize, setPartySize] = useState(1);
   const [arrivalTime, setArrivalTime] = useState("");
+  const [pkg, setPkg] = useState<"food" | "drinks">("food");
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -100,7 +102,7 @@ export function BrunchBooking() {
       const res = await fetch("/api/saturday-brunch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, website, turnstileToken: token }),
+        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, package: pkg, website, turnstileToken: token }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -129,12 +131,12 @@ export function BrunchBooking() {
         <div className="mt-5 pt-5 border-t border-white/10 text-sm text-stone-400 space-y-1.5">
           <p className="text-white">{result.prettyDate}</p>
           <p>Party of {result.partySize} · arriving {result.arrivalTime}</p>
-          <p>£{result.price} food only · £{result.priceWithDrinks ?? 50} with bottomless drinks, paid at the door</p>
+          <p>{result.packageLabel ?? "Food only"} · £{result.pricePerHead ?? result.price} per person, paid at the door</p>
           <p>{result.address}</p>
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
         <button
-          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); setArrivalTime(""); }}
+          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); setArrivalTime(""); setPkg("food"); }}
           className="mt-6 text-sm text-gold-300 hover:text-gold-200 transition"
         >
           Book another table
@@ -153,7 +155,6 @@ export function BrunchBooking() {
         <p className="text-[13px] text-stone-500 mt-0.5">
           £{avail?.price ?? 35} food only · £{avail?.priceWithDrinks ?? 50} with bottomless drinks
         </p>
-        <p className="text-[12px] text-stone-500 mt-2">This booking is for the Saturday bottomless brunch. Choose your package and team at the table.</p>
       </div>
 
       <div className="space-y-3">
@@ -165,6 +166,35 @@ export function BrunchBooking() {
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className={inputCls} />
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />
+
+        <div className="px-4 py-3.5 bg-black/40 border border-white/[0.09] rounded-xl">
+          <div className="mb-3">
+            <span className="text-sm text-stone-400">Which package?</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { key: "food", label: "Food only", price: avail?.price ?? 35 },
+              { key: "drinks", label: "Food & drinks", price: avail?.priceWithDrinks ?? 50 },
+            ] as const).map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => setPkg(p.key)}
+                className={`py-3 px-3 rounded-lg text-left transition border ${
+                  pkg === p.key
+                    ? "bg-gold-300 text-black border-gold-300"
+                    : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
+                }`}
+              >
+                <span className="block text-[13px] font-semibold leading-tight">{p.label}</span>
+                <span className={`block text-[12px] mt-0.5 ${pkg === p.key ? "text-black/70" : "text-stone-500"}`}>£{p.price} pp</span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-2.5 text-[11px] text-stone-500">
+            {pkg === "drinks" ? "Includes 90 minutes of bottomless drinks." : "You can upgrade at the table."}
+          </p>
+        </div>
 
         <div className="flex items-center justify-between px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
           <span className="text-sm text-stone-400">How many of you?</span>

@@ -6,10 +6,15 @@ type Result = {
   number: number;
   endCover: number;
   partySize: number;
+  foodOnly: number;
+  withDrinks: number;
   totalPrice: number;
   checkedInAt: string;
   endsAt: string;
 };
+
+const FOOD_PRICE = 35;
+const DRINKS_PRICE = 50;
 
 function fmtTime(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -26,7 +31,10 @@ export default function BrunchCheckinKioskPage() {
   const [result, setResult] = useState<Result | null>(null);
   const [countdown, setCountdown] = useState(6);
   const [choosing, setChoosing] = useState(false); // party-size step
-  const [party, setParty] = useState(1);
+  const [foodOnly, setFoodOnly] = useState(0);
+  const [withDrinks, setWithDrinks] = useState(0);
+  const party = foodOnly + withDrinks;
+  const total = foodOnly * FOOD_PRICE + withDrinks * DRINKS_PRICE;
 
   // Live clock for the screensaver (set after mount to avoid hydration mismatch)
   const [now, setNow] = useState<Date | null>(null);
@@ -75,14 +83,14 @@ export default function BrunchCheckinKioskPage() {
   }, [result]);
 
   async function checkIn() {
-    if (busy) return;
+    if (busy || party < 1) return;
     setError("");
     setBusy(true);
     try {
       const res = await fetch("/api/brunch-checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ partySize: party }),
+        body: JSON.stringify({ foodOnly, withDrinks }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -91,7 +99,8 @@ export default function BrunchCheckinKioskPage() {
       } else {
         setResult(d);
         setChoosing(false);
-        setParty(1);
+        setFoodOnly(0);
+        setWithDrinks(0);
       }
     } finally {
       setBusy(false);
@@ -151,6 +160,12 @@ export default function BrunchCheckinKioskPage() {
             </p>
             <p className="text-5xl font-extrabold text-emerald-400">£{result.totalPrice}</p>
             {result.partySize > 1 && <p className="text-sm text-gray-400 mt-2">Party of {result.partySize}</p>}
+            {result.withDrinks > 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                {result.foodOnly > 0 ? `${result.foodOnly} food only · ` : ""}
+                {result.withDrinks} with bottomless drinks
+              </p>
+            )}
             <div className="mt-6 pt-5 border-t border-white/10 text-sm text-gray-400 leading-relaxed">
               Checked in <span className="text-gray-200 font-medium">{fmtTime(result.checkedInAt)}</span>
               <br />
@@ -167,38 +182,67 @@ export default function BrunchCheckinKioskPage() {
     );
   }
 
-  // ── Party-size step: how many people, then confirm ──
+  // ── Package step: how many on each package, then confirm ──
   if (choosing) {
+    const counter = (
+      label: string,
+      price: number,
+      value: number,
+      set: (fn: (n: number) => number) => void
+    ) => (
+      <div className="rounded-3xl bg-white/[0.03] border border-white/10 p-5">
+        <div className="flex items-baseline justify-between mb-4">
+          <span className="text-lg font-semibold text-white">{label}</span>
+          <span className="text-sm text-gray-500">£{price} pp</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => set((n) => Math.max(0, n - 1))}
+            className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 text-3xl text-white active:scale-95 transition"
+          >−</button>
+          <span className="text-6xl font-extrabold tabular-nums">{value}</span>
+          <button
+            onClick={() => set((n) => Math.min(30, n + 1))}
+            className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 text-3xl text-white active:scale-95 transition"
+          >+</button>
+        </div>
+      </div>
+    );
+
     return (
       <div className={`min-h-screen ${BG} text-white flex items-center justify-center p-6 select-none`}>
         <head><meta name="robots" content="noindex, nofollow" /></head>
         <div className="w-full max-w-sm text-center">
-          <h2 className="text-2xl font-bold mb-1">How many people?</h2>
-          <p className="text-sm text-gray-500 mb-8">For this check-in</p>
+          <h2 className="text-2xl font-bold mb-1">How many on each?</h2>
+          <p className="text-sm text-gray-500 mb-6">Split the table between the two packages</p>
 
-          <div className="flex items-center justify-center gap-6 mb-10">
-            <button
-              onClick={() => setParty((p) => Math.max(1, p - 1))}
-              className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 text-3xl text-white active:scale-95 transition"
-            >−</button>
-            <span className="text-7xl font-extrabold tabular-nums w-24">{party}</span>
-            <button
-              onClick={() => setParty((p) => Math.min(20, p + 1))}
-              className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 text-3xl text-white active:scale-95 transition"
-            >+</button>
+          <div className="space-y-4 mb-6">
+            {counter("Food only", FOOD_PRICE, foodOnly, setFoodOnly)}
+            {counter("With drinks", DRINKS_PRICE, withDrinks, setWithDrinks)}
+          </div>
+
+          <div className="mb-6 text-sm text-gray-400">
+            {party === 0 ? (
+              "Add at least one person"
+            ) : (
+              <>
+                {party} {party === 1 ? "person" : "people"} ·{" "}
+                <span className="text-emerald-400 font-bold text-lg">£{total}</span>
+              </>
+            )}
           </div>
 
           {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
 
           <button
             onClick={checkIn}
-            disabled={busy}
-            className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-50"
+            disabled={busy || party < 1}
+            className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-40"
           >
-            {busy ? "…" : `Check in ${party} ${party === 1 ? "person" : "people"}`}
+            {busy ? "…" : party < 1 ? "Check in" : `Check in ${party} · £${total}`}
           </button>
           <button
-            onClick={() => { setChoosing(false); setParty(1); setError(""); }}
+            onClick={() => { setChoosing(false); setFoodOnly(0); setWithDrinks(0); setError(""); }}
             className="mt-4 text-sm text-gray-500 hover:text-white transition"
           >
             Cancel

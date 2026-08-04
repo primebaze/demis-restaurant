@@ -20,7 +20,7 @@ async function getReviews(): Promise<Review[]> {
 export const metadata: Metadata = {
   title: "Saturday Brunch | Demi's Restaurant Streatham Hill",
   description:
-    "Bottomless Saturday brunch at Demi's Streatham Hill, 11am to 4pm. £35 food only or £50 with 90 minutes of bottomless drinks — choose Team Seafood or Team Meaty, then a starter, a main and three sides.",
+    "Bottomless Saturday brunch at Demi's Streatham Hill, 1pm to 4:30pm. £35 food only or £50 with 90 minutes of bottomless drinks — choose Team Seafood or Team Meaty, then a starter, a main and three sides.",
   alternates: { canonical: "https://www.demisrestaurant.co.uk/saturday-brunch" },
   openGraph: {
     title: "Saturday Bottomless Brunch at Demi's, Streatham Hill",
@@ -118,7 +118,7 @@ export default async function SaturdayBrunchPage() {
           <p className="mt-5 text-lg text-stone-200/90 max-w-md mx-auto">
             Choose Team Seafood or Team Meaty — a starter, a main and three sides. Add 90 minutes of bottomless drinks.
           </p>
-          <p className="mt-2 text-sm text-stone-400">11am – 4pm</p>
+          <p className="mt-2 text-sm text-stone-400">1pm – 4:30pm</p>
         </div>
       </section>
 
@@ -241,7 +241,7 @@ export default async function SaturdayBrunchPage() {
               <div className="absolute top-0 left-8 sm:left-10 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
               <div className="grid sm:grid-cols-3 gap-6">
                 {[
-                  { k: "When", v: ["Every Saturday", "11am – 4pm"] },
+                  { k: "When", v: ["Every Saturday", "1pm – 4:30pm"] },
                   { k: "Where", v: ["Streatham Hill", "67 Streatham Hill, SW2 4TX"] },
                   { k: "Price", v: ["£35 food only · £50 with drinks", "Cash or card"] },
                 ].map((d) => (
