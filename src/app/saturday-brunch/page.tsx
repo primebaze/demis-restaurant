@@ -115,10 +115,7 @@ export default async function SaturdayBrunchPage() {
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold text-white font-[family-name:var(--font-display)] leading-[1.02] drop-shadow-lg">
             Saturday Brunch
           </h1>
-          <p className="mt-5 text-lg text-stone-200/90 max-w-md mx-auto">
-            Choose Team Seafood or Team Meaty — a starter, a main and three sides. Add 90 minutes of bottomless drinks.
-          </p>
-          <p className="mt-2 text-sm text-stone-400">1pm – 4:30pm</p>
+          <p className="mt-5 text-sm text-stone-400">1pm – 4:30pm</p>
         </div>
       </section>
 
