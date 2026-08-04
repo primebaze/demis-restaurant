@@ -10,7 +10,8 @@
 
   body {
     @apply bg-[#1a1a1a] text-white antialiased;
-    overflow-x: hidden;
+    /* No overflow-x here: it makes <body> a scroll container, which silently
+       breaks every position:sticky on the site. html already clips sideways. */
   }
 
   ::selection {

@@ -118,7 +118,7 @@ export function BrunchBooking() {
   }
 
   const inputCls =
-    "w-full px-4 py-3.5 bg-black/40 border border-white/[0.09] rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-300/60 transition";
+    "w-full px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-300/60 transition";
 
   // Confirmation
   if (result) {
@@ -146,10 +146,10 @@ export function BrunchBooking() {
   }
 
   return (
-    <div className="relative rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-6 sm:p-7 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)]">
+    <div className="relative rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-6 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)]">
       <div className="absolute top-0 left-7 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
 
-      <div className="pb-5 mb-5 border-b border-white/[0.08]">
+      <div className="pb-4 mb-4 border-b border-white/[0.08]">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your table</p>
         <p className="text-lg font-semibold text-white">{avail ? avail.prettyDate : "This Saturday"}</p>
         <p className="text-[13px] text-stone-500 mt-0.5">
@@ -157,7 +157,7 @@ export function BrunchBooking() {
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <input
           type="text" name="website" value={website} onChange={(e) => setWebsite(e.target.value)}
           tabIndex={-1} autoComplete="off" aria-hidden="true"
@@ -167,33 +167,26 @@ export function BrunchBooking() {
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />
 
-        <div className="px-4 py-3.5 bg-black/40 border border-white/[0.09] rounded-xl">
-          <div className="mb-3">
-            <span className="text-sm text-stone-400">Which package?</span>
-          </div>
+        <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
+          <span className="block mb-2.5 text-sm text-stone-400">Which package?</span>
           <div className="grid grid-cols-2 gap-2">
             {([
-              { key: "food", label: "Food only", price: avail?.price ?? 35 },
-              { key: "drinks", label: "Food & drinks", price: avail?.priceWithDrinks ?? 50 },
+              { key: "food", label: "Food only", price: avail?.price ?? 35, on: "bg-gold-300 text-black border-gold-300" },
+              { key: "drinks", label: "Food & drinks", price: avail?.priceWithDrinks ?? 50, on: "bg-brunch-500 text-white border-brunch-500" },
             ] as const).map((p) => (
               <button
                 key={p.key}
                 type="button"
                 onClick={() => setPkg(p.key)}
-                className={`py-3 px-3 rounded-lg text-left transition border ${
-                  pkg === p.key
-                    ? "bg-gold-300 text-black border-gold-300"
-                    : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
+                className={`py-2.5 px-3 rounded-lg text-left transition border ${
+                  pkg === p.key ? p.on : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
                 }`}
               >
                 <span className="block text-[13px] font-semibold leading-tight">{p.label}</span>
-                <span className={`block text-[12px] mt-0.5 ${pkg === p.key ? "text-black/70" : "text-stone-500"}`}>£{p.price} pp</span>
+                <span className={`block text-[12px] mt-0.5 ${pkg === p.key ? "opacity-75" : "text-stone-500"}`}>£{p.price} pp</span>
               </button>
             ))}
           </div>
-          <p className="mt-2.5 text-[11px] text-stone-500">
-            {pkg === "drinks" ? "Includes 90 minutes of bottomless drinks." : "You can upgrade at the table."}
-          </p>
         </div>
 
         <div className="flex items-center justify-between px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
@@ -205,17 +198,15 @@ export function BrunchBooking() {
           </div>
         </div>
 
-        <div className="px-4 py-3.5 bg-black/40 border border-white/[0.09] rounded-xl">
-          <div className="mb-3">
-            <span className="text-sm text-stone-400">What time will you arrive?</span>
-          </div>
+        <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
+          <span className="block mb-2.5 text-sm text-stone-400">What time will you arrive?</span>
           <div className="grid grid-cols-4 gap-2">
             {(avail?.arrivalSlots || ARRIVAL_SLOTS).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setArrivalTime(t)}
-                className={`py-2.5 rounded-lg text-[13px] font-semibold tabular-nums transition border ${
+                className={`py-2 rounded-lg text-[13px] font-semibold tabular-nums transition border ${
                   arrivalTime === t
                     ? "bg-gold-300 text-black border-gold-300"
                     : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
@@ -234,7 +225,7 @@ export function BrunchBooking() {
         <button
           onClick={reserve}
           disabled={submitting}
-          className="w-full px-4 py-4 mt-1 bg-gold-300 text-black font-semibold rounded-xl hover:bg-gold-400 transition disabled:opacity-50"
+          className="w-full px-4 py-3.5 mt-1 bg-gold-300 text-black font-semibold rounded-xl hover:bg-gold-400 transition disabled:opacity-50"
         >
           {submitting ? "Reserving…" : "Reserve my table"}
         </button>

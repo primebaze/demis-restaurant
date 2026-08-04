@@ -22,6 +22,13 @@ const config: Config = {
           800: '#544a3b',
           900: '#3a322a',
         },
+        // Burnt orange from the printed bottomless brunch poster.
+        brunch: {
+          300: '#e8a074',
+          400: '#e08a52',
+          500: '#d4733c',
+          600: '#b85e2c',
+        },
         gold: {
           DEFAULT: '#e8cc9c',
           50: '#fdf8f0',
