@@ -98,6 +98,7 @@ export default function MailingPage() {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [emailStyle, setEmailStyle] = useState<"plain" | "branded">("branded");
+  const [ctaUrl, setCtaUrl] = useState("/saturday-brunch"); // where the branded template's button points
   const [testEmail, setTestEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
@@ -138,7 +139,7 @@ export default function MailingPage() {
       const res = await fetch("/api/admin/mailing/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, body, style: emailStyle, test: test || undefined, ids, limit }),
+        body: JSON.stringify({ subject, body, style: emailStyle, ctaUrl, test: test || undefined, ids, limit }),
       });
       const d = await res.json();
       if (!res.ok) setSendResult(d.error || "Send failed");
@@ -271,6 +272,21 @@ export default function MailingPage() {
                 ))}
               </div>
             </div>
+            {/* Where the branded template's button points. The plain style has no button. */}
+            {emailStyle === "branded" && (
+              <div>
+                <label className="block text-[11px] text-gray-500 mb-1">&ldquo;Book now&rdquo; button link</label>
+                <input
+                  value={ctaUrl}
+                  onChange={(e) => setCtaUrl(e.target.value)}
+                  placeholder="/saturday-brunch"
+                  className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                />
+                <p className="mt-1 text-[11px] text-gray-500">
+                  A path like <code className="text-gold-300">/saturday-brunch</code> or <code className="text-gold-300">/sunday-buffet</code>, or a full URL.
+                </p>
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-2">
               <input
                 value={testEmail}

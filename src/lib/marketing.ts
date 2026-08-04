@@ -90,7 +90,13 @@ export function buildMarketingEmail(opts: {
   bodyHtml: string;
   unsubUrl: string;
   preheader?: string;
+  /** Where the "Book now" button goes. Pass a path or a full URL; defaults to the Saturday brunch. */
+  ctaUrl?: string;
+  ctaLabel?: string;
 }): string {
+  const rawCta = (opts.ctaUrl || "/saturday-brunch").trim();
+  const ctaUrl = /^https?:\/\//i.test(rawCta) ? rawCta : `${SITE_URL}${rawCta.startsWith("/") ? "" : "/"}${rawCta}`;
+  const ctaLabel = (opts.ctaLabel || "Book now").trim();
   const logoUrl = process.env.MARKETING_LOGO_URL;
   const header = logoUrl
     ? `<img src="${logoUrl}" alt="Demi's Restaurant" width="150" style="display:block;margin:0 auto;border:0;">`
@@ -123,7 +129,7 @@ export function buildMarketingEmail(opts: {
 
       <!-- Book now button -->
       <tr><td align="center" style="background-color:#fff;padding:20px 40px 40px;border-radius:0 0 12px 12px;">
-        <a href="${SITE_URL}/sunday-buffet" style="display:inline-block;background:#e3c07a;color:#141210;font-family:${SANS};font-size:14px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:6px;">Book now</a>
+        <a href="${escapeHtml(ctaUrl)}" style="display:inline-block;background:#e3c07a;color:#141210;font-family:${SANS};font-size:14px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:6px;">${escapeHtml(ctaLabel)}</a>
       </td></tr>
 
       <!-- Footer -->
@@ -134,7 +140,7 @@ export function buildMarketingEmail(opts: {
           67 Streatham Hill, London SW2 4TX
         </p>
         <p style="margin:10px 0 0;font-family:${SANS};color:#999;font-size:11px;line-height:1.7;">
-          <a href="tel:+442039046977" style="color:#999;text-decoration:none;">020 3904 6977</a>
+          020 3904 6977
           &middot;
           <a href="mailto:bookings@demisrestaurant.co.uk" style="color:#999;text-decoration:none;">bookings@demisrestaurant.co.uk</a>
         </p>
@@ -164,7 +170,7 @@ export function buildPlainEmail(opts: { bodyHtml: string; unsubUrl: string }): s
   ${opts.bodyHtml}
   <p style="color:#9a9a9a;font-size:12px;line-height:1.6;margin-top:28px;">
     Demi's Nigerian Restaurant &mdash; Cricklewood &amp; Streatham Hill, London.<br>
-    <a href="tel:+442039046977" style="color:#9a9a9a;">020 3904 6977</a> &middot;
+    020 3904 6977 &middot;
     <a href="${SITE_URL}" style="color:#9a9a9a;">demisrestaurant.co.uk</a> &middot;
     <a href="${opts.unsubUrl}" style="color:#9a9a9a;">Unsubscribe</a>.
   </p>
