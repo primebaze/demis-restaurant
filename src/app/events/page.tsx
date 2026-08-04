@@ -98,6 +98,12 @@ export default function EventsPage() {
                 Jollof and fried rice, grilled meats, small chops, sides and dessert, piled high
                 and refilled all afternoon. Bring the family and come hungry.
               </p>
+              <a
+                href="/sunday-buffet"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
+              >
+                Book a Table &rarr;
+              </a>
               <div className="mt-5 flex items-center gap-4">
                 <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Streatham Hill</span>
               </div>
