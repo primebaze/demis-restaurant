@@ -8,7 +8,15 @@ const nextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
     ],
-    formats: ["image/avif", "image/webp"],
+    // WebP only. Serving AVIF too doubles the Image Optimization
+    // transformation count for a ~10-20% file-size gain — not worth it.
+    formats: ["image/webp"],
+    // Only the breakpoints we actually serve. The Next defaults go up to
+    // 3840px, generating variants nobody on this site ever requests.
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
+    // Cache optimized images for 31 days so repeat views don't re-transform.
+    minimumCacheTTL: 2678400,
   },
   async headers() {
     return [
