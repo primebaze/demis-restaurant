@@ -70,6 +70,20 @@ export function upcomingSaturday(from: Date = new Date()): string {
   return dt.toISOString().slice(0, 10);
 }
 
+/** How many Saturdays ahead guests can book. */
+export const BOOKABLE_WEEKS = 4;
+
+/** The next N bookable Saturdays, starting with the upcoming one. */
+export function upcomingSaturdays(count: number = BOOKABLE_WEEKS, from: Date = new Date()): string[] {
+  const first = upcomingSaturday(from);
+  const [y, m, d] = first.split("-").map(Number);
+  return Array.from({ length: count }, (_, i) => {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    dt.setUTCDate(dt.getUTCDate() + i * 7);
+    return dt.toISOString().slice(0, 10);
+  });
+}
+
 /** Pretty UK date, e.g. "Saturday 8 August". */
 export function prettyDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);

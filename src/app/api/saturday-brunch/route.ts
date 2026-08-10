@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
-  upcomingSaturday, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, BRUNCH_PRICE_DRINKS,
+  upcomingSaturdays, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, BRUNCH_PRICE_DRINKS,
   BRUNCH_START, BRUNCH_END, ARRIVAL_SLOTS, isArrivalSlot, isBrunchPackage, packagePrice, packageLabel,
 } from "@/lib/saturday-brunch";
 import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
@@ -28,12 +28,70 @@ function withTimeout(p: Promise<boolean>, ms = 8000): Promise<boolean> {
   return Promise.race([p, new Promise<boolean>((r) => setTimeout(() => r(false), ms))]);
 }
 
-/** GET — the Saturday people are booking for. */
+export type DateAvailability = {
+  date: string;
+  prettyDate: string;
+  blocked: boolean;
+  soldOut: boolean;
+  capacity: number | null;
+  booked: number;
+  spotsLeft: number | null;
+  note: string;
+};
+
+/**
+ * Availability for each bookable Saturday. A date is sold out when an admin has
+ * blocked it, or when its optional capacity has been reached.
+ */
+async function availability(): Promise<DateAvailability[]> {
+  const dates = upcomingSaturdays();
+  try {
+    const [settings, bookings] = await Promise.all([
+      prisma.brunchDate.findMany({ where: { date: { in: dates } } }),
+      prisma.saturdayBrunchBooking.groupBy({
+        by: ["date"],
+        where: { date: { in: dates }, status: { not: "cancelled" } },
+        _sum: { partySize: true },
+      }),
+    ]);
+    const settingFor = new Map(settings.map((s) => [s.date, s]));
+    const bookedFor = new Map(bookings.map((b) => [b.date, b._sum.partySize || 0]));
+
+    return dates.map((date) => {
+      const s = settingFor.get(date);
+      const booked = bookedFor.get(date) || 0;
+      const capacity = s?.capacity ?? null;
+      const full = capacity !== null && booked >= capacity;
+      return {
+        date,
+        prettyDate: prettyDate(date),
+        blocked: !!s?.blocked,
+        soldOut: !!s?.blocked || full,
+        capacity,
+        booked,
+        spotsLeft: capacity === null ? null : Math.max(0, capacity - booked),
+        note: s?.note || "",
+      };
+    });
+  } catch {
+    // Table not migrated yet — everything open.
+    return dates.map((date) => ({
+      date, prettyDate: prettyDate(date), blocked: false, soldOut: false,
+      capacity: null, booked: 0, spotsLeft: null, note: "",
+    }));
+  }
+}
+
+/** GET — the Saturdays people can book, and whether each is still open. */
 export async function GET() {
-  const date = upcomingSaturday();
+  const dates = await availability();
+  const firstOpen = dates.find((d) => !d.soldOut) || dates[0];
   return NextResponse.json({
-    date,
-    prettyDate: prettyDate(date),
+    // The next bookable Saturday (kept top-level for the booking form's header).
+    date: firstOpen.date,
+    prettyDate: firstOpen.prettyDate,
+    dates,
+    allSoldOut: dates.every((d) => d.soldOut),
     price: BRUNCH_PRICE,
     priceWithDrinks: BRUNCH_PRICE_DRINKS,
     location: BRUNCH_LOCATION,
@@ -96,7 +154,30 @@ export async function POST(req: Request) {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
   if (!isArrivalSlot(arrivalTime)) return NextResponse.json({ error: "Please choose what time you'll arrive" }, { status: 400 });
 
-  const date = upcomingSaturday();
+  // The Saturday they picked. Must be one we're actually taking bookings for.
+  const requested = String(body.date || "").trim();
+  const open = await availability();
+  const chosen = requested
+    ? open.find((d) => d.date === requested)
+    : open.find((d) => !d.soldOut);
+
+  if (!chosen) {
+    return NextResponse.json({ error: "That date isn't available. Please pick another Saturday." }, { status: 400 });
+  }
+  if (chosen.soldOut) {
+    return NextResponse.json(
+      { error: `${chosen.prettyDate} is fully booked. Please choose another Saturday.` },
+      { status: 409 }
+    );
+  }
+  // Don't let a group take more covers than are left.
+  if (chosen.spotsLeft !== null && partySize > chosen.spotsLeft) {
+    return NextResponse.json(
+      { error: `Only ${chosen.spotsLeft} space${chosen.spotsLeft === 1 ? "" : "s"} left on ${chosen.prettyDate}.` },
+      { status: 409 }
+    );
+  }
+  const date = chosen.date;
 
   // One booking per email per Saturday.
   const already = await prisma.saturdayBrunchBooking.findFirst({

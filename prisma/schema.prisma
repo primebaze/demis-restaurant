@@ -399,6 +399,17 @@ model SaturdayBrunchBooking {
   @@index([confirmToken])
 }
 
+/** Per-Saturday availability settings. A row only exists once a date is configured. */
+model BrunchDate {
+  id        String   @id @default(cuid())
+  date      String   @unique // the Saturday, "2026-08-15"
+  blocked   Boolean  @default(false) // manually closed — shows as sold out
+  capacity  Int? // optional cover limit; auto sells out when reached
+  note      String   @default("") // optional message shown to guests
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 /** Door check-in for the Saturday brunch. A group can mix both packages. */
 model BrunchCheckIn {
   id          String   @id @default(cuid())

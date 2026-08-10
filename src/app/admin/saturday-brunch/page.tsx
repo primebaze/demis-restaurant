@@ -22,6 +22,8 @@ function fmt(s: string) {
   return new Date(s).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
+type DateRow = { date: string; prettyDate: string; blocked: boolean; capacity: number | null; booked: number; soldOut: boolean; note: string };
+
 const EMPTY: Summary = { reservations: 0, people: 0, drinkers: 0, confirmed: 0, cancelled: 0, revenue: 0 };
 
 export default function AdminSaturdayBrunchPage() {
@@ -31,6 +33,29 @@ export default function AdminSaturdayBrunchPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [summary, setSummary] = useState<Summary>(EMPTY);
   const [loading, setLoading] = useState(true);
+  const [dateRows, setDateRows] = useState<DateRow[]>([]);
+  const [savingDate, setSavingDate] = useState("");
+
+  const fetchDates = useCallback(async () => {
+    const res = await fetch("/api/admin/saturday-brunch/dates");
+    const d = await res.json();
+    setDateRows(d.dates || []);
+  }, []);
+
+  useEffect(() => { fetchDates(); }, [fetchDates]);
+
+  async function saveDate(date: string, patch: { blocked?: boolean; capacity?: number | null }) {
+    setSavingDate(date);
+    try {
+      await fetch("/api/admin/saturday-brunch/dates", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, ...patch }),
+      });
+      await fetchDates();
+    } finally {
+      setSavingDate("");
+    }
+  }
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -96,6 +121,60 @@ export default function AdminSaturdayBrunchPage() {
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Cancelled</p>
           <p className="text-2xl font-bold text-white">{summary.cancelled}</p>
+        </div>
+      </div>
+
+      {/* ── Availability: block / unblock each upcoming Saturday ── */}
+      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
+        <p className="text-sm text-white font-semibold mb-1">Availability</p>
+        <p className="text-xs text-gray-500 mb-4">
+          Mark a Saturday sold out to stop new bookings. Set a capacity and it sells out automatically once that many covers are booked. Guests can still book the other open dates.
+        </p>
+        <div className="space-y-2">
+          {dateRows.length === 0 ? (
+            <p className="text-xs text-gray-600">Loading dates…</p>
+          ) : dateRows.map((d) => (
+            <div key={d.date} className="flex flex-wrap items-center gap-3 py-2.5 px-3 rounded-xl bg-black/30 border border-gray-800">
+              <span className="text-sm text-white min-w-[170px]">{d.prettyDate}</span>
+
+              {d.soldOut ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/15 text-red-400">Sold out</span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400">Open</span>
+              )}
+
+              <span className="text-xs text-gray-500">
+                {d.booked} booked{d.capacity !== null ? ` of ${d.capacity}` : ""}
+              </span>
+
+              <div className="flex items-center gap-2 ml-auto">
+                <label className="text-[11px] text-gray-500">Capacity</label>
+                <input
+                  type="number"
+                  min={0}
+                  defaultValue={d.capacity ?? ""}
+                  placeholder="∞"
+                  onBlur={(e) => {
+                    const raw = e.target.value.trim();
+                    const next = raw === "" ? null : parseInt(raw);
+                    if (next !== d.capacity) saveDate(d.date, { capacity: next });
+                  }}
+                  className="w-20 px-2 py-1.5 bg-black/40 border border-gray-700 rounded-lg text-white text-xs focus:outline-none focus:border-gold-300/60"
+                />
+                <button
+                  onClick={() => saveDate(d.date, { blocked: !d.blocked })}
+                  disabled={savingDate === d.date}
+                  className={`px-3 py-1.5 text-xs rounded-lg border transition disabled:opacity-40 ${
+                    d.blocked
+                      ? "text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                      : "text-red-400 border-red-500/30 hover:bg-red-500/10"
+                  }`}
+                >
+                  {savingDate === d.date ? "…" : d.blocked ? "Reopen" : "Mark sold out"}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

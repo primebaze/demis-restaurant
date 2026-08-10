@@ -2,7 +2,14 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 
-type Avail = { date: string; prettyDate: string; price: number; priceWithDrinks?: number; arrivalSlots?: string[] };
+type DateOption = {
+  date: string; prettyDate: string; soldOut: boolean;
+  spotsLeft: number | null; note: string;
+};
+type Avail = {
+  date: string; prettyDate: string; price: number; priceWithDrinks?: number;
+  arrivalSlots?: string[]; dates?: DateOption[]; allSoldOut?: boolean;
+};
 type Result = {
   prettyDate: string; address: string; partySize: number; arrivalTime: string;
   packageLabel?: string; pricePerHead?: number; price: number;
@@ -28,6 +35,7 @@ export function BrunchBooking() {
   const [phone, setPhone] = useState("");
   const [partySize, setPartySize] = useState(1);
   const [arrivalTime, setArrivalTime] = useState("");
+  const [bookingDate, setBookingDate] = useState("");
   const [pkg, setPkg] = useState<"food" | "drinks">("food");
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
@@ -74,7 +82,10 @@ export function BrunchBooking() {
   const loadAvail = useCallback(async () => {
     try {
       const res = await fetch("/api/saturday-brunch");
-      setAvail(await res.json());
+      const d: Avail = await res.json();
+      setAvail(d);
+      // Preselect the soonest Saturday that's still open.
+      setBookingDate((cur) => cur || d.dates?.find((x) => !x.soldOut)?.date || d.date || "");
     } catch {
       /* ignore */
     }
@@ -83,6 +94,8 @@ export function BrunchBooking() {
   useEffect(() => { loadAvail(); }, [loadAvail]);
 
   function validate(): string | null {
+    if (!bookingDate) return "Please choose a Saturday";
+    if (avail?.dates?.find((d) => d.date === bookingDate)?.soldOut) return "That Saturday is sold out — please pick another";
     if (!name.trim()) return "Please enter your name";
     if (!phone.trim()) return "Please enter your phone number";
     if ((phone.match(/\d/g) || []).length < 7) return "Please enter a valid phone number";
@@ -102,7 +115,7 @@ export function BrunchBooking() {
       const res = await fetch("/api/saturday-brunch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, package: pkg, website, turnstileToken: token }),
+        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, date: bookingDate, package: pkg, website, turnstileToken: token }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -112,10 +125,15 @@ export function BrunchBooking() {
         return;
       }
       setResult(d);
+      loadAvail(); // refresh remaining spaces / sold-out state
     } finally {
       setSubmitting(false);
     }
   }
+
+  const dateOptions = avail?.dates ?? [];
+  const selected = dateOptions.find((d) => d.date === bookingDate) ?? null;
+  const allSoldOut = !!avail?.allSoldOut;
 
   const inputCls =
     "w-full px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-300/60 transition";
@@ -151,13 +169,58 @@ export function BrunchBooking() {
 
       <div className="pb-4 mb-4 border-b border-white/[0.08]">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your table</p>
-        <p className="text-lg font-semibold text-white">{avail ? avail.prettyDate : "This Saturday"}</p>
+        <p className="text-lg font-semibold text-white">{selected?.prettyDate ?? avail?.prettyDate ?? "This Saturday"}</p>
         <p className="text-[13px] text-stone-500 mt-0.5">
           £{avail?.price ?? 35} food only · £{avail?.priceWithDrinks ?? 50} with bottomless drinks
         </p>
+        <p className="text-[12px] text-stone-500 mt-2">This booking is for the Saturday bottomless brunch.</p>
       </div>
 
+      {allSoldOut && (
+        <div className="mb-4 px-4 py-3 rounded-xl border border-red-500/30 bg-red-500/[0.07] text-center">
+          <p className="text-sm font-semibold text-red-300">Fully booked</p>
+          <p className="text-xs text-stone-400 mt-1">Every upcoming Saturday is sold out. Give us a call and we&apos;ll see what we can do.</p>
+        </div>
+      )}
+
       <div className="space-y-2.5">
+        {dateOptions.length > 1 && (
+          <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
+            <span className="block mb-2.5 text-sm text-stone-400">Which Saturday?</span>
+            <div className="space-y-2">
+              {dateOptions.map((d) => {
+                const on = bookingDate === d.date;
+                const low = !d.soldOut && d.spotsLeft !== null && d.spotsLeft <= 10;
+                return (
+                  <button
+                    key={d.date}
+                    type="button"
+                    disabled={d.soldOut}
+                    onClick={() => { setBookingDate(d.date); setError(""); }}
+                    className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium border transition text-left ${
+                      d.soldOut
+                        ? "border-white/[0.06] text-stone-600 cursor-not-allowed"
+                        : on
+                          ? "bg-gold-300 text-black border-gold-300"
+                          : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
+                    }`}
+                  >
+                    <span className={d.soldOut ? "line-through" : ""}>{d.prettyDate}</span>
+                    {d.soldOut ? (
+                      <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/15 text-red-400">
+                        Sold out
+                      </span>
+                    ) : low ? (
+                      <span className={`shrink-0 text-[11px] ${on ? "text-black/70" : "text-gold-300"}`}>
+                        {d.spotsLeft} left
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <input
           type="text" name="website" value={website} onChange={(e) => setWebsite(e.target.value)}
           tabIndex={-1} autoComplete="off" aria-hidden="true"
@@ -224,10 +287,10 @@ export function BrunchBooking() {
 
         <button
           onClick={reserve}
-          disabled={submitting}
+          disabled={submitting || allSoldOut}
           className="w-full px-4 py-3.5 mt-1 bg-gold-300 text-black font-semibold rounded-xl hover:bg-gold-400 transition disabled:opacity-50"
         >
-          {submitting ? "Reserving…" : "Reserve my table"}
+          {submitting ? "Reserving…" : allSoldOut ? "Sold out" : "Reserve my table"}
         </button>
         <p className="text-xs text-stone-500 text-center">Free to reserve, pay at the door.</p>
       </div>
