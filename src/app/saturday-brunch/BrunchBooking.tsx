@@ -179,7 +179,6 @@ export function BrunchBooking() {
       {allSoldOut && (
         <div className="mb-4 px-4 py-3 rounded-xl border border-red-500/30 bg-red-500/[0.07] text-center">
           <p className="text-sm font-semibold text-red-300">Fully booked</p>
-          <p className="text-xs text-stone-400 mt-1">Every upcoming Saturday is sold out. Give us a call and we&apos;ll see what we can do.</p>
         </div>
       )}
 
