@@ -187,17 +187,19 @@ export function BrunchBooking() {
         {dateOptions.length > 1 && (
           <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
             <span className="block mb-2.5 text-sm text-stone-400">Which Saturday?</span>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               {dateOptions.map((d) => {
                 const on = bookingDate === d.date;
                 const low = !d.soldOut && d.spotsLeft !== null && d.spotsLeft <= 10;
+                // The heading already says "Saturday" — don't repeat it on every option.
+                const short = d.prettyDate.replace(/^\w+\s+/, "");
                 return (
                   <button
                     key={d.date}
                     type="button"
                     disabled={d.soldOut}
                     onClick={() => { setBookingDate(d.date); setError(""); }}
-                    className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium border transition text-left ${
+                    className={`px-3 py-2 rounded-lg text-[13px] font-semibold border transition leading-tight ${
                       d.soldOut
                         ? "border-white/[0.06] text-stone-600 cursor-not-allowed"
                         : on
@@ -205,13 +207,11 @@ export function BrunchBooking() {
                           : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
                     }`}
                   >
-                    <span className={d.soldOut ? "line-through" : ""}>{d.prettyDate}</span>
+                    <span className={d.soldOut ? "line-through" : ""}>{short}</span>
                     {d.soldOut ? (
-                      <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/15 text-red-400">
-                        Sold out
-                      </span>
+                      <span className="block mt-0.5 text-[10px] font-bold uppercase tracking-wider text-red-400">Sold out</span>
                     ) : low ? (
-                      <span className={`shrink-0 text-[11px] ${on ? "text-black/70" : "text-gold-300"}`}>
+                      <span className={`block mt-0.5 text-[10px] font-medium ${on ? "text-black/60" : "text-gold-300"}`}>
                         {d.spotsLeft} left
                       </span>
                     ) : null}
