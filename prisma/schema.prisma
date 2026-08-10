@@ -403,7 +403,8 @@ model SaturdayBrunchBooking {
 model BrunchDate {
   id        String   @id @default(cuid())
   date      String   @unique // the Saturday, "2026-08-15"
-  blocked   Boolean  @default(false) // manually closed — shows as sold out
+  blocked   Boolean  @default(false) // manually closed — still listed, shown as sold out
+  hidden    Boolean  @default(false) // not offered to guests at all
   capacity  Int? // optional cover limit; auto sells out when reached
   note      String   @default("") // optional message shown to guests
   createdAt DateTime @default(now())

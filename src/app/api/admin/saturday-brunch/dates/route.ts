@@ -31,6 +31,7 @@ export async function GET() {
           date,
           prettyDate: prettyDate(date),
           blocked: !!s?.blocked,
+          hidden: !!s?.hidden,
           capacity,
           booked,
           soldOut: !!s?.blocked || (capacity !== null && booked >= capacity),
@@ -54,8 +55,9 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
   }
 
-  const data: { blocked?: boolean; capacity?: number | null; note?: string } = {};
+  const data: { blocked?: boolean; hidden?: boolean; capacity?: number | null; note?: string } = {};
   if (typeof body.blocked === "boolean") data.blocked = body.blocked;
+  if (typeof body.hidden === "boolean") data.hidden = body.hidden;
   if (body.capacity === null || body.capacity === "") data.capacity = null;
   else if (body.capacity !== undefined) {
     const n = parseInt(body.capacity);
@@ -69,5 +71,5 @@ export async function PATCH(req: Request) {
     create: { date, ...data },
     update: data,
   });
-  return NextResponse.json({ ok: true, date: row.date, blocked: row.blocked, capacity: row.capacity, note: row.note });
+  return NextResponse.json({ ok: true, date: row.date, blocked: row.blocked, hidden: row.hidden, capacity: row.capacity, note: row.note });
 }

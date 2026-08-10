@@ -57,22 +57,25 @@ async function availability(): Promise<DateAvailability[]> {
     const settingFor = new Map(settings.map((s) => [s.date, s]));
     const bookedFor = new Map(bookings.map((b) => [b.date, b._sum.partySize || 0]));
 
-    return dates.map((date) => {
-      const s = settingFor.get(date);
-      const booked = bookedFor.get(date) || 0;
-      const capacity = s?.capacity ?? null;
-      const full = capacity !== null && booked >= capacity;
-      return {
-        date,
-        prettyDate: prettyDate(date),
-        blocked: !!s?.blocked,
-        soldOut: !!s?.blocked || full,
-        capacity,
-        booked,
-        spotsLeft: capacity === null ? null : Math.max(0, capacity - booked),
-        note: s?.note || "",
-      };
-    });
+    return dates
+      // Hidden dates aren't offered to guests at all.
+      .filter((date) => !settingFor.get(date)?.hidden)
+      .map((date) => {
+        const s = settingFor.get(date);
+        const booked = bookedFor.get(date) || 0;
+        const capacity = s?.capacity ?? null;
+        const full = capacity !== null && booked >= capacity;
+        return {
+          date,
+          prettyDate: prettyDate(date),
+          blocked: !!s?.blocked,
+          soldOut: !!s?.blocked || full,
+          capacity,
+          booked,
+          spotsLeft: capacity === null ? null : Math.max(0, capacity - booked),
+          note: s?.note || "",
+        };
+      });
   } catch {
     // Table not migrated yet — everything open.
     return dates.map((date) => ({
@@ -85,13 +88,14 @@ async function availability(): Promise<DateAvailability[]> {
 /** GET — the Saturdays people can book, and whether each is still open. */
 export async function GET() {
   const dates = await availability();
+  // Every date could be hidden, so this can legitimately be undefined.
   const firstOpen = dates.find((d) => !d.soldOut) || dates[0];
   return NextResponse.json({
     // The next bookable Saturday (kept top-level for the booking form's header).
-    date: firstOpen.date,
-    prettyDate: firstOpen.prettyDate,
+    date: firstOpen?.date ?? "",
+    prettyDate: firstOpen?.prettyDate ?? "",
     dates,
-    allSoldOut: dates.every((d) => d.soldOut),
+    allSoldOut: dates.length === 0 || dates.every((d) => d.soldOut),
     price: BRUNCH_PRICE,
     priceWithDrinks: BRUNCH_PRICE_DRINKS,
     location: BRUNCH_LOCATION,
