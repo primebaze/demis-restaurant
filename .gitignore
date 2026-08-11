@@ -47,3 +47,4 @@ next-env.d.ts
 
 # WordPress import (regenerate with npm run import:wordpress)
 wordpress-import-redirects.json
+.claude/
