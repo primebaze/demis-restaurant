@@ -35,6 +35,12 @@ function buildHtml(name: string, message: string, email: string, campaign: strin
     .split(/\n{2,}/)
     .map((p) => `<p style="margin:0 0 14px;">${p.replace(/\n/g, "<br>")}</p>`)
     .join("")
+    // A pasted URL becomes a real anchor. Left as typed, so it is untracked —
+    // {buffet} is the version that identifies who clicked.
+    .replace(
+      /(https?:\/\/[^\s<"]+)/g,
+      '<a href="$1" style="color:#b8862f;text-decoration:underline;">$1</a>'
+    )
     .replace(
       /\{\{?\s*buffet\s*\}?\}/gi,
       `<a href="${link}" style="color:#b8862f;text-decoration:underline;">book your place</a>`
