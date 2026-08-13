@@ -488,6 +488,11 @@ model EmailTemplate {
   id        String   @id @default(cuid())
   key       String   @unique // "sunday-buffet"
   name      String // shown on the button
+  // Which screen offers it. "blast" = Email Blast, to the marketing list.
+  // "buffet" = the Sunday Buffet screen, to people booked for a given Sunday.
+  // They are not interchangeable: buffet messages omit the greeting and sign-off
+  // because that route adds them, and they go to a completely different audience.
+  scope     String   @default("blast")
   subject   String
   body      String
   sortOrder Int      @default(0)

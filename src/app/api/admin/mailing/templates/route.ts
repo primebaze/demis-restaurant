@@ -18,6 +18,7 @@ const DEFAULTS = [
   {
     key: "sunday-buffet",
     name: "Sunday buffet",
+    scope: "blast",
     sortOrder: 1,
     subject: "Our Sunday buffet is back this week",
     body: `Hi {name},
@@ -38,8 +39,29 @@ Warmly,
 The team at Demi's`,
   },
   {
+    key: "buffet-follow-up",
+    name: "Follow-up",
+    scope: "buffet",
+    sortOrder: 3,
+    subject: "Coming back this Sunday?",
+    // No greeting or sign-off: the buffet route adds "Hi <name>," and
+    // "Thanks, Demi's Restaurant, Streatham Hill" around whatever is written here.
+    body: `Thank you for joining us at the buffet last Sunday. We hope it was worth the trip.
+
+We're running it again this Sunday, and the menu changes every week, so there'll be a fresh spread waiting: jollof, fried rice, rice and peas, grilled turkey, oxtail, beef ribs and plenty more. All you can eat, as always.
+
+Doors open at 12pm and the buffet starts at 12:30pm. The earlier you arrive, the less you pay, so it's worth coming down early.
+
+If you'd like us to save you a table, you can book here:
+
+https://www.demisrestaurant.co.uk/sunday-buffet
+
+We'd love to have you back.`,
+  },
+  {
     key: "saturday-brunch",
     name: "Saturday brunch",
+    scope: "blast",
     sortOrder: 2,
     subject: "Something new: Saturday bottomless brunch",
     body: `Hi {name},
@@ -59,18 +81,41 @@ The team at Demi's`,
   },
 ];
 
+const SEEDED_KEY = "email_templates_seeded";
+
+/**
+ * Creates any default that has never been seeded before.
+ *
+ * Keyed off a record of what we've already inserted rather than "is the table
+ * empty", so a new default added later still appears, and one the admin deleted
+ * on purpose does not come back.
+ */
 async function ensureSeeded() {
-  if ((await prisma.emailTemplate.count()) > 0) return;
-  await prisma.emailTemplate.createMany({ data: DEFAULTS, skipDuplicates: true });
+  const marker = await prisma.appSetting.findUnique({ where: { key: SEEDED_KEY } });
+  const already = new Set((marker?.value || "").split(",").filter(Boolean));
+
+  const missing = DEFAULTS.filter((d) => !already.has(d.key));
+  if (missing.length === 0) return;
+
+  await prisma.emailTemplate.createMany({ data: missing, skipDuplicates: true });
+
+  const value = [...Array.from(already), ...missing.map((d) => d.key)].join(",");
+  await prisma.appSetting.upsert({
+    where: { key: SEEDED_KEY },
+    create: { key: SEEDED_KEY, value },
+    update: { value },
+  });
 }
 
-/** GET — every saved template. */
-export async function GET() {
+/** GET ?scope=blast|buffet — saved templates for one screen. */
+export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await ensureSeeded();
+  const scope = new URL(req.url).searchParams.get("scope") || "blast";
   const templates = await prisma.emailTemplate.findMany({
+    where: { scope },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
   });
   return NextResponse.json({ templates });
@@ -81,22 +126,33 @@ export async function POST(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { name, subject, body } = await req.json();
+  const { name, subject, body, scope } = await req.json();
   if (!name?.trim() || !subject?.trim() || !body?.trim()) {
     return NextResponse.json({ error: "Name, subject and message are all required" }, { status: 400 });
   }
 
-  const key =
+  const where = scope === "buffet" ? "buffet" : "blast";
+  const slug =
     String(name)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "")
-      .slice(0, 60) || "template";
+      .slice(0, 50) || "template";
+  // Scoped, so "Follow-up" saved on the buffet screen never overwrites a
+  // "Follow-up" on the blast screen — they go to different people.
+  const key = `${where}:${slug}`;
+
+  const fields = {
+    name: String(name).slice(0, 60),
+    subject: String(subject).slice(0, 200),
+    body: String(body),
+    scope: where,
+  };
 
   const saved = await prisma.emailTemplate.upsert({
     where: { key },
-    create: { key, name: String(name).slice(0, 60), subject: String(subject).slice(0, 200), body: String(body) },
-    update: { name: String(name).slice(0, 60), subject: String(subject).slice(0, 200), body: String(body) },
+    create: { key, ...fields },
+    update: fields,
   });
 
   return NextResponse.json({ template: saved });

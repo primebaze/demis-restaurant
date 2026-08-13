@@ -37,6 +37,35 @@ export default function AdminSundayBuffetPage() {
   const [mailing, setMailing] = useState(false);
   const [mailNote, setMailNote] = useState("");
 
+  // Saved emails scoped to this screen — they omit the greeting and sign-off,
+  // which this route adds, so they are not interchangeable with blast templates.
+  type MailTemplate = { key: string; name: string; subject: string; body: string };
+  const [mailTemplates, setMailTemplates] = useState<MailTemplate[]>([]);
+
+  const fetchMailTemplates = useCallback(async () => {
+    const res = await fetch("/api/admin/mailing/templates?scope=buffet");
+    if (!res.ok) return;
+    const data = await res.json();
+    setMailTemplates(data.templates || []);
+  }, []);
+
+  useEffect(() => {
+    fetchMailTemplates();
+  }, [fetchMailTemplates]);
+
+  async function saveMailTemplate() {
+    const name = window.prompt("Save this email as:", "")?.trim();
+    if (!name) return;
+    const res = await fetch("/api/admin/mailing/templates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, subject: mailSubject, body: mailMessage, scope: "buffet" }),
+    });
+    if (!res.ok) { setMailNote("Could not save that one."); return; }
+    await fetchMailTemplates();
+    setMailNote(`Saved as "${name}".`);
+  }
+
   // "Ask guests to confirm attendance" — bulk + per-guest
   const [confirming, setConfirming] = useState(false);
   const [confirmNote, setConfirmNote] = useState("");
@@ -164,6 +193,25 @@ export default function AdminSundayBuffetPage() {
         <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
           <p className="text-sm text-white font-semibold mb-1">Email everyone booked for {prettyDate}</p>
           <p className="text-xs text-gray-500 mb-4">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
+          {/* Saved emails for this screen. One click fills the form; you still press Send. */}
+          <div className="flex items-center gap-2 flex-wrap mb-3">
+            {mailTemplates.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
+                className="px-3 py-1.5 text-sm text-gray-300 border border-gray-700 rounded-full hover:bg-white/5 transition"
+              >
+                {t.name}
+              </button>
+            ))}
+            <button
+              onClick={saveMailTemplate}
+              disabled={!mailSubject.trim() || !mailMessage.trim()}
+              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-gray-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              + Save current
+            </button>
+          </div>
           <input
             value={mailSubject} onChange={(e) => setMailSubject(e.target.value)} placeholder="Subject"
             className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-300/60"
