@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyDest } from "@/lib/marketing";
+import { verifyDest, looksLikeScanner } from "@/lib/marketing";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -17,13 +17,6 @@ const LOG_RATE_LIMIT = { maxRequests: 20, windowMs: 60_000 };
  * From domain, and the destination is signed so this can never be turned into an
  * open redirect pointing at somebody else's site.
  */
-
-/** Mail security scanners fetch every link in a message before the human sees it. */
-function looksLikeScanner(ua: string): boolean {
-  return /bot|crawler|spider|preview|scan|proofpoint|barracuda|mimecast|safelinks|slurp|curl|wget|python-requests|headless/i.test(
-    ua
-  );
-}
 
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;

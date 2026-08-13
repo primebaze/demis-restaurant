@@ -70,6 +70,20 @@ export function voteUrl(email: string): string {
   return `${SITE_URL}/vote?e=${unsubToken(email)}`;
 }
 
+/**
+ * Automated fetchers, which must not count as people.
+ *
+ * Two families: mail security scanners that open every link before the human
+ * sees it, and the link-preview fetchers messaging apps run when someone shares
+ * a URL in a chat. Both were seen in real data — a WhatsApp unfurl landed in the
+ * table looking like a genuine click.
+ */
+export function looksLikeScanner(ua: string): boolean {
+  return /bot|crawler|spider|preview|scan|proofpoint|barracuda|mimecast|safelinks|slurp|curl|wget|python-requests|headless|whatsapp|telegram|slack|discord|skype|viber|line-poker|twitterbot|facebookexternalhit|linkedinbot|pinterest|redditbot|embedly|quora|vkshare|outbrain|flipboard|nuzzel|applebot|google-?(?:read|structured)/i.test(
+    ua
+  );
+}
+
 /** Campaign label from a subject line, so clicks group per blast. */
 export function campaignSlug(subject: string): string {
   return (

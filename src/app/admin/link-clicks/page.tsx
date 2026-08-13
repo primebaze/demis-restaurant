@@ -16,6 +16,8 @@ type Stats = {
   lastClickAt: string | null;
   byUrl: UrlRow[];
   clickers: Clicker[];
+  page: number;
+  totalPages: number;
 };
 
 function when(iso: string | null): string {
@@ -37,6 +39,7 @@ function pretty(slug: string): string {
 export default function LinkClicksPage() {
   const [campaigns, setCampaigns] = useState<CampaignRow[]>([]);
   const [selected, setSelected] = useState<string>("");
+  const [page, setPage] = useState(1);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,10 +54,12 @@ export default function LinkClicksPage() {
     setLoading(false);
   }, []);
 
-  const fetchStats = useCallback(async (campaign: string) => {
+  const fetchStats = useCallback(async (campaign: string, p: number) => {
     if (!campaign) return;
     setLoading(true);
-    const res = await fetch(`/api/admin/link-clicks?campaign=${encodeURIComponent(campaign)}`);
+    const res = await fetch(
+      `/api/admin/link-clicks?campaign=${encodeURIComponent(campaign)}&page=${p}`
+    );
     setStats(await res.json());
     setLoading(false);
   }, []);
@@ -64,12 +69,18 @@ export default function LinkClicksPage() {
   }, [fetchCampaigns]);
 
   useEffect(() => {
-    if (selected) fetchStats(selected);
-  }, [selected, fetchStats]);
+    if (selected) fetchStats(selected, page);
+  }, [selected, page, fetchStats]);
+
+  /** Switching campaign must drop back to page 1, or you land past the end. */
+  function pickCampaign(campaign: string) {
+    setSelected(campaign);
+    setPage(1);
+  }
 
   function refresh() {
     fetchCampaigns();
-    if (selected) fetchStats(selected);
+    if (selected) fetchStats(selected, page);
   }
 
   const cards = [
@@ -113,7 +124,7 @@ export default function LinkClicksPage() {
             {campaigns.map((c) => (
               <button
                 key={c.campaign}
-                onClick={() => setSelected(c.campaign)}
+                onClick={() => pickCampaign(c.campaign)}
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   selected === c.campaign
                     ? "bg-gold-300 text-black border-gold-300 font-semibold"
@@ -164,8 +175,8 @@ export default function LinkClicksPage() {
             <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
               <h2 className="text-sm font-semibold text-white mb-3">
                 Who clicked{" "}
-                {stats?.clickers?.length ? (
-                  <span className="text-gray-500 font-normal">({stats.clickers.length})</span>
+                {stats?.identified ? (
+                  <span className="text-gray-500 font-normal">({stats.identified})</span>
                 ) : null}
               </h2>
               {stats?.clickers?.length ? (
@@ -195,12 +206,36 @@ export default function LinkClicksPage() {
                     </tbody>
                   </table>
                 </div>
-              ) : (
+              ) : null}
+
+              {stats && stats.totalPages > 1 ? (
+                <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-800">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1 || loading}
+                    className="px-3 py-1.5 text-sm text-gray-300 border border-gray-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-xs text-gray-500">
+                    Page {stats.page} of {stats.totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage((p) => Math.min(stats.totalPages, p + 1))}
+                    disabled={page >= stats.totalPages || loading}
+                    className="px-3 py-1.5 text-sm text-gray-300 border border-gray-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              ) : null}
+
+              {!stats?.clickers?.length ? (
                 <p className="text-sm text-gray-600">
                   Nobody yet. Clicks from forwarded copies land under &ldquo;Forwarded&rdquo; instead, since
                   they carry no token.
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
         </>
