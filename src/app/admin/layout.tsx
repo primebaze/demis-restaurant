@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { href: "/admin/email-logs", label: "Email Logs", icon: "📧" },
   { href: "/admin/reviews", label: "Reviews", icon: "⭐" },
   { href: "/admin/mailing", label: "Email Blast", icon: "📣" },
+  { href: "/admin/link-clicks", label: "Link Clicks", icon: "🖱️" },
   { href: "/admin/settings", label: "Settings", icon: "⚙️" },
 ];
 
