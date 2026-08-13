@@ -91,8 +91,11 @@ export function signDest(url: string): string {
 }
 
 export function verifyDest(url: string, sig: string): boolean {
-  const expected = signDest(url);
-  return sig.length === expected.length && crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+  // Compare BYTE lengths, not string lengths: a multibyte signature of the same
+  // character count makes timingSafeEqual throw.
+  const a = Buffer.from(signDest(url));
+  const b = Buffer.from(sig || "");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 /** Wraps one outbound link in the redirect that logs the click. */

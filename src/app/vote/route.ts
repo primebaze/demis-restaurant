@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const CAMPAIGN = "vote";
+
+/** Caps how many clicks one IP can WRITE. Never caps the redirect itself. */
+const LOG_RATE_LIMIT = { maxRequests: 20, windowMs: 60_000 };
 
 /**
  * GET /vote — the link that goes in the email.
@@ -44,20 +48,25 @@ export async function GET(req: NextRequest) {
 
   const ua = req.headers.get("user-agent") || "";
   const token = (req.nextUrl.searchParams.get("e") || "").slice(0, 32);
+  const ip = getClientIp(req);
 
-  try {
-    await prisma.linkClick.create({
-      data: {
-        campaign: CAMPAIGN,
-        url: url.slice(0, 500),
-        token,
-        bot: looksLikeScanner(ua),
-        ip: req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "",
-        userAgent: ua.slice(0, 300),
-      },
-    });
-  } catch {
-    // A logging failure must never cost us the click.
+  // Over the cap we drop the log line, never the redirect — a guest clicking
+  // twice must still reach the ballot.
+  if (rateLimit(`linkclick:${ip}`, LOG_RATE_LIMIT).success) {
+    try {
+      await prisma.linkClick.create({
+        data: {
+          campaign: CAMPAIGN,
+          url: url.slice(0, 500),
+          token,
+          bot: looksLikeScanner(ua),
+          ip,
+          userAgent: ua.slice(0, 300),
+        },
+      });
+    } catch {
+      // A logging failure must never cost us the click.
+    }
   }
 
   // 302, not 301: inboxes and browsers cache 301s permanently, which would strand

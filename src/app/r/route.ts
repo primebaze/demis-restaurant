@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyDest } from "@/lib/marketing";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
+
+/** Caps how many clicks one IP can WRITE. Never caps the redirect itself. */
+const LOG_RATE_LIMIT = { maxRequests: 20, windowMs: 60_000 };
 
 /**
  * GET /r?u=<base64url dest>&s=<sig>&c=<campaign>&e=<token>
@@ -38,20 +42,25 @@ export async function GET(req: NextRequest) {
   }
 
   const ua = req.headers.get("user-agent") || "";
+  const ip = getClientIp(req);
 
-  try {
-    await prisma.linkClick.create({
-      data: {
-        campaign: (params.get("c") || "blast").slice(0, 60),
-        url: dest.slice(0, 500),
-        token: (params.get("e") || "").slice(0, 32),
-        bot: looksLikeScanner(ua),
-        ip: req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "",
-        userAgent: ua.slice(0, 300),
-      },
-    });
-  } catch {
-    // A logging failure must never cost us the click.
+  // Over the cap we drop the log line, never the redirect — a guest clicking
+  // twice must still reach the destination.
+  if (rateLimit(`linkclick:${ip}`, LOG_RATE_LIMIT).success) {
+    try {
+      await prisma.linkClick.create({
+        data: {
+          campaign: (params.get("c") || "blast").slice(0, 60),
+          url: dest.slice(0, 500),
+          token: (params.get("e") || "").slice(0, 32),
+          bot: looksLikeScanner(ua),
+          ip,
+          userAgent: ua.slice(0, 300),
+        },
+      });
+    } catch {
+      // A logging failure must never cost us the click.
+    }
   }
 
   return NextResponse.redirect(dest, 302);
