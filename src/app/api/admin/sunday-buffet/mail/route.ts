@@ -3,8 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { sendViaResend, sendRawEmail, isResendConfigured } from "@/lib/email";
 import { upcomingSunday, prettyDate } from "@/lib/sunday-buffet";
+import { trackedSiteUrl } from "@/lib/marketing";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+/** The public booking page. Deliberately NOT tracked itself — see trackedSiteUrl. */
+const BUFFET_PATH = "/sunday-buffet";
 
 function esc(s: string): string {
   return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -19,12 +23,22 @@ async function deliver(to: string, subject: string, html: string): Promise<boole
 /**
  * Plain, personal-note style email (no logo/banner/buttons) so Gmail is more
  * likely to file it under Primary rather than Promotions. Escapes name + message.
+ *
+ * {buffet} in the message becomes a link to the booking page carrying this
+ * recipient's token, so a click is attributable to them. The placeholder is
+ * substituted AFTER escaping — it holds no special characters, so it comes
+ * through untouched, and the anchor inserted here is not re-escaped.
  */
-function buildHtml(name: string, message: string): string {
+function buildHtml(name: string, message: string, email: string, campaign: string): string {
+  const link = trackedSiteUrl(BUFFET_PATH, campaign, email);
   const body = esc(message)
     .split(/\n{2,}/)
     .map((p) => `<p style="margin:0 0 14px;">${p.replace(/\n/g, "<br>")}</p>`)
-    .join("");
+    .join("")
+    .replace(
+      /\{\{?\s*buffet\s*\}?\}/gi,
+      `<a href="${link}" style="color:#b8862f;text-decoration:underline;">book your place</a>`
+    );
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;">
 <div style="max-width:560px;margin:0 auto;padding:20px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#222;font-size:15px;line-height:1.6;">
   <p style="margin:0 0 14px;">Hi ${esc(name) || "there"},</p>
@@ -57,9 +71,14 @@ export async function POST(req: Request) {
   }
 
   const subj = String(subject).slice(0, 150);
+  // Per-Sunday campaign, so each week's send has its own click count.
+  const campaign = `buffet-${date}`;
+
   let sent = 0, failed = 0;
   for (const b of bookings) {
-    const ok = await deliver(b.email, subj, buildHtml(b.name, message)).catch(() => false);
+    const ok = await deliver(b.email, subj, buildHtml(b.name, message, b.email, campaign)).catch(
+      () => false
+    );
     if (ok) sent++; else failed++;
   }
 

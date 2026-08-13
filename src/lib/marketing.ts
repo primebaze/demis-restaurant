@@ -112,6 +112,24 @@ export function verifyDest(url: string, sig: string): boolean {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+/**
+ * A tracked link to one of our OWN pages, for emails that point at a public page.
+ *
+ * The page itself stays untracked — it gets traffic from the website, search and
+ * social, none of which says anything about who opened an email. Routing the
+ * email's copy of the link through /r is what makes a click attributable, and
+ * anyone arriving by any other route is simply not counted.
+ */
+export function trackedSiteUrl(path: string, campaign: string, email: string): string {
+  return trackedUrl(`${SITE_URL}${path}`, campaign, email);
+}
+
+/** Placeholders an admin can type in a blast to get a tracked link to our own pages. */
+const SITE_PLACEHOLDER_LINKS: Record<string, { path: string; label: string }> = {
+  buffet: { path: "/sunday-buffet", label: "book your place" },
+  brunch: { path: "/saturday-brunch", label: "reserve a table" },
+};
+
 /** Wraps one outbound link in the redirect that logs the click. */
 export function trackedUrl(dest: string, campaign: string, email: string): string {
   const u = Buffer.from(dest, "utf8").toString("base64url");
@@ -128,12 +146,22 @@ export function trackedUrl(dest: string, campaign: string, email: string): strin
  * and bouncing our own URLs through a redirect would only slow them down.
  */
 export function injectTrackedLinks(html: string, email: string, campaign = "blast"): string {
-  const withVote = html.replace(
-    /\{\{?\s*vote\s*\}?\}/gi,
-    `<a href="${voteUrl(email)}" style="color:#b8862f;text-decoration:underline;">Vote for Demi's</a>`
-  );
+  const anchor = (href: string, label: string) =>
+    `<a href="${href}" style="color:#b8862f;text-decoration:underline;">${label}</a>`;
 
-  return withVote.replace(/href="(https?:\/\/[^"]+)"/gi, (whole, url: string) =>
+  // {vote} goes through /vote, which logs its own clicks.
+  let out = html.replace(/\{\{?\s*vote\s*\}?\}/gi, anchor(voteUrl(email), "Vote for Demi's"));
+
+  // {buffet} / {brunch} point at our own public pages, so they go through /r to
+  // become attributable. The pages themselves stay untracked.
+  out = out.replace(/\{\{?\s*(buffet|brunch)\s*\}?\}/gi, (_whole, key: string) => {
+    const link = SITE_PLACEHOLDER_LINKS[key.toLowerCase()];
+    return anchor(trackedSiteUrl(link.path, campaign, email), link.label);
+  });
+
+  // Any remaining external link. Our own URLs are left alone: /vote logs itself,
+  // and bouncing the rest through a redirect would only slow them down.
+  return out.replace(/href="(https?:\/\/[^"]+)"/gi, (whole, url: string) =>
     url.startsWith(SITE_URL) ? whole : `href="${trackedUrl(url, campaign, email)}"`
   );
 }

@@ -2,6 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 
+type Template = {
+  key: string;
+  name: string;
+  subject: string;
+  body: string;
+};
+
 type Contact = {
   id: string;
   email: string;
@@ -97,6 +104,52 @@ export default function MailingPage() {
   // ── Compose / send ──
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+
+  // ── Saved emails ──
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [templateNote, setTemplateNote] = useState<string | null>(null);
+
+  const fetchTemplates = useCallback(async () => {
+    const res = await fetch("/api/admin/mailing/templates");
+    const data = await res.json();
+    setTemplates(data.templates || []);
+  }, []);
+
+  useEffect(() => {
+    fetchTemplates();
+  }, [fetchTemplates]);
+
+  function loadTemplate(t: Template) {
+    setSubject(t.subject);
+    setBody(t.body);
+    setTemplateNote(`Loaded "${t.name}". Check it over, then send.`);
+  }
+
+  // Saving under a name that already exists overwrites it — that is how you edit
+  // one: load it, change the wording, save it back.
+  async function saveTemplate() {
+    const name = window.prompt("Save this email as:", "")?.trim();
+    if (!name) return;
+    const res = await fetch("/api/admin/mailing/templates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, subject, body }),
+    });
+    if (!res.ok) {
+      setTemplateNote("Could not save that one.");
+      return;
+    }
+    await fetchTemplates();
+    setTemplateNote(`Saved as "${name}".`);
+  }
+
+  async function deleteTemplate(t: Template) {
+    if (!window.confirm(`Delete the saved email "${t.name}"? This does not affect anything already sent.`))
+      return;
+    await fetch(`/api/admin/mailing/templates?key=${encodeURIComponent(t.key)}`, { method: "DELETE" });
+    await fetchTemplates();
+    setTemplateNote(`Deleted "${t.name}".`);
+  }
   const [emailStyle, setEmailStyle] = useState<"plain" | "branded">("branded");
   const [testEmail, setTestEmail] = useState("");
   const [sending, setSending] = useState(false);
@@ -236,6 +289,42 @@ export default function MailingPage() {
         {/* Compose */}
         <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-white mb-4">Compose</h2>
+
+          {/* Saved emails — one click fills the form, you still press Send. */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              {templates.map((t) => (
+                <span
+                  key={t.key}
+                  className="inline-flex items-center rounded-full border border-gray-700 overflow-hidden"
+                >
+                  <button
+                    onClick={() => loadTemplate(t)}
+                    title="Load this into the form"
+                    className="px-3 py-1.5 text-sm text-gray-300 hover:bg-white/5 transition"
+                  >
+                    {t.name}
+                  </button>
+                  <button
+                    onClick={() => deleteTemplate(t)}
+                    title={`Delete "${t.name}"`}
+                    className="px-2 py-1.5 text-gray-600 hover:text-red-400 hover:bg-white/5 transition text-sm"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={saveTemplate}
+                disabled={!subject.trim() || !body.trim()}
+                className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-gray-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                + Save current
+              </button>
+            </div>
+            {templateNote ? <p className="text-[11px] text-gray-500 mt-2">{templateNote}</p> : null}
+          </div>
+
           <div className="space-y-3">
             <input
               value={subject}
@@ -251,7 +340,11 @@ export default function MailingPage() {
               className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-y"
             />
             <p className="text-[11px] text-gray-500">
-              Use <code className="text-gold-300">{"{name}"}</code> for the recipient&apos;s first name.
+              Use <code className="text-gold-300">{"{name}"}</code> for the recipient&apos;s first name,{" "}
+              <code className="text-gold-300">{"{buffet}"}</code> or{" "}
+              <code className="text-gold-300">{"{brunch}"}</code> for a tracked booking link, and{" "}
+              <code className="text-gold-300">{"{vote}"}</code> for the awards link. Clicks on those show up
+              under Link Clicks.
             </p>
             {/* Email style */}
             <div>

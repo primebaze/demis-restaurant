@@ -479,3 +479,18 @@ model LinkClick {
   @@index([campaign, createdAt])
   @@index([campaign, token])
 }
+
+// ─── EMAIL BLAST TEMPLATES ───
+// Saved subject + body for the emails sent regularly (Sunday buffet, Saturday
+// brunch, follow-ups). Editable from the admin so wording changes never need a
+// deploy. Defaults are seeded on first read when the table is empty.
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  key       String   @unique // "sunday-buffet"
+  name      String // shown on the button
+  subject   String
+  body      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

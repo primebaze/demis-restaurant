@@ -73,9 +73,22 @@ export async function GET(req: Request) {
     }),
   ]);
 
-  // token -> contact, built once from the list rather than per click
-  const contacts = await prisma.mailingContact.findMany({ select: { email: true, name: true } });
-  const byToken = new Map(contacts.map((c) => [unsubToken(c.email), c]));
+  // token -> contact, built once rather than per click. Recipients come from two
+  // places: the marketing list for blasts, and buffet bookings for the Sunday
+  // email, which goes to people who booked rather than to subscribers.
+  const [contacts, buffetGuests] = await Promise.all([
+    prisma.mailingContact.findMany({ select: { email: true, name: true } }),
+    prisma.sundayBuffetBooking.findMany({
+      where: { email: { not: "" } },
+      select: { email: true, name: true },
+      distinct: ["email"],
+    }),
+  ]);
+  const byToken = new Map<string, { email: string; name: string }>();
+  for (const c of [...contacts, ...buffetGuests]) {
+    const t = unsubToken(c.email);
+    if (!byToken.has(t)) byToken.set(t, c);
+  }
 
   const identified = tokenGroups.length;
   const totalPages = Math.max(1, Math.ceil(identified / PAGE_SIZE));
