@@ -61,6 +61,66 @@ export function personalize(text: string, name: string): string {
   return text.replace(/\{\{?\s*name\s*\}?\}/gi, firstName(name));
 }
 
+// ── Tracked campaign links ──
+/**
+ * The /vote link for one recipient. Carries the HMAC token, never the address,
+ * so nothing identifying leaks into referrer headers or the voting site's logs.
+ */
+export function voteUrl(email: string): string {
+  return `${SITE_URL}/vote?e=${unsubToken(email)}`;
+}
+
+/** Campaign label from a subject line, so clicks group per blast. */
+export function campaignSlug(subject: string): string {
+  return (
+    subject
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60) || "blast"
+  );
+}
+
+/**
+ * Signs a destination so /r can only ever forward to a URL we put in an email.
+ * Without this the redirect would be an open redirect: anyone could hand out
+ * demisrestaurant.co.uk/r?u=<anything> and borrow our domain's reputation.
+ */
+export function signDest(url: string): string {
+  return crypto.createHmac("sha256", UNSUB_SECRET).update(url).digest("hex").slice(0, 16);
+}
+
+export function verifyDest(url: string, sig: string): boolean {
+  const expected = signDest(url);
+  return sig.length === expected.length && crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+}
+
+/** Wraps one outbound link in the redirect that logs the click. */
+export function trackedUrl(dest: string, campaign: string, email: string): string {
+  const u = Buffer.from(dest, "utf8").toString("base64url");
+  return `${SITE_URL}/r?u=${u}&s=${signDest(dest)}&c=${encodeURIComponent(campaign)}&e=${unsubToken(email)}`;
+}
+
+/**
+ * Rewrites the links in an already-formatted body so clicks are attributable.
+ *
+ * Runs AFTER formatBody: {vote} contains no HTML characters, so it survives
+ * escaping intact, and the anchors inserted here are not re-escaped.
+ *
+ * Links already on our own domain are left alone — /vote logs its own clicks,
+ * and bouncing our own URLs through a redirect would only slow them down.
+ */
+export function injectTrackedLinks(html: string, email: string, campaign = "blast"): string {
+  const withVote = html.replace(
+    /\{\{?\s*vote\s*\}?\}/gi,
+    `<a href="${voteUrl(email)}" style="color:#b8862f;text-decoration:underline;">Vote for Demi's</a>`
+  );
+
+  return withVote.replace(/href="(https?:\/\/[^"]+)"/gi, (whole, url: string) =>
+    url.startsWith(SITE_URL) ? whole : `href="${trackedUrl(url, campaign, email)}"`
+  );
+}
+
 // ── Body formatting: treat the admin's input as plain text, safely ──
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

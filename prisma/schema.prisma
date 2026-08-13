@@ -459,3 +459,23 @@ model BlogComment {
 
   @@index([postId, status])
 }
+
+// ─── CAMPAIGN LINK CLICKS ───
+// One row per click on a tracked outbound link (e.g. /vote). The link carries an
+// HMAC token instead of the raw email, so nothing identifying sits in the URL or
+// in referrer headers; the token is resolved back to a contact only when stats
+// are read. Scanner prefetches (Outlook Safe Links and friends) are flagged
+// rather than dropped, so real counts and raw hits stay separable.
+model LinkClick {
+  id        String   @id @default(cuid())
+  campaign  String // "vote", or a slug of the blast's subject line
+  url       String   @default("") // destination, for blasts with more than one link
+  token     String   @default("") // unsubToken(email); empty when the link was shared on
+  bot       Boolean  @default(false) // looked like a security scanner prefetch
+  ip        String   @default("")
+  userAgent String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([campaign, createdAt])
+  @@index([campaign, token])
+}

@@ -7,6 +7,8 @@ import {
   buildPlainEmail,
   formatBody,
   personalize,
+  injectTrackedLinks,
+  campaignSlug,
   unsubscribeUrl,
   sendMarketingBatch,
 } from "@/lib/marketing";
@@ -39,10 +41,13 @@ export async function POST(req: Request) {
 
   const preheader = body.trim().replace(/\s+/g, " ").slice(0, 110);
   const plain = style === "plain";
+  // Groups this blast's clicks under one label. Subject-derived, matching how
+  // warm-up batches already dedupe recipients by subject.
+  const clickCampaign = campaignSlug(subject);
 
   // Renders a personalised email for one recipient ({name} → their first name).
   const render = (to: string, name: string) => {
-    const bodyHtml = formatBody(personalize(body, name));
+    const bodyHtml = injectTrackedLinks(formatBody(personalize(body, name)), to, clickCampaign);
     const unsubUrl = unsubscribeUrl(to);
     const subj = personalize(subject, name);
     const html = plain
