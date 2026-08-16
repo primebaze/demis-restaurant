@@ -320,6 +320,19 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             </div>
             <span className="text-gold-300 text-xl group-hover:translate-x-0.5 transition-transform">→</span>
           </a>
+
+          {/* Saturday brunch shortcut */}
+          <a
+            href="/saturday-brunch"
+            className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-brunch-500/30 bg-gradient-to-br from-brunch-500/[0.10] to-[#222] hover:border-brunch-500/50 transition-all"
+          >
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-brunch-300 font-semibold mb-1">Every Saturday</p>
+              <h3 className="text-lg font-bold text-white">Saturday Bottomless Brunch</h3>
+              <p className="text-sm text-stone-400 mt-1">Unlimited sides, seafood and grill. Add bottomless drinks.</p>
+            </div>
+            <span className="text-brunch-300 text-xl group-hover:translate-x-0.5 transition-transform">→</span>
+          </a>
         </div>
       </div>
     );
