@@ -308,6 +308,13 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             </button>
           ))}
 
+          {/* Fixed-price weekend sittings — booked separately from a normal table */}
+          <div className="sm:col-span-2 flex items-center gap-4 pt-4 mt-1">
+            <span className="h-px flex-1 bg-white/[0.08]" />
+            <span className="text-[11px] uppercase tracking-[0.2em] text-stone-500 font-semibold">Book an Experience</span>
+            <span className="h-px flex-1 bg-white/[0.08]" />
+          </div>
+
           {/* Sunday buffet shortcut */}
           <a
             href="/sunday-buffet"
