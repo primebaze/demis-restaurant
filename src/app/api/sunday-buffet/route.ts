@@ -189,7 +189,6 @@ function guestEmailHtml(o: { name: string; date: string; partySize: number; arri
   </td></tr></table>
   <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;"><tr><td align="center">
     <a href="${o.calendarUrl}" style="display:inline-block;border:1px solid #d9c9a8;color:#8b6f3d;font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:6px;">Add to Google Calendar</a>
-    <div style="margin-top:10px;font-size:12px;color:#999;font-family:Helvetica,Arial,sans-serif;">On iPhone or Outlook, open the attached invite to add it.</div>
   </td></tr></table>
   <p style="margin:0;color:#666;font-size:13px;">${BUFFET_ADDRESS}. See you Sunday!</p>
 </td></tr>
