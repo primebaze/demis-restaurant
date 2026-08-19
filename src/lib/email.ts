@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
 import { prisma } from "@/lib/prisma";
 
 const transporter = nodemailer.createTransport({
@@ -312,6 +313,18 @@ export async function sendBookingConfirmation(data: {
     modifyReservationUrl: `${SITE_URL}${data.manageUrl}`,
     cancelReservationUrl: `${SITE_URL}${data.manageUrl}`,
   };
+  // Calendar invite — a 2-hour sitting from the booked time.
+  const calEvent: IcsEvent = {
+    uid: `booking-${data.confirmationCode}@demisrestaurant.co.uk`,
+    start: londonToUtc(data.date, data.time),
+    end: new Date(londonToUtc(data.date, data.time).getTime() + 2 * 60 * 60 * 1000),
+    summary: `Table at Demi's — ${data.location}`,
+    description: `Reservation ${data.confirmationCode} for ${data.partySize} at ${data.slot}.`,
+    location: data.locationAddress,
+    url: "https://www.demisrestaurant.co.uk",
+    organizerEmail: "bookings@demisrestaurant.co.uk",
+  };
+
   const addOnsHtml = data.addOns.length > 0
     ? `<p style="margin:4px 0 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#666; font-size:13px;">
         Add-ons: ${data.addOns.map((a) => `${a.name} (${formatPence(a.pricePence)})`).join(", ")}
@@ -354,6 +367,11 @@ export async function sendBookingConfirmation(data: {
       <span style="color:#ccc; margin:0 12px;">|</span>
       ${linkRow("cancel reservation", `${SITE_URL}${data.manageUrl}`)}
     </p>
+
+    <!-- Add to calendar -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0 0;"><tr><td align="center">
+      <a href="${googleCalendarUrl(calEvent)}" style="display:inline-block;border:1px solid #d9c9a8;color:#8b6f3d;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:6px;">Add to Google Calendar</a>
+    </td></tr></table>
 
     <!-- Divider -->
     <hr style="border:none; border-top:1px solid #eee; margin:28px 0;" />
@@ -406,7 +424,8 @@ export async function sendBookingConfirmation(data: {
   await send(
     data.guestEmail,
     `Booking Confirmed — ${data.confirmationCode} | Demi's Restaurant`,
-    emailLayout(body, data.confirmationCode, jsonLd)
+    emailLayout(body, data.confirmationCode, jsonLd),
+    { attachments: [{ filename: "demis-booking.ics", content: buildIcs(calEvent), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }] }
   );
 }
 
