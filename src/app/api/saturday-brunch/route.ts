@@ -4,7 +4,8 @@ import {
   upcomingSaturdays, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, BRUNCH_PRICE_DRINKS,
   BRUNCH_START, BRUNCH_END, ARRIVAL_SLOTS, isArrivalSlot, isBrunchPackage, packagePrice, packageLabel,
 } from "@/lib/saturday-brunch";
-import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
+import { sendRawEmail, sendViaResend, isResendConfigured, type MailAttachment } from "@/lib/email";
+import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -18,9 +19,23 @@ function esc(s: string): string {
 }
 
 /** Send via Resend when configured, else SMTP. Reports whether it worked. */
-async function deliver(to: string, subject: string, html: string): Promise<boolean> {
-  if (isResendConfigured() && (await sendViaResend(to, subject, html))) return true;
-  return sendRawEmail(to, subject, html);
+async function deliver(to: string, subject: string, html: string, attachments?: MailAttachment[]): Promise<boolean> {
+  if (isResendConfigured() && (await sendViaResend(to, subject, html, undefined, attachments))) return true;
+  return sendRawEmail(to, subject, html, undefined, attachments);
+}
+
+/** The guest's sitting, as a calendar event. Ends when service does (4:30pm). */
+function brunchEvent(o: { id: string; date: string; arrivalTime: string; partySize: number; pkg: string }): IcsEvent {
+  return {
+    uid: `brunch-${o.id}@demisrestaurant.co.uk`,
+    start: londonToUtc(o.date, o.arrivalTime || "13:00"),
+    end: londonToUtc(o.date, "16:30"),
+    summary: "Saturday Bottomless Brunch at Demi's",
+    description: `${packageLabel(o.pkg)}. Party of ${o.partySize}, arriving ${o.arrivalTime}. Paid at the door.`,
+    location: BRUNCH_ADDRESS,
+    url: "https://www.demisrestaurant.co.uk/saturday-brunch",
+    organizerEmail: "bookings@demisrestaurant.co.uk",
+  };
 }
 
 /** Cap how long a hung mail server can stall the booking response. */
@@ -202,7 +217,7 @@ export async function POST(req: Request) {
   // Must be awaited — Vercel freezes the function once the response is returned.
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bookings@demisrestaurant.co.uk";
   const [guestSent, adminSent] = await Promise.all([
-    withTimeout(deliver(email, "Your Saturday brunch reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime, pkg, pricePerHead }))).catch(() => false),
+    withTimeout(deliver(email, "Your Saturday brunch reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime, pkg, pricePerHead, calendarUrl: googleCalendarUrl(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })) }), [{ filename: "demis-saturday-brunch.ics", content: buildIcs(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }])).catch(() => false),
     withTimeout(deliver(adminEmail, `New Saturday brunch reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime, pkg, pricePerHead }))).catch(() => false),
   ]);
   if (!guestSent) console.error(`[Brunch] Guest confirmation email FAILED → ${email}`);
@@ -242,7 +257,7 @@ function adminEmailHtml(o: { name: string; email: string; phone: string; date: s
 </table></td></tr></table></body></html>`;
 }
 
-function guestEmailHtml(o: { name: string; date: string; partySize: number; arrivalTime: string; pkg: string; pricePerHead: number }): string {
+function guestEmailHtml(o: { name: string; date: string; partySize: number; arrivalTime: string; pkg: string; pricePerHead: number; calendarUrl: string }): string {
   return `<!DOCTYPE html><html><body style="margin:0;background:#f0f0f0;font-family:Georgia,serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:40px 20px;"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:12px;overflow:hidden;">
@@ -258,6 +273,10 @@ function guestEmailHtml(o: { name: string; date: string; partySize: number; arri
     <div style="font-size:13px;color:#666;margin-top:6px;">Party of ${o.partySize} &middot; arriving ${esc(o.arrivalTime)}</div>
     <div style="font-size:13px;color:#666;margin-top:4px;">${packageLabel(o.pkg)} &mdash; &pound;${o.pricePerHead} per person, paid at the door</div>
     <div style="font-size:13px;color:#666;margin-top:4px;">Served ${BRUNCH_START} &ndash; ${BRUNCH_END}</div>
+  </td></tr></table>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;"><tr><td align="center">
+    <a href="${o.calendarUrl}" style="display:inline-block;border:1px solid #e0a98c;color:#b85e2c;font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:6px;">Add to Google Calendar</a>
+    <div style="margin-top:10px;font-size:12px;color:#999;font-family:Helvetica,Arial,sans-serif;">On iPhone or Outlook, open the attached invite to add it.</div>
   </td></tr></table>
   <p style="margin:0;color:#666;font-size:13px;">${BRUNCH_ADDRESS}. See you Saturday!</p>
 </td></tr>

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { upcomingSunday, prettyDate, BUFFET_START, BUFFET_END, BUFFET_LOCATION, BUFFET_ADDRESS, ARRIVAL_SLOTS, isArrivalSlot } from "@/lib/sunday-buffet";
-import { sendRawEmail, sendViaResend, isResendConfigured } from "@/lib/email";
+import { sendRawEmail, sendViaResend, isResendConfigured, type MailAttachment } from "@/lib/email";
+import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -15,9 +16,23 @@ function esc(s: string): string {
 }
 
 /** Send via Resend (from bookings@demisrestaurant.co.uk) when configured, else SMTP. */
-async function deliver(to: string, subject: string, html: string): Promise<boolean> {
-  if (isResendConfigured() && (await sendViaResend(to, subject, html))) return true;
-  return sendRawEmail(to, subject, html);
+async function deliver(to: string, subject: string, html: string, attachments?: MailAttachment[]): Promise<boolean> {
+  if (isResendConfigured() && (await sendViaResend(to, subject, html, undefined, attachments))) return true;
+  return sendRawEmail(to, subject, html, undefined, attachments);
+}
+
+/** The guest's sitting, as a calendar event. Ends when service does (4pm). */
+function buffetEvent(o: { id: string; date: string; arrivalTime: string; partySize: number }): IcsEvent {
+  return {
+    uid: `buffet-${o.id}@demisrestaurant.co.uk`,
+    start: londonToUtc(o.date, o.arrivalTime || "12:30"),
+    end: londonToUtc(o.date, "16:00"),
+    summary: "Sunday Buffet at Demi's",
+    description: `All-you-can-eat Sunday buffet. Party of ${o.partySize}, arriving ${o.arrivalTime}. Paid at the door.`,
+    location: BUFFET_ADDRESS,
+    url: "https://www.demisrestaurant.co.uk/sunday-buffet",
+    organizerEmail: "bookings@demisrestaurant.co.uk",
+  };
 }
 
 /** Cap how long a hung mail server can stall the booking response. */
@@ -115,8 +130,11 @@ export async function POST(req: Request) {
   // returned, which kills any in-flight request mid-TLS-handshake. Sent in
   // parallel so the guest only waits for one round-trip.
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bookings@demisrestaurant.co.uk";
+  const event = buffetEvent({ id: booking.id, date, arrivalTime, partySize });
+  const invite: MailAttachment[] = [{ filename: "demis-sunday-buffet.ics", content: buildIcs(event), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }];
+
   const [guestSent, adminSent] = await Promise.all([
-    withTimeout(deliver(email, "Your Sunday buffet reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime }))).catch(() => false),
+    withTimeout(deliver(email, "Your Sunday buffet reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime, calendarUrl: googleCalendarUrl(event) }), invite)).catch(() => false),
     withTimeout(deliver(adminEmail, `New Sunday buffet reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime }))).catch(() => false),
   ]);
   // Never fail the booking over email, but do surface the problem in the logs.
@@ -153,7 +171,7 @@ function adminEmailHtml(o: { name: string; email: string; phone: string; date: s
 </table></td></tr></table></body></html>`;
 }
 
-function guestEmailHtml(o: { name: string; date: string; partySize: number; arrivalTime: string }): string {
+function guestEmailHtml(o: { name: string; date: string; partySize: number; arrivalTime: string; calendarUrl: string }): string {
   return `<!DOCTYPE html><html><body style="margin:0;background:#f0f0f0;font-family:Georgia,serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:40px 20px;"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:12px;overflow:hidden;">
@@ -168,6 +186,10 @@ function guestEmailHtml(o: { name: string; date: string; partySize: number; arri
     <div style="font-family:Georgia,serif;font-size:22px;color:#8b0000;">${prettyDate(o.date)}</div>
     <div style="font-size:13px;color:#666;margin-top:6px;">Party of ${o.partySize} &middot; arriving ${esc(o.arrivalTime)}</div>
     <div style="font-size:13px;color:#666;margin-top:4px;">Doors 12pm &middot; buffet from 12:30pm</div>
+  </td></tr></table>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;"><tr><td align="center">
+    <a href="${o.calendarUrl}" style="display:inline-block;border:1px solid #d9c9a8;color:#8b6f3d;font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:6px;">Add to Google Calendar</a>
+    <div style="margin-top:10px;font-size:12px;color:#999;font-family:Helvetica,Arial,sans-serif;">On iPhone or Outlook, open the attached invite to add it.</div>
   </td></tr></table>
   <p style="margin:0;color:#666;font-size:13px;">${BUFFET_ADDRESS}. See you Sunday!</p>
 </td></tr>

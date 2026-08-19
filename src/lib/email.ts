@@ -14,6 +14,9 @@ const transporter = nodemailer.createTransport({
   maxMessages: 10,     // messages per connection before reconnect
 });
 
+/** Attachment for transactional email (used for .ics calendar invites). */
+export type MailAttachment = { filename: string; content: string; contentType?: string };
+
 const FROM_EMAIL =
   process.env.EMAIL_FROM || "Demi's Restaurant <bookings@demisrestaurant.co.uk>";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -147,7 +150,7 @@ async function send(
   to: string,
   subject: string,
   html: string,
-  opts?: { type?: string; skipLog?: boolean; from?: string }
+  opts?: { type?: string; skipLog?: boolean; from?: string; attachments?: MailAttachment[] }
 ): Promise<boolean> {
   try {
     await transporter.sendMail({
@@ -155,6 +158,9 @@ async function send(
       to,
       subject,
       html,
+      ...(opts?.attachments?.length
+        ? { attachments: opts.attachments.map((a) => ({ filename: a.filename, content: a.content, contentType: a.contentType })) }
+        : {}),
     });
     console.log(`[Email] Sent: "${subject}" → ${to}`);
     if (!opts?.skipLog) await recordEmailLog({ recipient: to, subject, type: opts?.type, status: "sent", bodyHtml: html });
@@ -186,8 +192,8 @@ export function buildGuestEmailHtml(message: string): string {
 }
 
 /** Low-level sender for the queue processor — sends pre-rendered HTML, no auto-logging. */
-export async function sendRawEmail(to: string, subject: string, html: string, from?: string): Promise<boolean> {
-  return send(to, subject, html, { skipLog: true, from });
+export async function sendRawEmail(to: string, subject: string, html: string, from?: string, attachments?: MailAttachment[]): Promise<boolean> {
+  return send(to, subject, html, { skipLog: true, from, attachments });
 }
 
 export function isResendConfigured(): boolean {
@@ -197,14 +203,20 @@ export function isResendConfigured(): boolean {
 const RESEND_FROM = process.env.RESEND_FROM || FROM_EMAIL;
 
 /** Send one email via the Resend HTTP API. No auto-logging. */
-export async function sendViaResend(to: string, subject: string, html: string, from?: string): Promise<boolean> {
+export async function sendViaResend(to: string, subject: string, html: string, from?: string, attachments?: MailAttachment[]): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   if (!key) return false;
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: from || RESEND_FROM, to, subject, html }),
+      body: JSON.stringify({
+        from: from || RESEND_FROM, to, subject, html,
+        // Resend expects attachment content base64-encoded.
+        ...(attachments?.length
+          ? { attachments: attachments.map((a) => ({ filename: a.filename, content: Buffer.from(a.content).toString("base64") })) }
+          : {}),
+      }),
     });
     if (!res.ok) {
       console.error(`[Resend] Failed (${res.status}): "${subject}" → ${to}`);
