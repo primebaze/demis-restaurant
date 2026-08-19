@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
+import { buildIcs, londonToUtc, type IcsEvent } from "@/lib/ics";
 import { prisma } from "@/lib/prisma";
 
 const transporter = nodemailer.createTransport({
@@ -367,11 +367,6 @@ export async function sendBookingConfirmation(data: {
       <span style="color:#ccc; margin:0 12px;">|</span>
       ${linkRow("cancel reservation", `${SITE_URL}${data.manageUrl}`)}
     </p>
-
-    <!-- Add to calendar -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0 0;"><tr><td align="center">
-      <a href="${googleCalendarUrl(calEvent)}" style="display:inline-block;border:1px solid #d9c9a8;color:#8b6f3d;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:6px;">Add to Google Calendar</a>
-    </td></tr></table>
 
     <!-- Divider -->
     <hr style="border:none; border-top:1px solid #eee; margin:28px 0;" />
