@@ -313,12 +313,6 @@ export default function ShootPlanDocument({
       )}
       <footer className="flex flex-wrap justify-between gap-3 border-t border-black/10 px-6 py-5 text-xs text-neutral-500 sm:px-12">
         <span>Demi’s · Weekly planner</span>
-        <span>
-          {activities.length} activities
-          {hasContent
-            ? ` · ${videos.length} videos · ${plan.shots.length} shots`
-            : ""}
-        </span>
       </footer>
     </article>
   );
