@@ -3,6 +3,18 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --scrollbar-track: #1a1a1a;
+    --scrollbar-thumb: #6b7280;
+    --scrollbar-hover: #9ca3af;
+    --scrollbar-active: #e8cc9c;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
   html {
     overflow-x: hidden;
     scroll-behavior: smooth;
@@ -19,7 +31,19 @@
   }
 
   ::-webkit-scrollbar {
-    width: 0px;
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+  ::-webkit-scrollbar-thumb:active { background: var(--scrollbar-active); }
+
+  @media (forced-colors: active) {
+    * { scrollbar-color: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
   }
 }
 

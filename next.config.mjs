@@ -1,5 +1,11 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
+
+/** @param {string} phase @returns {import('next').NextConfig} */
+const nextConfig = (phase) => ({
+  // Keep the user's dev preview independent of production builds and test servers.
+  distDir:
+    process.env.NEXT_DIST_DIR ||
+    (phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next"),
   images: {
     remotePatterns: [
       {
@@ -40,8 +46,16 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: "/shoot-plans/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+        ],
+      },
     ];
   },
-};
+});
 
 export default nextConfig;

@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/admin/guests", label: "Guests", icon: "👥" },
   { href: "/admin/email-logs", label: "Email Logs", icon: "📧" },
   { href: "/admin/reviews", label: "Reviews", icon: "⭐" },
+  { href: "/admin/shoot-plans", label: "Weekly Plans", icon: "🎬" },
   { href: "/admin/mailing", label: "Email Blast", icon: "📣" },
   { href: "/admin/link-clicks", label: "Link Clicks", icon: "🖱️" },
   { href: "/admin/settings", label: "Settings", icon: "⚙️" },
@@ -172,7 +173,7 @@ export default function AdminLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">{children}</main>
+        <main className={`flex-1 p-4 lg:p-8 ${pathname.startsWith("/admin/shoot-plans") ? "overflow-visible" : "overflow-auto"}`}>{children}</main>
       </div>
     </div>
   );
