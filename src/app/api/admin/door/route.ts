@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   try {
     const rows = await prisma.guestVisit.findMany({
       where: { date, locationSlug },
-      orderBy: { seq: "desc" },
+      orderBy: { seq: "asc" },
     });
 
     const visits = rows.map((v) => ({
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
   for (let attempt = 0; attempt < 12; attempt++) {
     const last = await prisma.guestVisit.findFirst({
       where: { date, locationSlug },
-      orderBy: { seq: "desc" },
+      orderBy: { seq: "asc" },
       select: { seq: true },
     });
     const seq = (last?.seq || 0) + 1;

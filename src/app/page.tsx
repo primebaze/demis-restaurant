@@ -267,7 +267,6 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
           {/* Section header — bold and playful */}
           <div className="text-center mb-14">
-            <p className="text-4xl sm:text-5xl mb-4">🎶🔥🍾</p>
             <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-gold-300">What&apos;s On</p>
             <h2 className="mt-3 text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
               It&apos;s always a <span className="text-gold-300">vibe</span> at Demi&apos;s.
@@ -281,7 +280,6 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {/* Afrobeats Night — hero card spanning full width on small */}
             <div className="sm:col-span-2 lg:col-span-1 group relative rounded-3xl overflow-hidden bg-gradient-to-br from-gold-300/20 via-[#2a2218]/80 to-[#1a1a1a] border border-gold-300/20 p-7 sm:p-9 transition-all duration-500 hover:border-gold-300/40 hover:shadow-[0_0_40px_rgba(232,204,156,0.12)]">
-              <span className="text-4xl block mb-4">🎵</span>
               <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gold-300">Every Friday</p>
               <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white leading-tight">
                 Live Afrobeats&nbsp;Night
@@ -302,7 +300,6 @@ export default function HomePage() {
 
             {/* Weekend Brunch */}
             <div className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-600/10 via-[#222]/80 to-[#1a1a1a] border border-white/[0.08] p-7 sm:p-9 transition-all duration-500 hover:border-gold-300/30 hover:shadow-[0_0_30px_rgba(232,204,156,0.08)]">
-              <span className="text-4xl block mb-4">🍳</span>
               <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gold-300">Saturdays</p>
               <h3 className="mt-2 text-xl sm:text-2xl font-extrabold text-white leading-tight">
                 Lunch Menu
@@ -317,7 +314,6 @@ export default function HomePage() {
 
             {/* Suya Sundays */}
             <div className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-red-900/10 via-[#222]/80 to-[#1a1a1a] border border-white/[0.08] p-7 sm:p-9 transition-all duration-500 hover:border-gold-300/30 hover:shadow-[0_0_30px_rgba(232,204,156,0.08)]">
-              <span className="text-4xl block mb-4">🔥</span>
               <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gold-300">Every Sunday</p>
               <h3 className="mt-2 text-xl sm:text-2xl font-extrabold text-white leading-tight">
                 Buffet Sundays
@@ -334,7 +330,6 @@ export default function HomePage() {
           {/* Private Hire + CTA row */}
           <div className="mt-5 rounded-3xl border border-gold-300/15 bg-gradient-to-r from-gold-300/10 via-[#222]/60 to-gold-300/10 p-7 sm:p-9 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
             <div className="flex-1 text-center sm:text-left">
-              <span className="text-3xl">🎉</span>
               <h3 className="mt-2 text-xl sm:text-2xl font-extrabold text-white">
                 Private Hire &amp; Celebrations
               </h3>
