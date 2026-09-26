@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, use } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type Visit = {
   id: string; seq: number; label: string; hasDetails: boolean;
@@ -35,8 +35,8 @@ function elapsed(from: string, to: string | null, now: number): string {
   return h > 0 ? `${h}h ${String(m % 60).padStart(2, "0")}m` : `${m}m`;
 }
 
-export default function DoorPage({ params }: { params: Promise<{ location: string }> }) {
-  const { location } = use(params);
+export default function DoorPage({ params }: { params: { location: string } }) {
+  const { location } = params;
 
   const [date, setDate] = useState(() => ukToday());
   const [visits, setVisits] = useState<Visit[]>([]);
