@@ -25,15 +25,15 @@ const money = (p: number) => `£${(p / 100).toFixed(2)}`;
 const clock = (d: string) => new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 const ukToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
 
-/** Time in the building, counting up from arrival. */
-function elapsed(from: string, to: string | null, now: number): string {
-  const ms = (to ? new Date(to).getTime() : now) - new Date(from).getTime();
-  const m = Math.max(0, Math.floor(ms / 60000));
+/** How long they stayed. Blank while they are still in. */
+function stayed(from: string, to: string | null): string {
+  if (!to) return "—";
+  const m = Math.max(0, Math.floor((new Date(to).getTime() - new Date(from).getTime()) / 60000));
   const h = Math.floor(m / 60);
   return h > 0 ? `${h}h ${String(m % 60).padStart(2, "0")}m` : `${m}m`;
 }
 
-export default function DoorPage({ params }: { params: { location: string } }) {
+export default function DoorSummaryPage({ params }: { params: { location: string } }) {
   const { location } = params;
 
   const [date, setDate] = useState(() => ukToday());
@@ -41,24 +41,8 @@ export default function DoorPage({ params }: { params: { location: string } }) {
   const [totals, setTotals] = useState<Totals>(EMPTY);
   const [locationName, setLocationName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [now, setNow] = useState(() => Date.now());
-
-  const [visitType, setVisitType] = useState<"dining" | "takeaway">("dining");
-  const [partySize, setPartySize] = useState(1);
-  const [tableNo, setTableNo] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [isBooking, setIsBooking] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [flash, setFlash] = useState("");
-  const [flashBad, setFlashBad] = useState(false);
-
-  const [amounts, setAmounts] = useState<Record<string, string>>({});
-  const [rowBusy, setRowBusy] = useState("");
 
   const isToday = date === ukToday();
-  const dining = visitType === "dining";
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/admin/door?location=${location}&date=${date}`);
@@ -70,62 +54,28 @@ export default function DoorPage({ params }: { params: { location: string } }) {
   }, [location, date]);
 
   useEffect(() => { setLoading(true); load(); }, [load]);
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   useEffect(() => {
     if (!isToday) return;
-    const t = setInterval(load, 20_000);
+    const t = setInterval(load, 30_000);
     return () => clearInterval(t);
   }, [load, isToday]);
 
-  async function checkIn() {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const res = await fetch("/api/admin/door", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location, visitType, partySize, tableNo, name, phone, email, isBooking }),
-      });
-      const d = await res.json();
-      if (!res.ok) { setFlashBad(true); setFlash(d.error || "Could not check in"); return; }
-      setFlashBad(false);
-      setFlash(`${d.label} checked in`);
-      setName(""); setPhone(""); setEmail(""); setPartySize(1); setTableNo(""); setIsBooking(false);
-      if (!isToday) setDate(ukToday());
-      load();
-      setTimeout(() => setFlash(""), 3500);
-    } finally { setBusy(false); }
-  }
-
-  async function patch(id: string, body: Record<string, unknown>) {
-    setRowBusy(id);
-    try {
-      await fetch(`/api/admin/door/${id}`, {
-        method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
-      });
-      await load();
-    } finally { setRowBusy(""); }
-  }
-
-  async function remove(id: string) {
-    if (!confirm("Remove this check-in?")) return;
-    setRowBusy(id);
-    try {
-      await fetch(`/api/admin/door/${id}`, { method: "DELETE" });
-      await load();
-    } finally { setRowBusy(""); }
-  }
-
-  const field =
-    "w-full px-3.5 py-2.5 bg-black/30 border border-white/[0.07] rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none focus:border-gold-300/50 focus:bg-black/50 transition";
   const card = "bg-[#161616] border border-white/[0.06] rounded-2xl";
+  const heads = totals.diningCovers + totals.takeaway;
+  const perHead = heads > 0 ? Math.round(totals.takingsPence / heads) : 0;
+  const perTable = totals.diningParties > 0 ? Math.round(totals.diningTakingsPence / totals.diningParties) : 0;
+  const unbilled = totals.visits - totals.billsEntered;
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header */}
       <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-gold-300/60 mb-1.5">Door check-in</p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-gold-300/60 mb-1.5">Door summary</p>
           <h1 className="text-3xl font-bold text-white leading-none">{locationName || "…"}</h1>
+          <a href={`/door/${location}`} target="_blank" rel="noopener"
+            className="inline-block mt-2 text-xs text-gold-300/80 hover:text-gold-300">
+            Open the door tablet → /door/{location}
+          </a>
         </div>
         <div className="flex items-center gap-2">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
@@ -137,179 +87,145 @@ export default function DoorPage({ params }: { params: { location: string } }) {
         </div>
       </header>
 
-      <div className="grid lg:grid-cols-[340px_minmax(0,1fr)] gap-5 items-start">
-        {/* ── Check in ── */}
-        {isToday ? (
-          <section className={`${card} p-5 lg:sticky lg:top-6`}>
-            {/* segmented control */}
-            <div className="grid grid-cols-2 gap-1 p-1 bg-black/40 rounded-xl mb-4">
-              {(["dining", "takeaway"] as const).map((t) => {
-                const on = visitType === t;
-                return (
-                  <button key={t}
-                    onClick={() => { setVisitType(t); if (t === "takeaway") { setPartySize(1); setTableNo(""); setIsBooking(false); } }}
-                    className={`py-2.5 rounded-lg text-sm font-semibold transition ${
-                      on ? (t === "dining" ? "bg-gold-300 text-black" : "bg-emerald-400 text-black") : "text-gray-400 hover:text-white"
-                    }`}>
-                    {t === "dining" ? "Dining in" : "Takeaway"}
-                  </button>
-                );
-              })}
-            </div>
+      {/* Headline numbers */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <Big label="Guests dining" value={totals.diningCovers} sub={`across ${totals.diningParties} ${totals.diningParties === 1 ? "table" : "tables"}`} tone="text-gold-300" />
+        <Big label="Takeaway orders" value={totals.takeaway} sub="collected at the door" tone="text-emerald-400" />
+        <Big label="Total through the door" value={heads} sub="dining guests plus takeaway" tone="text-white" />
+        <Big label="Takings" value={money(totals.takingsPence)} sub={`${totals.billsEntered} of ${totals.visits} bills entered`} tone="text-emerald-300" />
+      </div>
 
-            {dining && (
-              <div className="flex items-end gap-2.5 mb-4">
-                <label className="flex-1 min-w-0">
-                  <span className="block text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1.5">Table</span>
-                  <input value={tableNo} onChange={(e) => setTableNo(e.target.value)} placeholder="—"
-                    className={`${field} text-center font-semibold`} />
-                </label>
-                <label className="flex-1 min-w-0">
-                  <span className="block text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1.5">Guests</span>
-                  <div className="flex items-center justify-between px-2 py-1.5 bg-black/30 border border-white/[0.07] rounded-xl">
-                    <button onClick={() => setPartySize((p) => Math.max(1, p - 1))}
-                      className="w-7 h-7 rounded-lg border border-white/10 text-white text-lg leading-none hover:bg-white/5 active:scale-95 transition">−</button>
-                    <span className="text-lg font-bold text-white tabular-nums">{partySize}</span>
-                    <button onClick={() => setPartySize((p) => Math.min(30, p + 1))}
-                      className="w-7 h-7 rounded-lg border border-white/10 text-white text-lg leading-none hover:bg-white/5 active:scale-95 transition">+</button>
-                  </div>
-                </label>
-              </div>
-            )}
+      {/* The detail behind the headline */}
+      <div className="grid md:grid-cols-2 gap-4 mb-4">
+        <section className={`${card} p-5`}>
+          <h2 className="text-sm font-semibold text-white mb-4">Where the money came from</h2>
+          <Split label="Dining" pence={totals.diningTakingsPence} total={totals.takingsPence} tone="bg-gold-300" />
+          <Split label="Takeaway" pence={totals.takeawayTakingsPence} total={totals.takingsPence} tone="bg-emerald-400" />
+          <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/[0.06]">
+            <Mini label="Average per guest" value={money(perHead)} />
+            <Mini label="Average per table" value={money(perTable)} />
+          </div>
+        </section>
 
-            <div className="space-y-2.5">
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" className={field} />
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" inputMode="tel" className={field} />
-              <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" inputMode="email" className={field} />
-            </div>
-
-            {dining && (
-              <button onClick={() => setIsBooking((b) => !b)}
-                className={`mt-3 w-full py-2 text-xs rounded-lg border transition ${isBooking ? "bg-gold-300/10 border-gold-300/40 text-gold-300" : "border-white/[0.07] text-gray-500 hover:text-white"}`}>
-                {isBooking ? "✓ Has a booking" : "Has a booking?"}
-              </button>
-            )}
-
-            <button onClick={checkIn} disabled={busy}
-              className="mt-4 w-full py-3.5 bg-gold-300 text-black font-bold rounded-xl hover:bg-gold-200 active:scale-[0.99] transition disabled:opacity-50">
-              {busy ? "…" : "Check in"}
-            </button>
-
-            <p className="mt-3 text-[11px] text-gray-600 text-center">
-              {flash
-                ? <span className={flashBad ? "text-red-400" : "text-emerald-400"}>{flash}</span>
-                : <>All details optional · blank logs as Customer {totals.visits + 1}</>}
+        <section className={`${card} p-5`}>
+          <h2 className="text-sm font-semibold text-white mb-4">Where the day stands</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <Mini label="Still in the building" value={String(totals.stillIn)} tone={totals.stillIn > 0 ? "text-white" : "text-gray-500"} />
+            <Mini label="Checked out" value={String(totals.visits - totals.stillIn)} />
+            <Mini label="Bills still missing" value={String(unbilled)} tone={unbilled > 0 ? "text-amber-400" : "text-gray-500"} />
+            <Mini label="Arrived with a booking" value={String(visits.filter((v) => v.isBooking).length)} />
+          </div>
+          {isToday && totals.visits === 0 && (
+            <p className="mt-5 text-xs text-gray-500">
+              Nothing logged yet today. Staff check guests in on the door tablet at /door/{location}.
             </p>
-          </section>
+          )}
+        </section>
+      </div>
+
+      {/* Read-only log */}
+      <section className={`${card} overflow-hidden`}>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
+          <h2 className="text-sm font-semibold text-white">{isToday ? "Today's log" : `Log for ${date}`}</h2>
+          <span className="text-xs text-gray-500">by table</span>
+        </div>
+
+        {loading ? (
+          <p className="px-5 py-14 text-center text-sm text-gray-500">Loading…</p>
+        ) : visits.length === 0 ? (
+          <p className="px-5 py-14 text-center text-sm text-gray-500">No one checked in {isToday ? "yet" : "on this day"}.</p>
         ) : (
-          <section className={`${card} p-5 text-center`}>
-            <p className="text-sm text-gray-400">Viewing a past day.</p>
-            <button onClick={() => setDate(ukToday())} className="mt-2 text-sm text-gold-300 hover:text-gold-200">Back to today</button>
-          </section>
-        )}
-
-        {/* ── Visits + totals ── */}
-        <div className="min-w-0">
-          <section className={`${card} overflow-hidden`}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
-              <h2 className="text-sm font-semibold text-white">{isToday ? "Today" : date}</h2>
-              <span className="text-xs text-gray-500">{totals.visits} {totals.visits === 1 ? "visit" : "visits"}</span>
-            </div>
-
-            {loading ? (
-              <p className="px-5 py-14 text-center text-sm text-gray-500">Loading…</p>
-            ) : visits.length === 0 ? (
-              <p className="px-5 py-14 text-center text-sm text-gray-500">No one checked in {isToday ? "yet" : "on this day"}.</p>
-            ) : (
-              <div className="divide-y divide-white/[0.05]">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-[10px] uppercase tracking-[0.12em] text-gray-500 border-b border-white/[0.06]">
+                  <th className="text-left font-medium px-5 py-2.5">Table</th>
+                  <th className="text-left font-medium px-3 py-2.5">Guest</th>
+                  <th className="text-left font-medium px-3 py-2.5">Type</th>
+                  <th className="text-right font-medium px-3 py-2.5">Guests</th>
+                  <th className="text-right font-medium px-3 py-2.5">In</th>
+                  <th className="text-right font-medium px-3 py-2.5">Out</th>
+                  <th className="text-right font-medium px-3 py-2.5">Stayed</th>
+                  <th className="text-right font-medium px-5 py-2.5">Bill</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05]">
                 {visits.map((v) => {
-                  const open = v.status === "active";
                   const isDining = v.visitType === "dining";
                   return (
-                    <div key={v.id} className={`px-4 py-3 ${open ? "" : "bg-black/25"}`}>
-                      <div className="flex items-center gap-3">
-                        <span className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[11px] font-bold tabular-nums ${isDining ? "bg-gold-300/12 text-gold-300" : "bg-emerald-400/12 text-emerald-400"}`}>
-                          {v.seq}
-                        </span>
-
-                        <div className="min-w-0 flex-1">
-                          <p className={`text-sm font-semibold truncate ${v.hasDetails ? "text-white" : "text-gray-500"}`}>{v.label}</p>
-                          <p className="text-[11px] text-gray-500 truncate">
-                            <span className={isDining ? "text-gold-300/70" : "text-emerald-400/70"}>
-                              {isDining ? `Dining · ${v.partySize}` : "Takeaway"}
-                            </span>
-                            {v.tableNo && <> · <span className="text-gray-300 font-semibold">Table {v.tableNo}</span></>}
-                            {v.isBooking && " · booked"}
-                            {` · ${clock(v.checkedInAt)}`}
-                            {v.checkedOutAt && ` → ${clock(v.checkedOutAt)}`}
-                          </p>
-                        </div>
-
-                        <span className={`shrink-0 px-2 py-0.5 rounded-md text-[11px] font-semibold tabular-nums ${open ? "bg-white/[0.07] text-gray-200" : "text-gray-600"}`}>
-                          {elapsed(v.checkedInAt, v.checkedOutAt, now)}
-                        </span>
-
-                        <div className="shrink-0 flex items-center gap-1.5">
-                          {v.amountPence != null && !open ? (
-                            <span className="w-[74px] text-right text-sm font-bold text-emerald-300 tabular-nums">{money(v.amountPence)}</span>
-                          ) : (
-                            <input
-                              value={amounts[v.id] ?? (v.amountPence != null ? (v.amountPence / 100).toFixed(2) : "")}
-                              onChange={(e) => setAmounts((a) => ({ ...a, [v.id]: e.target.value }))}
-                              placeholder="£0.00" inputMode="decimal"
-                              className="w-[74px] px-2 py-1.5 bg-black/40 border border-white/[0.07] rounded-lg text-white text-sm text-right tabular-nums focus:outline-none focus:border-gold-300/50"
-                            />
-                          )}
-
-                          {open ? (
-                            <button onClick={() => patch(v.id, { action: "checkout", amount: amounts[v.id] ?? "" })} disabled={rowBusy === v.id}
-                              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/12 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 transition disabled:opacity-40">
-                              {rowBusy === v.id ? "…" : "Check out"}
-                            </button>
-                          ) : (
-                            <button onClick={() => patch(v.id, { action: "reopen" })} disabled={rowBusy === v.id}
-                              className="px-3 py-1.5 text-xs rounded-lg border border-white/[0.07] text-gray-500 hover:text-white transition disabled:opacity-40">
-                              Reopen
-                            </button>
-                          )}
-                          <button onClick={() => remove(v.id)} title="Remove"
-                            className="w-7 h-7 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition">✕</button>
-                        </div>
-                      </div>
-                    </div>
+                    <tr key={v.id} className={v.status === "active" ? "" : "bg-black/20"}>
+                      <td className="px-5 py-3 font-semibold text-white tabular-nums">{v.tableNo || <span className="text-gray-600">—</span>}</td>
+                      <td className={`px-3 py-3 ${v.hasDetails ? "text-white" : "text-gray-500"}`}>
+                        {v.label}
+                        {v.isBooking && <span className="ml-2 text-[10px] text-gold-300/80">booked</span>}
+                      </td>
+                      <td className={`px-3 py-3 ${isDining ? "text-gold-300/80" : "text-emerald-400/80"}`}>
+                        {isDining ? "Dining" : "Takeaway"}
+                      </td>
+                      <td className="px-3 py-3 text-right text-gray-300 tabular-nums">{isDining ? v.partySize : "—"}</td>
+                      <td className="px-3 py-3 text-right text-gray-400 tabular-nums">{clock(v.checkedInAt)}</td>
+                      <td className="px-3 py-3 text-right text-gray-400 tabular-nums">
+                        {v.checkedOutAt ? clock(v.checkedOutAt) : <span className="text-amber-400/80">still in</span>}
+                      </td>
+                      <td className="px-3 py-3 text-right text-gray-400 tabular-nums">{stayed(v.checkedInAt, v.checkedOutAt)}</td>
+                      <td className="px-5 py-3 text-right font-semibold tabular-nums">
+                        {v.amountPence != null
+                          ? <span className="text-emerald-300">{money(v.amountPence)}</span>
+                          : <span className="text-gray-600">—</span>}
+                      </td>
+                    </tr>
                   );
                 })}
-              </div>
-            )}
-          </section>
-
-          {/* End of day */}
-          <section className={`${card} sticky bottom-4 mt-4 px-5 py-4`}>
-            <div className="flex flex-wrap items-center gap-y-3">
-              <div className="flex items-center gap-8">
-                <Stat label="Dining" value={totals.diningCovers} sub={`${totals.diningParties} ${totals.diningParties === 1 ? "table" : "tables"}`} tone="text-gold-300" />
-                <Stat label="Takeaway" value={totals.takeaway} sub="orders" tone="text-emerald-400" />
-                <Stat label="Still in" value={totals.stillIn} sub="open" tone="text-white" />
-              </div>
-              <div className="ml-auto text-right">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500">Takings</p>
-                <p className="text-2xl font-bold text-emerald-300 tabular-nums leading-tight">{money(totals.takingsPence)}</p>
-                <p className="text-[10px] text-gray-600">{totals.billsEntered}/{totals.visits} bills</p>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-white/[0.08] bg-black/30 text-sm font-bold">
+                  <td className="px-5 py-3 text-gray-400" colSpan={3}>Total</td>
+                  <td className="px-3 py-3 text-right text-white tabular-nums">{totals.diningCovers}</td>
+                  <td colSpan={3} />
+                  <td className="px-5 py-3 text-right text-emerald-300 tabular-nums">{money(totals.takingsPence)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
 
-function Stat({ label, value, sub, tone }: { label: string; value: number; sub?: string; tone: string }) {
+function Big({ label, value, sub, tone }: { label: string; value: number | string; sub: string; tone: string }) {
+  return (
+    <div className="bg-[#161616] border border-white/[0.06] rounded-2xl p-5">
+      <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500">{label}</p>
+      <p className={`mt-1.5 text-4xl font-bold tabular-nums leading-none ${tone}`}>{value}</p>
+      <p className="mt-2 text-[11px] text-gray-500">{sub}</p>
+    </div>
+  );
+}
+
+function Mini({ label, value, tone = "text-white" }: { label: string; value: string; tone?: string }) {
   return (
     <div>
       <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500">{label}</p>
-      <p className={`text-2xl font-bold tabular-nums leading-tight ${tone}`}>{value}</p>
-      {sub && <p className="text-[10px] text-gray-600">{sub}</p>}
+      <p className={`mt-1 text-xl font-bold tabular-nums ${tone}`}>{value}</p>
+    </div>
+  );
+}
+
+function Split({ label, pence, total, tone }: { label: string; pence: number; total: number; tone: string }) {
+  const pct = total > 0 ? Math.round((pence / total) * 100) : 0;
+  return (
+    <div className="mb-3.5 last:mb-0">
+      <div className="flex items-baseline justify-between mb-1.5">
+        <span className="text-xs text-gray-400">{label}</span>
+        <span className="text-sm font-bold text-white tabular-nums">
+          {`£${(pence / 100).toFixed(2)}`}
+          <span className="ml-2 text-[11px] font-normal text-gray-500">{pct}%</span>
+        </span>
+      </div>
+      <div className="h-1.5 bg-black/50 rounded-full overflow-hidden">
+        <div className={`h-full ${tone} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 }
