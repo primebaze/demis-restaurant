@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import {
-  serviceDate, isDoorLocation, isVisitType, displayName, locationName,
+  serviceDate, isDoorLocation, isVisitType, displayName, locationName, byTableNumber,
 } from "@/lib/door";
 export const dynamic = "force-dynamic";
 
@@ -39,12 +39,13 @@ export async function GET(req: Request) {
       email: v.email,
       visitType: v.visitType,
       partySize: v.partySize,
+      tableNo: v.tableNo,
       isBooking: v.isBooking,
       checkedInAt: v.checkedInAt,
       checkedOutAt: v.checkedOutAt,
       amountPence: v.amountPence,
       status: v.status,
-    }));
+    })).sort(byTableNumber);
 
     // Covers count people, not parties — takeaway is always one head.
     const dining = rows.filter((v) => v.visitType === "dining");
@@ -96,6 +97,8 @@ export async function POST(req: Request) {
     ? 1
     : Math.max(1, Math.min(30, Math.floor(Number(body.partySize) || 1)));
   const isBooking = !!body.isBooking;
+  // Takeaway has no table to sit at.
+  const tableNo = visitType === "takeaway" ? "" : String(body.tableNo || "").trim().slice(0, 12);
   const date = serviceDate();
 
   // seq is per day+location so an unnamed guest reads as "Customer 3".
@@ -103,17 +106,17 @@ export async function POST(req: Request) {
   for (let attempt = 0; attempt < 12; attempt++) {
     const last = await prisma.guestVisit.findFirst({
       where: { date, locationSlug },
-      orderBy: { seq: "asc" },
+      orderBy: { seq: "desc" },
       select: { seq: true },
     });
     const seq = (last?.seq || 0) + 1;
     try {
       const row = await prisma.guestVisit.create({
-        data: { date, locationSlug, seq, visitType, name, phone, email, partySize, isBooking },
+        data: { date, locationSlug, seq, visitType, name, phone, email, partySize, tableNo, isBooking },
       });
       return NextResponse.json({
         id: row.id, seq: row.seq, label: displayName(row), visitType: row.visitType,
-        partySize: row.partySize, checkedInAt: row.checkedInAt,
+        partySize: row.partySize, tableNo: row.tableNo, checkedInAt: row.checkedInAt,
       });
     } catch (e) {
       if (isUniqueViolation(e)) continue;

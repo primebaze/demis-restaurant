@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 type Visit = {
   id: string; seq: number; label: string; hasDetails: boolean;
   name: string; phone: string; email: string;
-  visitType: string; partySize: number; isBooking: boolean;
+  visitType: string; partySize: number; tableNo: string; isBooking: boolean;
   checkedInAt: string; checkedOutAt: string | null;
   amountPence: number | null; status: string;
 };
@@ -45,12 +45,14 @@ export default function DoorPage({ params }: { params: { location: string } }) {
 
   const [visitType, setVisitType] = useState<"dining" | "takeaway">("dining");
   const [partySize, setPartySize] = useState(1);
+  const [tableNo, setTableNo] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [isBooking, setIsBooking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState("");
+  const [flashBad, setFlashBad] = useState(false);
 
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [rowBusy, setRowBusy] = useState("");
@@ -81,12 +83,13 @@ export default function DoorPage({ params }: { params: { location: string } }) {
     try {
       const res = await fetch("/api/admin/door", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location, visitType, partySize, name, phone, email, isBooking }),
+        body: JSON.stringify({ location, visitType, partySize, tableNo, name, phone, email, isBooking }),
       });
       const d = await res.json();
-      if (!res.ok) { setFlash(d.error || "Could not check in"); return; }
+      if (!res.ok) { setFlashBad(true); setFlash(d.error || "Could not check in"); return; }
+      setFlashBad(false);
       setFlash(`${d.label} checked in`);
-      setName(""); setPhone(""); setEmail(""); setPartySize(1); setIsBooking(false);
+      setName(""); setPhone(""); setEmail(""); setPartySize(1); setTableNo(""); setIsBooking(false);
       if (!isToday) setDate(ukToday());
       load();
       setTimeout(() => setFlash(""), 3500);
@@ -144,7 +147,7 @@ export default function DoorPage({ params }: { params: { location: string } }) {
                 const on = visitType === t;
                 return (
                   <button key={t}
-                    onClick={() => { setVisitType(t); if (t === "takeaway") { setPartySize(1); setIsBooking(false); } }}
+                    onClick={() => { setVisitType(t); if (t === "takeaway") { setPartySize(1); setTableNo(""); setIsBooking(false); } }}
                     className={`py-2.5 rounded-lg text-sm font-semibold transition ${
                       on ? (t === "dining" ? "bg-gold-300 text-black" : "bg-emerald-400 text-black") : "text-gray-400 hover:text-white"
                     }`}>
@@ -155,15 +158,22 @@ export default function DoorPage({ params }: { params: { location: string } }) {
             </div>
 
             {dining && (
-              <div className="flex items-center justify-between mb-4 px-3.5 py-2.5 bg-black/30 border border-white/[0.07] rounded-xl">
-                <span className="text-sm text-gray-400">At the table</span>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setPartySize((p) => Math.max(1, p - 1))}
-                    className="w-8 h-8 rounded-lg border border-white/10 text-white text-lg leading-none hover:bg-white/5 active:scale-95 transition">−</button>
-                  <span className="w-6 text-center text-lg font-bold text-white tabular-nums">{partySize}</span>
-                  <button onClick={() => setPartySize((p) => Math.min(30, p + 1))}
-                    className="w-8 h-8 rounded-lg border border-white/10 text-white text-lg leading-none hover:bg-white/5 active:scale-95 transition">+</button>
-                </div>
+              <div className="flex items-end gap-2.5 mb-4">
+                <label className="flex-1 min-w-0">
+                  <span className="block text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1.5">Table</span>
+                  <input value={tableNo} onChange={(e) => setTableNo(e.target.value)} placeholder="—"
+                    className={`${field} text-center font-semibold`} />
+                </label>
+                <label className="flex-1 min-w-0">
+                  <span className="block text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1.5">Guests</span>
+                  <div className="flex items-center justify-between px-2 py-1.5 bg-black/30 border border-white/[0.07] rounded-xl">
+                    <button onClick={() => setPartySize((p) => Math.max(1, p - 1))}
+                      className="w-7 h-7 rounded-lg border border-white/10 text-white text-lg leading-none hover:bg-white/5 active:scale-95 transition">−</button>
+                    <span className="text-lg font-bold text-white tabular-nums">{partySize}</span>
+                    <button onClick={() => setPartySize((p) => Math.min(30, p + 1))}
+                      className="w-7 h-7 rounded-lg border border-white/10 text-white text-lg leading-none hover:bg-white/5 active:scale-95 transition">+</button>
+                  </div>
+                </label>
               </div>
             )}
 
@@ -187,7 +197,7 @@ export default function DoorPage({ params }: { params: { location: string } }) {
 
             <p className="mt-3 text-[11px] text-gray-600 text-center">
               {flash
-                ? <span className="text-emerald-400">{flash}</span>
+                ? <span className={flashBad ? "text-red-400" : "text-emerald-400"}>{flash}</span>
                 : <>All details optional · blank logs as Customer {totals.visits + 1}</>}
             </p>
           </section>
@@ -228,6 +238,7 @@ export default function DoorPage({ params }: { params: { location: string } }) {
                             <span className={isDining ? "text-gold-300/70" : "text-emerald-400/70"}>
                               {isDining ? `Dining · ${v.partySize}` : "Takeaway"}
                             </span>
+                            {v.tableNo && <> · <span className="text-gray-300 font-semibold">Table {v.tableNo}</span></>}
                             {v.isBooking && " · booked"}
                             {` · ${clock(v.checkedInAt)}`}
                             {v.checkedOutAt && ` → ${clock(v.checkedOutAt)}`}

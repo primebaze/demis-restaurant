@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  * PATCH /api/admin/door/[id]
  *   { action: "checkout", amount?: "45.50" }  — close the visit, optionally with the bill
  *   { action: "reopen" }                       — undo a checkout
- *   { name?, phone?, email?, partySize?, visitType?, amount? } — correct the details
+ *   { name?, phone?, email?, partySize?, tableNo?, visitType?, amount? } — correct the details
  */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { unauthorized } = await requireAdmin();
@@ -19,7 +19,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const data: {
     status?: string; checkedOutAt?: Date | null; amountPence?: number | null;
-    name?: string; phone?: string; email?: string; partySize?: number; visitType?: string; note?: string;
+    name?: string; phone?: string; email?: string; partySize?: number; tableNo?: string;
+    visitType?: string; note?: string;
   } = {};
 
   if (body.action === "checkout") {
@@ -41,6 +42,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (typeof body.name === "string") data.name = body.name.trim().slice(0, 80);
   if (typeof body.phone === "string") data.phone = body.phone.trim().slice(0, 30);
   if (typeof body.email === "string") data.email = body.email.trim().toLowerCase().slice(0, 120);
+  if (typeof body.tableNo === "string") data.tableNo = body.tableNo.trim().slice(0, 12);
   if (typeof body.note === "string") data.note = body.note.slice(0, 200);
   if (body.partySize !== undefined) {
     data.partySize = Math.max(1, Math.min(30, Math.floor(Number(body.partySize) || 1)));

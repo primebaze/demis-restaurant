@@ -527,6 +527,7 @@ model GuestVisit {
   phone        String    @default("")
   email        String    @default("")
   partySize    Int       @default(1)
+  tableNo      String    @default("") // the table they were sat at; blank for takeaway
   isBooking    Boolean   @default(false) // walked in against a reservation
   checkedInAt  DateTime  @default(now())
   checkedOutAt DateTime?

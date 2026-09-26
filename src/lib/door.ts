@@ -43,3 +43,29 @@ export function parseAmountToPence(input: string): number | null {
   if (!Number.isFinite(n) || n < 0) return null;
   return Math.round(n * 100);
 }
+
+/**
+ * Order the day's list by table number: numbered tables first, low to high,
+ * then anything lettered, then rows with no table at all in arrival order.
+ * "10" must sort after "2", so the leading digits are compared as a number.
+ */
+export function byTableNumber(
+  a: { tableNo: string; seq: number },
+  b: { tableNo: string; seq: number },
+): number {
+  const ta = a.tableNo.trim();
+  const tb = b.tableNo.trim();
+  if (!ta && !tb) return a.seq - b.seq;
+  if (!ta) return 1;
+  if (!tb) return -1;
+
+  const na = parseInt(ta, 10);
+  const nb = parseInt(tb, 10);
+  const aNum = Number.isFinite(na);
+  const bNum = Number.isFinite(nb);
+  if (aNum && bNum && na !== nb) return na - nb;
+  if (aNum !== bNum) return aNum ? -1 : 1;
+
+  const cmp = ta.localeCompare(tb, "en", { numeric: true, sensitivity: "base" });
+  return cmp !== 0 ? cmp : a.seq - b.seq;
+}
