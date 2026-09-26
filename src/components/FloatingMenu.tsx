@@ -75,8 +75,6 @@ export function FloatingMenu() {
   const mobileRef = useRef<HTMLDivElement>(null);
 
   /* ── Desktop bottom nav state ── */
-  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
-  const desktopMenuRef = useRef<HTMLDivElement>(null);
 
   /* ── Desktop pill indicator ── */
   const desktopNavRef = useRef<HTMLDivElement>(null);
@@ -110,7 +108,6 @@ export function FloatingMenu() {
       } else if (y > lastScrollY.current + 10) {
         setVisible(false);
         setMobileOpen(false);
-        setDesktopMenuOpen(false);
       }
       lastScrollY.current = y;
     }
@@ -120,25 +117,21 @@ export function FloatingMenu() {
 
   /* ── Close mobile on outside click ── */
   useEffect(() => {
-    if (!mobileOpen && !desktopMenuOpen) return;
+    if (!mobileOpen) return;
     function handleClick(e: MouseEvent) {
       if (mobileOpen && mobileRef.current && !mobileRef.current.contains(e.target as Node)) {
         setMobileOpen(false);
       }
-      if (desktopMenuOpen && desktopMenuRef.current && !desktopMenuRef.current.contains(e.target as Node)) {
-        setDesktopMenuOpen(false);
-      }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [mobileOpen, desktopMenuOpen]);
+  }, [mobileOpen]);
 
   /* ── Close on Escape ── */
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setMobileOpen(false);
-        setDesktopMenuOpen(false);
       }
     }
     document.addEventListener("keydown", handleKey);
@@ -326,108 +319,6 @@ export function FloatingMenu() {
           </div>
         </div>
       </header>
-
-      {/* ═══════════════════════════════════════════
-          DESKTOP NAV (lg+) — Floating bottom button
-          ═══════════════════════════════════════════ */}
-      <div
-        ref={desktopMenuRef}
-        className={`fixed bottom-6 left-0 right-0 z-[9999] hidden lg:flex flex-col items-center pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          visible
-            ? "translate-y-0 opacity-100"
-            : "translate-y-24 opacity-0"
-        }`}
-      >
-        {/* Expanded nav panel */}
-        <div
-          className={`pointer-events-auto w-full max-w-xs rounded-[1.75rem] shadow-2xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            desktopMenuOpen
-              ? "max-h-[70vh] opacity-100 mb-3 scale-100"
-              : "max-h-0 opacity-0 mb-0 scale-95 !pointer-events-none"
-          }`}
-          style={{
-            background: "rgba(255,255,255,0.98)",
-            backdropFilter: "blur(24px)",
-          }}
-        >
-          <nav className="space-y-1 overflow-y-auto max-h-[calc(70vh-4rem)] p-8" style={{ scrollbarWidth: "thin" }}>
-            {MOBILE_LINKS.map((link, i) => {
-              if (link.comingSoon) {
-                return (
-                  <span
-                    key={`desktop-${link.label}-${i}`}
-                    className="block py-3 px-2 text-lg font-light rounded-xl text-stone-400 cursor-not-allowed"
-                    style={{
-                      transitionDelay: desktopMenuOpen ? `${i * 30}ms` : "0ms",
-                      opacity: desktopMenuOpen ? 0.5 : 0,
-                      transform: desktopMenuOpen ? "translateX(0)" : "translateX(-12px)",
-                    }}
-                  >
-                    {link.label} <span className="text-xs text-stone-400">(Coming Soon)</span>
-                  </span>
-                );
-              }
-              const isExternal = link.href.startsWith("http");
-              const LinkTag = isExternal ? "a" : Link;
-              const extraProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
-              return (
-                <LinkTag
-                  key={`desktop-${link.label}-${i}`}
-                  href={link.href}
-                  {...extraProps}
-                  {...(!isExternal ? { onClick: () => setDesktopMenuOpen(false) } : {})}
-                  className={`block py-3 px-2 text-lg font-light rounded-xl transition-all duration-300 ${
-                    isActive(link.href)
-                      ? "text-stone-900 bg-stone-100 font-normal"
-                      : "text-stone-700 hover:text-stone-900 hover:bg-stone-100"
-                  }`}
-                  style={{
-                    transitionDelay: desktopMenuOpen ? `${i * 30}ms` : "0ms",
-                    opacity: desktopMenuOpen ? 1 : 0,
-                    transform: desktopMenuOpen
-                      ? "translateX(0)"
-                      : "translateX(-12px)",
-                  }}
-                >
-                  {link.label}
-                </LinkTag>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Floating MENU button — Desktop */}
-        <button
-          type="button"
-          onClick={() => setDesktopMenuOpen(!desktopMenuOpen)}
-          aria-label={desktopMenuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={desktopMenuOpen}
-          className={`pointer-events-auto w-full max-w-xs rounded-full shadow-lg flex items-center justify-center gap-3 py-4 transition-all duration-300 hover:shadow-xl active:scale-[0.98] cursor-pointer ${
-            desktopMenuOpen ? "bg-stone-100" : "bg-white"
-          }`}
-        >
-          <div className="relative w-5 h-4 flex flex-col justify-between">
-            <span
-              className={`block h-[1.5px] w-full bg-stone-800 transition-all duration-300 origin-center ${
-                desktopMenuOpen ? "translate-y-[7px] rotate-45" : ""
-              }`}
-            />
-            <span
-              className={`block h-[1.5px] w-full bg-stone-800 transition-all duration-300 ${
-                desktopMenuOpen ? "opacity-0 scale-x-0" : ""
-              }`}
-            />
-            <span
-              className={`block h-[1.5px] w-full bg-stone-800 transition-all duration-300 origin-center ${
-                desktopMenuOpen ? "-translate-y-[7px] -rotate-45" : ""
-              }`}
-            />
-          </div>
-          <span className="text-sm font-medium tracking-[0.25em] uppercase text-stone-800">
-            {desktopMenuOpen ? "Close" : "Menu"}
-          </span>
-        </button>
-      </div>
 
       {/* ═══════════════════════════════════════════
           MOBILE NAV (<lg) — Floating bottom button
