@@ -58,6 +58,127 @@ https://www.demisrestaurant.co.uk/sunday-buffet
 
 We'd love to have you back.`,
   },
+  // ── Buffet screen. No greeting or sign-off: the buffet route wraps these in
+  // "Hi <name>," and "Thanks, Demi's Restaurant, Streatham Hill".
+  // Written to land in Primary: plain sentences, one link at most, no prices,
+  // no "offer"/"free"/capitals, and a couple that ask for a reply.
+  {
+    key: "buffet-thank-you",
+    name: "Thank you",
+    scope: "buffet",
+    sortOrder: 4,
+    subject: "Thank you for coming on Sunday",
+    body: `Thank you for coming to the Sunday buffet. It was really good to have you with us.
+
+We're always trying to make it better, so if there was anything you loved, or anything you think we could do differently, just reply to this email and let us know. Every reply comes straight to us and we read them all.`,
+  },
+  {
+    key: "buffet-miss-you",
+    name: "It's been a while",
+    scope: "buffet",
+    sortOrder: 5,
+    subject: "It's been a little while",
+    body: `It's been a little while since you came to our Sunday buffet, so we thought we'd say hello.
+
+The buffet is still on every Sunday at Streatham Hill, and the menu changes each week, so there's always something new on the table alongside the favourites like jollof, oxtail and beef ribs.
+
+Doors open at 12pm and the buffet starts at 12:30pm. The earlier you arrive, the less you pay.
+
+If you fancy coming back, you can book a table here:
+
+https://www.demisrestaurant.co.uk/sunday-buffet
+
+It would be lovely to see you again.`,
+  },
+  {
+    key: "buffet-this-weekend",
+    name: "This weekend",
+    scope: "buffet",
+    sortOrder: 6,
+    subject: "Are you free on Sunday?",
+    body: `Just a note before the weekend: we're doing the buffet again this Sunday at Streatham Hill.
+
+Doors open at 12pm and the buffet starts at 12:30pm. If you'd like to come, it's easiest to book ahead so we can keep a table for you:
+
+https://www.demisrestaurant.co.uk/sunday-buffet
+
+Hope to see you there.`,
+  },
+  {
+    key: "buffet-bring-the-group",
+    name: "Bring the group",
+    scope: "buffet",
+    sortOrder: 7,
+    subject: "Planning something with friends or family?",
+    body: `If you've got a birthday, a catch-up or a family get-together coming up, the Sunday buffet is an easy way to do it. Everyone eats as much as they like, and nobody has to agree on one dish.
+
+Just tell us how many of you there are when you book and we'll keep a table that fits:
+
+https://www.demisrestaurant.co.uk/sunday-buffet
+
+If it's a bigger group, reply to this email and we'll help you sort it out.`,
+  },
+
+  // ── Bookings screen. Same idea: the bookings route adds "Hi <first name>,"
+  // and "Thanks, Demi's Restaurant" around these.
+  {
+    key: "bookings-thank-you",
+    name: "Thank you",
+    scope: "bookings",
+    sortOrder: 1,
+    subject: "Thank you for dining with us",
+    body: `Thank you for coming to eat with us at Demi's. We really hope you enjoyed it.
+
+If you have a moment, we'd love to hear how it went. Just reply to this email with anything you liked, or anything we could do better. It all comes straight to us.`,
+  },
+  {
+    key: "bookings-miss-you",
+    name: "It's been a while",
+    scope: "bookings",
+    sortOrder: 2,
+    subject: "It's been a little while",
+    body: `It's been a little while since you came to Demi's, so we wanted to say hello.
+
+We're open every day from 12pm at both Cricklewood and Streatham Hill, and the kitchen is still cooking the dishes you know: jollof, suya, pepper soup, asun and plenty more.
+
+If you'd like to come back, you can book a table here:
+
+https://www.demisrestaurant.co.uk/booking
+
+We'd be really happy to see you again.`,
+  },
+  {
+    key: "bookings-whats-on",
+    name: "What's on",
+    scope: "bookings",
+    sortOrder: 3,
+    subject: "What's on at Demi's",
+    body: `A quick note on what's happening at Demi's at the moment.
+
+On Fridays there's a live Afrobeats night at Cricklewood from 8pm, with Deejay Why on the decks.
+
+On Saturdays there's a bottomless brunch from 1pm to 4:30pm.
+
+And on Sundays there's our all you can eat buffet at Streatham Hill, from 12pm.
+
+You'll find all of them on our website, where you can book a table too:
+
+https://www.demisrestaurant.co.uk`,
+  },
+  {
+    key: "bookings-celebrations",
+    name: "Celebrations",
+    scope: "bookings",
+    sortOrder: 4,
+    subject: "Got something to celebrate?",
+    body: `If you've got a birthday, an anniversary or a get-together coming up, we'd love to host it.
+
+We can look after bigger groups, and for larger occasions we also do private hire. Just reply to this email with the date and roughly how many people, and we'll take it from there.
+
+Or if you'd rather book a table yourself:
+
+https://www.demisrestaurant.co.uk/booking`,
+  },
   {
     key: "saturday-brunch",
     name: "Saturday brunch",
@@ -107,7 +228,7 @@ async function ensureSeeded() {
   });
 }
 
-/** GET ?scope=blast|buffet — saved templates for one screen. */
+/** GET ?scope=blast|buffet|bookings — saved templates for one screen. */
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -131,7 +252,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Name, subject and message are all required" }, { status: 400 });
   }
 
-  const where = scope === "buffet" ? "buffet" : "blast";
+  const where = scope === "buffet" || scope === "bookings" ? scope : "blast";
   const slug =
     String(name)
       .toLowerCase()

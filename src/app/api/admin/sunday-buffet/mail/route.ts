@@ -61,13 +61,14 @@ const PAGE_SIZE = 25;
 const SEND_GAP_MS = 550;
 
 /**
- * Everyone who has ever booked the buffet, one entry per email address.
- * A regular who booked five Sundays gets one email, greeted by the name on
- * their most recent booking. Sorted by email so paging is stable between calls.
+ * Everyone booked for a Sunday that has already happened, one entry per email
+ * address. Upcoming bookings don't count, so this reaches people who have been.
+ * A regular who came five Sundays gets one email, greeted by the name on their
+ * most recent booking. Sorted by email so paging is stable between calls.
  */
 async function everyoneEverBooked(): Promise<{ email: string; name: string }[]> {
   const rows = await prisma.sundayBuffetBooking.findMany({
-    where: { status: { not: "cancelled" }, email: { not: "" } },
+    where: { date: { lt: serviceDate() }, status: { not: "cancelled" }, email: { not: "" } },
     orderBy: { createdAt: "desc" },
     select: { email: true, name: true },
   });
@@ -79,7 +80,7 @@ async function everyoneEverBooked(): Promise<{ email: string; name: string }[]> 
   return Array.from(byEmail.values()).sort((a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase()));
 }
 
-/** GET /api/admin/sunday-buffet/mail?scope=all — how many people "everyone" would reach. */
+/** GET /api/admin/sunday-buffet/mail?scope=all — how many past guests "everyone" would reach. */
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -100,7 +101,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
   }
 
-  // Everyone who has ever booked, sent a page at a time. The admin screen
+  // Every past guest, sent a page at a time. The admin screen
   // calls this repeatedly with the returned nextOffset until it comes back null.
   if (scope === "all") {
     const everyone = await everyoneEverBooked();

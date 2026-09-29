@@ -36,7 +36,7 @@ export default function AdminSundayBuffetPage() {
   const [mailMessage, setMailMessage] = useState("");
   const [mailing, setMailing] = useState(false);
   const [mailNote, setMailNote] = useState("");
-  // "day" = guests booked for the Sunday on screen; "all" = everyone who has ever booked.
+  // "day" = guests booked for the Sunday on screen; "all" = everyone from past Sundays.
   const [mailScope, setMailScope] = useState<"day" | "all">("day");
   const [allCount, setAllCount] = useState<number | null>(null);
 
@@ -113,7 +113,7 @@ export default function AdminSundayBuffetPage() {
 
   async function sendMailEveryone() {
     const total = allCount ?? 0;
-    if (!confirm(`Email all ${total} people who have ever booked the buffet? Each person gets one email.`)) return;
+    if (!confirm(`Email all ${total} past buffet guests? Each person gets one email.`)) return;
     setMailing(true);
     setMailNote("");
     let sent = 0, failed = 0, offset: number | null = 0;
@@ -247,7 +247,7 @@ export default function AdminSundayBuffetPage() {
               onClick={() => setMailScope("all")}
               className={`px-3 py-1.5 text-xs rounded-lg transition ${mailScope === "all" ? "bg-gold-300 text-black font-semibold" : "text-gray-400 hover:text-white"}`}
             >
-              Everyone who&apos;s ever booked ({allCount ?? "…"})
+              All past guests ({allCount ?? "…"})
             </button>
           </div>
           {mailScope === "day" ? (
@@ -257,8 +257,8 @@ export default function AdminSundayBuffetPage() {
             </>
           ) : (
             <>
-              <p className="text-sm text-white font-semibold mb-1">Email everyone who has ever booked the buffet</p>
-              <p className="text-xs text-gray-500 mb-4">Goes to {allCount ?? "…"} {allCount === 1 ? "person" : "people"} across every Sunday, one email each even if they booked more than once (cancelled excluded). Sent from your normal bookings address.</p>
+              <p className="text-sm text-white font-semibold mb-1">Email everyone who has been to the buffet</p>
+              <p className="text-xs text-gray-500 mb-4">Goes to {allCount ?? "…"} {allCount === 1 ? "person" : "people"} booked for a Sunday that has already happened, one email each even if they came more than once. Upcoming and cancelled bookings are left out. Sent from your normal bookings address.</p>
             </>
           )}
           {/* Saved emails for this screen. One click fills the form; you still press Send. */}
