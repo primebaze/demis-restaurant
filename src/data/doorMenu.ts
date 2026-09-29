@@ -11,7 +11,14 @@
  */
 
 export type DoorChoice = { title: string; options: { label: string; extra?: number }[] };
-export type DoorDish = { name: string; price: number; note?: string; choices?: DoorChoice[] };
+export type DoorDish = {
+  name: string;
+  price: number;
+  note?: string;
+  choices?: DoorChoice[];
+  /** Extra words staff might search for, e.g. the sauces inside "Sauce and meat". */
+  keywords?: string[];
+};
 export type DoorSection = { title: string; dishes: DoorDish[] };
 
 const opts = (...labels: (string | [string, number])[]) =>
@@ -32,6 +39,13 @@ const PROTEIN_YAM_SOUP: DoorChoice = {
   title: "Protein",
   options: opts("Assorted meat", "Beef", "Chicken", ["Fresh Fish", 5], ["Fried Fish", 3], "Goat Meat", ["Turkey", 3]),
 };
+// Sides: each soup is its own tile so searching "eforiro" finds the soup-only
+// and soup-with-protein versions next to the Soup Meal.
+const SOUP_ONLY = ["Eforiro", "Egusi", "Ogbono", "Groundnut Soup", "Ewedu with Stew", "Okra with Stew",
+  "Edikankong", "Afang", "Banga", "Oha", "Bitter Leaf"];
+const SOUP_WITH_PROTEIN = ["Eforiro", "Egusi", "Ogbono", "Groundnut Soup", "Ewedu with Stew", "Okra with Stew", "Abula",
+  "Edikankong", "Afang", "Banga", "Oha", "Bitterleaf"];
+
 const SIDE_PLANTAIN_YAM: DoorChoice = { title: "Side", options: opts("Fried plantain", "Yam") };
 
 const riceMeal = (name: string): DoorDish => ({ name, price: 20, note: "with plantain + protein", choices: [PROTEIN_RICE] });
@@ -139,43 +153,29 @@ export const DOOR_FOOD: DoorSection[] = [
     ],
   },
   {
-    title: "Sides · Soup",
-    dishes: [
-      {
-        name: "Soup only", price: 12, note: "no swallow, no protein",
-        choices: [{
-          title: "Soup",
-          options: opts("Eforiro", "Egusi", "Ogbono", "Groundnut Soup", "Ewedu with Stew", "Okra with Stew",
-            "Edikankong", "Afang", "Banga", "Oha", "Bitter Leaf"),
-        }],
-      },
-      {
-        name: "Soup with protein", price: 16, note: "no swallow",
-        choices: [
-          {
-            title: "Soup",
-            options: opts("Eforiro", "Egusi", "Ogbono", "Groundnut Soup", "Ewedu with Stew", "Okra with Stew", "Abula",
-              "Edikankong", "Afang", "Banga", "Oha", "Bitterleaf"),
-          },
-          PROTEIN_YAM_SOUP,
-        ],
-      },
-    ],
+    title: "Sides · Soup only",
+    dishes: SOUP_ONLY.map((soup) => ({ name: `${soup} · soup only`, price: 12, note: "no swallow, no protein" })),
+  },
+  {
+    title: "Sides · Soup with protein",
+    dishes: SOUP_WITH_PROTEIN.map((soup) => ({
+      name: `${soup} · soup + protein`, price: 16, note: "no swallow", choices: [PROTEIN_YAM_SOUP],
+    })),
   },
   {
     title: "Sides · Rice only",
     dishes: [
-      { name: "White Rice", price: 9, note: "rice only" },
-      { name: "Jollof Rice", price: 10, note: "rice only" },
-      { name: "Fried Rice", price: 12, note: "rice only" },
+      { name: "White Rice · rice only", price: 9, note: "no plantain, no protein" },
+      { name: "Jollof Rice · rice only", price: 10, note: "no plantain, no protein" },
+      { name: "Fried Rice · rice only", price: 12, note: "no plantain, no protein" },
     ],
   },
   {
     title: "Sides · Beans only",
     dishes: [
-      { name: "Plain Beans", price: 12, note: "beans only" },
-      { name: "Ewa Aganyin", price: 12, note: "beans only" },
-      { name: "Porridge Beans", price: 12, note: "beans only" },
+      { name: "Plain Beans · beans only", price: 12, note: "no plantain, no protein" },
+      { name: "Ewa Aganyin · beans only", price: 12, note: "no plantain, no protein" },
+      { name: "Porridge Beans · beans only", price: 12, note: "no plantain, no protein" },
     ],
   },
   {
@@ -183,6 +183,7 @@ export const DOOR_FOOD: DoorSection[] = [
     dishes: [
       {
         name: "Sauce and meat", price: 14, note: "choose sauce and meat",
+        keywords: ["stewed meat", "spicy sauce", "mild sauce", "pot sauce", "ayamase", "designer stew", "assorted", "chicken", "beef", "goat"],
         choices: [
           { title: "Sauce", options: opts("Stewed Meat", "Spicy Sauce", "Mild Sauce", "Pot Sauce", "Ayamase Sauce", "Designer Stew") },
           { title: "Meat", options: opts("Assorted Meat", "Chicken", "Beef", "Goat Meat") },
@@ -195,13 +196,13 @@ export const DOOR_FOOD: DoorSection[] = [
     dishes: [
       { name: "Fried Yam", price: 10 },
       { name: "Fried Plantain", price: 8 },
-      { name: "Extra Swallow", price: 5, note: "choose swallow", choices: [SWALLOW] },
+      { name: "Extra Swallow", price: 5, note: "choose swallow", choices: [SWALLOW], keywords: ["amala", "eba", "oat meal", "pounded yam", "semolina"] },
       { name: "Boli", price: 10 },
       { name: "Potato Fries", price: 8 },
       { name: "Sweet Potato Fries", price: 7 },
       { name: "Chicken", price: 10 },
       {
-        name: "1 Piece of Meat", price: 5, note: "choose meat",
+        name: "1 Piece of Meat", price: 5, note: "choose meat", keywords: ["goat", "shaki", "cowleg", "beef"],
         choices: [{ title: "Meat", options: opts("Goat", "Shaki", "Cowleg", "Beef") }],
       },
       { name: "Salad", price: 10 },

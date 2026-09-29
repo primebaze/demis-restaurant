@@ -76,7 +76,7 @@ export function DoorOrderPanel({
     const out: { group: string; items: CatalogItem[] }[] = [];
     for (const item of DOOR_CATALOG) {
       if (item.kind !== tab) continue;
-      if (needle && !`${item.name} ${item.group}`.toLowerCase().includes(needle)) continue;
+      if (needle && !`${item.name} ${item.group} ${item.keywords || ""}`.toLowerCase().includes(needle)) continue;
       const last = out[out.length - 1];
       if (last && last.group === item.group) last.items.push(item);
       else out.push({ group: item.group, items: [item] });

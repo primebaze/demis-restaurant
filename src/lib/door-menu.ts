@@ -24,6 +24,8 @@ export type CatalogItem = {
   choices: ChoiceGroup[];
   /** Short hint under the dish, e.g. "with plantain + protein" or "rice only". */
   note?: string;
+  /** Extra search words. */
+  keywords?: string;
 };
 
 /** What was picked for one choice group on an order line. */
@@ -54,6 +56,7 @@ const food: CatalogItem[] = DOOR_FOOD.flatMap((sec) =>
     group: sec.title,
     pricePence: Math.round(d.price * 100),
     note: d.note,
+    keywords: (d.keywords || []).join(" "),
     choices: (d.choices || []).map((c) => ({
       title: c.title,
       options: c.options.map((o) => ({ label: o.label, extraPence: Math.round((o.extra || 0) * 100) })),
