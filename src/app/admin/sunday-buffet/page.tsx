@@ -36,6 +36,9 @@ export default function AdminSundayBuffetPage() {
   const [mailMessage, setMailMessage] = useState("");
   const [mailing, setMailing] = useState(false);
   const [mailNote, setMailNote] = useState("");
+  // "day" = guests booked for the Sunday on screen; "all" = everyone who has ever booked.
+  const [mailScope, setMailScope] = useState<"day" | "all">("day");
+  const [allCount, setAllCount] = useState<number | null>(null);
 
   // Saved emails scoped to this screen — they omit the greeting and sign-off,
   // which this route adds, so they are not interchangeable with blast templates.
@@ -97,8 +100,49 @@ export default function AdminSundayBuffetPage() {
     await fetch(`/api/admin/sunday-buffet/${id}`, { method: "DELETE" });
     fetchData();
   }
+  async function openMail() {
+    const opening = !mailOpen;
+    setMailOpen(opening);
+    if (!opening) return;
+    if (withEmail === 0) setMailScope("all");
+    fetch("/api/admin/sunday-buffet/mail?scope=all")
+      .then((r) => r.json())
+      .then((d) => setAllCount(typeof d.total === "number" ? d.total : 0))
+      .catch(() => setAllCount(0));
+  }
+
+  async function sendMailEveryone() {
+    const total = allCount ?? 0;
+    if (!confirm(`Email all ${total} people who have ever booked the buffet? Each person gets one email.`)) return;
+    setMailing(true);
+    setMailNote("");
+    let sent = 0, failed = 0, offset: number | null = 0;
+    try {
+      // The server sends 25 at a time; keep asking until it says we're done.
+      while (offset !== null) {
+        const res: Response = await fetch("/api/admin/sunday-buffet/mail", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scope: "all", offset, subject: mailSubject, message: mailMessage }),
+        });
+        const d: { sent: number; failed: number; total: number; nextOffset: number | null; error?: string } = await res.json();
+        if (!res.ok) {
+          setMailNote(`${d.error || "Could not send."}${sent ? ` ${sent} sent before it stopped.` : ""}`);
+          return;
+        }
+        sent += d.sent; failed += d.failed;
+        offset = d.nextOffset;
+        if (offset !== null) setMailNote(`Sending… ${sent + failed} of ${d.total}`);
+      }
+      setMailNote(`Sent to ${sent} of ${sent + failed}${failed ? ` (${failed} failed)` : ""}.`);
+      setMailSubject(""); setMailMessage("");
+    } finally {
+      setMailing(false);
+    }
+  }
+
   async function sendMailAll() {
     if (!mailSubject.trim() || !mailMessage.trim()) { setMailNote("Add a subject and a message first."); return; }
+    if (mailScope === "all") return sendMailEveryone();
     if (!confirm(`Email all ${withEmail} guest${withEmail === 1 ? "" : "s"} booked for ${prettyDate}?`)) return;
     setMailing(true);
     setMailNote("");
@@ -183,7 +227,7 @@ export default function AdminSundayBuffetPage() {
         <button onClick={() => askToConfirm()} disabled={withEmail === 0 || confirming} className="px-3 py-2 text-xs text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/10 transition disabled:opacity-40">
           {confirming ? "Sending…" : `✓ Ask guests to confirm${withEmail ? ` (${withEmail})` : ""}`}
         </button>
-        <button onClick={() => setMailOpen((v) => !v)} disabled={withEmail === 0} className="px-3 py-2 text-xs text-gold-300 border border-gold-300/30 rounded-xl hover:bg-gold-300/10 transition disabled:opacity-40">
+        <button onClick={openMail} className="px-3 py-2 text-xs text-gold-300 border border-gold-300/30 rounded-xl hover:bg-gold-300/10 transition disabled:opacity-40">
           ✉ Email everyone{withEmail ? ` (${withEmail})` : ""}
         </button>
         <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this Sunday</button>
@@ -191,8 +235,32 @@ export default function AdminSundayBuffetPage() {
 
       {mailOpen && (
         <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
-          <p className="text-sm text-white font-semibold mb-1">Email everyone booked for {prettyDate}</p>
-          <p className="text-xs text-gray-500 mb-4">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
+          <div className="inline-flex gap-1 p-1 bg-black/40 rounded-xl mb-4">
+            <button
+              onClick={() => setMailScope("day")}
+              disabled={withEmail === 0}
+              className={`px-3 py-1.5 text-xs rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${mailScope === "day" ? "bg-gold-300 text-black font-semibold" : "text-gray-400 hover:text-white"}`}
+            >
+              Booked for {prettyDate} ({withEmail})
+            </button>
+            <button
+              onClick={() => setMailScope("all")}
+              className={`px-3 py-1.5 text-xs rounded-lg transition ${mailScope === "all" ? "bg-gold-300 text-black font-semibold" : "text-gray-400 hover:text-white"}`}
+            >
+              Everyone who&apos;s ever booked ({allCount ?? "…"})
+            </button>
+          </div>
+          {mailScope === "day" ? (
+            <>
+              <p className="text-sm text-white font-semibold mb-1">Email everyone booked for {prettyDate}</p>
+              <p className="text-xs text-gray-500 mb-4">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-white font-semibold mb-1">Email everyone who has ever booked the buffet</p>
+              <p className="text-xs text-gray-500 mb-4">Goes to {allCount ?? "…"} {allCount === 1 ? "person" : "people"} across every Sunday, one email each even if they booked more than once (cancelled excluded). Sent from your normal bookings address.</p>
+            </>
+          )}
           {/* Saved emails for this screen. One click fills the form; you still press Send. */}
           <div className="flex items-center gap-2 flex-wrap mb-3">
             {mailTemplates.map((t) => (
@@ -223,7 +291,7 @@ export default function AdminSundayBuffetPage() {
           />
           <div className="flex items-center gap-3 mt-3">
             <button onClick={sendMailAll} disabled={mailing} className="px-4 py-2 text-sm bg-gold-300 text-black font-semibold rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
-              {mailing ? "Sending…" : `Send to ${withEmail}`}
+              {mailing ? "Sending…" : `Send to ${mailScope === "all" ? (allCount ?? "…") : withEmail}`}
             </button>
             <button onClick={() => { setMailOpen(false); setMailNote(""); }} className="text-sm text-gray-400 hover:text-white">Cancel</button>
             {mailNote && <span className="text-xs text-gray-400">{mailNote}</span>}

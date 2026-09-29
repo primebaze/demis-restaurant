@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { sendViaResend, sendRawEmail, isResendConfigured } from "@/lib/email";
 import { upcomingSunday, prettyDate } from "@/lib/sunday-buffet";
+import { serviceDate } from "@/lib/checkin-auth";
 import { trackedSiteUrl } from "@/lib/marketing";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -54,15 +55,77 @@ function buildHtml(name: string, message: string, email: string, campaign: strin
 </body></html>`;
 }
 
+/** Sends per request when mailing everyone, so each call finishes well inside maxDuration. */
+const PAGE_SIZE = 25;
+/** Gap between sends. Keeps us under Resend's per-second limit so nothing spills to the 50/hr SMTP fallback. */
+const SEND_GAP_MS = 550;
+
+/**
+ * Everyone who has ever booked the buffet, one entry per email address.
+ * A regular who booked five Sundays gets one email, greeted by the name on
+ * their most recent booking. Sorted by email so paging is stable between calls.
+ */
+async function everyoneEverBooked(): Promise<{ email: string; name: string }[]> {
+  const rows = await prisma.sundayBuffetBooking.findMany({
+    where: { status: { not: "cancelled" }, email: { not: "" } },
+    orderBy: { createdAt: "desc" },
+    select: { email: true, name: true },
+  });
+  const byEmail = new Map<string, { email: string; name: string }>();
+  for (const r of rows) {
+    const key = r.email.trim().toLowerCase();
+    if (key && !byEmail.has(key)) byEmail.set(key, { email: r.email.trim(), name: r.name });
+  }
+  return Array.from(byEmail.values()).sort((a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase()));
+}
+
+/** GET /api/admin/sunday-buffet/mail?scope=all — how many people "everyone" would reach. */
+export async function GET(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const scope = new URL(req.url).searchParams.get("scope");
+  if (scope !== "all") return NextResponse.json({ error: "Unknown scope" }, { status: 400 });
+  return NextResponse.json({ total: (await everyoneEverBooked()).length });
+}
+
 /** POST /api/admin/sunday-buffet/mail — email everyone booked for a Sunday. */
 export async function POST(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { date: rawDate, subject, message, id } = await req.json();
+  const { date: rawDate, subject, message, id, scope, offset: rawOffset } = await req.json();
   const date = rawDate || upcomingSunday();
   if (!subject?.trim() || !message?.trim()) {
     return NextResponse.json({ error: "Subject and message are required" }, { status: 400 });
+  }
+
+  // Everyone who has ever booked, sent a page at a time. The admin screen
+  // calls this repeatedly with the returned nextOffset until it comes back null.
+  if (scope === "all") {
+    const everyone = await everyoneEverBooked();
+    if (everyone.length === 0) {
+      return NextResponse.json({ error: "No past guests with an email to send to." }, { status: 400 });
+    }
+    const offset = Math.max(0, Math.floor(Number(rawOffset) || 0));
+    const page = everyone.slice(offset, offset + PAGE_SIZE);
+    const subj = String(subject).slice(0, 150);
+    // One campaign per send day, so a "come back" blast has its own click count.
+    const campaign = `buffet-all-${serviceDate()}`;
+
+    let sent = 0, failed = 0;
+    for (let i = 0; i < page.length; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, SEND_GAP_MS));
+      const b = page[i];
+      const ok = await deliver(b.email, subj, buildHtml(b.name, message, b.email, campaign)).catch(() => false);
+      if (ok) sent++; else failed++;
+    }
+
+    const next = offset + page.length;
+    return NextResponse.json({
+      sent, failed, total: everyone.length,
+      nextOffset: next < everyone.length ? next : null,
+    });
   }
 
   // With an `id`, email just that one guest; otherwise everyone booked for the Sunday.
