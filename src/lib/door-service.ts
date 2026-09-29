@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
+import { sanitiseOrder } from "@/lib/door-menu";
 import {
   serviceDate, isVisitType, displayName, locationName, byTableNumber, parseAmountToPence,
 } from "@/lib/door";
@@ -38,6 +40,7 @@ export async function listDay(locationSlug: string, dateParam: string | null) {
       visitType: v.visitType,
       partySize: v.partySize,
       tableNo: v.tableNo,
+      items: sanitiseOrder(v.items),
       isBooking: v.isBooking,
       checkedInAt: v.checkedInAt,
       checkedOutAt: v.checkedOutAt,
@@ -124,7 +127,7 @@ export async function updateVisit(id: string, body: Record<string, unknown>): Pr
   const data: {
     status?: string; checkedOutAt?: Date | null; amountPence?: number | null;
     name?: string; phone?: string; email?: string; partySize?: number; tableNo?: string;
-    visitType?: string; note?: string;
+    visitType?: string; note?: string; items?: Prisma.InputJsonValue;
   } = {};
 
   if (body.action === "checkout") {
@@ -152,6 +155,8 @@ export async function updateVisit(id: string, body: Record<string, unknown>): Pr
     data.partySize = Math.max(1, Math.min(30, Math.floor(Number(body.partySize) || 1)));
   }
   if (isVisitType(body.visitType)) data.visitType = body.visitType;
+  // The whole order is sent each time, so saving replaces it.
+  if (body.items !== undefined) data.items = sanitiseOrder(body.items) as unknown as Prisma.InputJsonValue;
 
   if (Object.keys(data).length === 0) {
     return { ok: false, error: "Nothing to update", status: 400 };

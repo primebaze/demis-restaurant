@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import type { OrderLine } from "@/lib/door-menu";
 
 type Visit = {
   id: string; seq: number; label: string; hasDetails: boolean;
   name: string; phone: string; email: string;
-  visitType: string; partySize: number; tableNo: string; isBooking: boolean;
+  visitType: string; partySize: number; tableNo: string; isBooking: boolean; items: OrderLine[];
   checkedInAt: string; checkedOutAt: string | null;
   amountPence: number | null; status: string;
 };
@@ -65,6 +66,13 @@ export default function DoorSummaryPage({ params }: { params: { location: string
   const perHead = heads > 0 ? Math.round(totals.takingsPence / heads) : 0;
   const perTable = totals.diningParties > 0 ? Math.round(totals.diningTakingsPence / totals.diningParties) : 0;
   const unbilled = totals.visits - totals.billsEntered;
+  const sold = (kind: "food" | "drink") => {
+    const m = new Map<string, number>();
+    for (const v of visits) for (const l of v.items || []) if (l.kind === kind) m.set(l.name, (m.get(l.name) || 0) + l.qty);
+    return Array.from(m.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  };
+  const soldFood = sold("food");
+  const soldDrinks = sold("drink");
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -123,6 +131,51 @@ export default function DoorSummaryPage({ params }: { params: { location: string
         </section>
       </div>
 
+      {/* What sold, from the orders staff took at the door */}
+      <section className={`${card} p-5 mb-4`}>
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="text-sm font-semibold text-white">What sold</h2>
+          <span className="text-xs text-gray-500">
+            {soldFood.reduce((n, [, q]) => n + q, 0)} food · {soldDrinks.reduce((n, [, q]) => n + q, 0)} drinks
+          </span>
+        </div>
+        {soldFood.length === 0 && soldDrinks.length === 0 ? (
+          <p className="text-xs text-gray-500">No orders taken {isToday ? "yet today" : "on this day"}.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            {([["Food", soldFood, "bg-gold-300"], ["Drinks", soldDrinks, "bg-sky-400"]] as const).map(([title, list, bar]) => {
+              const top = list.slice(0, 8);
+              const max = top[0]?.[1] || 1;
+              return (
+                <div key={title}>
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-2.5">{title}</p>
+                  {top.length === 0 ? (
+                    <p className="text-xs text-gray-600">None</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {top.map(([name, qty]) => (
+                        <div key={name}>
+                          <div className="flex items-baseline justify-between gap-3 mb-1">
+                            <span className="text-xs text-gray-300 truncate">{name}</span>
+                            <span className="text-sm font-bold text-white tabular-nums">{qty}</span>
+                          </div>
+                          <div className="h-1 bg-black/50 rounded-full overflow-hidden">
+                            <div className={`h-full ${bar} rounded-full`} style={{ width: `${(qty / max) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                      {list.length > top.length && (
+                        <p className="text-[11px] text-gray-600">+{list.length - top.length} more</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       {/* Read-only log */}
       <section className={`${card} overflow-hidden`}>
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
@@ -143,6 +196,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                   <th className="text-left font-medium px-3 py-2.5">Guest</th>
                   <th className="text-left font-medium px-3 py-2.5">Type</th>
                   <th className="text-right font-medium px-3 py-2.5">Guests</th>
+                  <th className="text-left font-medium px-3 py-2.5">Order</th>
                   <th className="text-right font-medium px-3 py-2.5">In</th>
                   <th className="text-right font-medium px-3 py-2.5">Out</th>
                   <th className="text-right font-medium px-3 py-2.5">Stayed</th>
@@ -163,6 +217,11 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                         {isDining ? "Dining" : "Takeaway"}
                       </td>
                       <td className="px-3 py-3 text-right text-gray-300 tabular-nums">{isDining ? v.partySize : "—"}</td>
+                      <td className="px-3 py-3 text-xs text-gray-400 max-w-[260px]">
+                        {v.items?.length
+                          ? v.items.map((l) => (l.qty > 1 ? `${l.qty}× ${l.name}` : l.name)).join(", ")
+                          : <span className="text-gray-600">—</span>}
+                      </td>
                       <td className="px-3 py-3 text-right text-gray-400 tabular-nums">{clock(v.checkedInAt)}</td>
                       <td className="px-3 py-3 text-right text-gray-400 tabular-nums">
                         {v.checkedOutAt ? clock(v.checkedOutAt) : <span className="text-amber-400/80">still in</span>}
@@ -181,7 +240,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                 <tr className="border-t border-white/[0.08] bg-black/30 text-sm font-bold">
                   <td className="px-5 py-3 text-gray-400" colSpan={3}>Total</td>
                   <td className="px-3 py-3 text-right text-white tabular-nums">{totals.diningCovers}</td>
-                  <td colSpan={3} />
+                  <td colSpan={4} />
                   <td className="px-5 py-3 text-right text-emerald-300 tabular-nums">{money(totals.takingsPence)}</td>
                 </tr>
               </tfoot>

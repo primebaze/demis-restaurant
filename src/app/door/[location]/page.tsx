@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { DoorOrderPanel } from "@/components/DoorOrderPanel";
+import type { OrderLine } from "@/lib/door-menu";
 
 type Visit = {
   id: string; seq: number; label: string; hasDetails: boolean;
   name: string; phone: string; email: string;
-  visitType: string; partySize: number; tableNo: string; isBooking: boolean;
+  visitType: string; partySize: number; tableNo: string; isBooking: boolean; items: OrderLine[];
   checkedInAt: string; checkedOutAt: string | null;
   amountPence: number | null; status: string;
 };
@@ -47,6 +49,7 @@ export default function DoorKioskPage({ params }: { params: { location: string }
 
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [rowBusy, setRowBusy] = useState("");
+  const [orderFor, setOrderFor] = useState<Visit | null>(null);
 
   const dining = visitType === "dining";
 
@@ -119,6 +122,16 @@ export default function DoorKioskPage({ params }: { params: { location: string }
       if (res.status === 401) { setUnlocked(false); return; }
       await load();
     } finally { setRowBusy(""); }
+  }
+
+  async function saveOrder(id: string, items: OrderLine[]): Promise<boolean> {
+    const res = await fetch(`/api/door/${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }),
+    });
+    if (res.status === 401) { setUnlocked(false); return false; }
+    if (!res.ok) return false;
+    await load();
+    return true;
   }
 
   async function remove(id: string) {
@@ -269,6 +282,9 @@ export default function DoorKioskPage({ params }: { params: { location: string }
                             {` · ${clock(v.checkedInAt)}`}
                             {v.checkedOutAt && ` → ${clock(v.checkedOutAt)}`}
                           </p>
+                          {v.items.length > 0 && (
+                            <p className="text-[11px] text-gray-400 truncate mt-0.5">{orderSummary(v.items)}</p>
+                          )}
                         </div>
 
                         <span className={`shrink-0 px-2 py-0.5 rounded-md text-[11px] font-semibold tabular-nums ${open ? "bg-white/[0.07] text-gray-200" : "text-gray-600"}`}>
@@ -276,6 +292,12 @@ export default function DoorKioskPage({ params }: { params: { location: string }
                         </span>
 
                         <div className="shrink-0 flex items-center gap-1.5">
+                          <button onClick={() => setOrderFor(v)}
+                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
+                              v.items.length ? "border-gold-300/40 text-gold-300 bg-gold-300/[0.06] hover:bg-gold-300/10" : "border-white/[0.1] text-gray-300 hover:text-white hover:bg-white/5"
+                            }`}>
+                            {v.items.length ? `Order (${v.items.reduce((n, l) => n + l.qty, 0)})` : "+ Order"}
+                          </button>
                           {v.amountPence != null && !open ? (
                             <span className="w-[74px] text-right text-sm font-bold text-emerald-300 tabular-nums">{money(v.amountPence)}</span>
                           ) : (
@@ -310,6 +332,23 @@ export default function DoorKioskPage({ params }: { params: { location: string }
           </section>
         </div>
       </div>
+
+      {orderFor && (
+        <DoorOrderPanel
+          label={orderFor.label}
+          tableNo={orderFor.tableNo}
+          initial={orderFor.items}
+          onSave={(items) => saveOrder(orderFor.id, items)}
+          onUseTotal={(pence) => setAmounts((a) => ({ ...a, [orderFor.id]: (pence / 100).toFixed(2) }))}
+          onClose={() => setOrderFor(null)}
+        />
+      )}
     </div>
   );
+}
+
+/** "2× Jollof Rice · Chapman · +3 more" */
+function orderSummary(items: OrderLine[]): string {
+  const parts = items.map((l) => (l.qty > 1 ? `${l.qty}× ${l.name}` : l.name));
+  return parts.length > 4 ? `${parts.slice(0, 4).join(" · ")} · +${parts.length - 4} more` : parts.join(" · ");
 }

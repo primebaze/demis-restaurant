@@ -528,6 +528,7 @@ model GuestVisit {
   email        String    @default("")
   partySize    Int       @default(1)
   tableNo      String    @default("") // the table they were sat at; blank for takeaway
+  items        Json      @default("[]") // what they ordered: [{ name, kind: food|drink, group, qty, pricePence }]
   isBooking    Boolean   @default(false) // walked in against a reservation
   checkedInAt  DateTime  @default(now())
   checkedOutAt DateTime?
