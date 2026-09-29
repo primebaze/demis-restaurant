@@ -9,6 +9,8 @@ type DateOption = {
 type Avail = {
   date: string; prettyDate: string; price: number; priceWithDrinks?: number;
   arrivalSlots?: string[]; dates?: DateOption[]; allSoldOut?: boolean;
+  /** False when an admin has switched brunch bookings off. */
+  bookingsOpen?: boolean;
 };
 type Result = {
   prettyDate: string; address: string; partySize: number; arrivalTime: string;
@@ -159,6 +161,19 @@ export function BrunchBooking() {
         >
           Book another table
         </button>
+      </div>
+    );
+  }
+
+  // Bookings switched off in admin: no form, just say so.
+  if (avail?.bookingsOpen === false) {
+    return (
+      <div className="relative rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-6 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)]">
+        <div className="absolute top-0 left-7 h-px w-12 bg-gradient-to-r from-gold-300/60 to-transparent" />
+        <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-4">Reserve your table</p>
+        <div className="px-4 py-5 rounded-xl border border-red-500/30 bg-red-500/[0.07] text-center">
+          <p className="text-base font-semibold text-red-300">Bookings closed</p>
+        </div>
       </div>
     );
   }

@@ -7,6 +7,7 @@ import {
 import { sendRawEmail, sendViaResend, isResendConfigured, type MailAttachment } from "@/lib/email";
 import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { brunchBookingsOpen } from "@/lib/brunch-settings";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
@@ -102,10 +103,13 @@ async function availability(): Promise<DateAvailability[]> {
 
 /** GET — the Saturdays people can book, and whether each is still open. */
 export async function GET() {
-  const dates = await availability();
+  // Admin switched brunch bookings off: offer no dates at all.
+  const bookingsOpen = await brunchBookingsOpen();
+  const dates = bookingsOpen ? await availability() : [];
   // Every date could be hidden, so this can legitimately be undefined.
   const firstOpen = dates.find((d) => !d.soldOut) || dates[0];
   return NextResponse.json({
+    bookingsOpen,
     // The next bookable Saturday (kept top-level for the booking form's header).
     date: firstOpen?.date ?? "",
     prettyDate: firstOpen?.prettyDate ?? "",
@@ -121,6 +125,14 @@ export async function GET() {
 
 /** POST — reserve a table for the upcoming Saturday brunch. */
 export async function POST(req: Request) {
+  // Checked first, so a page left open from before bookings closed can't get through.
+  if (!(await brunchBookingsOpen())) {
+    return NextResponse.json(
+      { error: "Saturday brunch bookings are closed at the moment." },
+      { status: 403 }
+    );
+  }
+
   const body = await req.json();
 
   // Honeypot: a hidden field real users never fill.

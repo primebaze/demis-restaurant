@@ -36,6 +36,33 @@ export default function AdminSaturdayBrunchPage() {
   const [dateRows, setDateRows] = useState<DateRow[]>([]);
   const [savingDate, setSavingDate] = useState("");
 
+  // Master on/off for brunch bookings. null while loading.
+  const [bookingsOpen, setBookingsOpen] = useState<boolean | null>(null);
+  const [savingOpen, setSavingOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/saturday-brunch/bookings-open")
+      .then((r) => r.json())
+      .then((d) => setBookingsOpen(typeof d.open === "boolean" ? d.open : true))
+      .catch(() => setBookingsOpen(true));
+  }, []);
+
+  async function toggleBookings() {
+    if (bookingsOpen === null) return;
+    const next = !bookingsOpen;
+    if (!next && !confirm("Turn off Saturday brunch bookings? Guests won't be able to book until you turn them back on.")) return;
+    setSavingOpen(true);
+    try {
+      const res = await fetch("/api/admin/saturday-brunch/bookings-open", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ open: next }),
+      });
+      if (res.ok) setBookingsOpen(next);
+    } finally {
+      setSavingOpen(false);
+    }
+  }
+
   const fetchDates = useCallback(async () => {
     const res = await fetch("/api/admin/saturday-brunch/dates");
     const d = await res.json();
@@ -102,6 +129,35 @@ export default function AdminSaturdayBrunchPage() {
           <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">This Saturday</button>
           <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">Next →</button>
         </div>
+      </div>
+
+      {/* ── Master switch: brunch bookings on / off ── */}
+      <div className={`flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5 mb-6 max-w-2xl ${
+        bookingsOpen === false ? "border-red-500/30 bg-red-500/[0.06]" : "border-gray-800 bg-[#1a1a1a]"
+      }`}>
+        <div>
+          <p className="text-sm font-semibold text-white">
+            Brunch bookings are{" "}
+            {bookingsOpen === null ? "…" : bookingsOpen
+              ? <span className="text-emerald-400">ON</span>
+              : <span className="text-red-400">OFF</span>}
+          </p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {bookingsOpen === false
+              ? "Guests see “Bookings closed” and can’t reserve. Existing reservations are kept."
+              : "Guests can reserve on the Saturday brunch page."}
+          </p>
+        </div>
+        <button
+          onClick={toggleBookings}
+          disabled={bookingsOpen === null || savingOpen}
+          role="switch"
+          aria-checked={!!bookingsOpen}
+          aria-label="Saturday brunch bookings"
+          className={`relative w-16 h-9 rounded-full transition-colors disabled:opacity-50 ${bookingsOpen ? "bg-emerald-500" : "bg-gray-700"}`}
+        >
+          <span className={`absolute top-1 left-1 w-7 h-7 rounded-full bg-white shadow transition-transform ${bookingsOpen ? "translate-x-7" : ""}`} />
+        </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
