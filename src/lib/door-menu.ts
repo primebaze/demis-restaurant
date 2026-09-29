@@ -1,9 +1,10 @@
-import { ALL_CATEGORIES } from "@/data/menuData";
+import { DOOR_FOOD } from "@/data/doorMenu";
 import { SECTIONS } from "@/data/drinksData";
 
 /**
- * What door staff can pick from when taking an order: the food menu and the
- * drinks list, the same data the public menu and drinks pages show.
+ * What door staff can pick from when taking an order: the printed food menu
+ * used in the restaurant (src/data/doorMenu.ts, not the website menu) and the
+ * drinks list from the drinks page.
  *
  * A drink's price is taken from wherever the drinks page states it: on the
  * item, in its sub-heading ("Bottles — £12") or in the section note
@@ -21,6 +22,8 @@ export type CatalogItem = {
   group: string;
   pricePence: number | null;
   choices: ChoiceGroup[];
+  /** Short hint under the dish, e.g. "with plantain + protein" or "rice only". */
+  note?: string;
 };
 
 /** What was picked for one choice group on an order line. */
@@ -44,58 +47,19 @@ function pounds(text: string | undefined): number | null {
   return m ? Math.round(parseFloat(m[1]) * 100) : null;
 }
 
-/**
- * Category choices come from the menu subtitle, so the tablet always matches the
- * menu. "Served with your choice of swallow and protein: Amala / Eba / …. Assorted
- * meat / Asun (+10) / …" becomes a Swallow group and a Protein group, with the
- * (+10) read as a £10 extra.
- */
-function choicesFromSubtitle(subtitle: string | undefined): ChoiceGroup[] {
-  if (!subtitle || !subtitle.includes(":")) return [];
-  const body = subtitle.slice(subtitle.indexOf(":") + 1);
-  return body
-    .split(/\.\s+/)
-    .map((list) =>
-      list
-        .split("/")
-        .map((o) => o.trim().replace(/\.$/, ""))
-        .filter(Boolean)
-        .map((o) => {
-          const m = o.match(/\(\+\s*(\d+(?:\.\d{1,2})?)\)/);
-          return {
-            label: o.replace(/\s*\(\+[^)]*\)/, "").trim(),
-            extraPence: m ? Math.round(parseFloat(m[1]) * 100) : 0,
-          };
-        })
-    )
-    .filter((opts) => opts.length > 1)
-    .map((options) => ({
-      title: options.some((o) => /amala|eba|semolina|pounded/i.test(o.label)) ? "Swallow" : "Protein",
-      options,
-    }));
-}
-
-/** Dishes whose own description offers an either/or. Wording follows the menu. */
-const ITEM_CHOICES: Record<string, ChoiceGroup[]> = {
-  "Grilled Croaker": [{ title: "Side", options: [{ label: "Fried plantain", extraPence: 0 }, { label: "Yam", extraPence: 0 }] }],
-  "Grilled Tilapia": [{ title: "Side", options: [{ label: "Fried plantain", extraPence: 0 }, { label: "Yam", extraPence: 0 }] }],
-  "Suya Platter": [{ title: "Side", options: [{ label: "Fried plantain", extraPence: 0 }, { label: "Yam", extraPence: 0 }] }],
-  "Vegetarian Platter": [
-    { title: "Plantain or boli", options: [{ label: "Fried plantain", extraPence: 0 }, { label: "Boli", extraPence: 0 }] },
-    { title: "Rice", options: [{ label: "Jollof rice", extraPence: 0 }, { label: "Fried rice", extraPence: 0 }] },
-  ],
-};
-
-const food: CatalogItem[] = ALL_CATEGORIES.flatMap((c) => {
-  const fromCategory = choicesFromSubtitle(c.subtitle);
-  return c.items.map((i) => ({
-    name: i.name,
+const food: CatalogItem[] = DOOR_FOOD.flatMap((sec) =>
+  sec.dishes.map((d) => ({
+    name: d.name,
     kind: "food" as const,
-    group: c.title,
-    pricePence: typeof i.price === "number" ? Math.round(i.price * 100) : null,
-    choices: ITEM_CHOICES[i.name] ?? fromCategory,
-  }));
-});
+    group: sec.title,
+    pricePence: Math.round(d.price * 100),
+    note: d.note,
+    choices: (d.choices || []).map((c) => ({
+      title: c.title,
+      options: c.options.map((o) => ({ label: o.label, extraPence: Math.round((o.extra || 0) * 100) })),
+    })),
+  }))
+);
 
 const drinks: CatalogItem[] = SECTIONS.flatMap((sec) => {
   const sectionPrice = pounds(sec.note);

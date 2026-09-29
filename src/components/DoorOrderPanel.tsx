@@ -63,11 +63,12 @@ export function DoorOrderPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, choosing]);
 
+  // Badges on the menu show what the selected guest has, not the whole table.
   const qtyByMenu = useMemo(() => {
     const m = new Map<string, number>();
-    for (const l of lines) m.set(menuKey(l), (m.get(menuKey(l)) || 0) + l.qty);
+    for (const l of lines) if (l.guest === guest) m.set(menuKey(l), (m.get(menuKey(l)) || 0) + l.qty);
     return m;
-  }, [lines]);
+  }, [lines, guest]);
 
   // Menu for the current tab, filtered by the search box, kept in menu order.
   const groups = useMemo(() => {
@@ -222,8 +223,10 @@ export function DoorOrderPanel({
                           }`}>
                           <span className="min-w-0">
                             <span className="block text-sm text-white truncate">{item.name}</span>
-                            {item.choices.length > 0 && (
-                              <span className="block text-[10px] text-gray-500 truncate">+ {item.choices.map((c) => c.title.toLowerCase()).join(" & ")}</span>
+                            {(item.note || item.choices.length > 0) && (
+                              <span className="block text-[10px] text-gray-500 truncate">
+                                {item.note ?? `+ ${item.choices.map((c) => c.title.toLowerCase()).join(" & ")}`}
+                              </span>
                             )}
                           </span>
                           <span className="shrink-0 flex items-center gap-2">
