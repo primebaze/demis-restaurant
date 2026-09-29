@@ -84,6 +84,11 @@ export function DoorOrderPanel({
     return out;
   }, [tab, q]);
 
+  /** Each guest starts clean: no leftover search or half-made choice from the last guest. */
+  function selectGuest(n: number) {
+    setGuest(n); setQ(""); setChoosing(null); setCustomName(""); setCustomPrice("");
+  }
+
   function push(line: OrderLine) {
     setLines((cur) => {
       const i = cur.findIndex((l) => lineKey(l) === lineKey(line));
@@ -139,6 +144,8 @@ export function DoorOrderPanel({
   const total = orderTotal(lines);
   const count = lines.reduce((s, l) => s + l.qty, 0);
   const byGuest = Array.from({ length: guestCount }, (_, i) => lines.filter((l) => l.guest === i + 1));
+  // With one guest there are no tabs, so "mine" is simply the whole order.
+  const mine = guestCount > 1 ? byGuest[guest - 1] || [] : lines;
   const chooserReady = !!choosing && choosing.choices.every((g) => picks[g.title]);
   const chooserPrice = choosing?.pricePence != null
     ? choosing.pricePence + choosing.choices.reduce((s, g) => s + (g.options.find((o) => o.label === picks[g.title])?.extraPence || 0), 0)
@@ -170,7 +177,7 @@ export function DoorOrderPanel({
                 const n = i + 1, on = n === guest;
                 const items = list.reduce((s, l) => s + l.qty, 0);
                 return (
-                  <button key={n} onClick={() => setGuest(n)}
+                  <button key={n} onClick={() => selectGuest(n)}
                     className={`shrink-0 px-3.5 py-2 rounded-xl text-sm font-semibold border transition ${
                       on ? "bg-white text-black border-white" : "border-white/[0.1] text-gray-300 hover:text-white hover:bg-white/5"
                     }`}>
@@ -247,60 +254,69 @@ export function DoorOrderPanel({
           {/* ── the order, guest by guest ── */}
           <div className="min-h-0 flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
-              <p className="text-sm font-semibold text-white">This order</p>
-              <p className="text-xs text-gray-500">{count} {count === 1 ? "item" : "items"}</p>
+              <p className="text-sm font-semibold text-white">{guestCount > 1 ? `Guest ${guest}'s order` : "This order"}</p>
+              <p className="text-xs text-gray-500 tabular-nums">
+                {guestCount > 1
+                  ? (mine.length ? money(orderTotal(mine).pence) : "")
+                  : `${count} ${count === 1 ? "item" : "items"}`}
+              </p>
             </div>
 
             <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2">
-              {lines.length === 0 && guestCount === 1 ? (
-                <p className="py-10 text-center text-sm text-gray-500">Tap something on the menu to add it.</p>
+              {mine.length === 0 ? (
+                <p className="py-8 text-center text-sm text-gray-500">
+                  {guestCount > 1 ? `Nothing for Guest ${guest} yet. Tap the menu to add.` : "Tap something on the menu to add it."}
+                </p>
               ) : (
-                byGuest.map((list, i) => {
-                  const n = i + 1, on = n === guest;
-                  const sub = orderTotal(list).pence;
+                mine.map((l) => {
+                  const k = lineKey(l);
+                  const u = unitPence(l);
                   return (
-                    <div key={n} className={`mb-2 rounded-xl ${guestCount > 1 && on ? "bg-white/[0.03] ring-1 ring-white/[0.08]" : ""}`}>
-                      {guestCount > 1 && (
-                        <button onClick={() => setGuest(n)} className="w-full flex items-baseline justify-between px-2.5 pt-2.5 pb-1">
-                          <span className={`text-xs font-bold uppercase tracking-[0.12em] ${on ? "text-white" : "text-gray-400"}`}>Guest {n}</span>
-                          <span className="text-xs text-gray-400 tabular-nums">{list.length ? money(sub) : ""}</span>
-                        </button>
-                      )}
-                      {list.length === 0 ? (
-                        <p className="px-2.5 pb-2.5 text-xs text-gray-600">{on ? "Tap the menu to add for this guest" : "Nothing yet"}</p>
-                      ) : (
-                        list.map((l) => {
-                          const k = lineKey(l);
-                          const u = unitPence(l);
-                          return (
-                            <div key={k} className="flex items-center gap-2 px-2.5 py-2">
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm text-white truncate">
-                                  {l.kind === "drink" && <span className="text-sky-400/80 mr-1">●</span>}{l.name}
-                                </p>
-                                <p className="text-[11px] text-gray-500 truncate">
-                                  {l.choices.length
-                                    ? l.choices.map((c) => c.label + (c.extraPence ? ` +${money(c.extraPence)}` : "")).join(" · ")
-                                    : l.group}
-                                </p>
-                              </div>
-                              <div className="shrink-0 flex items-center gap-1.5">
-                                <button onClick={() => bump(k, -1)}
-                                  className="w-7 h-7 rounded-lg border border-white/10 text-white leading-none hover:bg-white/5 active:scale-95 transition">−</button>
-                                <span className="w-5 text-center text-sm font-bold text-white tabular-nums">{l.qty}</span>
-                                <button onClick={() => bump(k, 1)}
-                                  className="w-7 h-7 rounded-lg border border-white/10 text-white leading-none hover:bg-white/5 active:scale-95 transition">+</button>
-                              </div>
-                              <span className="w-[62px] shrink-0 text-right text-sm text-gray-300 tabular-nums">
-                                {u != null ? money(u * l.qty) : "—"}
-                              </span>
-                            </div>
-                          );
-                        })
-                      )}
+                    <div key={k} className="flex items-center gap-2 px-2.5 py-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-white truncate">
+                          {l.kind === "drink" && <span className="text-sky-400/80 mr-1">●</span>}{l.name}
+                        </p>
+                        <p className="text-[11px] text-gray-500 truncate">
+                          {l.choices.length
+                            ? l.choices.map((c) => c.label + (c.extraPence ? ` +${money(c.extraPence)}` : "")).join(" · ")
+                            : l.group}
+                        </p>
+                      </div>
+                      <div className="shrink-0 flex items-center gap-1.5">
+                        <button onClick={() => bump(k, -1)}
+                          className="w-7 h-7 rounded-lg border border-white/10 text-white leading-none hover:bg-white/5 active:scale-95 transition">−</button>
+                        <span className="w-5 text-center text-sm font-bold text-white tabular-nums">{l.qty}</span>
+                        <button onClick={() => bump(k, 1)}
+                          className="w-7 h-7 rounded-lg border border-white/10 text-white leading-none hover:bg-white/5 active:scale-95 transition">+</button>
+                      </div>
+                      <span className="w-[62px] shrink-0 text-right text-sm text-gray-300 tabular-nums">
+                        {u != null ? money(u * l.qty) : "—"}
+                      </span>
                     </div>
                   );
                 })
+              )}
+
+              {/* the other guests, summarised; tap to switch */}
+              {guestCount > 1 && (
+                <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                  <p className="px-2.5 pb-1.5 text-[10px] uppercase tracking-[0.15em] text-gray-500">Rest of the table</p>
+                  {byGuest.map((list, i) => {
+                    const n = i + 1;
+                    if (n === guest) return null;
+                    const items = list.reduce((t, l) => t + l.qty, 0);
+                    return (
+                      <button key={n} onClick={() => selectGuest(n)}
+                        className="w-full flex items-center justify-between gap-3 px-2.5 py-2 rounded-lg hover:bg-white/[0.04] transition text-left">
+                        <span className="text-sm text-gray-300">Guest {n}</span>
+                        <span className="text-xs text-gray-500 tabular-nums">
+                          {items ? `${items} ${items === 1 ? "item" : "items"} · ${money(orderTotal(list).pence)}` : "nothing yet"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
