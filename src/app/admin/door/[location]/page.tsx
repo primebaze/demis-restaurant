@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import type { OrderLine } from "@/lib/door-menu";
+import { lineName, type OrderLine } from "@/lib/door-menu";
 
 type Visit = {
   id: string; seq: number; label: string; hasDetails: boolean;
@@ -218,9 +218,15 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                       </td>
                       <td className="px-3 py-3 text-right text-gray-300 tabular-nums">{isDining ? v.partySize : "—"}</td>
                       <td className="px-3 py-3 text-xs text-gray-400 max-w-[260px]">
-                        {v.items?.length
-                          ? v.items.map((l) => (l.qty > 1 ? `${l.qty}× ${l.name}` : l.name)).join(", ")
-                          : <span className="text-gray-600">—</span>}
+                        {v.items?.length ? (
+                          // one line per guest when the table ordered guest by guest
+                          Array.from(new Set(v.items.map((l) => l.guest))).sort((a, b) => a - b).map((g, _, all) => (
+                            <div key={g} className="leading-relaxed">
+                              {all.length > 1 && <span className="text-gray-500 font-semibold mr-1">G{g}</span>}
+                              {v.items.filter((l) => l.guest === g).map((l) => (l.qty > 1 ? `${l.qty}× ${lineName(l)}` : lineName(l))).join(", ")}
+                            </div>
+                          ))
+                        ) : <span className="text-gray-600">—</span>}
                       </td>
                       <td className="px-3 py-3 text-right text-gray-400 tabular-nums">{clock(v.checkedInAt)}</td>
                       <td className="px-3 py-3 text-right text-gray-400 tabular-nums">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { DoorOrderPanel } from "@/components/DoorOrderPanel";
-import type { OrderLine } from "@/lib/door-menu";
+import { lineName, type OrderLine } from "@/lib/door-menu";
 
 type Visit = {
   id: string; seq: number; label: string; hasDetails: boolean;
@@ -337,6 +337,7 @@ export default function DoorKioskPage({ params }: { params: { location: string }
         <DoorOrderPanel
           label={orderFor.label}
           tableNo={orderFor.tableNo}
+          guests={orderFor.visitType === "dining" ? orderFor.partySize : 1}
           initial={orderFor.items}
           onSave={(items) => saveOrder(orderFor.id, items)}
           onUseTotal={(pence) => setAmounts((a) => ({ ...a, [orderFor.id]: (pence / 100).toFixed(2) }))}
@@ -347,8 +348,8 @@ export default function DoorKioskPage({ params }: { params: { location: string }
   );
 }
 
-/** "2× Jollof Rice · Chapman · +3 more" */
+/** "2× Jollof Rice (Chicken) · Chapman · +3 more" */
 function orderSummary(items: OrderLine[]): string {
-  const parts = items.map((l) => (l.qty > 1 ? `${l.qty}× ${l.name}` : l.name));
+  const parts = items.map((l) => (l.qty > 1 ? `${l.qty}× ${lineName(l)}` : lineName(l)));
   return parts.length > 4 ? `${parts.slice(0, 4).join(" · ")} · +${parts.length - 4} more` : parts.join(" · ");
 }
