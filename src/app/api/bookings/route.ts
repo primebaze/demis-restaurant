@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { blocksSlot } from "@/lib/blackouts";
 import {
   generateConfirmationCode,
   generateManagementToken,
@@ -132,13 +133,14 @@ export async function POST(req: Request) {
       }
     }
 
-    // Check blackout
-    const blackout = await prisma.blackoutDate.findFirst({
+    // Check blackout: the whole day, or a window covering this arrival time
+    const blackouts = await prisma.blackoutDate.findMany({
       where: {
         date,
         OR: [{ locationId: null }, { locationId: location.id }],
       },
     });
+    const blackout = blackouts.find((b) => blocksSlot(b, timeSlot.startTime));
     if (blackout) {
       return NextResponse.json({ error: `Unavailable: ${blackout.reason}` }, { status: 400 });
     }

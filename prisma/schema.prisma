@@ -221,6 +221,10 @@ model BlackoutDate {
   locationId String?
   date       String // "2026-12-25"
   reason     String // "Christmas Day", "Private Hire"
+  // Optional window, London time "HH:mm". Both empty = the whole day is blocked;
+  // set = only arrival slots starting at or after fromTime and before toTime.
+  fromTime   String?
+  toTime     String?
 
   location Location? @relation(fields: [locationId], references: [id])
 

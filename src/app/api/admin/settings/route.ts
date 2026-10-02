@@ -15,7 +15,10 @@ export async function GET() {
     prisma.location.findMany({ orderBy: { name: "asc" } }),
     prisma.bookingPolicy.findMany(),
     prisma.addOn.findMany({ orderBy: { name: "asc" } }),
-    prisma.blackoutDate.findMany({ orderBy: { date: "asc" } }),
+    prisma.blackoutDate.findMany({
+      orderBy: [{ date: "asc" }, { fromTime: "asc" }],
+      include: { location: { select: { name: true } } },
+    }),
     prisma.timeSlot.findMany({
       include: { location: true },
       orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],

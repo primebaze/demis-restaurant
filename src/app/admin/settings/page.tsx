@@ -28,6 +28,8 @@ interface BlackoutDate {
   reason: string;
   locationId: string | null;
   location: { name: string } | null;
+  fromTime: string | null;
+  toTime: string | null;
 }
 
 interface Location {
@@ -465,26 +467,43 @@ function BlackoutsPanel({
   const [newDate, setNewDate] = useState("");
   const [newReason, setNewReason] = useState("");
   const [newLocation, setNewLocation] = useState("");
+  // Optional window. Both empty = block the whole day.
+  const [newFrom, setNewFrom] = useState("");
+  const [newTo, setNewTo] = useState("");
+  const [formError, setFormError] = useState("");
   const [creating, setCreating] = useState(false);
 
   async function createBlackout(e: React.FormEvent) {
     e.preventDefault();
     if (!newDate || !newReason) return;
     setCreating(true);
-    await fetch("/api/admin/settings/blackout-dates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        date: newDate,
-        reason: newReason,
-        locationId: newLocation || null,
-      }),
-    });
-    setCreating(false);
-    setNewDate("");
-    setNewReason("");
-    setNewLocation("");
-    onRefresh();
+    setFormError("");
+    try {
+      const res = await fetch("/api/admin/settings/blackout-dates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: newDate,
+          reason: newReason,
+          locationId: newLocation || null,
+          fromTime: newFrom,
+          toTime: newTo,
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setFormError(d.error || "Could not add the blackout");
+        return;
+      }
+      setNewDate("");
+      setNewReason("");
+      setNewLocation("");
+      setNewFrom("");
+      setNewTo("");
+      onRefresh();
+    } finally {
+      setCreating(false);
+    }
   }
 
   async function deleteBlackout(id: string) {
@@ -511,6 +530,13 @@ function BlackoutsPanel({
               <div key={b.id} className="px-6 py-3 flex items-center justify-between">
                 <div>
                   <span className="text-white text-sm">{b.date}</span>
+                  {b.fromTime && b.toTime ? (
+                    <span className="ml-2 px-1.5 py-0.5 rounded bg-gold-300/10 text-gold-300 text-xs tabular-nums">
+                      {b.fromTime} to {b.toTime}
+                    </span>
+                  ) : (
+                    <span className="ml-2 px-1.5 py-0.5 rounded bg-white/5 text-gray-400 text-xs">Whole day</span>
+                  )}
                   <span className="text-gray-500 text-sm ml-2">— {b.reason}</span>
                   {b.location && (
                     <span className="text-xs text-gray-600 ml-2">({b.location.name})</span>
@@ -533,7 +559,11 @@ function BlackoutsPanel({
 
       {/* Add new blackout */}
       <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6">
-        <h3 className="text-white font-semibold mb-4">Add Blackout Date</h3>
+        <h3 className="text-white font-semibold mb-1">Add Blackout</h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Leave From and To empty to block the whole day. Set them to block only those arrival times:
+          19:00 to 21:00 blocks 19:00, 19:30, 20:00 and 20:30, and 21:00 stays bookable.
+        </p>
         <form onSubmit={createBlackout} className="flex flex-wrap gap-3 items-end">
           <div>
             <label className="text-xs text-gray-500 block mb-1">Date</label>
@@ -571,14 +601,35 @@ function BlackoutsPanel({
               ))}
             </select>
           </div>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">From (optional)</label>
+            <input
+              type="time"
+              step={1800}
+              value={newFrom}
+              onChange={(e) => setNewFrom(e.target.value)}
+              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">To (optional)</label>
+            <input
+              type="time"
+              step={1800}
+              value={newTo}
+              onChange={(e) => setNewTo(e.target.value)}
+              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
+            />
+          </div>
           <button
             type="submit"
             disabled={creating}
             className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50"
           >
-            {creating ? "Adding..." : "Add Blackout"}
+            {creating ? "Adding..." : newFrom || newTo ? "Block these times" : "Block whole day"}
           </button>
         </form>
+        {formError && <p className="mt-3 text-sm text-red-400">{formError}</p>}
       </div>
     </div>
   );

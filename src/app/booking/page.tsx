@@ -30,7 +30,9 @@ export default async function BookingPage() {
       select: { id: true, name: true, description: true, pricePence: true },
       orderBy: { pricePence: "asc" },
     }),
+    // Only whole-day blackouts grey out a date; timed ones just remove slots.
     prisma.blackoutDate.findMany({
+      where: { OR: [{ fromTime: null }, { toTime: null }] },
       select: { date: true, locationId: true, reason: true },
     }),
   ]);

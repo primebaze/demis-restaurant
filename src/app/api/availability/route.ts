@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getDayOfWeek } from "@/lib/booking-utils";
+import { isWholeDay, blocksSlot } from "@/lib/blackouts";
 export const dynamic = "force-dynamic";
 
 
@@ -26,8 +27,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Invalid date format (YYYY-MM-DD)" }, { status: 400 });
   }
 
-  // Check for blackout date
-  const blackout = await prisma.blackoutDate.findFirst({
+  // Blackouts for this date: whole-day ones close the day, timed ones drop slots below.
+  const blackouts = await prisma.blackoutDate.findMany({
     where: {
       date,
       OR: [
@@ -36,6 +37,7 @@ export async function GET(req: Request) {
       ],
     },
   });
+  const blackout = blackouts.find(isWholeDay);
 
   if (blackout) {
     return NextResponse.json({
@@ -100,7 +102,10 @@ export async function GET(req: Request) {
     },
   });
 
-  const slots = specificSlots.length > 0 ? specificSlots : regularSlots;
+  // Arrival times inside a timed blackout aren't offered at all.
+  const slots = (specificSlots.length > 0 ? specificSlots : regularSlots).filter(
+    (slot) => !blackouts.some((b) => blocksSlot(b, slot.startTime))
+  );
 
   // Get existing bookings for this date + location
   const existingBookings = await prisma.booking.findMany({
