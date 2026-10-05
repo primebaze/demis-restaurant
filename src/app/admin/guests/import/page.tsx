@@ -14,6 +14,10 @@ const CSV_NAME_KEYS = ["name", "full name", "fullname", "guest name", "guestname
 const CSV_EMAIL_KEYS = ["email", "email address", "emailaddress", "e-mail"];
 const CSV_PHONE_KEYS = ["phone", "mobile", "tel", "telephone", "phone number", "mobile number"];
 
+/** Every guest is keyed by email, so that's the one field a row can't do without. */
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const hasEmail = (r: ImportRow) => EMAIL.test(r.email.trim());
+
 function findKey(headers: string[], candidates: string[]): string | undefined {
   return headers.find((h) => candidates.includes(h.toLowerCase().trim()));
 }
@@ -23,7 +27,7 @@ export default function GuestImportPage() {
   const [fileName, setFileName] = useState("");
   const [parseError, setParseError] = useState("");
   const [importing, setImporting] = useState(false);
-  const [result, setResult] = useState<{ added: number; skipped: number } | null>(null);
+  const [result, setResult] = useState<{ added: number; skipped: number; noEmail?: number } | null>(null);
   const [importError, setImportError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -47,11 +51,15 @@ export default function GuestImportPage() {
     if (file.name.toLowerCase().endsWith(".pdf")) {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/admin/guests/import", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) { setParseError(data.error || "Failed to parse PDF"); return; }
-      setRows(data.rows || []);
-      if ((data.rows || []).length === 0) setParseError("No email addresses found in this PDF. Try a CSV instead.");
+      try {
+        const res = await fetch("/api/admin/guests/import", { method: "POST", body: formData });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setParseError(data.error || "Could not read this PDF."); return; }
+        setRows(data.rows || []);
+        if ((data.rows || []).length === 0) setParseError("No email addresses found in this PDF. Try a CSV instead.");
+      } catch {
+        setParseError("Could not upload the PDF. Check your connection and try again.");
+      }
       return;
     }
 
@@ -65,8 +73,8 @@ export default function GuestImportPage() {
         const emailKey = findKey(headers, CSV_EMAIL_KEYS);
         const phoneKey = findKey(headers, CSV_PHONE_KEYS);
 
-        if (!nameKey && !emailKey) {
-          setParseError(`Could not find name or email columns. Found: ${headers.join(", ")}`);
+        if (!emailKey) {
+          setParseError(`Could not find an email column. Found: ${headers.join(", ") || "no headings"}`);
           return;
         }
 
@@ -74,7 +82,7 @@ export default function GuestImportPage() {
           name: (nameKey ? row[nameKey] : "") || "",
           email: (emailKey ? row[emailKey] : "") || "",
           phone: (phoneKey ? row[phoneKey] : "") || "",
-        })).filter((r) => r.name.trim() || r.email.trim());
+        })).filter((r) => r.name.trim() || r.email.trim() || r.phone.trim());
 
         if (parsed.length === 0) { setParseError("No valid rows found in file."); return; }
         setRows(parsed);
@@ -86,24 +94,29 @@ export default function GuestImportPage() {
   }
 
   async function handleImport() {
-    const valid = rows.filter((r) => r.name.trim());
-    if (valid.length === 0) { setImportError("At least one guest must have a name."); return; }
+    const valid = rows.filter(hasEmail);
+    if (valid.length === 0) { setImportError("At least one guest needs a valid email address."); return; }
     setImporting(true);
     setImportError("");
-    const res = await fetch("/api/admin/guests/import", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guests: valid }),
-    });
-    const data = await res.json();
-    setImporting(false);
-    if (!res.ok) { setImportError(data.error || "Import failed"); return; }
-    setResult(data);
-    setRows([]);
-    setFileName("");
+    try {
+      const res = await fetch("/api/admin/guests/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guests: valid }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setImportError(data.error || "Import failed. Please try again."); return; }
+      setResult({ ...data, noEmail: (data.noEmail || 0) + (rows.length - valid.length) });
+      setRows([]);
+      setFileName("");
+    } catch {
+      setImportError("Could not reach the server. Check your connection and try again.");
+    } finally {
+      setImporting(false);
+    }
   }
 
-  const validCount = rows.filter((r) => r.name.trim()).length;
+  const validCount = rows.filter(hasEmail).length;
 
   return (
     <div>
@@ -117,7 +130,10 @@ export default function GuestImportPage() {
       {result && (
         <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
           <p className="text-emerald-400 font-medium">Import complete</p>
-          <p className="text-sm text-gray-400 mt-1">{result.added} guest{result.added !== 1 ? "s" : ""} added · {result.skipped} skipped (email already exists)</p>
+          <p className="text-sm text-gray-400 mt-1">
+            {result.added} guest{result.added !== 1 ? "s" : ""} added · {result.skipped} already in the CRM
+            {result.noEmail ? ` · ${result.noEmail} left out (no valid email)` : ""}
+          </p>
           <Link href="/admin/guests" className="inline-block mt-3 text-sm text-gold-300 hover:underline">View Guest CRM →</Link>
         </div>
       )}
@@ -133,7 +149,7 @@ export default function GuestImportPage() {
           <div className="text-4xl mb-4">📂</div>
           <p className="text-white font-medium mb-1">Drop a CSV or PDF here</p>
           <p className="text-sm text-gray-500 mb-4">Or click to browse</p>
-          <p className="text-xs text-gray-600">CSV: columns named name, email, phone (any order)<br />PDF: email addresses extracted automatically</p>
+          <p className="text-xs text-gray-600">CSV: an email column, plus name and phone if you have them (any order)<br />PDF: email addresses extracted automatically</p>
           <input
             ref={fileRef}
             type="file"
@@ -168,20 +184,20 @@ export default function GuestImportPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
-                  <th className="px-4 py-3">Name *</th>
-                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Email *</th>
                   <th className="px-4 py-3">Phone</th>
                   <th className="px-4 py-3 w-10"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {rows.map((r, i) => (
-                  <tr key={i} className={`${!r.name.trim() ? "bg-red-500/5" : ""}`}>
+                  <tr key={i} className={`${!hasEmail(r) ? "bg-red-500/5" : ""}`}>
                     <td className="px-4 py-2">
-                      <input value={r.name} onChange={(e) => updateRow(i, "name", e.target.value)} className={inputCls} placeholder="Required" />
+                      <input value={r.name} onChange={(e) => updateRow(i, "name", e.target.value)} className={inputCls} placeholder="—" />
                     </td>
                     <td className="px-4 py-2">
-                      <input value={r.email} onChange={(e) => updateRow(i, "email", e.target.value)} className={inputCls} placeholder="—" />
+                      <input value={r.email} onChange={(e) => updateRow(i, "email", e.target.value)} className={inputCls} placeholder="Required" />
                     </td>
                     <td className="px-4 py-2">
                       <input value={r.phone} onChange={(e) => updateRow(i, "phone", e.target.value)} className={inputCls} placeholder="—" />
@@ -200,7 +216,10 @@ export default function GuestImportPage() {
           )}
 
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
-            <p className="text-sm text-gray-500">{validCount} of {rows.length} rows ready to import</p>
+            <p className="text-sm text-gray-500">
+              {validCount} of {rows.length} rows ready to import
+              {validCount < rows.length ? " · rows in red need a valid email" : ""}
+            </p>
             <button
               onClick={handleImport}
               disabled={importing || validCount === 0}

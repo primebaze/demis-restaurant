@@ -6,6 +6,11 @@ const nextConfig = (phase) => ({
   distDir:
     process.env.NEXT_DIST_DIR ||
     (phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next"),
+  experimental: {
+    // Load the PDF reader (and the pdf.js engine it wraps) from node_modules at
+    // runtime instead of bundling it; pdf.js does not survive webpack bundling.
+    serverComponentsExternalPackages: ["pdf-parse", "pdfjs-dist"],
+  },
   images: {
     remotePatterns: [
       {
