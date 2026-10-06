@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 
-const VALID_APPETISERS = ["Puff Puff", "Samosa", "Spring Rolls"];
+// Appetisers aren't chosen: every guest gets all three.
+const STANDARD_APPETISERS = "Puff Puff, Samosa, Spring Rolls";
 const VALID_STARTERS = ["Salad", "Assorted Goat Meat Pepper Soup", "Gizzdodo", "Beef Suya", "Lamb Suya", "Moi Moi", "Nil"];
-const VALID_MAINS = ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase", "Nil"];
+const VALID_MAINS = ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase", "White Rice and Stew", "Nil"];
 const VALID_PROTEINS = ["Chicken", "Beef", "Goat Meat", "Fish", "Nil"];
 const VALID_DESSERTS = ["Ice Cream Xplosion", "Toffee Pudding", "Nil"];
 
@@ -56,12 +57,10 @@ export async function POST(
   // Honeypot
   if (body.website) return NextResponse.json({ ok: true });
 
-  const { guestName, appetiser, starter, main, protein, dessert, allergies = "" } = body;
+  const { guestName, starter, main, protein, dessert, allergies = "" } = body;
 
   if (!guestName?.trim() || guestName.trim().length > 200)
     return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
-  if (!VALID_APPETISERS.includes(appetiser))
-    return NextResponse.json({ error: "Please choose a valid appetiser" }, { status: 400 });
   if (!starter || !VALID_STARTERS.includes(starter))
     return NextResponse.json({ error: "Please choose a valid starter" }, { status: 400 });
   if (!main || !VALID_MAINS.includes(main))
@@ -85,7 +84,7 @@ export async function POST(
     data: {
       groupId: group.id,
       guestName: guestName.trim(),
-      appetiser,
+      appetiser: STANDARD_APPETISERS,
       starter,
       main,
       protein,

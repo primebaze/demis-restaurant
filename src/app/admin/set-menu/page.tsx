@@ -184,7 +184,7 @@ export default function AdminSetMenuPage() {
       // Appetiser summary
       const finalY = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || 28;
       const summary = ["Puff Puff", "Samosa", "Spring Rolls"]
-        .map((a) => `${a}: ${group.selections.filter((s) => s.appetiser === a).length}`)
+        .map((a) => `${a}: ${group.selections.filter((s) => s.appetiser.includes(a)).length}`)
         .join("    ");
       doc.setFontSize(10);
       doc.setTextColor(60);
@@ -473,7 +473,7 @@ export default function AdminSetMenuPage() {
                             {g.selections.length > 0 && (
                               <div className="mt-4 pt-4 border-t border-gray-800 flex flex-wrap gap-4">
                                 {["Puff Puff", "Samosa", "Spring Rolls"].map((a) => {
-                                  const count = g.selections.filter((s) => s.appetiser === a).length;
+                                  const count = g.selections.filter((s) => s.appetiser.includes(a)).length;
                                   return (
                                     <div key={a} className="text-sm">
                                       <span className="text-gray-500">{a}: </span>

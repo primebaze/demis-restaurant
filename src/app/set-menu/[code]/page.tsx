@@ -18,12 +18,10 @@ const LOCATION_NAMES: Record<string, string> = {
   streatham: "Streatham Hill",
 };
 
+/** Every guest gets all three, so there's nothing to choose. */
+const STANDARD_APPETISERS = ["Puff Puff", "Samosa", "Spring Rolls"];
+
 const COURSES = [
-  {
-    key: "appetiser" as const,
-    label: "01 Appetiser",
-    options: ["Puff Puff", "Samosa", "Spring Rolls"],
-  },
   {
     key: "starter" as const,
     label: "02 Starter",
@@ -32,7 +30,7 @@ const COURSES = [
   {
     key: "main" as const,
     label: "03 Main Meal",
-    options: ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase", "Nil"],
+    options: ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase", "White Rice and Stew", "Nil"],
   },
   {
     key: "protein" as const,
@@ -47,7 +45,6 @@ const COURSES = [
 ];
 
 type Selections = {
-  appetiser: string;
   starter: string;
   main: string;
   protein: string;
@@ -74,7 +71,6 @@ export default function GuestSelectionPage() {
 
   const [guestName, setGuestName] = useState("");
   const [selections, setSelections] = useState<Selections>({
-    appetiser: "",
     starter: "",
     main: "",
     protein: "",
@@ -105,7 +101,6 @@ export default function GuestSelectionPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!guestName.trim()) { setSubmitError("Please enter your name"); return; }
-    if (!selections.appetiser) { setSubmitError("Please choose your appetiser"); return; }
     if (!selections.starter) { setSubmitError("Please choose your starter"); return; }
     if (!selections.main) { setSubmitError("Please choose your main meal"); return; }
     if (!selections.protein) { setSubmitError("Please choose your protein"); return; }
@@ -168,7 +163,7 @@ export default function GuestSelectionPage() {
           <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 text-left space-y-0">
             <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/60 mb-4">Your Menu</p>
             {[
-              { label: "Appetiser", value: selections.appetiser },
+              { label: "Appetisers", value: "All 3 served" },
               { label: "Starter", value: selections.starter },
               { label: "Main", value: selections.main },
               { label: "Protein", value: selections.protein },
@@ -231,6 +226,19 @@ export default function GuestSelectionPage() {
                 maxLength={200}
                 className="w-full px-4 py-3 bg-white/[0.05] border border-white/[0.10] rounded-xl text-white placeholder-stone-600 text-sm focus:outline-none focus:border-gold-300/40 transition-colors"
               />
+            </div>
+
+            {/* Appetisers: all three served to everyone */}
+            <div>
+              <label className="block text-sm font-medium text-stone-300 mb-1">01 Standard Appetisers</label>
+              <p className="text-xs text-stone-500 mb-3">All 3 served</p>
+              <div className="grid grid-cols-3 gap-3">
+                {STANDARD_APPETISERS.map((a) => (
+                  <div key={a} className="py-3.5 px-4 rounded-xl border border-gold-300/25 bg-gold-300/[0.05] text-sm font-medium text-center text-gold-300/90">
+                    {a}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Course selections */}

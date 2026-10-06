@@ -29,7 +29,7 @@ const COURSES = [
     label: "Appetiser",
     title: "Small Chops",
     items: ["Puff Puff", "Samosa", "Spring Rolls"],
-    note: "Choose one",
+    note: "All 3 served",
   },
   {
     number: "02",
@@ -42,7 +42,7 @@ const COURSES = [
     number: "03",
     label: "Main Meal",
     title: "Your Choice",
-    items: ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase"],
+    items: ["Jollof Rice", "Fried Rice", "Eforiro with Pounded Yam", "Egusi with Pounded Yam", "Amala with Abula", "White Rice and Ayamase", "White Rice and Stew"],
     note: "Choose one + choice of protein: Chicken, Beef, Goat Meat or Fish",
   },
   {
