@@ -9,6 +9,7 @@ type Slot = {
   id: string;
   startTime: string;
   endTime: string;
+  maxCovers: number;
   remaining: number;
   available: boolean;
 };
@@ -105,6 +106,8 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
   const [selectedDate, setSelectedDate] = useState("");
   const [slots, setSlots] = useState<Slot[]>([]);
   const [policy, setPolicy] = useState<Policy | null>(null);
+  // Phone for the chosen site, shown when a group is too big to book online.
+  const [sitePhone, setSitePhone] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [partySize, setPartySize] = useState(2);
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
@@ -179,6 +182,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
 
       setSlots(data.slots || []);
       setPolicy(data.policy || null);
+      setSitePhone(data.location?.phone || "");
     } catch {
       setAvailabilityError("Failed to load availability");
     }
@@ -256,6 +260,17 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
   }
 
   const depositRequired = policy && partySize >= policy.depositThreshold;
+
+  // The biggest group one table slot can seat that day. Larger groups are asked
+  // to call rather than shown a wall of "Full".
+  const slotLimit = slots.length ? Math.max(...slots.map((s) => s.maxCovers)) : Infinity;
+  const maxGroup = Math.max(1, Math.min(policy?.maxPartySize || 30, slotLimit));
+  const atMaxGroup = partySize >= maxGroup && Number.isFinite(slotLimit);
+
+  // Picked 15 at one site, then switched to a site whose slots seat 12: bring it down.
+  useEffect(() => {
+    if (Number.isFinite(slotLimit) && partySize > maxGroup) setPartySize(maxGroup);
+  }, [slotLimit, maxGroup, partySize]);
 
   // ─── Render step indicator ───
   function StepIndicator() {
@@ -466,14 +481,21 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             </button>
             <span className="text-2xl font-bold text-white w-12 text-center">{partySize}</span>
             <button
-              onClick={() =>
-                setPartySize(Math.min(policy?.maxPartySize || 30, partySize + 1))
-              }
-              className="w-10 h-10 rounded-full border border-white/[0.1] bg-[#222] text-white text-lg flex items-center justify-center hover:border-gold-300/30 transition-all"
+              onClick={() => setPartySize(Math.min(maxGroup, partySize + 1))}
+              disabled={partySize >= maxGroup}
+              className="w-10 h-10 rounded-full border border-white/[0.1] bg-[#222] text-white text-lg flex items-center justify-center hover:border-gold-300/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-white/[0.1]"
             >
               +
             </button>
           </div>
+          {atMaxGroup && (
+            <p className="mt-2 text-xs text-stone-400">
+              For groups larger than {maxGroup}, please call us
+              {sitePhone ? (
+                <> on <a href={`tel:${sitePhone.replace(/\s+/g, "")}`} className="text-gold-300 hover:text-gold-200 underline underline-offset-2">{sitePhone}</a></>
+              ) : null}.
+            </p>
+          )}
           {depositRequired && (
             <p className="mt-2 text-xs text-gold-300">
               ⚡ A {formatPence(policy!.depositAmountPence)} hold fee applies for parties of{" "}

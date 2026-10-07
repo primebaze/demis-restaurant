@@ -139,7 +139,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     available: true,
-    location: { id: location.id, name: location.name, slug: location.slug },
+    location: { id: location.id, name: location.name, slug: location.slug, phone: location.phone },
     date,
     dayOfWeek,
     policy: policy
