@@ -90,8 +90,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid md:grid-cols-2 gap-5">
             {/* Bulk Order card */}
-            <div className="group relative rounded-[1.75rem] border border-white/[0.08] bg-gradient-to-br from-[#2c2c2c] to-[#1e1e1e] p-8 sm:p-10 overflow-hidden transition-all duration-300 hover:border-gold-300/20 hover:shadow-[0_0_40px_-12px_rgba(232,204,156,0.15)]">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-gold-300/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="group relative rounded-[1.75rem] border border-white/[0.08] p-8 sm:p-10 overflow-hidden transition-colors duration-300 hover:border-gold-300/20">
               <div className="relative">
                 <div className="w-12 h-12 rounded-2xl bg-gold-300/10 flex items-center justify-center mb-7">
                   <svg className="text-gold-300" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
@@ -110,8 +109,7 @@ export default function HomePage() {
             </div>
 
             {/* Dine In card */}
-            <div className="group relative rounded-[1.75rem] border border-white/[0.08] bg-gradient-to-br from-[#2c2c2c] to-[#1e1e1e] p-8 sm:p-10 overflow-hidden transition-all duration-300 hover:border-gold-300/20 hover:shadow-[0_0_40px_-12px_rgba(232,204,156,0.15)]">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-gold-300/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="group relative rounded-[1.75rem] border border-white/[0.08] p-8 sm:p-10 overflow-hidden transition-colors duration-300 hover:border-gold-300/20">
               <div className="relative">
                 <div className="w-12 h-12 rounded-2xl bg-gold-300/10 flex items-center justify-center mb-7">
                   <svg className="text-gold-300" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
