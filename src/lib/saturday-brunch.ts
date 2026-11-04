@@ -21,18 +21,15 @@ export const FEAST_MAX_PARTY = 15;
 /** Day of the week the feast runs, 0 = Sunday. */
 const SERVICE_WEEKDAY = 0;
 
-// The feast runs 1:30pm to 6pm. Arrival times guests can pick, the last half-hour before close.
+// The feast runs 1:30pm to 6pm. Arrival times guests can pick, the last one at 6pm.
 export const ARRIVAL_SLOTS = [
-  "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
+  "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00",
 ];
 export const BRUNCH_START = "1:30pm";
 export const BRUNCH_END = "6pm";
-/** Service ends at 6pm (London); after that the booking form rolls on to next Sunday. */
+/** At 6pm (London) the last arrival has gone, so the booking form rolls on to next Sunday. */
 export const BRUNCH_END_MIN = 18 * 60;
 export const SERVICE_END = "18:00";
-/** How long a booking blocks out in the guest's calendar. */
-export const SITTING_MIN = 120;
-
 export function isArrivalSlot(t: string): boolean {
   return ARRIVAL_SLOTS.includes(t);
 }

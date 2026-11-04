@@ -38,13 +38,13 @@ test("booking form fallback times match the settings times", () => {
   assert.deepEqual(formSlots, ARRIVAL_SLOTS);
 });
 
-test("arrival times are in order, on the half hour, and before closing", () => {
+test("arrival times are in order, on the half hour, and no later than closing", () => {
   assert.ok(ARRIVAL_SLOTS.length > 0);
   const sorted = [...ARRIVAL_SLOTS].sort();
   assert.deepEqual(ARRIVAL_SLOTS, sorted, "arrival times are out of order");
   for (const t of ARRIVAL_SLOTS) {
     assert.match(t, /^([01]\d|2[0-3]):(00|30)$/, `${t} isn't on the hour or half hour`);
-    assert.ok(t < SERVICE_END, `${t} is at or after closing (${SERVICE_END})`);
+    assert.ok(t <= SERVICE_END, `${t} is after closing (${SERVICE_END})`);
   }
   const [h, m] = SERVICE_END.split(":").map(Number);
   assert.equal(BRUNCH_END_MIN, h * 60 + m, "BRUNCH_END_MIN doesn't match SERVICE_END");

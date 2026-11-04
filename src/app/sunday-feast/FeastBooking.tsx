@@ -18,7 +18,7 @@ type Result = {
 };
 
 // Fallback only; the server sends the real list (ARRIVAL_SLOTS in src/lib/saturday-brunch.ts).
-const ARRIVAL_SLOTS = ["13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"];
+const ARRIVAL_SLOTS = ["13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00"];
 const CRICKLEWOOD_PHONE = "020 3904 6977";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;

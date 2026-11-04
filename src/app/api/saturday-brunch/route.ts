@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   upcomingFeastDates, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, FEAST_NAME,
-  FEAST_MIN_PARTY, FEAST_MAX_PARTY, SITTING_MIN, ARRIVAL_SLOTS, isArrivalSlot, packageLabel, addMinutes,
-  BRUNCH_START, BRUNCH_END, SERVICE_END,
+  FEAST_MIN_PARTY, FEAST_MAX_PARTY, BRUNCH_WINDOW_MIN, ARRIVAL_SLOTS, isArrivalSlot, packageLabel, addMinutes,
+  BRUNCH_START, BRUNCH_END,
 } from "@/lib/saturday-brunch";
 import { sendRawEmail, sendViaResend, isResendConfigured, type MailAttachment } from "@/lib/email";
 import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
@@ -26,14 +26,13 @@ async function deliver(to: string, subject: string, html: string, attachments?: 
   return sendRawEmail(to, subject, html, undefined, attachments);
 }
 
-/** The guest's sitting, as a calendar event: from arrival for a sitting, but never past 6pm close. */
+/** The guest's sitting, as a calendar event: from arrival, as long as the dining window timed at the door. */
 function brunchEvent(o: { id: string; date: string; arrivalTime: string; partySize: number; pkg: string }): IcsEvent {
   const start = o.arrivalTime || ARRIVAL_SLOTS[0];
-  const sittingEnd = addMinutes(start, SITTING_MIN);
   return {
     uid: `brunch-${o.id}@demisrestaurant.co.uk`,
     start: londonToUtc(o.date, start),
-    end: londonToUtc(o.date, sittingEnd < SERVICE_END ? sittingEnd : SERVICE_END),
+    end: londonToUtc(o.date, addMinutes(start, BRUNCH_WINDOW_MIN)),
     summary: `${FEAST_NAME} at Demi's ${BRUNCH_LOCATION}`,
     description: `${FEAST_NAME}, party of ${o.partySize}, arriving ${start}. £${BRUNCH_PRICE} per person, paid at the door.`,
     location: BRUNCH_ADDRESS,

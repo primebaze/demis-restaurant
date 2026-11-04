@@ -117,7 +117,7 @@ the account owner (Vercel connection `create_deployment`, `gitSource` = this rep
 
 - the door check-in price matches the settings price
 - the booking form's fallback times match the settings times
-- every arrival time is in order, on the half hour, and before closing
+- every arrival time is in order, on the half hour, and no later than closing
 - the next bookable date always lands on the right weekday, and rolls to next week after close
 - the right number of upcoming dates is offered, a week apart
 - the feast package costs the settings price; old brunch bookings still read correctly
