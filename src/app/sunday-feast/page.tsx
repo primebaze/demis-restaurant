@@ -74,6 +74,7 @@ export default function SundayFeastPage() {
             Sunday Feast
           </h1>
           <p className="mt-4 text-base text-stone-300">A three course feast to share</p>
+          <p className="mt-1.5 text-sm text-stone-400">1:30pm to 6pm</p>
           <div className="mt-7 flex items-center justify-center gap-2.5 flex-wrap">
             <span className="rounded-full bg-gold-300 px-4 py-2 text-[13px] font-semibold text-[#1a1a1a]">£30 per person</span>
             <span className="rounded-full border border-white/25 bg-black/40 px-4 py-2 text-[13px] font-medium text-white backdrop-blur-sm">
@@ -175,7 +176,7 @@ export default function SundayFeastPage() {
             <section className={`${card} p-8 sm:p-10`}>
               <div className="grid sm:grid-cols-3 gap-6">
                 {[
-                  { k: "When", v: ["Every Sunday", "Reserve your table below"] },
+                  { k: "When", v: ["Every Sunday", "1:30pm to 6pm"] },
                   { k: "Where", v: ["Cricklewood", "89 Cricklewood Broadway, NW2 3JG"] },
                   { k: "Price", v: ["£30 per person", "For two or more"] },
                 ].map((d) => (

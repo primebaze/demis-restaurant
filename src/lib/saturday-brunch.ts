@@ -21,15 +21,15 @@ export const FEAST_MAX_PARTY = 15;
 /** Day of the week the feast runs, 0 = Sunday. */
 const SERVICE_WEEKDAY = 0;
 
-// Arrival times guests can pick. Change these to change the feast's hours.
+// The feast runs 1:30pm to 6pm. Arrival times guests can pick, the last half-hour before close.
 export const ARRIVAL_SLOTS = [
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
-  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00",
+  "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
 ];
-export const BRUNCH_START = "12pm";
-export const BRUNCH_END = "late";
-/** After this time on a Sunday (London), the booking form rolls on to next week. */
-export const BRUNCH_END_MIN = 20 * 60;
+export const BRUNCH_START = "1:30pm";
+export const BRUNCH_END = "6pm";
+/** Service ends at 6pm (London); after that the booking form rolls on to next Sunday. */
+export const BRUNCH_END_MIN = 18 * 60;
+export const SERVICE_END = "18:00";
 /** How long a booking blocks out in the guest's calendar. */
 export const SITTING_MIN = 120;
 

@@ -115,6 +115,7 @@ export default function EventsPage() {
                 <span className="text-3xl">🍗</span>
                 <div>
                   <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Sunday</p>
+                  <p className="text-xs text-stone-500">1:30 PM &ndash; 6 PM</p>
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-white">Sunday Feast</h3>
