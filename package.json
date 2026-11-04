@@ -9,7 +9,8 @@
     "lint": "next lint",
     "import:wordpress": "npx tsx prisma/import-wordpress.ts",
     "recompress:blog-images": "npx tsx prisma/recompress-blog-images.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:experiences": "npx tsx --test tests/experiences.test.ts"
   },
   "dependencies": {
     "@next/font": "^14.2.15",

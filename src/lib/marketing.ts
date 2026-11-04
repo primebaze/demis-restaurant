@@ -127,7 +127,9 @@ export function trackedSiteUrl(path: string, campaign: string, email: string): s
 /** Placeholders an admin can type in a blast to get a tracked link to our own pages. */
 const SITE_PLACEHOLDER_LINKS: Record<string, { path: string; label: string }> = {
   buffet: { path: "/sunday-buffet", label: "book your place" },
-  brunch: { path: "/saturday-brunch", label: "reserve a table" },
+  feast: { path: "/sunday-feast", label: "reserve a table" },
+  // The Saturday brunch became the Sunday Feast; old saved emails using {brunch} still work.
+  brunch: { path: "/sunday-feast", label: "reserve a table" },
 };
 
 /** Wraps one outbound link in the redirect that logs the click. */
@@ -152,9 +154,9 @@ export function injectTrackedLinks(html: string, email: string, campaign = "blas
   // {vote} goes through /vote, which logs its own clicks.
   let out = html.replace(/\{\{?\s*vote\s*\}?\}/gi, anchor(voteUrl(email), "Vote for Demi's"));
 
-  // {buffet} / {brunch} point at our own public pages, so they go through /r to
+  // {buffet} / {feast} point at our own public pages, so they go through /r to
   // become attributable. The pages themselves stay untracked.
-  out = out.replace(/\{\{?\s*(buffet|brunch)\s*\}?\}/gi, (_whole, key: string) => {
+  out = out.replace(/\{\{?\s*(buffet|feast|brunch)\s*\}?\}/gi, (_whole, key: string) => {
     const link = SITE_PLACEHOLDER_LINKS[key.toLowerCase()];
     return anchor(trackedSiteUrl(link.path, campaign, email), link.label);
   });

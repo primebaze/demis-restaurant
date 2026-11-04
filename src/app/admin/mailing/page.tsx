@@ -342,7 +342,7 @@ export default function MailingPage() {
             <p className="text-[11px] text-gray-500">
               Use <code className="text-gold-300">{"{name}"}</code> for the recipient&apos;s first name,{" "}
               <code className="text-gold-300">{"{buffet}"}</code> or{" "}
-              <code className="text-gold-300">{"{brunch}"}</code> for a tracked booking link, and{" "}
+              <code className="text-gold-300">{"{feast}"}</code> for a tracked booking link, and{" "}
               <code className="text-gold-300">{"{vote}"}</code> for the awards link. Clicks on those show up
               under Link Clicks.
             </p>

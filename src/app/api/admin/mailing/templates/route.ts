@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * Seeded on first read so a fresh database comes up with the wording already in
  * place; after that the admin owns them and nothing here overwrites an edit.
  *
- * {name} becomes the recipient's first name. {buffet} and {brunch} become
+ * {name} becomes the recipient's first name. {buffet} and {feast} become
  * tracked links to those pages, so clicks are attributable to the person who
  * received the email while the public pages stay uncounted.
  */
@@ -157,9 +157,9 @@ We'd be really happy to see you again.`,
 
 On Fridays there's a live Afrobeats night at Cricklewood from 8pm, with Deejay Why on the decks.
 
-On Saturdays there's a bottomless brunch from 1pm to 4:30pm.
+On Sundays there's our all you can eat buffet at Streatham Hill, from 12pm.
 
-And on Sundays there's our all you can eat buffet at Streatham Hill, from 12pm.
+And also on Sundays, our Sunday Feast at Cricklewood, 1:30pm to 6pm: three courses to share for £30 per person.
 
 You'll find all of them on our website, where you can book a table too:
 
@@ -180,20 +180,19 @@ Or if you'd rather book a table yourself:
 https://www.demisrestaurant.co.uk/booking`,
   },
   {
+    // Key kept from the Saturday brunch template it replaced, so it updates in place.
     key: "saturday-brunch",
-    name: "Saturday brunch",
+    name: "Sunday Feast",
     scope: "blast",
     sortOrder: 2,
-    subject: "Something new: Saturday bottomless brunch",
+    subject: "New at Demi's: the Sunday Feast",
     body: `Hi {name},
 
-We wanted you to be among the first to know we've just added something new: a Saturday bottomless brunch, 1pm to 4:30pm, £35 per person.
+We've just started something new at Cricklewood: the Sunday Feast, every Sunday from 1:30pm to 6pm.
 
-It's unlimited sides, potato and sweet potato fries, roasted potatoes, grilled plantain, shawarma, seafood like scallops, mussels, prawns and grilled fish, plus beef ribs, striploin, suya, lamb chops and asun from the grill.
+For two or more people, it's £30 per person for everything on the menu, all to share: puff puff, meat pie and fish roll to start, then pepper soup, moi moi and house salad, then a whole rotisserie chicken and a whole grilled fish, with smoky party jollof rice and sweet fried plantain. It comes with one winter warmer each too.
 
-If Sundays are hard to make, this might suit you better. And of course the buffet is still on every Sunday.
-
-You can reserve a table here: {brunch}
+You can reserve a table here: {feast}
 
 Hope to see you soon.
 
