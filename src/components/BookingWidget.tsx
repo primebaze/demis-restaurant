@@ -349,7 +349,10 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-white/[0.06] bg-[#222] hover:border-gold-300/30 hover:bg-[#282828] transition-all"
           >
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-stone-500 font-semibold mb-1">Every Sunday</p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-[10px] uppercase tracking-widest text-stone-500 font-semibold">Every Sunday</p>
+                <span className="rounded-full bg-gold-300 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#1a1a1a]">New</span>
+              </div>
               <h3 className="text-lg font-bold text-white">Sunday Feast at Cricklewood</h3>
               <p className="text-sm text-stone-400 mt-1">Three courses to share, £30pp for two or more.</p>
             </div>
