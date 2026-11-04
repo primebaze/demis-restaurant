@@ -469,6 +469,7 @@ model SaturdayBrunchBooking {
   arrivalTime   String    @default("")
   package       String    @default("food") // food | drinks — rows predating packages were flat-price food
   pricePerHead  Int       @default(35) // £ per head for the chosen package, at the time of booking
+  heardFrom     String    @default("") // optional answer to "Where did you hear about us?": instagram | facebook | tiktok | friend
   ip            String    @default("")
   status        String    @default("booked") // booked, arrived, cancelled
   confirmToken  String    @default("")

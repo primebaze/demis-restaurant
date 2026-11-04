@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { upcomingFeastDate, prettyDate, BRUNCH_PRICE, packagePrice, packageLabel } from "@/lib/saturday-brunch";
+import { HEARD_FROM_OPTIONS, heardFromLabel } from "@/lib/heard-from";
 export const dynamic = "force-dynamic";
 
 /** POST /api/admin/saturday-brunch — { action: "reset", date } clears a Sunday. */
@@ -41,6 +42,7 @@ export async function GET(req: Request) {
       package: b.package,
       packageLabel: packageLabel(b.package),
       pricePerHead: b.pricePerHead || packagePrice(b.package),
+      heardFrom: heardFromLabel(b.heardFrom),
       status: b.status,
       confirmSentAt: b.confirmSentAt,
       confirmedAt: b.confirmedAt,
@@ -52,12 +54,18 @@ export async function GET(req: Request) {
     const confirmed = active.filter((b) => b.confirmedAt).length;
     // Expected takings at each guest's chosen package; the door check-in is the final word.
     const revenue = active.reduce((s, b) => s + (b.pricePerHead || packagePrice(b.package)) * b.partySize, 0);
+    // "Where did you hear about us?" counts for this date, by booking (not by head).
+    const heardFrom = [
+      ...HEARD_FROM_OPTIONS.map((o) => ({ label: o.label, count: active.filter((b) => b.heardFrom === o.key).length })),
+      { label: "Not said", count: active.filter((b) => !b.heardFrom).length },
+    ];
     return NextResponse.json({
       date,
       prettyDate: prettyDate(date),
       price: BRUNCH_PRICE,
       bookings,
       summary: { reservations: active.length, people, drinkers, confirmed, cancelled: rows.length - active.length, revenue },
+      heardFrom,
     });
   } catch {
     return NextResponse.json({

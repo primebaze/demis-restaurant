@@ -9,6 +9,7 @@ import { sendRawEmail, sendViaResend, isResendConfigured, type MailAttachment } 
 import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { brunchBookingsOpen } from "@/lib/brunch-settings";
+import { parseHeardFrom, heardFromLabel } from "@/lib/heard-from";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
@@ -182,6 +183,8 @@ export async function POST(req: Request) {
   // One package: the feast, the same price for everyone at the table.
   const pkg = "feast";
   const pricePerHead = BRUNCH_PRICE;
+  // Optional, for marketing analytics. Anything unrecognised is stored as "" (skipped).
+  const heardFrom = parseHeardFrom(body.heardFrom);
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
@@ -230,14 +233,14 @@ export async function POST(req: Request) {
   }
 
   const booking = await prisma.saturdayBrunchBooking.create({
-    data: { date, name, email, phone, partySize, arrivalTime, package: pkg, pricePerHead, ip },
+    data: { date, name, email, phone, partySize, arrivalTime, package: pkg, pricePerHead, heardFrom, ip },
   });
 
   // Must be awaited — Vercel freezes the function once the response is returned.
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bookings@demisrestaurant.co.uk";
   const [guestSent, adminSent] = await Promise.all([
     withTimeout(deliver(email, `Your ${FEAST_NAME} reservation is confirmed`, guestEmailHtml({ name, date, partySize, arrivalTime, pkg, pricePerHead, calendarUrl: googleCalendarUrl(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })) }), [{ filename: "demis-sunday-feast.ics", content: buildIcs(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }])).catch(() => false),
-    withTimeout(deliver(adminEmail, `New ${FEAST_NAME} reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime, pkg, pricePerHead }))).catch(() => false),
+    withTimeout(deliver(adminEmail, `New ${FEAST_NAME} reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime, pkg, pricePerHead, heardFrom }))).catch(() => false),
   ]);
   if (!guestSent) console.error(`[Feast] Guest confirmation email FAILED → ${email}`);
   if (!adminSent) console.error(`[Feast] Admin notification email FAILED → ${adminEmail}`);
@@ -256,7 +259,7 @@ export async function POST(req: Request) {
   });
 }
 
-function adminEmailHtml(o: { name: string; email: string; phone: string; date: string; partySize: number; arrivalTime: string; pkg: string; pricePerHead: number }): string {
+function adminEmailHtml(o: { name: string; email: string; phone: string; date: string; partySize: number; arrivalTime: string; pkg: string; pricePerHead: number; heardFrom: string }): string {
   const row = (k: string, v: string) =>
     `<tr><td style="padding:6px 0;color:#888;font-size:13px;width:120px;">${k}</td><td style="padding:6px 0;color:#111;font-size:14px;font-weight:600;">${v}</td></tr>`;
   return `<!DOCTYPE html><html><body style="margin:0;background:#f4f4f4;font-family:Helvetica,Arial,sans-serif;">
@@ -271,6 +274,7 @@ function adminEmailHtml(o: { name: string; email: string; phone: string; date: s
     ${row("Date", prettyDate(o.date))}
     ${row("Email", esc(o.email))}
     ${row("Phone", esc(o.phone))}
+    ${row("Heard about us", heardFromLabel(o.heardFrom) || "Not said")}
   </table></td></tr>
 </table></td></tr></table></body></html>`;
 }

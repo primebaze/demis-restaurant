@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; package: string; packageLabel: string; pricePerHead: number; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
+type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; package: string; packageLabel: string; pricePerHead: number; heardFrom: string; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
 type Summary = { reservations: number; people: number; drinkers: number; confirmed: number; cancelled: number; revenue: number };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -32,6 +32,8 @@ export default function AdminSaturdayBrunchPage() {
   const [prettyDate, setPrettyDate] = useState("");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [summary, setSummary] = useState<Summary>(EMPTY);
+  // "Where did you hear about us?" answers for the selected Sunday.
+  const [heardFrom, setHeardFrom] = useState<{ label: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRows, setDateRows] = useState<DateRow[]>([]);
   const [savingDate, setSavingDate] = useState("");
@@ -90,6 +92,7 @@ export default function AdminSaturdayBrunchPage() {
     const d = await res.json();
     setBookings(d.bookings || []);
     setSummary(d.summary || EMPTY);
+    setHeardFrom(d.heardFrom || []);
     setResolvedDate(d.date || "");
     setPrettyDate(d.prettyDate || "");
     setLoading(false);
@@ -179,6 +182,28 @@ export default function AdminSaturdayBrunchPage() {
         </div>
       </div>
 
+      {/* ── Where guests heard about the feast ── */}
+      {summary.reservations > 0 && (
+        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6 max-w-2xl">
+          <p className="text-sm text-white font-semibold mb-3">Heard about us</p>
+          <div className="space-y-2">
+            {heardFrom.map((h) => {
+              const pct = summary.reservations ? Math.round((h.count / summary.reservations) * 100) : 0;
+              return (
+                <div key={h.label} className="flex items-center gap-3 text-sm">
+                  <span className="w-28 shrink-0 text-gray-400">{h.label}</span>
+                  <div className="flex-1 h-1.5 bg-black/50 rounded-full overflow-hidden">
+                    <div className="h-full bg-gold-300 rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="w-16 shrink-0 text-right text-white tabular-nums">{h.count} <span className="text-gray-500 text-xs">{pct}%</span></span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[11px] text-gray-500">Counted per booking. The question is optional on the booking form.</p>
+        </div>
+      )}
+
       {/* ── Availability: block / unblock each upcoming Sunday ── */}
       <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
         <p className="text-sm text-white font-semibold mb-1">Availability</p>
@@ -262,6 +287,7 @@ export default function AdminSaturdayBrunchPage() {
                   <th className="px-4 py-3">Party</th>
                   <th className="px-4 py-3">Package</th>
                   <th className="px-4 py-3">Contact</th>
+                  <th className="px-4 py-3">Heard</th>
                   <th className="px-4 py-3">Booked</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3"></th>
@@ -279,6 +305,7 @@ export default function AdminSaturdayBrunchPage() {
                       <span className="text-gray-500">£{b.pricePerHead} pp · £{b.pricePerHead * b.partySize}</span>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
+                    <td className="px-4 py-3 text-xs text-gray-400">{b.heardFrom || "—"}</td>
                     <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-700 text-gray-300"}`}>{b.status}</span>

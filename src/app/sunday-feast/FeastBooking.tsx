@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { HEARD_FROM_OPTIONS } from "@/lib/heard-from";
 
 type DateOption = {
   date: string; prettyDate: string; soldOut: boolean;
@@ -34,6 +35,7 @@ export function FeastBooking() {
   const [phone, setPhone] = useState("");
   const [partySize, setPartySize] = useState(2);
   const [arrivalTime, setArrivalTime] = useState("");
+  const [heardFrom, setHeardFrom] = useState(""); // optional, for analytics
   const [bookingDate, setBookingDate] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
@@ -113,7 +115,7 @@ export function FeastBooking() {
       const res = await fetch("/api/saturday-brunch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, date: bookingDate, website, turnstileToken: token }),
+        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, heardFrom, date: bookingDate, website, turnstileToken: token }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -154,7 +156,7 @@ export function FeastBooking() {
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
         <button
-          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(2); setArrivalTime(""); }}
+          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(2); setArrivalTime(""); setHeardFrom(""); }}
           className="mt-6 text-sm text-gold-300 hover:text-gold-200 transition"
         >
           Book another table
@@ -272,6 +274,29 @@ export function FeastBooking() {
                 }`}
               >
                 {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
+          <span className="block mb-2.5 text-sm text-stone-400">
+            Where did you hear about us? <span className="text-stone-600">(optional)</span>
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            {HEARD_FROM_OPTIONS.map((o) => (
+              <button
+                key={o.key}
+                type="button"
+                aria-pressed={heardFrom === o.key}
+                onClick={() => setHeardFrom((cur) => (cur === o.key ? "" : o.key))}
+                className={`py-2 rounded-lg text-[13px] font-semibold transition border ${
+                  heardFrom === o.key
+                    ? "bg-gold-300 text-black border-gold-300"
+                    : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
+                }`}
+              >
+                {o.label}
               </button>
             ))}
           </div>
