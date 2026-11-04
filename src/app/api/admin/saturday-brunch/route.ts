@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
-import { upcomingSaturday, prettyDate, BRUNCH_PRICE, packagePrice, packageLabel } from "@/lib/saturday-brunch";
+import { upcomingFeastDate, prettyDate, BRUNCH_PRICE, packagePrice, packageLabel } from "@/lib/saturday-brunch";
 export const dynamic = "force-dynamic";
 
-/** POST /api/admin/saturday-brunch — { action: "reset", date } clears a Saturday. */
+/** POST /api/admin/saturday-brunch — { action: "reset", date } clears a Sunday. */
 export async function POST(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const date = body.date || upcomingSaturday();
+  const date = body.date || upcomingFeastDate();
 
   if (body.action === "reset") {
     const { count } = await prisma.saturdayBrunchBooking.deleteMany({ where: { date } });
@@ -19,12 +19,12 @@ export async function POST(req: Request) {
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }
 
-/** GET /api/admin/saturday-brunch?date=YYYY-MM-DD — reservations for a Saturday. */
+/** GET /api/admin/saturday-brunch?date=YYYY-MM-DD — reservations for a Sunday. */
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const date = new URL(req.url).searchParams.get("date") || upcomingSaturday();
+  const date = new URL(req.url).searchParams.get("date") || upcomingFeastDate();
 
   try {
     const rows = await prisma.saturdayBrunchBooking.findMany({

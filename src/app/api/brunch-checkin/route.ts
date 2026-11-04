@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { isCheckinUnlocked, serviceDate } from "@/lib/checkin-auth";
-import { BRUNCH_PRICE, BRUNCH_PRICE_DRINKS, BRUNCH_WINDOW_MIN } from "@/lib/saturday-brunch";
+import { BRUNCH_PRICE, BRUNCH_WINDOW_MIN } from "@/lib/saturday-brunch";
 export const dynamic = "force-dynamic";
 
 function isUniqueViolation(e: unknown): boolean {
@@ -28,15 +28,15 @@ export async function POST(req: Request) {
 
   const name = (body.name || "").trim().slice(0, 120);
   const heads = (v: unknown) => Math.max(0, Math.min(50, Math.floor(Number(v) || 0)));
-  const withDrinks = heads(body.withDrinks);
-  let foodOnly = heads(body.foodOnly);
-  // Older kiosk clients only send partySize — treat the whole group as food only.
-  if (foodOnly + withDrinks === 0) foodOnly = Math.max(1, heads(body.partySize) || 1);
-  if (foodOnly + withDrinks > 50) {
+  // The feast is one price for everyone at the table; there is no drinks package.
+  // Accept partySize, or the old foodOnly/withDrinks counts from a kiosk that hasn't reloaded.
+  const partySize = heads(body.partySize) || heads(body.foodOnly) + heads(body.withDrinks) || 1;
+  if (partySize > 50) {
     return NextResponse.json({ error: "That's too many for one check-in." }, { status: 400 });
   }
-  const partySize = foodOnly + withDrinks;
-  const totalPrice = foodOnly * BRUNCH_PRICE + withDrinks * BRUNCH_PRICE_DRINKS;
+  const foodOnly = partySize;
+  const withDrinks = 0;
+  const totalPrice = partySize * BRUNCH_PRICE;
   const date = serviceDate();
   const endsAt = new Date(Date.now() + BRUNCH_WINDOW_MIN * 60 * 1000);
 

@@ -7,9 +7,9 @@ type DateOption = {
   spotsLeft: number | null; note: string;
 };
 type Avail = {
-  date: string; prettyDate: string; price: number; priceWithDrinks?: number;
+  date: string; prettyDate: string; price: number; minParty?: number; maxParty?: number;
   arrivalSlots?: string[]; dates?: DateOption[]; allSoldOut?: boolean;
-  /** False when an admin has switched brunch bookings off. */
+  /** False when an admin has switched Sunday Feast bookings off. */
   bookingsOpen?: boolean;
 };
 type Result = {
@@ -17,12 +17,12 @@ type Result = {
   packageLabel?: string; pricePerHead?: number; price: number;
 };
 
+// Fallback only; the server sends the real list (ARRIVAL_SLOTS in src/lib/saturday-brunch.ts).
 const ARRIVAL_SLOTS = [
-  "13:00", "13:30",
-  "14:00", "14:30",
-  "15:00", "15:30",
-  "16:00", "16:30",
+  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00",
 ];
+const CRICKLEWOOD_PHONE = "020 3904 6977";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 type TurnstileApi = {
@@ -30,15 +30,14 @@ type TurnstileApi = {
   reset: (id?: string) => void;
 };
 
-export function BrunchBooking() {
+export function FeastBooking() {
   const [avail, setAvail] = useState<Avail | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [partySize, setPartySize] = useState(1);
+  const [partySize, setPartySize] = useState(2);
   const [arrivalTime, setArrivalTime] = useState("");
   const [bookingDate, setBookingDate] = useState("");
-  const [pkg, setPkg] = useState<"food" | "drinks">("food");
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -83,10 +82,10 @@ export function BrunchBooking() {
 
   const loadAvail = useCallback(async () => {
     try {
-      const res = await fetch("/api/saturday-brunch");
+      const res = await fetch("/api/saturday-brunch"); // the feast runs on the brunch booking API
       const d: Avail = await res.json();
       setAvail(d);
-      // Preselect the soonest Saturday that's still open.
+      // Preselect the soonest Sunday that is still open.
       setBookingDate((cur) => cur || d.dates?.find((x) => !x.soldOut)?.date || d.date || "");
     } catch {
       /* ignore */
@@ -96,8 +95,8 @@ export function BrunchBooking() {
   useEffect(() => { loadAvail(); }, [loadAvail]);
 
   function validate(): string | null {
-    if (!bookingDate) return "Please choose a Saturday";
-    if (avail?.dates?.find((d) => d.date === bookingDate)?.soldOut) return "That Saturday is sold out — please pick another";
+    if (!bookingDate) return "Please choose a Sunday";
+    if (avail?.dates?.find((d) => d.date === bookingDate)?.soldOut) return "That Sunday is sold out, please pick another";
     if (!name.trim()) return "Please enter your name";
     if (!phone.trim()) return "Please enter your phone number";
     if ((phone.match(/\d/g) || []).length < 7) return "Please enter a valid phone number";
@@ -117,7 +116,7 @@ export function BrunchBooking() {
       const res = await fetch("/api/saturday-brunch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, date: bookingDate, package: pkg, website, turnstileToken: token }),
+        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, date: bookingDate, website, turnstileToken: token }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -136,6 +135,8 @@ export function BrunchBooking() {
   const dateOptions = avail?.dates ?? [];
   const selected = dateOptions.find((d) => d.date === bookingDate) ?? null;
   const allSoldOut = !!avail?.allSoldOut;
+  const minParty = avail?.minParty ?? 2;
+  const maxParty = avail?.maxParty ?? 15;
 
   const inputCls =
     "w-full px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-300/60 transition";
@@ -151,12 +152,12 @@ export function BrunchBooking() {
         <div className="mt-5 pt-5 border-t border-white/10 text-sm text-stone-400 space-y-1.5">
           <p className="text-white">{result.prettyDate}</p>
           <p>Party of {result.partySize} · arriving {result.arrivalTime}</p>
-          <p>{result.packageLabel ?? "Food only"} · £{result.pricePerHead ?? result.price} per person, paid at the door</p>
+          <p>{result.packageLabel ?? "Sunday Feast"} · £{result.pricePerHead ?? result.price} per person, paid at the door</p>
           <p>{result.address}</p>
         </div>
         <p className="mt-6 text-xs text-stone-500">A confirmation is on its way to your inbox.</p>
         <button
-          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(1); setArrivalTime(""); setPkg("food"); }}
+          onClick={() => { setResult(null); setName(""); setEmail(""); setPhone(""); setPartySize(2); setArrivalTime(""); }}
           className="mt-6 text-sm text-gold-300 hover:text-gold-200 transition"
         >
           Book another table
@@ -184,11 +185,11 @@ export function BrunchBooking() {
 
       <div className="pb-4 mb-4 border-b border-white/[0.08]">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your table</p>
-        <p className="text-lg font-semibold text-white">{selected?.prettyDate ?? avail?.prettyDate ?? "This Saturday"}</p>
+        <p className="text-lg font-semibold text-white">{selected?.prettyDate ?? avail?.prettyDate ?? "This Sunday"}</p>
         <p className="text-[13px] text-stone-500 mt-0.5">
-          £{avail?.price ?? 35} food only · £{avail?.priceWithDrinks ?? 50} with bottomless drinks
+          £{avail?.price ?? 30} per person · for {minParty} or more
         </p>
-        <p className="text-[12px] text-stone-500 mt-2">This booking is for the Saturday bottomless brunch.</p>
+        <p className="text-[12px] text-stone-500 mt-2">This booking is for the Sunday Feast at Cricklewood.</p>
       </div>
 
       {allSoldOut && (
@@ -200,12 +201,12 @@ export function BrunchBooking() {
       <div className="space-y-2.5">
         {dateOptions.length > 1 && (
           <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
-            <span className="block mb-2.5 text-sm text-stone-400">Which Saturday?</span>
+            <span className="block mb-2.5 text-sm text-stone-400">Which Sunday?</span>
             <div className="grid grid-cols-2 gap-2">
               {dateOptions.map((d) => {
                 const on = bookingDate === d.date;
                 const low = !d.soldOut && d.spotsLeft !== null && d.spotsLeft <= 10;
-                // The heading already says "Saturday" — don't repeat it on every option.
+                // The heading already says "Sunday" — don't repeat it on every option.
                 const short = d.prettyDate.replace(/^\w+\s+/, "");
                 return (
                   <button
@@ -244,36 +245,20 @@ export function BrunchBooking() {
         <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" autoComplete="tel" className={inputCls} />
         <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" autoComplete="email" className={inputCls} />
 
-        <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
-          <span className="block mb-2.5 text-sm text-stone-400">Which package?</span>
-          <div className="grid grid-cols-2 gap-2">
-            {([
-              { key: "food", label: "Food only", price: avail?.price ?? 35, on: "bg-gold-300 text-black border-gold-300" },
-              { key: "drinks", label: "Food & drinks", price: avail?.priceWithDrinks ?? 50, on: "bg-brunch-500 text-white border-brunch-500" },
-            ] as const).map((p) => (
-              <button
-                key={p.key}
-                type="button"
-                onClick={() => setPkg(p.key)}
-                className={`py-2.5 px-3 rounded-lg text-left transition border ${
-                  pkg === p.key ? p.on : "bg-transparent text-stone-300 border-white/15 hover:border-white/30"
-                }`}
-              >
-                <span className="block text-[13px] font-semibold leading-tight">{p.label}</span>
-                <span className={`block text-[12px] mt-0.5 ${pkg === p.key ? "opacity-75" : "text-stone-500"}`}>£{p.price} pp</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="flex items-center justify-between px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
           <span className="text-sm text-stone-400">How many of you?</span>
           <div className="flex items-center gap-4">
-            <button type="button" onClick={() => setPartySize((p) => Math.max(1, p - 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">−</button>
+            <button type="button" onClick={() => setPartySize((p) => Math.max(minParty, p - 1))} disabled={partySize <= minParty} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition disabled:opacity-30">−</button>
             <span className="w-6 text-center text-white font-semibold tabular-nums">{partySize}</span>
-            <button type="button" onClick={() => setPartySize((p) => Math.min(10, p + 1))} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition">+</button>
+            <button type="button" onClick={() => setPartySize((p) => Math.min(maxParty, p + 1))} disabled={partySize >= maxParty} className="w-9 h-9 rounded-full border border-white/15 text-white text-lg leading-none hover:bg-white/5 transition disabled:opacity-30">+</button>
           </div>
         </div>
+        {partySize >= maxParty && (
+          <p className="-mt-1 px-1 text-xs text-stone-400">
+            For groups larger than {maxParty}, please call us on{" "}
+            <a href={`tel:${CRICKLEWOOD_PHONE.replace(/\s+/g, "")}`} className="text-gold-300 underline underline-offset-2">{CRICKLEWOOD_PHONE}</a>.
+          </p>
+        )}
 
         <div className="px-4 py-3 bg-black/40 border border-white/[0.09] rounded-xl">
           <span className="block mb-2.5 text-sm text-stone-400">What time will you arrive?</span>

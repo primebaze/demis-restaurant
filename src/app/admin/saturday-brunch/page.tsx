@@ -50,7 +50,7 @@ export default function AdminSaturdayBrunchPage() {
   async function toggleBookings() {
     if (bookingsOpen === null) return;
     const next = !bookingsOpen;
-    if (!next && !confirm("Turn off Saturday brunch bookings? Guests won't be able to book until you turn them back on.")) return;
+    if (!next && !confirm("Turn off Sunday Feast bookings? Guests won't be able to book until you turn them back on.")) return;
     setSavingOpen(true);
     try {
       const res = await fetch("/api/admin/saturday-brunch/bookings-open", {
@@ -121,23 +121,23 @@ export default function AdminSaturdayBrunchPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Saturday Brunch</h1>
+          <h1 className="text-2xl font-bold text-white">Sunday Feast</h1>
           <p className="text-sm text-gray-500 mt-0.5">Reservations for {prettyDate || "…"}.</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setDate(shiftWeeks(resolvedDate, -1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white disabled:opacity-40">← Prev</button>
-          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">This Saturday</button>
+          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">This Sunday</button>
           <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">Next →</button>
         </div>
       </div>
 
-      {/* ── Master switch: brunch bookings on / off ── */}
+      {/* ── Master switch: Sunday Feast bookings on / off ── */}
       <div className={`flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5 mb-6 max-w-2xl ${
         bookingsOpen === false ? "border-red-500/30 bg-red-500/[0.06]" : "border-gray-800 bg-[#1a1a1a]"
       }`}>
         <div>
           <p className="text-sm font-semibold text-white">
-            Brunch bookings are{" "}
+            Sunday Feast bookings are{" "}
             {bookingsOpen === null ? "…" : bookingsOpen
               ? <span className="text-emerald-400">ON</span>
               : <span className="text-red-400">OFF</span>}
@@ -145,7 +145,7 @@ export default function AdminSaturdayBrunchPage() {
           <p className="text-xs text-gray-500 mt-0.5">
             {bookingsOpen === false
               ? "Guests see “Bookings closed” and can’t reserve. Existing reservations are kept."
-              : "Guests can reserve on the Saturday brunch page."}
+              : "Guests can reserve on the Sunday Feast page."}
           </p>
         </div>
         <button
@@ -153,7 +153,7 @@ export default function AdminSaturdayBrunchPage() {
           disabled={bookingsOpen === null || savingOpen}
           role="switch"
           aria-checked={!!bookingsOpen}
-          aria-label="Saturday brunch bookings"
+          aria-label="Sunday Feast bookings"
           className={`relative w-16 h-9 rounded-full transition-colors disabled:opacity-50 ${bookingsOpen ? "bg-emerald-500" : "bg-gray-700"}`}
         >
           <span className={`absolute top-1 left-1 w-7 h-7 rounded-full bg-white shadow transition-transform ${bookingsOpen ? "translate-x-7" : ""}`} />
@@ -168,7 +168,6 @@ export default function AdminSaturdayBrunchPage() {
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">People</p>
           <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
-          <p className="text-[11px] text-gray-500 mt-0.5">{summary.drinkers} on drinks</p>
         </div>
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Expected</p>
@@ -180,11 +179,11 @@ export default function AdminSaturdayBrunchPage() {
         </div>
       </div>
 
-      {/* ── Availability: block / unblock each upcoming Saturday ── */}
+      {/* ── Availability: block / unblock each upcoming Sunday ── */}
       <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
         <p className="text-sm text-white font-semibold mb-1">Availability</p>
         <p className="text-xs text-gray-500 mb-4">
-          <strong className="text-gray-400">Mark sold out</strong> keeps the date on the form but shows it crossed out. <strong className="text-gray-400">Hide</strong> removes it from the form entirely — hide the later weeks if you only want to open one or two Saturdays at a time. A capacity sells the date out automatically once that many covers are booked.
+          <strong className="text-gray-400">Mark sold out</strong> keeps the date on the form but shows it crossed out. <strong className="text-gray-400">Hide</strong> removes it from the form entirely — hide the later weeks if you only want to open one or two Sundays at a time. A capacity sells the date out automatically once that many covers are booked.
         </p>
         <div className="space-y-2">
           {dateRows.length === 0 ? (
@@ -245,14 +244,14 @@ export default function AdminSaturdayBrunchPage() {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
-        <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this Saturday</button>
+        <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this Sunday</button>
       </div>
 
       <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
         {loading ? (
           <p className="p-8 text-center text-gray-500">Loading…</p>
         ) : bookings.length === 0 ? (
-          <p className="p-8 text-center text-gray-500">No reservations for this Saturday yet.</p>
+          <p className="p-8 text-center text-gray-500">No reservations for this Sunday yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -275,9 +274,7 @@ export default function AdminSaturdayBrunchPage() {
                     <td className="px-4 py-3 text-sm text-white font-semibold tabular-nums">{b.arrivalTime}</td>
                     <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
                     <td className="px-4 py-3 text-xs">
-                      <span className={b.package === "drinks" ? "text-gold-300" : "text-gray-400"}>
-                        {b.package === "drinks" ? "Food & drinks" : "Food only"}
-                      </span>
+                      <span className="text-gray-400">{b.packageLabel}</span>
                       <br />
                       <span className="text-gray-500">£{b.pricePerHead} pp · £{b.pricePerHead * b.partySize}</span>
                     </td>

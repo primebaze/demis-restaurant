@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
-import { upcomingSaturdays, prettyDate } from "@/lib/saturday-brunch";
+import { upcomingFeastDates, prettyDate } from "@/lib/saturday-brunch";
 export const dynamic = "force-dynamic";
 
-/** GET /api/admin/saturday-brunch/dates — availability for each bookable Saturday. */
+/** GET /api/admin/saturday-brunch/dates — availability for each bookable Sunday. */
 export async function GET() {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const dates = upcomingSaturdays();
+  const dates = upcomingFeastDates();
   try {
     const [settings, bookings] = await Promise.all([
       prisma.brunchDate.findMany({ where: { date: { in: dates } } }),

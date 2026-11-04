@@ -20,7 +20,7 @@ const MOBILE_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Book a Table", href: "/booking" },
   { label: "Sunday Buffet", href: "/sunday-buffet" },
-  { label: "Saturday Brunch", href: "/saturday-brunch" },
+  { label: "Sunday Feast", href: "/sunday-feast" },
   { label: "Menu", href: "/menu" },
   { label: "Drinks", href: "/drinks" },
   { label: "Set Menu", href: "/set-menu" },

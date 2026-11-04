@@ -55,7 +55,7 @@ export default function AdminBrunchCheckinsPage() {
   }, []);
 
   async function resetDay() {
-    if (!confirm(`Clear ALL brunch check-ins for ${date}? This cannot be undone.`)) return;
+    if (!confirm(`Clear ALL feast check-ins for ${date}? This cannot be undone.`)) return;
     await fetch("/api/admin/brunch-checkins", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ date }),
     });
@@ -66,8 +66,8 @@ export default function AdminBrunchCheckinsPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Brunch Check-ins</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Door check-ins for the Saturday brunch.</p>
+          <h1 className="text-2xl font-bold text-white">Feast Check-ins</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Door check-ins for the Sunday Feast.</p>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -94,8 +94,8 @@ export default function AdminBrunchCheckinsPage() {
           <p className="text-2xl font-bold text-emerald-300">£{data?.takings ?? 0}</p>
         </div>
         <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">On drinks</p>
-          <p className="text-2xl font-bold text-white">{data?.drinkers ?? 0}</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Per person</p>
+          <p className="text-2xl font-bold text-white">£{data?.pricePerHead ?? 0}</p>
         </div>
       </div>
 
@@ -132,9 +132,10 @@ export default function AdminBrunchCheckinsPage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{c.partySize}</td>
                       <td className="px-4 py-3 text-xs text-gray-400">
-                        {c.foodOnly > 0 && <span>{c.foodOnly} food</span>}
-                        {c.foodOnly > 0 && c.withDrinks > 0 && <span className="text-gray-600"> · </span>}
-                        {c.withDrinks > 0 && <span className="text-gold-300/80">{c.withDrinks} drinks</span>}
+                        {/* Old brunch check-ins split food / drinks; feast check-ins are one price. */}
+                        {c.withDrinks > 0
+                          ? <span>{c.foodOnly} food · <span className="text-gold-300/80">{c.withDrinks} drinks</span></span>
+                          : <span>Sunday Feast</span>}
                       </td>
                       <td className="px-4 py-3 text-sm text-emerald-300 font-semibold">£{c.price}</td>
                       <td className="px-4 py-3 text-xs text-gray-400 tabular-nums">{fmt(c.checkedInAt)}</td>

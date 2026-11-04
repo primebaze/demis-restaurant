@@ -343,15 +343,15 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             <span className="text-stone-500 text-xl group-hover:text-gold-300 group-hover:translate-x-0.5 transition-all">→</span>
           </a>
 
-          {/* Saturday brunch shortcut */}
+          {/* Sunday Feast shortcut */}
           <a
-            href="/saturday-brunch"
+            href="/sunday-feast"
             className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-white/[0.06] bg-[#222] hover:border-gold-300/30 hover:bg-[#282828] transition-all"
           >
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-stone-500 font-semibold mb-1">Every Saturday</p>
-              <h3 className="text-lg font-bold text-white">Saturday Bottomless Brunch</h3>
-              <p className="text-sm text-stone-400 mt-1">Unlimited sides, seafood and grill. Add bottomless drinks.</p>
+              <p className="text-[10px] uppercase tracking-widest text-stone-500 font-semibold mb-1">Every Sunday</p>
+              <h3 className="text-lg font-bold text-white">Sunday Feast at Cricklewood</h3>
+              <p className="text-sm text-stone-400 mt-1">Three courses to share, £30pp for two or more.</p>
             </div>
             <span className="text-stone-500 text-xl group-hover:text-gold-300 group-hover:translate-x-0.5 transition-all">→</span>
           </a>

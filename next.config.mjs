@@ -29,6 +29,12 @@ const nextConfig = (phase) => ({
     // Cache optimized images for 31 days so repeat views don't re-transform.
     minimumCacheTTL: 2678400,
   },
+  async redirects() {
+    return [
+      // The Saturday brunch was replaced by the Sunday Feast; old links and posts land on the new page.
+      { source: "/saturday-brunch", destination: "/sunday-feast", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

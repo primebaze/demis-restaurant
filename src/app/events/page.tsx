@@ -109,30 +109,29 @@ export default function EventsPage() {
               </div>
             </div>
 
-            {/* Saturday Bottomless Brunch */}
+            {/* Sunday Feast */}
             <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🥂</span>
+                <span className="text-3xl">🍗</span>
                 <div>
-                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Saturday</p>
-                  <p className="text-xs text-stone-500">1 PM &ndash; 4:30 PM</p>
+                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Sunday</p>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white">Bottomless Brunch</h3>
-              <p className="mt-1 text-sm font-semibold text-gold-300">£35 food only &middot; £50 with drinks</p>
+              <h3 className="text-2xl font-bold text-white">Sunday Feast</h3>
+              <p className="mt-1 text-sm font-semibold text-gold-300">£30 per person &middot; for two or more</p>
               <p className="mt-3 text-sm text-stone-400 leading-relaxed">
-                Choose Team Seafood or Team Meaty, then one starter, one main and any three
-                sides from that menu. Make it £50 and you get 90 minutes of bottomless
-                prosecco, wine, cocktails and mocktails with it.
+                Puff puff, meat pie and fish roll, then pepper soup, moi moi and house salad, then a
+                whole rotisserie chicken and whole grilled fish with smoky party jollof rice and sweet
+                fried plantain. All to share, with one winter warmer drink each.
               </p>
               <a
-                href="/saturday-brunch"
+                href="/sunday-feast"
                 className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
               >
                 Book a Table &rarr;
               </a>
               <div className="mt-5 flex items-center gap-4">
-                <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Streatham Hill</span>
+                <span className="inline-flex items-center rounded-full bg-gold-300/10 px-3 py-1 text-xs font-medium text-gold-300">Cricklewood</span>
               </div>
             </div>
           </div>

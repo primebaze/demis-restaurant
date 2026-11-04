@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
-  upcomingSaturdays, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, BRUNCH_PRICE_DRINKS,
-  BRUNCH_START, BRUNCH_END, ARRIVAL_SLOTS, isArrivalSlot, isBrunchPackage, packagePrice, packageLabel,
+  upcomingFeastDates, prettyDate, BRUNCH_LOCATION, BRUNCH_ADDRESS, BRUNCH_PRICE, FEAST_NAME,
+  FEAST_MIN_PARTY, FEAST_MAX_PARTY, SITTING_MIN, ARRIVAL_SLOTS, isArrivalSlot, packageLabel, addMinutes,
 } from "@/lib/saturday-brunch";
 import { sendRawEmail, sendViaResend, isResendConfigured, type MailAttachment } from "@/lib/email";
 import { buildIcs, googleCalendarUrl, londonToUtc, type IcsEvent } from "@/lib/ics";
@@ -25,16 +25,17 @@ async function deliver(to: string, subject: string, html: string, attachments?: 
   return sendRawEmail(to, subject, html, undefined, attachments);
 }
 
-/** The guest's sitting, as a calendar event. Ends when service does (4:30pm). */
+/** The guest's sitting, as a calendar event, from arrival for the length of a sitting. */
 function brunchEvent(o: { id: string; date: string; arrivalTime: string; partySize: number; pkg: string }): IcsEvent {
+  const start = o.arrivalTime || ARRIVAL_SLOTS[0];
   return {
     uid: `brunch-${o.id}@demisrestaurant.co.uk`,
-    start: londonToUtc(o.date, o.arrivalTime || "13:00"),
-    end: londonToUtc(o.date, "16:30"),
-    summary: "Saturday Bottomless Brunch at Demi's",
-    description: `${packageLabel(o.pkg)}. Party of ${o.partySize}, arriving ${o.arrivalTime}. Paid at the door.`,
+    start: londonToUtc(o.date, start),
+    end: londonToUtc(o.date, addMinutes(start, SITTING_MIN)),
+    summary: `${FEAST_NAME} at Demi's ${BRUNCH_LOCATION}`,
+    description: `${FEAST_NAME}, party of ${o.partySize}, arriving ${start}. £${BRUNCH_PRICE} per person, paid at the door.`,
     location: BRUNCH_ADDRESS,
-    url: "https://www.demisrestaurant.co.uk/saturday-brunch",
+    url: "https://www.demisrestaurant.co.uk/sunday-feast",
     organizerEmail: "bookings@demisrestaurant.co.uk",
   };
 }
@@ -56,11 +57,11 @@ export type DateAvailability = {
 };
 
 /**
- * Availability for each bookable Saturday. A date is sold out when an admin has
+ * Availability for each bookable Sunday. A date is sold out when an admin has
  * blocked it, or when its optional capacity has been reached.
  */
 async function availability(): Promise<DateAvailability[]> {
-  const dates = upcomingSaturdays();
+  const dates = upcomingFeastDates();
   try {
     const [settings, bookings] = await Promise.all([
       prisma.brunchDate.findMany({ where: { date: { in: dates } } }),
@@ -101,7 +102,7 @@ async function availability(): Promise<DateAvailability[]> {
   }
 }
 
-/** GET — the Saturdays people can book, and whether each is still open. */
+/** GET — the Sundays people can book, and whether each is still open. */
 export async function GET() {
   // Admin switched brunch bookings off: offer no dates at all.
   const bookingsOpen = await brunchBookingsOpen();
@@ -110,20 +111,21 @@ export async function GET() {
   const firstOpen = dates.find((d) => !d.soldOut) || dates[0];
   return NextResponse.json({
     bookingsOpen,
-    // The next bookable Saturday (kept top-level for the booking form's header).
+    // The next bookable Sunday (kept top-level for the booking form's header).
     date: firstOpen?.date ?? "",
     prettyDate: firstOpen?.prettyDate ?? "",
     dates,
     allSoldOut: dates.length === 0 || dates.every((d) => d.soldOut),
     price: BRUNCH_PRICE,
-    priceWithDrinks: BRUNCH_PRICE_DRINKS,
+    minParty: FEAST_MIN_PARTY,
+    maxParty: FEAST_MAX_PARTY,
     location: BRUNCH_LOCATION,
     address: BRUNCH_ADDRESS,
     arrivalSlots: ARRIVAL_SLOTS,
   });
 }
 
-/** POST — reserve a table for the upcoming Saturday brunch. */
+/** POST — reserve a table for a Sunday Feast. */
 export async function POST(req: Request) {
   // Checked first, so a page left open from before bookings closed can't get through.
   if (!(await brunchBookingsOpen())) {
@@ -173,10 +175,12 @@ export async function POST(req: Request) {
   const name = String(body.name || "").trim().slice(0, 80);
   const email = String(body.email || "").trim().toLowerCase().slice(0, 120);
   const phone = String(body.phone || "").trim().slice(0, 30);
-  const partySize = Math.min(10, Math.max(1, parseInt(body.partySize) || 1));
+  const requestedParty = parseInt(body.partySize) || 0;
+  const partySize = Math.min(FEAST_MAX_PARTY, Math.max(FEAST_MIN_PARTY, requestedParty));
   const arrivalTime = String(body.arrivalTime || "").trim();
-  const pkg = isBrunchPackage(body.package) ? body.package : "food";
-  const pricePerHead = packagePrice(pkg);
+  // One package: the feast, the same price for everyone at the table.
+  const pkg = "feast";
+  const pricePerHead = BRUNCH_PRICE;
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
@@ -184,8 +188,10 @@ export async function POST(req: Request) {
   if (!email) return NextResponse.json({ error: "Please enter your email" }, { status: 400 });
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
   if (!isArrivalSlot(arrivalTime)) return NextResponse.json({ error: "Please choose what time you'll arrive" }, { status: 400 });
+  if (requestedParty < FEAST_MIN_PARTY)
+    return NextResponse.json({ error: `The ${FEAST_NAME} is for ${FEAST_MIN_PARTY} or more people.` }, { status: 400 });
 
-  // The Saturday they picked. Must be one we're actually taking bookings for.
+  // The Sunday they picked. Must be one we're actually taking bookings for.
   const requested = String(body.date || "").trim();
   const open = await availability();
   const chosen = requested
@@ -193,11 +199,11 @@ export async function POST(req: Request) {
     : open.find((d) => !d.soldOut);
 
   if (!chosen) {
-    return NextResponse.json({ error: "That date isn't available. Please pick another Saturday." }, { status: 400 });
+    return NextResponse.json({ error: "That date isn't available. Please pick another Sunday." }, { status: 400 });
   }
   if (chosen.soldOut) {
     return NextResponse.json(
-      { error: `${chosen.prettyDate} is fully booked. Please choose another Saturday.` },
+      { error: `${chosen.prettyDate} is fully booked. Please choose another Sunday.` },
       { status: 409 }
     );
   }
@@ -210,14 +216,14 @@ export async function POST(req: Request) {
   }
   const date = chosen.date;
 
-  // One booking per email per Saturday.
+  // One booking per email per Sunday.
   const already = await prisma.saturdayBrunchBooking.findFirst({
     where: { date, email, status: { not: "cancelled" } },
     select: { id: true },
   });
   if (already) {
     return NextResponse.json(
-      { error: "You have already reserved for Saturday. See you there! To change your booking, give us a call." },
+      { error: "You have already reserved for this Sunday. See you there! To change your booking, give us a call." },
       { status: 429 }
     );
   }
@@ -229,11 +235,11 @@ export async function POST(req: Request) {
   // Must be awaited — Vercel freezes the function once the response is returned.
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bookings@demisrestaurant.co.uk";
   const [guestSent, adminSent] = await Promise.all([
-    withTimeout(deliver(email, "Your Saturday brunch reservation is confirmed", guestEmailHtml({ name, date, partySize, arrivalTime, pkg, pricePerHead, calendarUrl: googleCalendarUrl(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })) }), [{ filename: "demis-saturday-brunch.ics", content: buildIcs(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }])).catch(() => false),
-    withTimeout(deliver(adminEmail, `New Saturday brunch reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime, pkg, pricePerHead }))).catch(() => false),
+    withTimeout(deliver(email, `Your ${FEAST_NAME} reservation is confirmed`, guestEmailHtml({ name, date, partySize, arrivalTime, pkg, pricePerHead, calendarUrl: googleCalendarUrl(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })) }), [{ filename: "demis-sunday-feast.ics", content: buildIcs(brunchEvent({ id: booking.id, date, arrivalTime, partySize, pkg })), contentType: "text/calendar; charset=utf-8; method=PUBLISH" }])).catch(() => false),
+    withTimeout(deliver(adminEmail, `New ${FEAST_NAME} reservation · ${name} (party of ${partySize}, ${arrivalTime})`, adminEmailHtml({ name, email, phone, date, partySize, arrivalTime, pkg, pricePerHead }))).catch(() => false),
   ]);
-  if (!guestSent) console.error(`[Brunch] Guest confirmation email FAILED → ${email}`);
-  if (!adminSent) console.error(`[Brunch] Admin notification email FAILED → ${adminEmail}`);
+  if (!guestSent) console.error(`[Feast] Guest confirmation email FAILED → ${email}`);
+  if (!adminSent) console.error(`[Feast] Admin notification email FAILED → ${adminEmail}`);
 
   return NextResponse.json({
     id: booking.id,
@@ -244,7 +250,6 @@ export async function POST(req: Request) {
     packageLabel: packageLabel(pkg),
     pricePerHead,
     price: BRUNCH_PRICE,
-    priceWithDrinks: BRUNCH_PRICE_DRINKS,
     prettyDate: prettyDate(date),
     address: BRUNCH_ADDRESS,
   });
@@ -256,7 +261,7 @@ function adminEmailHtml(o: { name: string; email: string; phone: string; date: s
   return `<!DOCTYPE html><html><body style="margin:0;background:#f4f4f4;font-family:Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 20px;"><tr><td align="center">
 <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fff;border-radius:10px;overflow:hidden;">
-  <tr><td style="background:#141210;padding:18px 28px;color:#e8cc9c;font-size:14px;font-weight:700;letter-spacing:1px;">NEW SATURDAY BRUNCH RESERVATION</td></tr>
+  <tr><td style="background:#141210;padding:18px 28px;color:#e8cc9c;font-size:14px;font-weight:700;letter-spacing:1px;">NEW SUNDAY FEAST RESERVATION</td></tr>
   <tr><td style="padding:22px 28px;"><table width="100%" cellpadding="0" cellspacing="0">
     ${row("Name", esc(o.name))}
     ${row("Party size", String(o.partySize))}
@@ -279,17 +284,16 @@ function guestEmailHtml(o: { name: string; date: string; partySize: number; arri
 </td></tr>
 <tr><td style="padding:8px 44px 36px;font-family:Helvetica,Arial,sans-serif;color:#333;font-size:15px;line-height:1.7;">
   <p style="margin:0 0 16px;">Hi ${esc(o.name)},</p>
-  <p style="margin:0 0 16px;">Your table for our Saturday bottomless brunch is <strong>confirmed</strong>. We can't wait to have you.</p>
+  <p style="margin:0 0 16px;">Your table for our ${FEAST_NAME} at ${BRUNCH_LOCATION} is <strong>confirmed</strong>. We can't wait to have you.</p>
   <table width="100%" style="background:#faf7f0;border-radius:8px;margin:0 0 16px;"><tr><td style="padding:20px;text-align:center;">
     <div style="font-family:Georgia,serif;font-size:22px;color:#8b0000;">${prettyDate(o.date)}</div>
     <div style="font-size:13px;color:#666;margin-top:6px;">Party of ${o.partySize} &middot; arriving ${esc(o.arrivalTime)}</div>
-    <div style="font-size:13px;color:#666;margin-top:4px;">${packageLabel(o.pkg)} &mdash; &pound;${o.pricePerHead} per person, paid at the door</div>
-    <div style="font-size:13px;color:#666;margin-top:4px;">Served ${BRUNCH_START} &ndash; ${BRUNCH_END}</div>
+    <div style="font-size:13px;color:#666;margin-top:4px;">${FEAST_NAME} &mdash; &pound;${o.pricePerHead} per person, paid at the door</div>
   </td></tr></table>
   <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;"><tr><td align="center">
     <a href="${o.calendarUrl}" style="display:inline-block;border:1px solid #e0a98c;color:#b85e2c;font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:6px;">Add to Google Calendar</a>
   </td></tr></table>
-  <p style="margin:0;color:#666;font-size:13px;">${BRUNCH_ADDRESS}. See you Saturday!</p>
+  <p style="margin:0;color:#666;font-size:13px;">${BRUNCH_ADDRESS}. See you Sunday!</p>
 </td></tr>
 </table></td></tr></table></body></html>`;
 }

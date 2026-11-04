@@ -49,3 +49,6 @@ next-env.d.ts
 # WordPress import (regenerate with npm run import:wordpress)
 wordpress-import-redirects.json
 .claude/
+
+# Full-size originals for the Sunday Feast page; only the compressed .webp copies are deployed
+public/feast/*.jpg
