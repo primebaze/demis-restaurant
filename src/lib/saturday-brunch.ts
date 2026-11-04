@@ -93,8 +93,8 @@ export function upcomingFeastDate(from: Date = new Date()): string {
   return dt.toISOString().slice(0, 10);
 }
 
-/** How many Sundays ahead guests can book. */
-export const BOOKABLE_WEEKS = 4;
+/** How many Sundays guests can book at once: just the upcoming one. */
+export const BOOKABLE_WEEKS = 1;
 
 /** The next N bookable Sundays, starting with the upcoming one. */
 export function upcomingFeastDates(count: number = BOOKABLE_WEEKS, from: Date = new Date()): string[] {

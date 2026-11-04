@@ -183,7 +183,7 @@ export default function AdminSaturdayBrunchPage() {
       <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
         <p className="text-sm text-white font-semibold mb-1">Availability</p>
         <p className="text-xs text-gray-500 mb-4">
-          <strong className="text-gray-400">Mark sold out</strong> keeps the date on the form but shows it crossed out. <strong className="text-gray-400">Hide</strong> removes it from the form entirely — hide the later weeks if you only want to open one or two Sundays at a time. A capacity sells the date out automatically once that many covers are booked.
+          <strong className="text-gray-400">Mark sold out</strong> keeps the date on the form but shows it crossed out. <strong className="text-gray-400">Hide</strong> removes it from the form entirely. A capacity sells the date out automatically once that many covers are booked.
         </p>
         <div className="space-y-2">
           {dateRows.length === 0 ? (
