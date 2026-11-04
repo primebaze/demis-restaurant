@@ -34,7 +34,7 @@ test("booking form fallback times match the settings times", () => {
   const src = read("src/app/sunday-feast/FeastBooking.tsx");
   const m = src.match(/const ARRIVAL_SLOTS = \[([^\]]*)\]/);
   assert.ok(m, "ARRIVAL_SLOTS not found in the booking form");
-  const formSlots = [...m[1].matchAll(/"(\d\d:\d\d)"/g)].map((x) => x[1]);
+  const formSlots = Array.from(m[1].matchAll(/"(\d\d:\d\d)"/g), (x) => x[1]);
   assert.deepEqual(formSlots, ARRIVAL_SLOTS);
 });
 
