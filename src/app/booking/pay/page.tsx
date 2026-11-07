@@ -141,8 +141,6 @@ function PayContent() {
           </p>
         </div>
       )}
-
-      <div className="text-5xl mb-4">💳</div>
       <h1 className="text-2xl font-bold text-white mb-2">Complete Payment</h1>
       <p className="text-stone-400 text-sm mb-6">
         Booking: <span className="text-gold-300 font-mono">{booking.confirmationCode}</span>

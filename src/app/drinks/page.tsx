@@ -141,7 +141,6 @@ export default function DrinksPage() {
                   : "bg-white/[0.05] text-stone-400 hover:bg-white/[0.1] hover:text-white border border-white/[0.07]"
               }`}
             >
-              <span>{s.icon}</span>
               <span>{s.label}</span>
             </button>
           ))}
@@ -159,9 +158,6 @@ export default function DrinksPage() {
           >
             {/* Section header */}
             <div className="flex items-center gap-4 mb-8">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-gold-300/[0.06] border border-gold-300/15 shrink-0`}>
-                {section.icon}
-              </div>
               <div>
                 <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-bold text-white italic tracking-tight">
                   {section.label}

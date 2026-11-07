@@ -60,7 +60,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
 
 export function LiveChat() {
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<Msg[]>([{ id: 0, from: "bot", node: "Hi! 👋 I'm Demi's helper. Tap a question below and I'll answer right away." }]);
+  const [msgs, setMsgs] = useState<Msg[]>([{ id: 0, from: "bot", node: "Hi! I'm Demi's helper. Tap a question below and I'll answer right away." }]);
   const idRef = useRef(1);
   const endRef = useRef<HTMLDivElement>(null);
 

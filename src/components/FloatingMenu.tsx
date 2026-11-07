@@ -35,33 +35,6 @@ const MOBILE_LINKS: NavLink[] = [
   { label: "Privacy Policy", href: "/privacy" },
 ];
 
-/* ── Scroll progress bar ──  */
-function ScrollProgress() {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    function onScroll() {
-      const top = window.scrollY;
-      const height = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(height > 0 ? (top / height) * 100 : 0);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  if (progress <= 0) return null;
-
-  return (
-    <div className="absolute bottom-0 left-0 right-0 h-[2px] z-10">
-      <div
-        className="h-full bg-gradient-to-r from-gold-400 via-gold-300 to-gold-200 transition-[width] duration-150 ease-out"
-        style={{ width: `${progress}%` }}
-      />
-    </div>
-  );
-}
-
 export function FloatingMenu() {
   const pathname = usePathname();
 
@@ -207,20 +180,6 @@ export function FloatingMenu() {
               : "bg-gradient-to-b from-black/60 via-black/25 to-transparent"
           }`}
         >
-          {/* Scroll progress */}
-          <ScrollProgress />
-
-          {/* Subtle gold bottom border on scroll */}
-          <div
-            className={`absolute bottom-0 left-0 right-0 h-px transition-opacity duration-500 ${
-              scrolled ? "opacity-100" : "opacity-0"
-            }`}
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, rgba(232,204,156,0.15), transparent)",
-            }}
-          />
-
           <div className="mx-auto max-w-7xl px-8 flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="group shrink-0">

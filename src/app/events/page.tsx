@@ -58,7 +58,6 @@ export default function EventsPage() {
             {/* Afrobeats Friday */}
             <div className="rounded-2xl border border-white/[0.06] bg-ink-800 p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🎵</span>
                 <div>
                   <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Friday</p>
                   <p className="text-xs text-stone-500">8 PM &ndash; Late</p>
@@ -86,7 +85,6 @@ export default function EventsPage() {
             {/* Sunday Buffet */}
             <div className="rounded-2xl border border-white/[0.06] bg-ink-800 p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🍲</span>
                 <div>
                   <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Sunday</p>
                   <p className="text-xs text-stone-500">12 PM &ndash; 6 PM</p>
@@ -112,7 +110,6 @@ export default function EventsPage() {
             {/* Sunday Feast */}
             <div className="rounded-2xl border border-white/[0.06] bg-ink-800 p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">🍗</span>
                 <div>
                   <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-300">Every Sunday</p>
                   <p className="text-xs text-stone-500">1:30 PM &ndash; 6 PM</p>
@@ -171,28 +168,28 @@ export default function EventsPage() {
               </div>
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
-                  <span className="text-xl mt-0.5">🎂</span>
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" />
                   <div>
                     <p className="text-sm font-semibold text-stone-900">Birthdays &amp; Milestones</p>
                     <p className="text-sm text-stone-500">Custom menus, decorations, and dedicated service.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <span className="text-xl mt-0.5">💼</span>
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" />
                   <div>
                     <p className="text-sm font-semibold text-stone-900">Corporate Events</p>
                     <p className="text-sm text-stone-500">Team lunches, client dinners, and networking evenings.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <span className="text-xl mt-0.5">💒</span>
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" />
                   <div>
                     <p className="text-sm font-semibold text-stone-900">Weddings &amp; Receptions</p>
                     <p className="text-sm text-stone-500">Intimate ceremonies and reception dinners for up to 80 guests.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <span className="text-xl mt-0.5">🎉</span>
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" />
                   <div>
                     <p className="text-sm font-semibold text-stone-900">Cultural Celebrations</p>
                     <p className="text-sm text-stone-500">Naming ceremonies, graduations, and family gatherings.</p>

@@ -6,7 +6,6 @@ export type DrinkItem = { name: string; price?: string; abv?: string; desc?: str
 export type DrinkSection = {
   id: string;
   label: string;
-  icon: string;
   note?: string;
   items?: DrinkItem[];
   subsections?: { title: string; note?: string; items: DrinkItem[] }[];
@@ -17,7 +16,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "cocktails",
     label: "Cocktails",
-    icon: "🍹",
     note: "£15 each",
     items: [
       { name: "Chapman", desc: "Cucumber, lime, lemon, orange and blackcurrant" },
@@ -32,7 +30,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "mocktails",
     label: "Mocktails",
-    icon: "🥤",
     note: "£10 each",
     items: [
       { name: "Chapman", desc: "Cucumber, lime, lemon, orange and blackcurrant" },
@@ -47,7 +44,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "ginger-gordons",
     label: "Gin-ger",
-    icon: "🫙",
     note: "Gordon's Gin — Lagos meets London",
     items: [
       {
@@ -63,7 +59,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "beer",
     label: "Beer & Cider",
-    icon: "🍺",
     subsections: [
       {
         title: "Bottles — £12",
@@ -96,7 +91,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "wines",
     label: "Wines",
-    icon: "🍷",
     subsections: [
       {
         title: "White Wine",
@@ -130,7 +124,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "champagne",
     label: "Champagne",
-    icon: "🥂",
     subsections: [
       {
         title: "Champagne",
@@ -156,7 +149,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "spirits",
     label: "Spirits",
-    icon: "🥃",
     note: "25ml £8 · 50ml £13",
     subsections: [
       {
@@ -210,7 +202,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "liqueurs",
     label: "Liqueurs",
-    icon: "🍸",
     note: "25ml £8 · 50ml £13",
     items: [
       { name: "Bailey's Irish Cream" },
@@ -223,7 +214,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "locals",
     label: "Locals",
-    icon: "🌴",
     items: [
       { name: "Palm Wine", abv: "4%", price: "£12", desc: "Fermented palm tree sap" },
       { name: "Origin Bitters", abv: "30%", price: "£10", desc: "Spirit drink with African herb extracts" },
@@ -234,7 +224,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "soft",
     label: "Soft Drinks",
-    icon: "🧃",
     subsections: [
       {
         title: "Juice — £5",
@@ -269,7 +258,6 @@ export const SECTIONS: DrinkSection[] = [
   {
     id: "hot",
     label: "Hot Drinks",
-    icon: "☕",
     items: [
       { name: "Hot Chocolate", price: "£5", desc: "Chocolate malt beverage with minerals and vitamins" },
       { name: "Lipton Yellow Label Tea", price: "£8" },

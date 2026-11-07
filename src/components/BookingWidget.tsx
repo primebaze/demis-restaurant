@@ -501,7 +501,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
           )}
           {depositRequired && (
             <p className="mt-2 text-xs text-gold-300">
-              ⚡ A {formatPence(policy!.depositAmountPence)} hold fee applies for parties of{" "}
+              A {formatPence(policy!.depositAmountPence)} hold fee applies for parties of{" "}
               {policy!.depositThreshold}+
             </p>
           )}
@@ -517,10 +517,10 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
         ) : (
           <div className="space-y-6">
             {[
-              { label: "Lunch", icon: "☀️", from: "12:00", to: "14:59" },
-              { label: "Afternoon", icon: "🌤", from: "15:00", to: "17:59" },
-              { label: "Evening", icon: "🌙", from: "18:00", to: "20:59" },
-              { label: "Late", icon: "✨", from: "21:00", to: "23:59" },
+              { label: "Lunch", from: "12:00", to: "14:59" },
+              { label: "Afternoon", from: "15:00", to: "17:59" },
+              { label: "Evening", from: "18:00", to: "20:59" },
+              { label: "Late", from: "21:00", to: "23:59" },
             ].map((period) => {
               const periodSlots = slots.filter(
                 (s) => s.startTime >= period.from && s.startTime <= period.to
@@ -529,7 +529,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
               return (
                 <div key={period.label}>
                   <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">
-                    {period.icon} {period.label}
+                    {period.label}
                   </p>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
                     {periodSlots.map((slot) => {
