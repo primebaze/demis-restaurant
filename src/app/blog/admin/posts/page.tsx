@@ -65,12 +65,12 @@ export default function BlogPostsPage() {
           placeholder="Search posts..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
+          className="flex-1 px-4 py-2.5 bg-ink-900 border border-white/10 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
         />
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-4 py-2.5 bg-ink-900 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Status</option>
           <option value="published">Published</option>
@@ -78,13 +78,13 @@ export default function BlogPostsPage() {
         </select>
       </div>
 
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <p className="p-6 text-stone-500 text-sm">Loading...</p>
         ) : posts.length === 0 ? (
           <p className="p-6 text-stone-500 text-sm">No posts found.</p>
         ) : (
-          <div className="divide-y divide-stone-800">
+          <div className="divide-y divide-white/[0.06]">
             {posts.map((post) => (
               <div key={post.id} className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
                 <div className="min-w-0 flex-1">
@@ -130,7 +130,7 @@ export default function BlogPostsPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-stone-800 rounded-xl disabled:opacity-30"
+            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-white/[0.06] rounded-xl disabled:opacity-30"
           >
             Previous
           </button>
@@ -138,7 +138,7 @@ export default function BlogPostsPage() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-stone-800 rounded-xl disabled:opacity-30"
+            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-white/[0.06] rounded-xl disabled:opacity-30"
           >
             Next
           </button>

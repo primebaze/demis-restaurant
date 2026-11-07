@@ -42,7 +42,7 @@ function ItemText({
         // Example content: highlight reel, decor, buffet service or food review.
         aria-invalid={!!error || undefined}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={`block min-h-11 w-full resize-none overflow-hidden rounded-lg border border-transparent bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-stone-500 hover:border-stone-700 focus:border-gold-300 focus:outline-none focus:ring-1 focus:ring-gold-300 sm:text-lg ${item.completed ? "text-stone-400 line-through" : "text-stone-200"}`}
+        className={`block min-h-11 w-full resize-none overflow-hidden rounded-lg border border-transparent bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-stone-500 hover:border-white/10 focus:border-gold-300 focus:outline-none focus:ring-1 focus:ring-gold-300 sm:text-lg ${item.completed ? "text-stone-400 line-through" : "text-stone-200"}`}
       />
       {error && (
         <p id={`${id}-error`} className="mt-2 text-sm text-red-300">
@@ -102,7 +102,7 @@ export default function ShootContentChecklist({
       id="checklist"
       tabIndex={-1}
       aria-labelledby="checklist-heading"
-      className="rounded-2xl border border-stone-800 bg-ink-950 p-5 focus-visible:outline focus-visible:outline-gold-300 sm:p-6"
+      className="rounded-2xl border border-white/[0.06] bg-ink-950 p-5 focus-visible:outline focus-visible:outline-gold-300 sm:p-6"
     >
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>

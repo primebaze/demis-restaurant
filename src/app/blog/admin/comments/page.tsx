@@ -48,7 +48,7 @@ export default function CommentsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">Comments ({total})</h1>
         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400">
+          className="px-4 py-2.5 bg-ink-900 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400">
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
@@ -56,13 +56,13 @@ export default function CommentsPage() {
         </select>
       </div>
 
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <p className="p-6 text-stone-500 text-sm">Loading...</p>
         ) : comments.length === 0 ? (
           <p className="p-6 text-stone-500 text-sm">No {statusFilter} comments.</p>
         ) : (
-          <div className="divide-y divide-stone-800">
+          <div className="divide-y divide-white/[0.06]">
             {comments.map((c) => (
               <div key={c.id} className="p-6">
                 <div className="flex items-start justify-between gap-4">
@@ -112,12 +112,12 @@ export default function CommentsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}
-            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-stone-800 rounded-xl disabled:opacity-30">
+            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-white/[0.06] rounded-xl disabled:opacity-30">
             Previous
           </button>
           <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
           <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
-            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-stone-800 rounded-xl disabled:opacity-30">
+            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-white/[0.06] rounded-xl disabled:opacity-30">
             Next
           </button>
         </div>

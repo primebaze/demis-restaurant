@@ -69,7 +69,7 @@ const STATUS_COLORS: Record<string, string> = {
   pending_payment: "bg-amber-500/20 text-amber-400",
   cancelled: "bg-red-500/20 text-red-400",
   no_show: "bg-red-600/20 text-red-500",
-  completed: "bg-stone-500/20 text-stone-400",
+  completed: "bg-white/[0.06] text-stone-400",
 };
 
 export default function AdminDashboard() {
@@ -141,8 +141,8 @@ export default function AdminDashboard() {
   if (!data) return null;
 
   const statCards = [
-    { label: "Today's Bookings", value: data.stats.todayBookings, accent: true },
-    { label: "Today's Covers", value: data.stats.todayCovers, accent: true },
+    { label: "Today's Bookings", value: data.stats.todayBookings },
+    { label: "Today's Covers", value: data.stats.todayCovers },
     { label: "Next 7 Days", value: data.stats.upcomingNext7Days },
     { label: "30d Bookings", value: data.stats.totalBookings30d },
     { label: "30d Covers", value: data.stats.totalCovers30d },
@@ -163,16 +163,12 @@ export default function AdminDashboard() {
         {statCards.map((s) => (
           <div
             key={s.label}
-            className={`rounded-xl p-4 border ${
-              s.accent
-                ? "bg-gold-300/5 border-gold-300/20"
-                : "bg-ink-900 border-stone-800"
-            }`}
+            className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]"
           >
             <p className="text-xs text-stone-500 uppercase tracking-wider mb-1 truncate">
               {s.label}
             </p>
-            <p className={`text-2xl font-bold ${s.accent ? "text-gold-300" : "text-white"}`}>
+            <p className="text-2xl font-bold text-white tabular-nums">
               {s.value}
             </p>
           </div>
@@ -180,8 +176,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* Day bookings table */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between gap-3">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h2 className="text-lg font-semibold text-white truncate">
               {data.today.isToday ? "Today's Bookings" : formatDayLabel(data.today.date)}
@@ -209,7 +205,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setSelectedDate(addDays(data.today.date, -1))}
               title="Previous day"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-ink-950 border border-stone-700 text-stone-300 hover:border-gold-400 hover:text-white transition"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-ink-950 border border-white/10 text-stone-300 hover:border-gold-400 hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -218,7 +214,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setSelectedDate(addDays(data.today.date, 1))}
               title="Next day"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-ink-950 border border-stone-700 text-stone-300 hover:border-gold-400 hover:text-white transition"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-ink-950 border border-white/10 text-stone-300 hover:border-gold-400 hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -235,7 +231,7 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-6 py-3">Code</th>
                   <th className="px-6 py-3">Type</th>
                   <th className="px-6 py-3">Guest</th>
@@ -248,12 +244,12 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {data.today.bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-stone-800/50 hover:bg-white/[0.02]">
+                  <tr key={b.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
                     <td className="px-6 py-4 text-sm font-mono text-gold-300">
                       {b.confirmationCode}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[b.type] || "bg-stone-700 text-stone-300"}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[b.type] || "bg-white/10 text-stone-300"}`}>
                         {b.type}
                       </span>
                     </td>
@@ -267,7 +263,7 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                          STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"
+                          STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"
                         }`}
                       >
                         {b.status.replace("_", " ")}
@@ -286,7 +282,7 @@ export default function AdminDashboard() {
                             </svg>
                           </a>
                         ) : (
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-stone-800/50 text-stone-700">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.04] text-stone-700">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
@@ -303,7 +299,7 @@ export default function AdminDashboard() {
                             </svg>
                           </button>
                         ) : (
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-stone-800/50 text-stone-700">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.04] text-stone-700">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
@@ -322,7 +318,7 @@ export default function AdminDashboard() {
       {/* In-app email composer */}
       {email && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setEmail(null)}>
-          <div className="w-full max-w-lg bg-ink-900 border border-stone-800 rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg bg-ink-900 border border-white/[0.06] rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-semibold text-white mb-1">Email guest</h2>
             <p className="text-xs text-stone-500 mb-4">To: {email.name} &lt;{email.to}&gt;</p>
 
@@ -332,7 +328,7 @@ export default function AdminDashboard() {
                 value={email.subject}
                 onChange={(e) => setEmail((s) => s && { ...s, subject: e.target.value })}
                 placeholder="Subject"
-                className="w-full px-3 py-2.5 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
+                className="w-full px-3 py-2.5 bg-ink-950 border border-white/10 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
                 autoFocus
               />
               <textarea
@@ -340,20 +336,20 @@ export default function AdminDashboard() {
                 onChange={(e) => setEmail((s) => s && { ...s, message: e.target.value })}
                 rows={6}
                 placeholder="Write your message…"
-                className="w-full px-3 py-2.5 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-none"
+                className="w-full px-3 py-2.5 bg-ink-950 border border-white/10 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-none"
               />
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setEmail((s) => s && { ...s, provider: "smtp" })}
-                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-stone-700 text-stone-400 hover:text-white"}`}
+                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-white/10 text-stone-400 hover:text-white"}`}
                 >
                   SMTP
                 </button>
                 <button
                   type="button"
                   onClick={() => setEmail((s) => s && { ...s, provider: "resend" })}
-                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-stone-700 text-stone-400 hover:text-white"}`}
+                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-white/10 text-stone-400 hover:text-white"}`}
                 >
                   Resend
                 </button>

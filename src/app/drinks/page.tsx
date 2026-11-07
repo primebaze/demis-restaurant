@@ -20,7 +20,7 @@ function CocktailCard({ item, price }: { item: DrinkItem; price?: string }) {
       </div>
       {item.desc && <p className="text-[13px] text-stone-500 leading-relaxed">{item.desc}</p>}
       {item.abv && (
-        <span className="inline-block self-start text-[10px] font-semibold tracking-[0.15em] uppercase text-stone-600 border border-stone-700 rounded-full px-2 py-0.5">
+        <span className="inline-block self-start text-[10px] font-semibold tracking-[0.15em] uppercase text-stone-600 border border-white/10 rounded-full px-2 py-0.5">
           {item.abv}
         </span>
       )}

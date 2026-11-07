@@ -125,7 +125,7 @@ export default function AdminBuffetPage() {
     fetchBookings();
   }
 
-  const inputCls = "w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 placeholder-stone-600";
+  const inputCls = "w-full px-3 py-2 bg-ink-950 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 placeholder-stone-600";
   const labelCls = "block text-xs text-stone-400 mb-1.5";
 
   return (
@@ -149,8 +149,8 @@ export default function AdminBuffetPage() {
 
       {/* New booking form */}
       {showForm && (
-        <div className="mb-8 bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-stone-800">
+        <div className="mb-8 bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-white/[0.06]">
             <h2 className="text-base font-semibold text-white">New Buffet Booking</h2>
             <p className="text-xs text-stone-500 mt-0.5">Enter booking details taken by phone or in person.</p>
           </div>
@@ -214,7 +214,7 @@ export default function AdminBuffetPage() {
         <select
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Statuses</option>
           <option value="confirmed">Confirmed</option>
@@ -228,7 +228,7 @@ export default function AdminBuffetPage() {
       </div>
 
       {/* Bookings table */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading bookings…</div>
         ) : bookings.length === 0 ? (
@@ -237,7 +237,7 @@ export default function AdminBuffetPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3">Code</th>
                   <th className="px-4 py-3">Guest</th>
                   <th className="px-4 py-3">Date</th>
@@ -250,7 +250,7 @@ export default function AdminBuffetPage() {
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-stone-800/50 hover:bg-white/[0.02]">
+                  <tr key={b.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
                     <td className="px-4 py-3 text-sm font-mono text-gold-300 font-semibold">{b.bookingCode}</td>
                     <td className="px-4 py-3">
                       <p className="text-sm text-white">{b.name}</p>
@@ -261,7 +261,7 @@ export default function AdminBuffetPage() {
                     <td className="px-4 py-3 text-sm text-stone-400">{LOCATIONS[b.locationSlug] || b.locationSlug}</td>
                     <td className="px-4 py-3 text-sm text-white">{b.partySize}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"}`}>
                         {b.status}
                       </span>
                     </td>
@@ -295,7 +295,7 @@ export default function AdminBuffetPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
             <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
               ← Previous
             </button>

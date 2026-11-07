@@ -128,7 +128,7 @@ export default function AuthorsPage() {
       <h1 className="text-2xl font-bold text-white mb-6">Author Profiles</h1>
 
       {/* Add Author Form */}
-      <div className="mb-8 p-6 bg-ink-950 border border-stone-800 rounded-2xl">
+      <div className="mb-8 p-6 bg-ink-950 border border-white/[0.06] rounded-2xl">
         <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider mb-4">Add Author</h2>
         {addError && (
           <div className="mb-4 p-3 rounded-lg bg-red-900/30 border border-red-800 text-red-300 text-sm">{addError}</div>
@@ -141,7 +141,7 @@ export default function AuthorsPage() {
               value={addName}
               onChange={(e) => setAddName(e.target.value)}
               placeholder="e.g. Chef Adedemi"
-              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
             />
           </div>
           <div>
@@ -151,7 +151,7 @@ export default function AuthorsPage() {
               onChange={(e) => setAddBio(e.target.value)}
               rows={2}
               placeholder="Short bio shown on posts"
-              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
+              className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
             />
           </div>
           <div>
@@ -161,7 +161,7 @@ export default function AuthorsPage() {
               value={addAvatar}
               onChange={(e) => setAddAvatar(e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
             />
           </div>
           <button
@@ -179,7 +179,7 @@ export default function AuthorsPage() {
         {authors.map((author) => (
           <div
             key={author.id}
-            className={`p-5 bg-ink-950 border rounded-2xl transition ${author.isActive ? "border-stone-800" : "border-stone-800/50 opacity-60"}`}
+            className={`p-5 bg-ink-950 border rounded-2xl transition ${author.isActive ? "border-white/[0.06]" : "border-white/[0.04] opacity-60"}`}
           >
             {editId === author.id ? (
               /* Edit mode */
@@ -191,21 +191,21 @@ export default function AuthorsPage() {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-gold-400 text-sm"
+                  className="w-full px-4 py-2.5 bg-ink-900 border border-white/10 rounded-xl text-white focus:outline-none focus:border-gold-400 text-sm"
                   placeholder="Name"
                 />
                 <textarea
                   value={editBio}
                   onChange={(e) => setEditBio(e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y text-sm"
+                  className="w-full px-4 py-2.5 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y text-sm"
                   placeholder="Bio"
                 />
                 <input
                   type="url"
                   value={editAvatar}
                   onChange={(e) => setEditAvatar(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 text-sm"
+                  className="w-full px-4 py-2.5 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 text-sm"
                   placeholder="Avatar URL"
                 />
                 <div className="flex gap-2">
@@ -218,7 +218,7 @@ export default function AuthorsPage() {
                   </button>
                   <button
                     onClick={cancelEdit}
-                    className="px-4 py-2 bg-ink-900 border border-stone-700 text-stone-300 rounded-xl hover:bg-white/5 transition text-sm"
+                    className="px-4 py-2 bg-ink-900 border border-white/10 text-stone-300 rounded-xl hover:bg-white/5 transition text-sm"
                   >
                     Cancel
                   </button>
@@ -241,7 +241,7 @@ export default function AuthorsPage() {
                       <span className="text-xs px-2 py-0.5 rounded-full bg-gold-300/10 text-gold-300 border border-gold-300/20">You</span>
                     )}
                     {!author.isActive && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-stone-700 text-stone-400">Inactive</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-stone-400">Inactive</span>
                     )}
                   </div>
                   {author.bio && (
@@ -251,7 +251,7 @@ export default function AuthorsPage() {
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
                     onClick={() => startEdit(author)}
-                    className="px-3 py-1.5 text-xs bg-ink-900 border border-stone-700 text-stone-300 rounded-lg hover:bg-white/5 transition"
+                    className="px-3 py-1.5 text-xs bg-ink-900 border border-white/10 text-stone-300 rounded-lg hover:bg-white/5 transition"
                   >
                     Edit
                   </button>

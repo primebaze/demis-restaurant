@@ -103,14 +103,14 @@ export default function LinkClicksPage() {
         </div>
         <button
           onClick={refresh}
-          className="px-3 py-2 text-sm text-stone-300 border border-stone-700 rounded-lg hover:bg-white/5 transition"
+          className="px-3 py-2 text-sm text-stone-300 border border-white/10 rounded-lg hover:bg-white/5 transition"
         >
           Refresh
         </button>
       </div>
 
       {campaigns.length === 0 && !loading ? (
-        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-8 text-center">
+        <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-8 text-center">
           <p className="text-sm text-stone-400">No clicks tracked yet.</p>
           <p className="text-xs text-stone-600 mt-2">
             Links in an email blast are tracked automatically. Put <code className="text-gold-300">{"{vote}"}</code>{" "}
@@ -128,7 +128,7 @@ export default function LinkClicksPage() {
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   selected === c.campaign
                     ? "bg-gold-300 text-black border-gold-300 font-semibold"
-                    : "border-stone-700 text-stone-300 hover:bg-white/5"
+                    : "border-white/10 text-stone-300 hover:bg-white/5"
                 }`}
               >
                 {c.campaign === "vote" ? "Vote" : pretty(c.campaign)}{" "}
@@ -140,7 +140,7 @@ export default function LinkClicksPage() {
           {/* Summary */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             {cards.map((s) => (
-              <div key={s.label} className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+              <div key={s.label} className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
                 <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">{s.label}</p>
                 <p className="text-2xl font-bold text-white">{s.value}</p>
                 <p className="text-[11px] text-stone-600 mt-1 leading-tight">{s.hint}</p>
@@ -150,7 +150,7 @@ export default function LinkClicksPage() {
 
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Per link */}
-            <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
+            <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-5">
               <h2 className="text-sm font-semibold text-white mb-3">Links</h2>
               {stats?.byUrl?.length ? (
                 <ul className="space-y-2">
@@ -166,13 +166,13 @@ export default function LinkClicksPage() {
               ) : (
                 <p className="text-sm text-stone-600">No clicks yet.</p>
               )}
-              <p className="text-xs text-stone-600 mt-4 pt-3 border-t border-stone-800">
+              <p className="text-xs text-stone-600 mt-4 pt-3 border-t border-white/[0.06]">
                 Last click: {when(stats?.lastClickAt ?? null)}
               </p>
             </div>
 
             {/* Who clicked */}
-            <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
+            <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-5">
               <h2 className="text-sm font-semibold text-white mb-3">
                 Who clicked{" "}
                 {stats?.identified ? (
@@ -183,14 +183,14 @@ export default function LinkClicksPage() {
                 <div className="max-h-96 overflow-y-auto -mx-1 px-1">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                      <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                         <th className="py-2 font-medium">Contact</th>
                         <th className="py-2 font-medium text-right">First click</th>
                       </tr>
                     </thead>
                     <tbody>
                       {stats.clickers.map((c) => (
-                        <tr key={c.email + c.at} className="border-b border-stone-800/50">
+                        <tr key={c.email + c.at} className="border-b border-white/[0.04]">
                           <td className="py-2 pr-2">
                             <span className="text-white">{c.name || c.email}</span>
                             {c.name ? <span className="text-stone-600 text-xs block">{c.email}</span> : null}
@@ -209,11 +209,11 @@ export default function LinkClicksPage() {
               ) : null}
 
               {stats && stats.totalPages > 1 ? (
-                <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-stone-800">
+                <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-white/[0.06]">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page <= 1 || loading}
-                    className="px-3 py-1.5 text-sm text-stone-300 border border-stone-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 text-sm text-stone-300 border border-white/10 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Previous
                   </button>
@@ -223,7 +223,7 @@ export default function LinkClicksPage() {
                   <button
                     onClick={() => setPage((p) => Math.min(stats.totalPages, p + 1))}
                     disabled={page >= stats.totalPages || loading}
-                    className="px-3 py-1.5 text-sm text-stone-300 border border-stone-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 text-sm text-stone-300 border border-white/10 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Next
                   </button>

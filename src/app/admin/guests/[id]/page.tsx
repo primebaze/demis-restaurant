@@ -48,7 +48,7 @@ const STATUS_COLORS: Record<string, string> = {
   pending_payment: "bg-amber-500/20 text-amber-400",
   cancelled: "bg-red-500/20 text-red-400",
   no_show: "bg-red-600/20 text-red-500",
-  completed: "bg-stone-500/20 text-stone-400",
+  completed: "bg-white/[0.06] text-stone-400",
 };
 
 export default function GuestProfilePage() {
@@ -92,7 +92,7 @@ export default function GuestProfilePage() {
       </Link>
 
       {/* Guest header */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 mb-6">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">{guest.name}</h1>
@@ -121,7 +121,7 @@ export default function GuestProfilePage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-stone-800">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-white/[0.06]">
           <div>
             <p className="text-xs text-stone-500 uppercase">Bookings</p>
             <p className="text-xl font-bold text-white">{guest.totalBookings}</p>
@@ -152,15 +152,15 @@ export default function GuestProfilePage() {
       </div>
 
       {/* Booking history */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-stone-800">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-white/[0.06]">
           <h2 className="text-lg font-semibold text-white">Booking History</h2>
         </div>
 
         {guest.bookings.length === 0 ? (
           <div className="p-6 text-center text-stone-500">No bookings yet</div>
         ) : (
-          <div className="divide-y divide-stone-800">
+          <div className="divide-y divide-white/[0.06]">
             {guest.bookings.map((b) => (
               <div key={b.id} className="p-4">
                 <div className="flex items-center justify-between">
@@ -168,7 +168,7 @@ export default function GuestProfilePage() {
                     <span className="font-mono text-sm text-gold-300">{b.confirmationCode}</span>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"
+                        STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"
                       }`}
                     >
                       {b.status.replace("_", " ")}
@@ -195,7 +195,7 @@ export default function GuestProfilePage() {
                   </div>
                 )}
                 {b.changes.length > 0 && (
-                  <div className="mt-2 pl-3 border-l border-stone-800">
+                  <div className="mt-2 pl-3 border-l border-white/[0.06]">
                     {b.changes.map((c, i) => (
                       <p key={i} className="text-xs text-stone-600">
                         {c.fieldChanged}: {c.oldValue} → {c.newValue}{" "}
@@ -213,15 +213,15 @@ export default function GuestProfilePage() {
       </div>
 
       {/* Visit history */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-800">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/[0.06]">
           <h2 className="text-lg font-semibold text-white">Visit History</h2>
         </div>
 
         {guest.visits.length === 0 ? (
           <div className="p-6 text-center text-stone-500">No visits recorded yet</div>
         ) : (
-          <div className="divide-y divide-stone-800">
+          <div className="divide-y divide-white/[0.06]">
             {guest.visits.map((v) => (
               <div key={v.id} className="px-6 py-3 flex items-center justify-between">
                 <div>

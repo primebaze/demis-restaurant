@@ -197,26 +197,26 @@ export default function AdminSundayBuffetPage() {
           <p className="text-sm text-stone-500 mt-0.5">Reservations for {prettyDate || "…"}.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setDate(shiftWeeks(resolvedDate, -1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white disabled:opacity-40">← Prev</button>
-          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white">This Sunday</button>
-          <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white">Next →</button>
+          <button onClick={() => setDate(shiftWeeks(resolvedDate, -1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-white/10 rounded-lg text-stone-300 hover:text-white disabled:opacity-40">← Prev</button>
+          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-ink-900 border border-white/10 rounded-lg text-stone-300 hover:text-white">This Sunday</button>
+          <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-white/10 rounded-lg text-stone-300 hover:text-white">Next →</button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Reservations</p>
           <p className="text-2xl font-bold text-white">{summary.reservations}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People</p>
           <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Confirmed</p>
           <p className="text-2xl font-bold text-emerald-400">{summary.confirmed}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Cancelled</p>
           <p className="text-2xl font-bold text-white">{summary.cancelled}</p>
         </div>
@@ -234,7 +234,7 @@ export default function AdminSundayBuffetPage() {
       </div>
 
       {mailOpen && (
-        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5 mb-6">
+        <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-5 mb-6">
           <div className="inline-flex gap-1 p-1 bg-black/40 rounded-xl mb-4">
             <button
               onClick={() => setMailScope("day")}
@@ -267,7 +267,7 @@ export default function AdminSundayBuffetPage() {
               <button
                 key={t.key}
                 onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
-                className="px-3 py-1.5 text-sm text-stone-300 border border-stone-700 rounded-full hover:bg-white/5 transition"
+                className="px-3 py-1.5 text-sm text-stone-300 border border-white/10 rounded-full hover:bg-white/5 transition"
               >
                 {t.name}
               </button>
@@ -275,19 +275,19 @@ export default function AdminSundayBuffetPage() {
             <button
               onClick={saveMailTemplate}
               disabled={!mailSubject.trim() || !mailMessage.trim()}
-              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-stone-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-white/10 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
             >
               + Save current
             </button>
           </div>
           <input
             value={mailSubject} onChange={(e) => setMailSubject(e.target.value)} placeholder="Subject"
-            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-stone-700 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60"
+            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-white/10 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60"
           />
           <textarea
             value={mailMessage} onChange={(e) => setMailMessage(e.target.value)} rows={6}
             placeholder="Your message. Line breaks are kept. Each guest is greeted by name automatically."
-            className="w-full px-3 py-2.5 bg-black/40 border border-stone-700 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60 resize-y"
+            className="w-full px-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60 resize-y"
           />
           <div className="flex items-center gap-3 mt-3">
             <button onClick={sendMailAll} disabled={mailing} className="px-4 py-2 text-sm bg-gold-300 text-black font-semibold rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
@@ -299,7 +299,7 @@ export default function AdminSundayBuffetPage() {
         </div>
       )}
 
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <p className="p-8 text-center text-stone-500">Loading…</p>
         ) : bookings.length === 0 ? (
@@ -308,7 +308,7 @@ export default function AdminSundayBuffetPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3">Guest</th>
                   <th className="px-4 py-3">Arrives</th>
                   <th className="px-4 py-3">Party</th>
@@ -320,7 +320,7 @@ export default function AdminSundayBuffetPage() {
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className={`border-b border-stone-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
+                  <tr key={b.id} className={`border-b border-white/[0.04] hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 text-sm text-white">{b.name}</td>
                     <td className="px-4 py-3 text-sm text-white font-semibold tabular-nums">{b.arrivalTime}</td>
                     <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
@@ -328,7 +328,7 @@ export default function AdminSundayBuffetPage() {
                     <td className="px-4 py-3 text-xs text-stone-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col items-start gap-1">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"}`}>{b.status}</span>
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"}`}>{b.status}</span>
                         {b.status !== "cancelled" && (
                           b.confirmedAt
                             ? <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400" title={`Confirmed ${fmt(b.confirmedAt)}`}>✓ confirmed</span>

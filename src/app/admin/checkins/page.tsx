@@ -94,7 +94,7 @@ export default function AdminCheckinsPage() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm [color-scheme:dark] focus:outline-none focus:border-gold-400"
+            className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm [color-scheme:dark] focus:outline-none focus:border-gold-400"
           />
           <button
             onClick={resetDay}
@@ -106,7 +106,7 @@ export default function AdminCheckinsPage() {
       </div>
 
       {/* PIN management */}
-      <div className="mb-6 p-4 bg-ink-950 border border-stone-800 rounded-2xl">
+      <div className="mb-6 p-4 bg-ink-950 border border-white/[0.06] rounded-2xl">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="text-sm font-semibold text-white">Kiosk PIN</p>
@@ -122,7 +122,7 @@ export default function AdminCheckinsPage() {
               value={newPin}
               onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="4 digits"
-              className="w-32 px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              className="w-32 px-3 py-2 bg-ink-950 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
             />
             <button onClick={savePin} disabled={!newPin} className="px-4 py-2 bg-gold-300 text-ink-900 rounded-lg text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
               Save
@@ -138,13 +138,13 @@ export default function AdminCheckinsPage() {
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People in {isToday ? "today" : ""}</p>
           <p className="text-2xl font-bold text-gold-300">{data?.total ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£20 (1–20)</p><p className="text-2xl font-bold text-emerald-300">{data?.tiers.t20 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£25 (21–45)</p><p className="text-2xl font-bold text-amber-300">{data?.tiers.t25 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£30 (46+)</p><p className="text-2xl font-bold text-red-300">{data?.tiers.t30 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£20 (1–20)</p><p className="text-2xl font-bold text-emerald-300">{data?.tiers.t20 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£25 (21–45)</p><p className="text-2xl font-bold text-amber-300">{data?.tiers.t25 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£30 (46+)</p><p className="text-2xl font-bold text-red-300">{data?.tiers.t30 ?? 0}</p></div>
       </div>
 
       {/* Table */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading…</div>
         ) : !data || data.checkins.length === 0 ? (
@@ -153,7 +153,7 @@ export default function AdminCheckinsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3">No.</th>
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Party</th>
@@ -167,7 +167,7 @@ export default function AdminCheckinsPage() {
                 {data.checkins.map((c) => {
                   const left = remaining(c.endsAt, now);
                   return (
-                    <tr key={c.id} className="border-b border-stone-800/50 hover:bg-white/[0.02]">
+                    <tr key={c.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
                       <td className="px-4 py-3 text-sm font-bold text-white">{c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}</td>
                       <td className="px-4 py-3 text-sm text-stone-300">{c.name || "—"}</td>
                       <td className="px-4 py-3 text-sm text-stone-300">{c.partySize}</td>

@@ -146,7 +146,7 @@ export default function ShootPlanList() {
         </Feedback>
       ) : loading ? (
         <div
-          className="flex min-h-64 items-center justify-center rounded-2xl border border-stone-800 text-sm text-stone-400"
+          className="flex min-h-64 items-center justify-center rounded-2xl border border-white/[0.06] text-sm text-stone-400"
           role="status"
         >
           Loading weekly plans…
@@ -158,7 +158,7 @@ export default function ShootPlanList() {
               <Link
                 href={`/admin/shoot-plans/${plan.id}`}
                 key={plan.id}
-                className="group flex min-w-0 flex-col rounded-2xl border border-stone-800 bg-ink-900 p-5 transition-colors hover:border-gold-300/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300"
+                className="group flex min-w-0 flex-col rounded-2xl border border-white/[0.06] bg-ink-900 p-5 transition-colors hover:border-gold-300/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300"
               >
                 <div className="flex items-center justify-between gap-3">
                   <StatusBadge status={plan.status} />
@@ -245,7 +245,7 @@ export default function ShootPlanList() {
           </nav>
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed border-stone-700 px-6 py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-white/10 px-6 py-16 text-center">
           <Camera
             size={32}
             aria-hidden="true"

@@ -98,7 +98,7 @@ export default function NewPostPage() {
             type="text"
             value={title}
             onChange={(e) => { setTitle(e.target.value); autoSlug(e.target.value); }}
-            className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
             placeholder="Post title"
           />
         </div>
@@ -109,7 +109,7 @@ export default function NewPostPage() {
             type="text"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
             placeholder="post-url-slug"
           />
         </div>
@@ -120,7 +120,7 @@ export default function NewPostPage() {
             <select
               value={authorId}
               onChange={(e) => setAuthorId(e.target.value)}
-              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white focus:outline-none focus:border-gold-400"
             >
               {authors.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
@@ -130,7 +130,7 @@ export default function NewPostPage() {
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white focus:outline-none focus:border-gold-400"
             >
               <option value="">No category</option>
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -141,7 +141,7 @@ export default function NewPostPage() {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white focus:outline-none focus:border-gold-400"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
@@ -152,7 +152,7 @@ export default function NewPostPage() {
         <div>
           <label className="block text-sm font-medium text-stone-300 mb-1.5">Featured Image</label>
           <div className="flex items-center gap-4">
-            <label className="px-4 py-2 bg-ink-900 border border-stone-700 rounded-xl text-sm text-stone-300 cursor-pointer hover:border-gold-400 transition">
+            <label className="px-4 py-2 bg-ink-900 border border-white/10 rounded-xl text-sm text-stone-300 cursor-pointer hover:border-gold-400 transition">
               {uploading ? "Uploading..." : "Choose Image"}
               <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
             </label>
@@ -171,7 +171,7 @@ export default function NewPostPage() {
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             rows={2}
-            className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
+            className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
             placeholder="Brief description for search results and social sharing"
           />
         </div>
@@ -185,7 +185,7 @@ export default function NewPostPage() {
           />
         </div>
 
-        <div className="border-t border-stone-800 pt-6">
+        <div className="border-t border-white/[0.06] pt-6">
           <h3 className="text-sm font-semibold text-stone-400 uppercase tracking-wider mb-4">SEO Settings</h3>
           <div className="space-y-4">
             <div>
@@ -194,7 +194,7 @@ export default function NewPostPage() {
                 type="text"
                 value={metaTitle}
                 onChange={(e) => setMetaTitle(e.target.value)}
-                className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
+                className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
                 placeholder="Custom title for search engines (leave blank to use post title)"
               />
             </div>
@@ -204,7 +204,7 @@ export default function NewPostPage() {
                 value={metaDescription}
                 onChange={(e) => setMetaDescription(e.target.value)}
                 rows={2}
-                className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
+                className="w-full px-4 py-3 bg-ink-900 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
                 placeholder="Custom description for search engines (leave blank to use excerpt)"
               />
             </div>
@@ -221,7 +221,7 @@ export default function NewPostPage() {
           </button>
           <button
             onClick={() => router.push("/blog/admin/posts")}
-            className="px-6 py-3 bg-ink-900 border border-stone-700 text-stone-300 rounded-xl hover:bg-white/5 transition"
+            className="px-6 py-3 bg-ink-900 border border-white/10 text-stone-300 rounded-xl hover:bg-white/5 transition"
           >
             Cancel
           </button>

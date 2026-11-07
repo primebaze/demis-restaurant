@@ -62,21 +62,21 @@ export default function BlogDashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statCards.map((s) => (
-          <div key={s.label} className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
+          <div key={s.label} className="bg-ink-900 border border-white/[0.06] rounded-2xl p-5">
             <p className="text-xs text-stone-500 uppercase tracking-wider">{s.label}</p>
             <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-800">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/[0.06]">
           <h2 className="text-lg font-semibold text-white">Recent Posts</h2>
         </div>
         {stats.recentPosts.length === 0 ? (
           <p className="p-6 text-stone-500 text-sm">No posts yet. Create your first post!</p>
         ) : (
-          <div className="divide-y divide-stone-800">
+          <div className="divide-y divide-white/[0.06]">
             {stats.recentPosts.map((post) => (
               <Link
                 key={post.slug}

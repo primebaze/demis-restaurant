@@ -31,7 +31,7 @@ export default function GuestImportPage() {
   const [importError, setImportError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const inputCls = "px-3 py-1.5 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 w-full";
+  const inputCls = "px-3 py-1.5 bg-ink-950 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 w-full";
 
   function updateRow(idx: number, field: keyof ImportRow, value: string) {
     setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)));
@@ -141,7 +141,7 @@ export default function GuestImportPage() {
       {/* Upload zone */}
       {rows.length === 0 && !result && (
         <div
-          className="bg-ink-900 border-2 border-dashed border-stone-700 hover:border-gold-300/40 rounded-2xl p-12 text-center cursor-pointer transition"
+          className="bg-ink-900 border-2 border-dashed border-white/10 hover:border-gold-300/40 rounded-2xl p-12 text-center cursor-pointer transition"
           onClick={() => fileRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
@@ -166,8 +166,8 @@ export default function GuestImportPage() {
 
       {/* Preview table */}
       {rows.length > 0 && (
-        <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-stone-800">
+        <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
             <div>
               <p className="text-white font-medium">{fileName}</p>
               <p className="text-xs text-stone-500 mt-0.5">{rows.length} rows found — review and edit before importing</p>
@@ -183,14 +183,14 @@ export default function GuestImportPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Email *</th>
                   <th className="px-4 py-3">Phone</th>
                   <th className="px-4 py-3 w-10"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-800">
+              <tbody className="divide-y divide-white/[0.06]">
                 {rows.map((r, i) => (
                   <tr key={i} className={`${!hasEmail(r) ? "bg-red-500/5" : ""}`}>
                     <td className="px-4 py-2">
@@ -215,7 +215,7 @@ export default function GuestImportPage() {
             <p className="mx-6 my-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{importError}</p>
           )}
 
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
             <p className="text-sm text-stone-500">
               {validCount} of {rows.length} rows ready to import
               {validCount < rows.length ? " · rows in red need a valid email" : ""}

@@ -28,7 +28,20 @@ Five dark shades, set in `tailwind.config.ts`. Never type a hex black like
 one step darker than the card it's in. Every page on the guest site uses
 `ink-900` as its page colour, including Sunday Buffet and Sunday Feast.
 
-Borders are white at low strength (`border-white/[0.06]`), not grey.
+**Borders and dividers are white at low strength, never solid grey.** Solid
+`stone-700` / `stone-800` borders look brown and muddy on the black.
+
+| Use | Class |
+|---|---|
+| Card edge, table rows, dividers | `border-white/[0.06]` |
+| Inputs, buttons, stronger edges | `border-white/10` |
+| Very faint (rows inside a card) | `border-white/[0.04]` |
+
+Grey fills (chips, toggles when off, empty bars) work the same way:
+`bg-white/[0.06]` or `bg-white/10`, never `bg-stone-700`.
+
+**Stat cards are all the same.** Don't tint one or two of a row gold; if a
+number matters most, put it first.
 
 ## 2. Greys: `stone` only
 

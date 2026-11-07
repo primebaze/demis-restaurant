@@ -62,6 +62,11 @@ test("greys are warm stone, never gray/slate/zinc/neutral", () => {
   assert.deepEqual(bad, [], `Cold greys:\n${bad.join("\n")}`);
 });
 
+test("borders and grey fills on dark screens are white at low strength, not solid stone", () => {
+  const bad = offenders(/\b(?:(?:border|divide)(?:-[trblxy])?-stone-(?:600|700|800|900)|bg-stone-(?:600|700|800))\b(?:\/\d+)?/g);
+  assert.deepEqual(bad, [], `Use border-white/[0.06], border-white/10 or bg-white/[0.06]:\n${bad.join("\n")}`);
+});
+
 test("no decorative accent colours (gold is the only accent)", () => {
   const bad = offenders(/\b(?:bg|text|border|from|to|via|ring|fill|stroke)-(?:blue|purple|indigo|pink|sky|cyan|teal|violet|fuchsia|rose|lime|orange|yellow|green)-\d+/g);
   assert.deepEqual(bad, [], `Off-palette accents (use gold, or emerald/amber/red for status):\n${bad.join("\n")}`);

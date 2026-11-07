@@ -74,26 +74,26 @@ export default function AdminBrunchCheckinsPage() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300"
+            className="px-3 py-2 text-sm bg-ink-900 border border-white/10 rounded-lg text-stone-300"
           />
-          <button onClick={() => setDate(ukToday())} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white">Today</button>
+          <button onClick={() => setDate(ukToday())} className="px-3 py-2 text-sm bg-ink-900 border border-white/10 rounded-lg text-stone-300 hover:text-white">Today</button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People in</p>
           <p className="text-2xl font-bold text-gold-300">{data?.total ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Groups</p>
           <p className="text-2xl font-bold text-white">{data?.groups ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Takings</p>
           <p className="text-2xl font-bold text-emerald-300">£{data?.takings ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Per person</p>
           <p className="text-2xl font-bold text-white">£{data?.pricePerHead ?? 0}</p>
         </div>
@@ -103,7 +103,7 @@ export default function AdminBrunchCheckinsPage() {
         <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this day</button>
       </div>
 
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <p className="p-8 text-center text-stone-500">Loading…</p>
         ) : !data || data.checkins.length === 0 ? (
@@ -112,7 +112,7 @@ export default function AdminBrunchCheckinsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3">No.</th>
                   <th className="px-4 py-3">Party</th>
                   <th className="px-4 py-3">Mix</th>
@@ -126,7 +126,7 @@ export default function AdminBrunchCheckinsPage() {
                 {data.checkins.map((c) => {
                   const left = remaining(c.endsAt, now);
                   return (
-                    <tr key={c.id} className="border-b border-stone-800/50 hover:bg-white/[0.02]">
+                    <tr key={c.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
                       <td className="px-4 py-3 text-sm font-semibold text-white tabular-nums">
                         {c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}
                       </td>

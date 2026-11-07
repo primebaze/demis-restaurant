@@ -79,9 +79,9 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
   if (!editor) return null;
 
   return (
-    <div className="border border-stone-700 rounded-xl overflow-hidden bg-ink-900">
+    <div className="border border-white/10 rounded-xl overflow-hidden bg-ink-900">
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-0.5 px-2 py-2 border-b border-stone-700 bg-ink-950">
+      <div className="flex flex-wrap gap-0.5 px-2 py-2 border-b border-white/10 bg-ink-950">
         {/* Text type */}
         <ToolbarGroup>
           <ToolbarButton
@@ -307,5 +307,5 @@ function ToolbarGroup({ children }: { children: React.ReactNode }) {
 }
 
 function Divider() {
-  return <div className="w-px bg-stone-700 mx-1.5 my-1" />;
+  return <div className="w-px bg-white/10 mx-1.5 my-1" />;
 }

@@ -81,7 +81,7 @@ export default function ShootShotEditor({
         </div>
       )}
       {!group.length && (
-        <div className="rounded-xl border border-dashed border-stone-700 p-8 text-center">
+        <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
           <p className="mb-4 text-sm text-stone-400">No shots yet</p>
           <Action onClick={add} disabled={shots.length >= MAX_SHOTS}>
             Add your first shot
@@ -91,7 +91,7 @@ export default function ShootShotEditor({
       {group.map(({ shot, index }, position) => (
         <div
           key={shot.id}
-          className="rounded-xl border border-stone-800 bg-black/15 p-4 sm:p-5"
+          className="rounded-xl border border-white/[0.06] bg-black/15 p-4 sm:p-5"
         >
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <label className="flex min-h-11 items-center gap-3 text-sm">

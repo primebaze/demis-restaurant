@@ -115,7 +115,7 @@ export default function CalendarPage() {
           <button
             onClick={() => setFilterLoc("")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              !filterLoc ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-stone-800 hover:text-white"
+              !filterLoc ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-white/[0.06] hover:text-white"
             }`}
           >
             All Locations
@@ -125,7 +125,7 @@ export default function CalendarPage() {
               key={l.id}
               onClick={() => setFilterLoc(l.slug)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                filterLoc === l.slug ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-stone-800 hover:text-white"
+                filterLoc === l.slug ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-white/[0.06] hover:text-white"
               }`}
             >
               {l.name}
@@ -136,7 +136,7 @@ export default function CalendarPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
-        <div className="lg:col-span-2 bg-ink-950 border border-stone-800 rounded-2xl p-6">
+        <div className="lg:col-span-2 bg-ink-950 border border-white/[0.06] rounded-2xl p-6">
           {/* Month navigation */}
           <div className="flex items-center justify-between mb-6">
             <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-400 hover:text-white hover:bg-white/5 transition text-lg">
@@ -182,7 +182,7 @@ export default function CalendarPage() {
                       isSelected
                         ? "bg-gold-300/20 text-gold-300 border border-gold-300/40"
                         : isToday
-                        ? "bg-white/5 text-white border border-stone-700"
+                        ? "bg-white/5 text-white border border-white/10"
                         : "text-stone-300 hover:bg-white/5"
                     }`}
                   >
@@ -212,7 +212,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Side panel — booking list for selected date */}
-        <div className="bg-ink-950 border border-stone-800 rounded-2xl p-6">
+        <div className="bg-ink-950 border border-white/[0.06] rounded-2xl p-6">
           {selectedDate ? (
             <>
               <h3 className="text-white font-semibold mb-1">
@@ -231,7 +231,7 @@ export default function CalendarPage() {
                     {selectedEntry.bookings.map((b) => (
                       <div
                         key={b.id}
-                        className="bg-ink-900 border border-stone-800 rounded-xl p-4"
+                        className="bg-ink-900 border border-white/[0.06] rounded-xl p-4"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-white font-medium text-sm">{b.guest}</span>

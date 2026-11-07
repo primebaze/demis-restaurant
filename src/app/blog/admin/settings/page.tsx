@@ -16,7 +16,7 @@ export default function BlogAdminSettingsPage() {
     <div>
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
 
-      <div className="flex gap-1 mb-6 bg-ink-900 rounded-xl p-1 border border-stone-800 w-fit">
+      <div className="flex gap-1 mb-6 bg-ink-900 rounded-xl p-1 border border-white/[0.06] w-fit">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -124,7 +124,7 @@ function ProfilePanel() {
   }
 
   return (
-    <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 max-w-md">
+    <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-6 max-w-md">
       <h2 className="text-white font-semibold mb-4">Edit Profile</h2>
 
       {message && (
@@ -141,7 +141,7 @@ function ProfilePanel() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-ink-950 border border-stone-700 overflow-hidden flex-shrink-0">
+          <div className="w-16 h-16 rounded-full bg-ink-950 border border-white/10 overflow-hidden flex-shrink-0">
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
@@ -181,7 +181,7 @@ function ProfilePanel() {
             onChange={(e) => setName(e.target.value)}
             required
             maxLength={100}
-            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
 
@@ -193,7 +193,7 @@ function ProfilePanel() {
             maxLength={500}
             rows={3}
             placeholder="A short bio that appears on your blog posts..."
-            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
+            className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
           />
           <span className="text-[10px] text-stone-600">{bio.length}/500</span>
         </div>
@@ -257,7 +257,7 @@ function PasswordPanel() {
   }
 
   return (
-    <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 max-w-md">
+    <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-6 max-w-md">
       <h2 className="text-white font-semibold mb-4">Change Password</h2>
 
       {message && (
@@ -280,7 +280,7 @@ function PasswordPanel() {
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <div>
@@ -291,7 +291,7 @@ function PasswordPanel() {
             onChange={(e) => setNewPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <div>
@@ -302,7 +302,7 @@ function PasswordPanel() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <button

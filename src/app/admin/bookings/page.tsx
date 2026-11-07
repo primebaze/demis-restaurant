@@ -27,7 +27,7 @@ const STATUS_COLORS: Record<string, string> = {
   pending_payment: "bg-amber-500/20 text-amber-400",
   cancelled: "bg-red-500/20 text-red-400",
   no_show: "bg-red-600/20 text-red-500",
-  completed: "bg-stone-500/20 text-stone-400",
+  completed: "bg-white/[0.06] text-stone-400",
 };
 
 const STATUS_OPTIONS = [
@@ -44,7 +44,7 @@ function dayTag(date: string): { label: string; cls: string } {
   const ukToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
   if (date > ukToday) return { label: "Upcoming", cls: "bg-emerald-500/15 text-emerald-300" };
   if (date === ukToday) return { label: "Today", cls: "bg-gold-300/15 text-gold-300" };
-  return { label: "Past", cls: "bg-stone-600/20 text-stone-400" };
+  return { label: "Past", cls: "bg-white/[0.06] text-stone-400" };
 }
 
 export default function AdminBookingsPage() {
@@ -189,7 +189,7 @@ export default function AdminBookingsPage() {
       </div>
 
       {mailOpen && (
-        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5 mb-6">
+        <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-5 mb-6">
           <div className="inline-flex gap-1 p-1 bg-black/40 rounded-xl mb-4">
             {([["", "All locations"], ["cricklewood", "Cricklewood"], ["streatham", "Streatham Hill"]] as const).map(([slug, label]) => (
               <button
@@ -211,7 +211,7 @@ export default function AdminBookingsPage() {
               <button
                 key={t.key}
                 onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
-                className="px-3 py-1.5 text-sm text-stone-300 border border-stone-700 rounded-full hover:bg-white/5 transition"
+                className="px-3 py-1.5 text-sm text-stone-300 border border-white/10 rounded-full hover:bg-white/5 transition"
               >
                 {t.name}
               </button>
@@ -219,19 +219,19 @@ export default function AdminBookingsPage() {
             <button
               onClick={saveMailTemplate}
               disabled={!mailSubject.trim() || !mailMessage.trim()}
-              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-stone-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-white/10 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
             >
               + Save current
             </button>
           </div>
           <input
             value={mailSubject} onChange={(e) => setMailSubject(e.target.value)} placeholder="Subject"
-            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-stone-700 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60"
+            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-white/10 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60"
           />
           <textarea
             value={mailMessage} onChange={(e) => setMailMessage(e.target.value)} rows={6}
             placeholder="Your message. Line breaks are kept. Each guest is greeted by their first name automatically."
-            className="w-full px-3 py-2.5 bg-black/40 border border-stone-700 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60 resize-y"
+            className="w-full px-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60 resize-y"
           />
           <div className="flex items-center gap-3 mt-3">
             <button onClick={sendMailPast} disabled={mailing || !mailCount} className="px-4 py-2 text-sm bg-gold-300 text-black font-semibold rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
@@ -246,7 +246,7 @@ export default function AdminBookingsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
         {/* Upcoming / Past toggle (only when no specific date is picked) */}
-        <div className="inline-flex rounded-lg border border-stone-700 overflow-hidden">
+        <div className="inline-flex rounded-lg border border-white/10 overflow-hidden">
           {(["upcoming", "past"] as const).map((v) => (
             <button
               key={v}
@@ -264,7 +264,7 @@ export default function AdminBookingsPage() {
             setFilterDate(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
+          className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
         />
         <select
           value={filterLocation}
@@ -272,7 +272,7 @@ export default function AdminBookingsPage() {
             setFilterLocation(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Locations</option>
           <option value="cricklewood">Cricklewood</option>
@@ -284,7 +284,7 @@ export default function AdminBookingsPage() {
             setFilterStatus(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Statuses</option>
           {STATUS_OPTIONS.map((s) => (
@@ -309,7 +309,7 @@ export default function AdminBookingsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading bookings...</div>
         ) : bookings.length === 0 ? (
@@ -318,7 +318,7 @@ export default function AdminBookingsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3">Code</th>
                   <th className="px-4 py-3">Guest</th>
                   <th className="px-4 py-3">Date</th>
@@ -334,7 +334,7 @@ export default function AdminBookingsPage() {
                   <>
                     <tr
                       key={b.id}
-                      className="border-b border-stone-800/50 hover:bg-white/[0.02] cursor-pointer"
+                      className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer"
                       onClick={() => setExpanded(expanded === b.id ? null : b.id)}
                     >
                       <td className="px-4 py-3 text-sm font-mono text-gold-300">
@@ -357,7 +357,7 @@ export default function AdminBookingsPage() {
                       <td className="px-4 py-3">
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                            STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"
+                            STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"
                           }`}
                         >
                           {b.status.replace("_", " ")}
@@ -372,7 +372,7 @@ export default function AdminBookingsPage() {
                           }}
                           onClick={(e) => e.stopPropagation()}
                           disabled={updating === b.id}
-                          className="px-2 py-1 bg-ink-950 border border-stone-700 rounded text-xs text-white focus:outline-none"
+                          className="px-2 py-1 bg-ink-950 border border-white/10 rounded text-xs text-white focus:outline-none"
                         >
                           <option value="">Update...</option>
                           {STATUS_OPTIONS.filter((s) => s !== b.status).map((s) => (
@@ -445,7 +445,7 @@ export default function AdminBookingsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}

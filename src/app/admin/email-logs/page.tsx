@@ -25,7 +25,7 @@ const TYPE_COLORS: Record<string, string> = {
   transactional: "bg-white/[0.06] text-stone-200",
   direct: "bg-gold-300/15 text-gold-300",
   bulk: "bg-white/[0.06] text-stone-400",
-  admin: "bg-stone-500/15 text-stone-300",
+  admin: "bg-white/[0.06] text-stone-300",
 };
 
 function fmt(dateStr: string | null) {
@@ -152,7 +152,7 @@ export default function EmailLogsPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <div key={s.label} className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
             <p className="text-xs text-stone-500 uppercase tracking-wider mb-1 truncate">{s.label}</p>
             <p className="text-2xl font-bold text-white">{s.value}</p>
           </div>
@@ -164,7 +164,7 @@ export default function EmailLogsPage() {
         <select
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Statuses</option>
           <option value="sent">Sent</option>
@@ -190,7 +190,7 @@ export default function EmailLogsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading…</div>
         ) : logs.length === 0 ? (
@@ -199,7 +199,7 @@ export default function EmailLogsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3 w-10">
                     <input
                       type="checkbox"
@@ -220,7 +220,7 @@ export default function EmailLogsPage() {
               </thead>
               <tbody>
                 {logs.map((l) => (
-                  <tr key={l.id} className="border-b border-stone-800/50 hover:bg-white/[0.02]">
+                  <tr key={l.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
@@ -232,13 +232,13 @@ export default function EmailLogsPage() {
                     <td className="px-4 py-3 text-sm text-white">{l.recipient}</td>
                     <td className="px-4 py-3 text-sm text-stone-300 max-w-xs truncate" title={l.subject}>{l.subject}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[l.type] || "bg-stone-700 text-stone-300"}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[l.type] || "bg-white/10 text-stone-300"}`}>
                         {l.type}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-stone-400 uppercase">{l.provider}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[l.status] || "bg-stone-700 text-stone-300"}`} title={l.error || undefined}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[l.status] || "bg-white/10 text-stone-300"}`} title={l.error || undefined}>
                         {l.status}
                       </span>
                     </td>
@@ -248,7 +248,7 @@ export default function EmailLogsPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => viewEmail(l.id)}
-                          className="text-xs px-3 py-1.5 bg-white/[0.04] border border-stone-700 text-stone-300 rounded-lg hover:bg-white/[0.08] transition"
+                          className="text-xs px-3 py-1.5 bg-white/[0.04] border border-white/10 text-stone-300 rounded-lg hover:bg-white/[0.08] transition"
                           title="View the full email"
                         >
                           View
@@ -273,7 +273,7 @@ export default function EmailLogsPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
             <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
               ← Previous
             </button>
@@ -288,8 +288,8 @@ export default function EmailLogsPage() {
       {/* View email modal */}
       {viewing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setViewing(null)}>
-          <div className="w-full max-w-2xl bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden flex flex-col max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-stone-800">
+          <div className="w-full max-w-2xl bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden flex flex-col max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-white/[0.06]">
               <p className="text-sm font-semibold text-white truncate">{viewing.subject || "…"}</p>
               <p className="text-xs text-stone-500 truncate">To: {viewing.recipient}</p>
             </div>
@@ -302,7 +302,7 @@ export default function EmailLogsPage() {
                 <div className="p-8 text-center text-stone-500">No stored body for this email (logged before full-body capture).</div>
               )}
             </div>
-            <div className="px-5 py-3 border-t border-stone-800 text-right">
+            <div className="px-5 py-3 border-t border-white/[0.06] text-right">
               <button onClick={() => setViewing(null)} className="px-4 py-2 text-sm text-stone-400 hover:text-white transition">Close</button>
             </div>
           </div>

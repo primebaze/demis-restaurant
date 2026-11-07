@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { SHOOT_STATUSES, type ShootStatus } from "@/lib/shoot-plans";
 
 export const fieldClass =
-  "w-full min-h-11 rounded-lg border border-stone-700 bg-ink-950 px-3 py-2.5 text-sm text-white placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-gold-300/70 disabled:opacity-60 [color-scheme:dark]";
+  "w-full min-h-11 rounded-lg border border-white/10 bg-ink-950 px-3 py-2.5 text-sm text-white placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-gold-300/70 disabled:opacity-60 [color-scheme:dark]";
 export const linkClass =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-300 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300";
 export function Action({
@@ -25,7 +25,7 @@ export function Action({
       type="button"
       onClick={onClick}
       {...props}
-      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-gold-300 text-ink-900 hover:bg-gold-200" : "border border-stone-700 text-stone-200 hover:bg-white/5"} ${className}`}
+      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-gold-300 text-ink-900 hover:bg-gold-200" : "border border-white/10 text-stone-200 hover:bg-white/5"} ${className}`}
     />
   );
 }
@@ -208,7 +208,7 @@ export function UnsavedGuard({ dirty }: { dirty: boolean }) {
     <dialog
       ref={dialog}
       onCancel={close}
-      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-stone-700 bg-ink-900 p-6 text-white backdrop:bg-black/70"
+      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-white/10 bg-ink-900 p-6 text-white backdrop:bg-black/70"
       aria-labelledby="leave-title"
       aria-describedby="leave-description"
     >
@@ -268,7 +268,7 @@ export function ConfirmDelete({
         event.preventDefault();
         if (!busy) onCancel();
       }}
-      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-stone-700 bg-ink-900 p-6 text-white backdrop:bg-black/70"
+      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-ink-900 p-6 text-white backdrop:bg-black/70"
     >
       <h2 id="delete-plan-title" className="text-xl font-bold">
         Delete plan?

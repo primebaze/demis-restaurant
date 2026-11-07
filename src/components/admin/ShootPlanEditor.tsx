@@ -412,7 +412,7 @@ export default function ShootPlanEditor({
           </div>
         </header>
         <div
-          className="flex gap-2 overflow-x-auto whitespace-nowrap border-b border-stone-800 pb-4 [&>button]:shrink-0"
+          className="flex gap-2 overflow-x-auto whitespace-nowrap border-b border-white/[0.06] pb-4 [&>button]:shrink-0"
           role="group"
           aria-label="Planner view"
         >
@@ -497,7 +497,7 @@ export default function ShootPlanEditor({
           }}
         >
           <fieldset disabled={locked} className="min-w-0 space-y-6">
-            <section className="rounded-2xl border border-stone-800 bg-ink-900 p-5 sm:p-7">
+            <section className="rounded-2xl border border-white/[0.06] bg-ink-900 p-5 sm:p-7">
               <h2 className="mb-6 text-xl font-semibold">Week overview</h2>
               <div className="space-y-5">
                 <PlanText
@@ -587,7 +587,7 @@ export default function ShootPlanEditor({
             </section>
             {hasContent && (
               <details
-                className="rounded-2xl border border-stone-800 p-5"
+                className="rounded-2xl border border-white/[0.06] p-5"
                 open={
                   ["date", "time", "visualDirection", "outputFormat"].includes(
                     errorField,
@@ -759,7 +759,7 @@ export default function ShootPlanEditor({
               }}
             >
               <fieldset disabled={locked} className="min-w-0 space-y-6">
-                <section className="rounded-2xl border border-stone-800 bg-ink-900 p-5 sm:p-7">
+                <section className="rounded-2xl border border-white/[0.06] bg-ink-900 p-5 sm:p-7">
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                     <h2 className="text-lg font-semibold">
                       Video brief {videoIndex + 1}
@@ -893,7 +893,7 @@ export default function ShootPlanEditor({
                     />
                   </div>
                   <details
-                    className="mt-6 border-t border-stone-800 pt-3"
+                    className="mt-6 border-t border-white/[0.06] pt-3"
                     open={
                       errorField.startsWith(`video-${videoIndex}-`) &&
                       [
@@ -932,7 +932,7 @@ export default function ShootPlanEditor({
                     </div>
                   </details>
                 </section>
-                <section className="rounded-2xl border border-stone-800 bg-ink-900 p-5 sm:p-7">
+                <section className="rounded-2xl border border-white/[0.06] bg-ink-900 p-5 sm:p-7">
                   <ShootShotEditor
                     shots={draft.shots}
                     videos={draft.videos}
@@ -945,7 +945,7 @@ export default function ShootPlanEditor({
               <div
                 id={`video-${videoIndex}-references`}
                 tabIndex={-1}
-                className="mt-6 rounded-2xl border border-stone-800 bg-ink-900 p-5 sm:p-7"
+                className="mt-6 rounded-2xl border border-white/[0.06] bg-ink-900 p-5 sm:p-7"
               >
                 <ShootReferenceEditor
                   references={video.references}
@@ -961,7 +961,7 @@ export default function ShootPlanEditor({
           ) : ungrouped.length ? (
             <fieldset
               disabled={locked}
-              className="min-w-0 rounded-2xl border border-stone-800 bg-ink-900 p-5"
+              className="min-w-0 rounded-2xl border border-white/[0.06] bg-ink-900 p-5"
             >
               <ShootShotEditor
                 shots={draft.shots}
@@ -972,7 +972,7 @@ export default function ShootPlanEditor({
               />
             </fieldset>
           ) : (
-            <section className="rounded-2xl border border-dashed border-stone-700 py-20 text-center">
+            <section className="rounded-2xl border border-dashed border-white/10 py-20 text-center">
               <h3 className="mb-5 text-lg font-semibold">
                 No video briefs yet
               </h3>
@@ -985,7 +985,7 @@ export default function ShootPlanEditor({
       )}
       {mode === "day" && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-stone-800 p-5">
+          <div className="rounded-2xl border border-white/[0.06] p-5">
             <CaptureProgress
               captured={draft.shots.filter((s) => s.captured).length}
               total={draft.shots.length}
@@ -1012,7 +1012,7 @@ export default function ShootPlanEditor({
           {groups.map((group) => (
             <section
               key={group.id}
-              className="rounded-2xl border border-stone-800 p-5"
+              className="rounded-2xl border border-white/[0.06] p-5"
             >
               <h2 className="mb-4 text-xl font-semibold">{group.title}</h2>
               <div className="space-y-3">

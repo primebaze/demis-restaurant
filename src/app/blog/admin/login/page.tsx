@@ -45,7 +45,7 @@ export default function BlogAdminLoginPage() {
           <p className="text-stone-400 text-sm">Author Login</p>
         </div>
 
-        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-8">
+        <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-8">
           <h2 className="text-xl font-semibold text-white mb-6">Sign In</h2>
 
           {error && (
@@ -62,7 +62,7 @@ export default function BlogAdminLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
+                className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
                 placeholder="Email address"
               />
             </div>
@@ -73,7 +73,7 @@ export default function BlogAdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
+                className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
                 placeholder="Password"
               />
             </div>

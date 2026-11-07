@@ -146,7 +146,7 @@ export default function PublicShootPlan({
   return (
     <div className="min-h-screen bg-ink-950 px-4 py-8 text-white sm:px-8">
       <div className={`mx-auto max-w-6xl`}>
-        <header className="mb-8 flex items-center justify-between gap-3 border-b border-stone-800 pb-5">
+        <header className="mb-8 flex items-center justify-between gap-3 border-b border-white/[0.06] pb-5">
           <div>
             <p className="text-xl font-bold text-gold-300">Demi’s</p>
             <p className="mt-1 text-xs uppercase tracking-widest text-stone-400">
@@ -163,7 +163,7 @@ export default function PublicShootPlan({
             Checking access…
           </p>
         ) : state === "locked" ? (
-          <section className="mx-auto my-16 max-w-md rounded-2xl border border-stone-800 bg-ink-900 p-6 sm:p-8">
+          <section className="mx-auto my-16 max-w-md rounded-2xl border border-white/[0.06] bg-ink-900 p-6 sm:p-8">
             <LockKeyhole
               size={28}
               className="mb-5 text-gold-300"

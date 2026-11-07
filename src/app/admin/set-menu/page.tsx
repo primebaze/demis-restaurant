@@ -196,7 +196,7 @@ export default function AdminSetMenuPage() {
     }
   }
 
-  const inputCls = "w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 placeholder-stone-600";
+  const inputCls = "w-full px-3 py-2 bg-ink-950 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 placeholder-stone-600";
   const labelCls = "block text-xs text-stone-400 mb-1.5";
 
   return (
@@ -216,8 +216,8 @@ export default function AdminSetMenuPage() {
 
       {/* New group form */}
       {showForm && (
-        <div className="mb-8 bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-stone-800">
+        <div className="mb-8 bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-white/[0.06]">
             <h2 className="text-base font-semibold text-white">Create Set Menu Group</h2>
             <p className="text-xs text-stone-500 mt-0.5">A shareable guest selection link will be generated automatically.</p>
           </div>
@@ -235,7 +235,7 @@ export default function AdminSetMenuPage() {
                   <p className="text-xs text-stone-500">Share the link below with the organiser</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 bg-ink-950 border border-stone-700 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2 bg-ink-950 border border-white/10 rounded-xl px-4 py-3">
                 <span className="text-sm text-stone-300 flex-1 truncate font-mono">{newGroupResult.guestSelectionUrl}</span>
                 <button
                   onClick={() => copyLink(newGroupResult.guestSelectionUrl, newGroupResult.groupCode)}
@@ -309,7 +309,7 @@ export default function AdminSetMenuPage() {
         <select
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Statuses</option>
           <option value="active">Active</option>
@@ -323,7 +323,7 @@ export default function AdminSetMenuPage() {
       </div>
 
       {/* Groups table */}
-      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading groups…</div>
         ) : groups.length === 0 ? (
@@ -332,7 +332,7 @@ export default function AdminSetMenuPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
                   <th className="px-4 py-3">Group ID</th>
                   <th className="px-4 py-3">Organiser</th>
                   <th className="px-4 py-3">Date</th>
@@ -351,7 +351,7 @@ export default function AdminSetMenuPage() {
                     <>
                       <tr
                         key={g.id}
-                        className="border-b border-stone-800/50 hover:bg-white/[0.02] cursor-pointer"
+                        className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer"
                         onClick={() => setExpanded(isExpanded ? null : g.id)}
                       >
                         <td className="px-4 py-3 text-sm font-mono text-gold-300 font-semibold">{g.groupCode}</td>
@@ -365,7 +365,7 @@ export default function AdminSetMenuPage() {
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-white font-semibold">{g.selections.length}</span>
                             <span className="text-xs text-stone-500">/ {g.partySize}</span>
-                            <div className="w-16 h-1.5 bg-stone-800 rounded-full overflow-hidden">
+                            <div className="w-16 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-gold-300/60 rounded-full"
                                 style={{ width: `${Math.min(100, (g.selections.length / g.partySize) * 100)}%` }}
@@ -374,7 +374,7 @@ export default function AdminSetMenuPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[g.status] || "bg-stone-700 text-stone-300"}`}>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[g.status] || "bg-white/10 text-stone-300"}`}>
                             {g.status}
                           </span>
                         </td>
@@ -405,7 +405,7 @@ export default function AdminSetMenuPage() {
                         <tr key={`${g.id}-detail`} className="bg-ink-950">
                           <td colSpan={7} className="px-6 py-5">
                             {/* Organiser details */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-5 pb-5 border-b border-stone-800">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-5 pb-5 border-b border-white/[0.06]">
                               <div>
                                 <span className="text-stone-500 block text-xs mb-0.5">Email</span>
                                 <span className="text-white">{g.organizerEmail || "—"}</span>
@@ -447,13 +447,13 @@ export default function AdminSetMenuPage() {
                             ) : (
                               <div className="space-y-2">
                                 {g.selections.map((s, i) => (
-                                  <div key={s.id} className="bg-ink-900 border border-stone-800 rounded-xl px-4 py-3">
+                                  <div key={s.id} className="bg-ink-900 border border-white/[0.06] rounded-xl px-4 py-3">
                                     <div className="flex items-center justify-between mb-2">
                                       <div className="flex items-center gap-3">
                                         <span className="text-xs text-stone-600 w-5 text-right">{i + 1}.</span>
                                         <span className="text-sm font-semibold text-white">{s.guestName}</span>
                                       </div>
-                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPETISER_COLORS[s.appetiser] || "bg-stone-700 text-stone-300"}`}>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPETISER_COLORS[s.appetiser] || "bg-white/10 text-stone-300"}`}>
                                         {s.appetiser}
                                       </span>
                                     </div>
@@ -471,7 +471,7 @@ export default function AdminSetMenuPage() {
 
                             {/* Appetiser summary */}
                             {g.selections.length > 0 && (
-                              <div className="mt-4 pt-4 border-t border-stone-800 flex flex-wrap gap-4">
+                              <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-wrap gap-4">
                                 {["Puff Puff", "Samosa", "Spring Rolls"].map((a) => {
                                   const count = g.selections.filter((s) => s.appetiser.includes(a)).length;
                                   return (
@@ -495,7 +495,7 @@ export default function AdminSetMenuPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
             <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
               ← Previous
             </button>
