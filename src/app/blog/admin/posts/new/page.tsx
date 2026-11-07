@@ -93,55 +93,55 @@ export default function NewPostPage() {
 
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Title</label>
+          <label className="block text-sm font-medium text-stone-300 mb-1.5">Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => { setTitle(e.target.value); autoSlug(e.target.value); }}
-            className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
             placeholder="Post title"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Slug</label>
+          <label className="block text-sm font-medium text-stone-300 mb-1.5">Slug</label>
           <input
             type="text"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
             placeholder="post-url-slug"
           />
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Author</label>
+            <label className="block text-sm font-medium text-stone-300 mb-1.5">Author</label>
             <select
               value={authorId}
               onChange={(e) => setAuthorId(e.target.value)}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
             >
               {authors.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Category</label>
+            <label className="block text-sm font-medium text-stone-300 mb-1.5">Category</label>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
             >
               <option value="">No category</option>
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Status</label>
+            <label className="block text-sm font-medium text-stone-300 mb-1.5">Status</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
+              className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-gold-400"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
@@ -150,9 +150,9 @@ export default function NewPostPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Featured Image</label>
+          <label className="block text-sm font-medium text-stone-300 mb-1.5">Featured Image</label>
           <div className="flex items-center gap-4">
-            <label className="px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded-xl text-sm text-gray-300 cursor-pointer hover:border-gold-400 transition">
+            <label className="px-4 py-2 bg-ink-900 border border-stone-700 rounded-xl text-sm text-stone-300 cursor-pointer hover:border-gold-400 transition">
               {uploading ? "Uploading..." : "Choose Image"}
               <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
             </label>
@@ -166,18 +166,18 @@ export default function NewPostPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Excerpt</label>
+          <label className="block text-sm font-medium text-stone-300 mb-1.5">Excerpt</label>
           <textarea
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             rows={2}
-            className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400 resize-y"
+            className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
             placeholder="Brief description for search results and social sharing"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Content</label>
+          <label className="block text-sm font-medium text-stone-300 mb-1.5">Content</label>
           <RichTextEditor
             content={content}
             onChange={setContent}
@@ -185,26 +185,26 @@ export default function NewPostPage() {
           />
         </div>
 
-        <div className="border-t border-gray-800 pt-6">
-          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">SEO Settings</h3>
+        <div className="border-t border-stone-800 pt-6">
+          <h3 className="text-sm font-semibold text-stone-400 uppercase tracking-wider mb-4">SEO Settings</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Meta Title</label>
+              <label className="block text-sm font-medium text-stone-300 mb-1.5">Meta Title</label>
               <input
                 type="text"
                 value={metaTitle}
                 onChange={(e) => setMetaTitle(e.target.value)}
-                className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400"
+                className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400"
                 placeholder="Custom title for search engines (leave blank to use post title)"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Meta Description</label>
+              <label className="block text-sm font-medium text-stone-300 mb-1.5">Meta Description</label>
               <textarea
                 value={metaDescription}
                 onChange={(e) => setMetaDescription(e.target.value)}
                 rows={2}
-                className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400 resize-y"
+                className="w-full px-4 py-3 bg-ink-900 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-y"
                 placeholder="Custom description for search engines (leave blank to use excerpt)"
               />
             </div>
@@ -221,7 +221,7 @@ export default function NewPostPage() {
           </button>
           <button
             onClick={() => router.push("/blog/admin/posts")}
-            className="px-6 py-3 bg-[#1a1a1a] border border-gray-700 text-gray-300 rounded-xl hover:bg-white/5 transition"
+            className="px-6 py-3 bg-ink-900 border border-stone-700 text-stone-300 rounded-xl hover:bg-white/5 transition"
           >
             Cancel
           </button>

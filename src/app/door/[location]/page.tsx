@@ -145,13 +145,13 @@ export default function DoorKioskPage({ params }: { params: { location: string }
   }
 
   const field =
-    "w-full px-3.5 py-2.5 bg-black/30 border border-white/[0.07] rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none focus:border-gold-300/50 focus:bg-black/50 transition";
-  const card = "bg-[#161616] border border-white/[0.06] rounded-2xl";
+    "w-full px-3.5 py-2.5 bg-black/30 border border-white/[0.07] rounded-xl text-white text-sm placeholder-stone-600 focus:outline-none focus:border-gold-300/50 focus:bg-black/50 transition";
+  const card = "bg-ink-900 border border-white/[0.06] rounded-2xl";
 
   // ── Locked ──
   if (unlocked !== true) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-5">
+      <div className="min-h-screen bg-ink-950 flex items-center justify-center px-5">
         <div className="w-full max-w-xs text-center">
           <p className="text-[11px] uppercase tracking-[0.18em] text-gold-300/60 mb-2">Door check-in</p>
           <h1 className="text-2xl font-bold text-white mb-8">Staff PIN</h1>
@@ -162,12 +162,12 @@ export default function DoorKioskPage({ params }: { params: { location: string }
             autoFocus
             placeholder="••••"
             disabled={pinBusy || unlocked === null}
-            className="w-full px-4 py-5 bg-[#161616] border border-white/[0.07] rounded-2xl text-white text-center text-3xl tracking-[0.5em] font-bold placeholder-gray-700 focus:outline-none focus:border-gold-300/50 disabled:opacity-50"
+            className="w-full px-4 py-5 bg-ink-900 border border-white/[0.07] rounded-2xl text-white text-center text-3xl tracking-[0.5em] font-bold placeholder-stone-700 focus:outline-none focus:border-gold-300/50 disabled:opacity-50"
           />
           <p className="mt-4 text-xs h-4">
             {pinError
               ? <span className="text-red-400">{pinError}</span>
-              : <span className="text-gray-600">Enter the 4-digit staff PIN</span>}
+              : <span className="text-stone-600">Enter the 4-digit staff PIN</span>}
           </p>
         </div>
       </div>
@@ -176,7 +176,7 @@ export default function DoorKioskPage({ params }: { params: { location: string }
 
   // ── Unlocked ──
   return (
-    <div className="min-h-screen bg-[#0f0f0f] px-4 py-6 sm:px-6">
+    <div className="min-h-screen bg-ink-950 px-4 py-6 sm:px-6">
       <div className="max-w-7xl mx-auto">
         <header className="flex items-end justify-between gap-4 mb-6">
           <div>
@@ -184,7 +184,7 @@ export default function DoorKioskPage({ params }: { params: { location: string }
             <h1 className="text-3xl font-bold text-white leading-none">{locationName || "…"}</h1>
           </div>
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500">In the building</p>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-stone-500">In the building</p>
             <p className="text-3xl font-bold text-white tabular-nums leading-tight">{stillIn}</p>
           </div>
         </header>
@@ -198,7 +198,7 @@ export default function DoorKioskPage({ params }: { params: { location: string }
                   <button key={t}
                     onClick={() => { setVisitType(t); if (t === "takeaway") { setPartySize(1); setTableNo(""); setIsBooking(false); } }}
                     className={`py-2.5 rounded-lg text-sm font-semibold transition ${
-                      on ? (t === "dining" ? "bg-gold-300 text-black" : "bg-emerald-400 text-black") : "text-gray-400 hover:text-white"
+                      on ? (t === "dining" ? "bg-gold-300 text-black" : "bg-emerald-400 text-black") : "text-stone-400 hover:text-white"
                     }`}>
                     {t === "dining" ? "Dining in" : "Takeaway"}
                   </button>
@@ -209,12 +209,12 @@ export default function DoorKioskPage({ params }: { params: { location: string }
             {dining && (
               <div className="flex items-end gap-2.5 mb-4">
                 <label className="flex-1 min-w-0">
-                  <span className="block text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1.5">Table</span>
+                  <span className="block text-[10px] uppercase tracking-[0.15em] text-stone-500 mb-1.5">Table</span>
                   <input value={tableNo} onChange={(e) => setTableNo(e.target.value)} placeholder="—"
                     className={`${field} text-center font-semibold`} />
                 </label>
                 <label className="flex-1 min-w-0">
-                  <span className="block text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1.5">Guests</span>
+                  <span className="block text-[10px] uppercase tracking-[0.15em] text-stone-500 mb-1.5">Guests</span>
                   <div className="flex items-center justify-between px-2 py-1.5 bg-black/30 border border-white/[0.07] rounded-xl">
                     <button onClick={() => setPartySize((p) => Math.max(1, p - 1))}
                       className="w-7 h-7 rounded-lg border border-white/10 text-white text-lg leading-none hover:bg-white/5 active:scale-95 transition">−</button>
@@ -234,7 +234,7 @@ export default function DoorKioskPage({ params }: { params: { location: string }
 
             {dining && (
               <button onClick={() => setIsBooking((b) => !b)}
-                className={`mt-3 w-full py-2 text-xs rounded-lg border transition ${isBooking ? "bg-gold-300/10 border-gold-300/40 text-gold-300" : "border-white/[0.07] text-gray-500 hover:text-white"}`}>
+                className={`mt-3 w-full py-2 text-xs rounded-lg border transition ${isBooking ? "bg-gold-300/10 border-gold-300/40 text-gold-300" : "border-white/[0.07] text-stone-500 hover:text-white"}`}>
                 {isBooking ? "✓ Has a booking" : "Has a booking?"}
               </button>
             )}
@@ -244,7 +244,7 @@ export default function DoorKioskPage({ params }: { params: { location: string }
               {busy ? "…" : "Check in"}
             </button>
 
-            <p className="mt-3 text-[11px] text-gray-600 text-center">
+            <p className="mt-3 text-[11px] text-stone-600 text-center">
               {flash
                 ? <span className={flashBad ? "text-red-400" : "text-emerald-400"}>{flash}</span>
                 : <>All details optional · blank logs as Customer {visits.length + 1}</>}
@@ -254,11 +254,11 @@ export default function DoorKioskPage({ params }: { params: { location: string }
           <section className={`${card} overflow-hidden`}>
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
               <h2 className="text-sm font-semibold text-white">Today</h2>
-              <span className="text-xs text-gray-500">{visits.length} {visits.length === 1 ? "visit" : "visits"}</span>
+              <span className="text-xs text-stone-500">{visits.length} {visits.length === 1 ? "visit" : "visits"}</span>
             </div>
 
             {visits.length === 0 ? (
-              <p className="px-5 py-14 text-center text-sm text-gray-500">No one checked in yet.</p>
+              <p className="px-5 py-14 text-center text-sm text-stone-500">No one checked in yet.</p>
             ) : (
               <div className="divide-y divide-white/[0.05]">
                 {visits.map((v) => {
@@ -272,29 +272,29 @@ export default function DoorKioskPage({ params }: { params: { location: string }
                         </span>
 
                         <div className="min-w-0 flex-1">
-                          <p className={`text-sm font-semibold truncate ${v.hasDetails ? "text-white" : "text-gray-500"}`}>{v.label}</p>
-                          <p className="text-[11px] text-gray-500 truncate">
+                          <p className={`text-sm font-semibold truncate ${v.hasDetails ? "text-white" : "text-stone-500"}`}>{v.label}</p>
+                          <p className="text-[11px] text-stone-500 truncate">
                             <span className={isDining ? "text-gold-300/70" : "text-emerald-400/70"}>
                               {isDining ? `Dining · ${v.partySize}` : "Takeaway"}
                             </span>
-                            {v.tableNo && <> · <span className="text-gray-300 font-semibold">Table {v.tableNo}</span></>}
+                            {v.tableNo && <> · <span className="text-stone-300 font-semibold">Table {v.tableNo}</span></>}
                             {v.isBooking && " · booked"}
                             {` · ${clock(v.checkedInAt)}`}
                             {v.checkedOutAt && ` → ${clock(v.checkedOutAt)}`}
                           </p>
                           {v.items.length > 0 && (
-                            <p className="text-[11px] text-gray-400 truncate mt-0.5">{orderSummary(v.items)}</p>
+                            <p className="text-[11px] text-stone-400 truncate mt-0.5">{orderSummary(v.items)}</p>
                           )}
                         </div>
 
-                        <span className={`shrink-0 px-2 py-0.5 rounded-md text-[11px] font-semibold tabular-nums ${open ? "bg-white/[0.07] text-gray-200" : "text-gray-600"}`}>
+                        <span className={`shrink-0 px-2 py-0.5 rounded-md text-[11px] font-semibold tabular-nums ${open ? "bg-white/[0.07] text-stone-200" : "text-stone-600"}`}>
                           {elapsed(v.checkedInAt, v.checkedOutAt, now)}
                         </span>
 
                         <div className="shrink-0 flex items-center gap-1.5">
                           <button onClick={() => setOrderFor(v)}
                             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
-                              v.items.length ? "border-gold-300/40 text-gold-300 bg-gold-300/[0.06] hover:bg-gold-300/10" : "border-white/[0.1] text-gray-300 hover:text-white hover:bg-white/5"
+                              v.items.length ? "border-gold-300/40 text-gold-300 bg-gold-300/[0.06] hover:bg-gold-300/10" : "border-white/[0.1] text-stone-300 hover:text-white hover:bg-white/5"
                             }`}>
                             {v.items.length ? `Order (${v.items.reduce((n, l) => n + l.qty, 0)})` : "+ Order"}
                           </button>
@@ -316,12 +316,12 @@ export default function DoorKioskPage({ params }: { params: { location: string }
                             </button>
                           ) : (
                             <button onClick={() => patch(v.id, { action: "reopen" })} disabled={rowBusy === v.id}
-                              className="px-3 py-1.5 text-xs rounded-lg border border-white/[0.07] text-gray-500 hover:text-white transition disabled:opacity-40">
+                              className="px-3 py-1.5 text-xs rounded-lg border border-white/[0.07] text-stone-500 hover:text-white transition disabled:opacity-40">
                               Reopen
                             </button>
                           )}
                           <button onClick={() => remove(v.id)} title="Remove"
-                            className="w-7 h-7 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition">✕</button>
+                            className="w-7 h-7 rounded-lg text-stone-600 hover:text-red-400 hover:bg-red-500/10 transition">✕</button>
                         </div>
                       </div>
                     </div>

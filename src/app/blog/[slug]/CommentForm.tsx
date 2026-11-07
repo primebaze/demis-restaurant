@@ -49,7 +49,7 @@ export function CommentForm({ postSlug }: { postSlug: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-6">
+    <form onSubmit={handleSubmit} className="bg-ink-800 border border-white/5 rounded-2xl p-6">
       <h3 className="text-lg font-semibold text-white mb-4">Leave a Comment</h3>
 
       {error && (
@@ -63,7 +63,7 @@ export function CommentForm({ postSlug }: { postSlug: string }) {
           onChange={(e) => setName(e.target.value)}
           required
           placeholder="Your name"
-          className="px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-xl text-white placeholder-stone-500 text-sm focus:outline-none focus:border-gold-400"
+          className="px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white placeholder-stone-500 text-sm focus:outline-none focus:border-gold-400"
         />
         <input
           type="email"
@@ -71,7 +71,7 @@ export function CommentForm({ postSlug }: { postSlug: string }) {
           onChange={(e) => setEmail(e.target.value)}
           required
           placeholder="Your email (not displayed)"
-          className="px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-xl text-white placeholder-stone-500 text-sm focus:outline-none focus:border-gold-400"
+          className="px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white placeholder-stone-500 text-sm focus:outline-none focus:border-gold-400"
         />
       </div>
       <textarea
@@ -81,7 +81,7 @@ export function CommentForm({ postSlug }: { postSlug: string }) {
         rows={4}
         maxLength={2000}
         placeholder="Share your thoughts..."
-        className="w-full px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-xl text-white placeholder-stone-500 text-sm focus:outline-none focus:border-gold-400 resize-y mb-4"
+        className="w-full px-4 py-3 bg-ink-950 border border-white/10 rounded-xl text-white placeholder-stone-500 text-sm focus:outline-none focus:border-gold-400 resize-y mb-4"
       />
       <button
         type="submit"

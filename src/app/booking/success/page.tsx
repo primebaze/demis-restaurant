@@ -93,7 +93,7 @@ function SuccessContent() {
   return (
     <div className="text-center">
       {/* Success icon */}
-      <div className="w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500/20 flex items-center justify-center mx-auto mb-6">
+      <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
         <span className="text-4xl">✓</span>
       </div>
 
@@ -108,7 +108,7 @@ function SuccessContent() {
       </p>
 
       {/* Booking summary */}
-      <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-6 text-left max-w-sm mx-auto">
+      <div className="rounded-2xl border border-white/[0.06] bg-ink-700 p-6 text-left max-w-sm mx-auto">
         <div className="mb-4">
           <p className="text-xs text-stone-500 uppercase tracking-wider">Confirmation Code</p>
           <p className="text-xl font-bold text-gold-300 mt-1">{booking.confirmationCode}</p>
@@ -179,7 +179,7 @@ export default function BookingSuccessPage() {
     <div className="min-h-[80vh] flex items-center justify-center">
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-lg px-4 sm:px-6">
-          <div className="rounded-3xl border border-white/[0.06] bg-[#1f1f1f] p-6 sm:p-10">
+          <div className="rounded-3xl border border-white/[0.06] bg-ink-800 p-6 sm:p-10">
             <Suspense
               fallback={
                 <div className="text-center py-16">

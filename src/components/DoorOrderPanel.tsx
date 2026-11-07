@@ -154,7 +154,7 @@ export function DoorOrderPanel({
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" onClick={onClose}>
       <div
-        className="relative w-full max-w-6xl h-[92vh] bg-[#141414] border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-6xl h-[92vh] bg-ink-950 border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* header */}
@@ -163,27 +163,27 @@ export function DoorOrderPanel({
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-[0.18em] text-gold-300/60">Order</p>
               <h2 className="text-lg font-bold text-white truncate">
-                {label}{tableNo && <span className="text-gray-400 font-semibold"> · Table {tableNo}</span>}
+                {label}{tableNo && <span className="text-stone-400 font-semibold"> · Table {tableNo}</span>}
               </h2>
             </div>
             <button onClick={onClose} title="Close without saving"
-              className="w-9 h-9 shrink-0 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition">✕</button>
+              className="w-9 h-9 shrink-0 rounded-xl text-stone-500 hover:text-white hover:bg-white/5 transition">✕</button>
           </div>
 
           {guestCount > 1 && (
             <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-0.5">
-              <span className="shrink-0 text-[10px] uppercase tracking-[0.15em] text-gray-500 mr-1">Adding for</span>
+              <span className="shrink-0 text-[10px] uppercase tracking-[0.15em] text-stone-500 mr-1">Adding for</span>
               {byGuest.map((list, i) => {
                 const n = i + 1, on = n === guest;
                 const items = list.reduce((s, l) => s + l.qty, 0);
                 return (
                   <button key={n} onClick={() => selectGuest(n)}
                     className={`shrink-0 px-3.5 py-2 rounded-xl text-sm font-semibold border transition ${
-                      on ? "bg-white text-black border-white" : "border-white/[0.1] text-gray-300 hover:text-white hover:bg-white/5"
+                      on ? "bg-white text-black border-white" : "border-white/[0.1] text-stone-300 hover:text-white hover:bg-white/5"
                     }`}>
                     Guest {n}
                     {items > 0 && (
-                      <span className={`ml-2 text-[11px] tabular-nums ${on ? "text-black/60" : "text-gray-500"}`}>{items}</span>
+                      <span className={`ml-2 text-[11px] tabular-nums ${on ? "text-black/60" : "text-stone-500"}`}>{items}</span>
                     )}
                   </button>
                 );
@@ -200,7 +200,7 @@ export function DoorOrderPanel({
                 {(["food", "drink"] as const).map((k) => (
                   <button key={k} onClick={() => { setTab(k); setQ(""); }}
                     className={`py-2.5 rounded-lg text-sm font-semibold transition ${
-                      tab === k ? (k === "food" ? "bg-gold-300 text-black" : "bg-sky-400 text-black") : "text-gray-400 hover:text-white"
+                      tab === k ? (k === "food" ? "bg-gold-300 text-black" : "bg-stone-200 text-black") : "text-stone-400 hover:text-white"
                     }`}>
                     {k === "food" ? "Food" : "Drinks"}
                   </button>
@@ -209,17 +209,17 @@ export function DoorOrderPanel({
               <input
                 ref={searchRef} value={q} onChange={(e) => setQ(e.target.value)}
                 placeholder={tab === "food" ? "Search food…" : "Search drinks…"}
-                className="w-full px-3.5 py-2.5 bg-black/30 border border-white/[0.07] rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none focus:border-gold-300/50"
+                className="w-full px-3.5 py-2.5 bg-black/30 border border-white/[0.07] rounded-xl text-white text-sm placeholder-stone-600 focus:outline-none focus:border-gold-300/50"
               />
             </div>
 
             <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
               {groups.length === 0 && (
-                <p className="py-10 text-center text-sm text-gray-500">Nothing matches. Add it below the order instead.</p>
+                <p className="py-10 text-center text-sm text-stone-500">Nothing matches. Add it below the order instead.</p>
               )}
               {groups.map((g) => (
                 <div key={g.group} className="mb-4">
-                  <p className="sticky top-0 z-10 bg-[#141414] py-1.5 text-[10px] uppercase tracking-[0.15em] text-gray-500">{g.group}</p>
+                  <p className="sticky top-0 z-10 bg-ink-950 py-1.5 text-[10px] uppercase tracking-[0.15em] text-stone-500">{g.group}</p>
                   <div className="grid sm:grid-cols-2 gap-1.5">
                     {g.items.map((item) => {
                       const n = qtyByMenu.get(menuKey(item)) || 0;
@@ -231,13 +231,13 @@ export function DoorOrderPanel({
                           <span className="min-w-0">
                             <span className="block text-sm text-white truncate">{item.name}</span>
                             {(item.note || item.choices.length > 0) && (
-                              <span className="block text-[10px] text-gray-500 truncate">
+                              <span className="block text-[10px] text-stone-500 truncate">
                                 {item.note ?? `+ ${item.choices.map((c) => c.title.toLowerCase()).join(" & ")}`}
                               </span>
                             )}
                           </span>
                           <span className="shrink-0 flex items-center gap-2">
-                            <span className="text-xs text-gray-400 tabular-nums">{item.pricePence != null ? money(item.pricePence) : "—"}</span>
+                            <span className="text-xs text-stone-400 tabular-nums">{item.pricePence != null ? money(item.pricePence) : "—"}</span>
                             {n > 0 && (
                               <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-gold-300 text-black text-[11px] font-bold flex items-center justify-center tabular-nums">{n}</span>
                             )}
@@ -255,7 +255,7 @@ export function DoorOrderPanel({
           <div className="min-h-0 flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
               <p className="text-sm font-semibold text-white">{guestCount > 1 ? `Guest ${guest}'s order` : "This order"}</p>
-              <p className="text-xs text-gray-500 tabular-nums">
+              <p className="text-xs text-stone-500 tabular-nums">
                 {guestCount > 1
                   ? (mine.length ? money(orderTotal(mine).pence) : "")
                   : `${count} ${count === 1 ? "item" : "items"}`}
@@ -264,7 +264,7 @@ export function DoorOrderPanel({
 
             <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2">
               {mine.length === 0 ? (
-                <p className="py-8 text-center text-sm text-gray-500">
+                <p className="py-8 text-center text-sm text-stone-500">
                   {guestCount > 1 ? `Nothing for Guest ${guest} yet. Tap the menu to add.` : "Tap something on the menu to add it."}
                 </p>
               ) : (
@@ -275,9 +275,9 @@ export function DoorOrderPanel({
                     <div key={k} className="flex items-center gap-2 px-2.5 py-2">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-white truncate">
-                          {l.kind === "drink" && <span className="text-sky-400/80 mr-1">●</span>}{l.name}
+                          {l.kind === "drink" && <span className="text-stone-400 mr-1">●</span>}{l.name}
                         </p>
-                        <p className="text-[11px] text-gray-500 truncate">
+                        <p className="text-[11px] text-stone-500 truncate">
                           {l.choices.length
                             ? l.choices.map((c) => c.label + (c.extraPence ? ` +${money(c.extraPence)}` : "")).join(" · ")
                             : l.group}
@@ -290,7 +290,7 @@ export function DoorOrderPanel({
                         <button onClick={() => bump(k, 1)}
                           className="w-7 h-7 rounded-lg border border-white/10 text-white leading-none hover:bg-white/5 active:scale-95 transition">+</button>
                       </div>
-                      <span className="w-[62px] shrink-0 text-right text-sm text-gray-300 tabular-nums">
+                      <span className="w-[62px] shrink-0 text-right text-sm text-stone-300 tabular-nums">
                         {u != null ? money(u * l.qty) : "—"}
                       </span>
                     </div>
@@ -301,7 +301,7 @@ export function DoorOrderPanel({
               {/* the other guests, summarised; tap to switch */}
               {guestCount > 1 && (
                 <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                  <p className="px-2.5 pb-1.5 text-[10px] uppercase tracking-[0.15em] text-gray-500">Rest of the table</p>
+                  <p className="px-2.5 pb-1.5 text-[10px] uppercase tracking-[0.15em] text-stone-500">Rest of the table</p>
                   {byGuest.map((list, i) => {
                     const n = i + 1;
                     if (n === guest) return null;
@@ -309,8 +309,8 @@ export function DoorOrderPanel({
                     return (
                       <button key={n} onClick={() => selectGuest(n)}
                         className="w-full flex items-center justify-between gap-3 px-2.5 py-2 rounded-lg hover:bg-white/[0.04] transition text-left">
-                        <span className="text-sm text-gray-300">Guest {n}</span>
-                        <span className="text-xs text-gray-500 tabular-nums">
+                        <span className="text-sm text-stone-300">Guest {n}</span>
+                        <span className="text-xs text-stone-500 tabular-nums">
                           {items ? `${items} ${items === 1 ? "item" : "items"} · ${money(orderTotal(list).pence)}` : "nothing yet"}
                         </span>
                       </button>
@@ -322,18 +322,18 @@ export function DoorOrderPanel({
 
             {/* anything not on the menu */}
             <div className="px-4 py-3 border-t border-white/[0.06]">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-2">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-stone-500 mb-2">
                 Not on the menu? Add {tab === "food" ? "food" : "a drink"}{guestCount > 1 ? ` for Guest ${guest}` : ""}
               </p>
               <div className="flex gap-2">
                 <input value={customName} onChange={(e) => setCustomName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") addCustom(); }}
                   placeholder="Item"
-                  className="flex-1 min-w-0 px-3 py-2 bg-black/30 border border-white/[0.07] rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-gold-300/50" />
+                  className="flex-1 min-w-0 px-3 py-2 bg-black/30 border border-white/[0.07] rounded-lg text-white text-sm placeholder-stone-600 focus:outline-none focus:border-gold-300/50" />
                 <input value={customPrice} onChange={(e) => setCustomPrice(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") addCustom(); }}
                   placeholder="£" inputMode="decimal"
-                  className="w-[70px] px-2 py-2 bg-black/30 border border-white/[0.07] rounded-lg text-white text-sm text-right placeholder-gray-600 focus:outline-none focus:border-gold-300/50" />
+                  className="w-[70px] px-2 py-2 bg-black/30 border border-white/[0.07] rounded-lg text-white text-sm text-right placeholder-stone-600 focus:outline-none focus:border-gold-300/50" />
                 <button onClick={addCustom} disabled={!customName.trim()}
                   className="px-3 py-2 text-xs font-semibold rounded-lg border border-white/10 text-white hover:bg-white/5 transition disabled:opacity-30">Add</button>
               </div>
@@ -342,7 +342,7 @@ export function DoorOrderPanel({
             {/* total + actions */}
             <div className="px-5 py-4 border-t border-white/[0.06] bg-black/20">
               <div className="flex items-baseline justify-between">
-                <span className="text-[10px] uppercase tracking-[0.15em] text-gray-500">Table total</span>
+                <span className="text-[10px] uppercase tracking-[0.15em] text-stone-500">Table total</span>
                 <span className="text-2xl font-bold text-white tabular-nums">{money(total.pence)}</span>
               </div>
               {total.unpriced > 0 && (
@@ -368,19 +368,19 @@ export function DoorOrderPanel({
         {/* ── "comes with" chooser ── */}
         {choosing && (
           <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-[2px] flex items-center justify-center p-4" onClick={() => setChoosing(null)}>
-            <div className="w-full max-w-lg max-h-full overflow-y-auto bg-[#1b1b1b] border border-white/[0.1] rounded-2xl shadow-2xl p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-lg max-h-full overflow-y-auto bg-ink-800 border border-white/[0.1] rounded-2xl shadow-2xl p-5" onClick={(e) => e.stopPropagation()}>
               <p className="text-[10px] uppercase tracking-[0.18em] text-gold-300/60">
                 {choosing.group}{guestCount > 1 ? ` · Guest ${guest}` : ""}
               </p>
               <div className="flex items-baseline justify-between gap-4 mt-0.5 mb-4">
                 <h3 className="text-xl font-bold text-white">{choosing.name}</h3>
-                {choosing.pricePence != null && <span className="text-sm text-gray-400 tabular-nums">{money(choosing.pricePence)}</span>}
+                {choosing.pricePence != null && <span className="text-sm text-stone-400 tabular-nums">{money(choosing.pricePence)}</span>}
               </div>
 
               {choosing.choices.map((g) => (
                 <div key={g.title} className="mb-4">
-                  <p className="text-xs font-semibold text-gray-300 mb-2">
-                    {g.title} <span className="text-gray-500 font-normal">· pick one</span>
+                  <p className="text-xs font-semibold text-stone-300 mb-2">
+                    {g.title} <span className="text-stone-500 font-normal">· pick one</span>
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                     {g.options.map((o) => {
@@ -392,7 +392,7 @@ export function DoorOrderPanel({
                           }`}>
                           {o.label}
                           {o.extraPence > 0 && (
-                            <span className={`block text-[11px] ${on ? "text-black/60" : "text-gray-500"}`}>+{money(o.extraPence)}</span>
+                            <span className={`block text-[11px] ${on ? "text-black/60" : "text-stone-500"}`}>+{money(o.extraPence)}</span>
                           )}
                         </button>
                       );
@@ -403,7 +403,7 @@ export function DoorOrderPanel({
 
               <div className="grid grid-cols-[auto_1fr] gap-2 mt-5">
                 <button onClick={() => setChoosing(null)}
-                  className="px-5 py-3 text-sm rounded-xl border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 transition">Cancel</button>
+                  className="px-5 py-3 text-sm rounded-xl border border-white/10 text-stone-300 hover:text-white hover:bg-white/5 transition">Cancel</button>
                 <button onClick={confirmChoices} disabled={!chooserReady}
                   className="py-3 text-sm font-bold rounded-xl bg-gold-300 text-black hover:bg-gold-200 transition disabled:opacity-30">
                   {chooserReady

@@ -18,9 +18,9 @@ interface TodayBooking {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  Website: "bg-blue-500/15 text-blue-300",
-  "Set Menu": "bg-purple-500/15 text-purple-300",
-  Buffet: "bg-orange-500/15 text-orange-300",
+  Website: "bg-gold-300/15 text-gold-300",
+  "Set Menu": "bg-white/[0.06] text-stone-200",
+  Buffet: "bg-white/[0.06] text-stone-400",
 };
 
 interface DashboardData {
@@ -65,11 +65,11 @@ function formatDayLabel(dateStr: string): string {
 
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "bg-emerald-500/20 text-emerald-400",
-  modified: "bg-blue-500/20 text-blue-400",
+  modified: "bg-gold-300/15 text-gold-300",
   pending_payment: "bg-amber-500/20 text-amber-400",
   cancelled: "bg-red-500/20 text-red-400",
   no_show: "bg-red-600/20 text-red-500",
-  completed: "bg-gray-500/20 text-gray-400",
+  completed: "bg-stone-500/20 text-stone-400",
 };
 
 export default function AdminDashboard() {
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400">Loading dashboard...</div>
+        <div className="text-stone-400">Loading dashboard...</div>
       </div>
     );
   }
@@ -166,10 +166,10 @@ export default function AdminDashboard() {
             className={`rounded-xl p-4 border ${
               s.accent
                 ? "bg-gold-300/5 border-gold-300/20"
-                : "bg-[#1a1a1a] border-gray-800"
+                : "bg-ink-900 border-stone-800"
             }`}
           >
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 truncate">
+            <p className="text-xs text-stone-500 uppercase tracking-wider mb-1 truncate">
               {s.label}
             </p>
             <p className={`text-2xl font-bold ${s.accent ? "text-gold-300" : "text-white"}`}>
@@ -180,14 +180,14 @@ export default function AdminDashboard() {
       </div>
 
       {/* Day bookings table */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between gap-3">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <h2 className="text-lg font-semibold text-white truncate">
               {data.today.isToday ? "Today's Bookings" : formatDayLabel(data.today.date)}
             </h2>
             {data.today.isToday ? (
-              <span className="text-xs text-gray-500 hidden sm:inline">{formatDayLabel(data.today.date)}</span>
+              <span className="text-xs text-stone-500 hidden sm:inline">{formatDayLabel(data.today.date)}</span>
             ) : (
               <button
                 onClick={() => setSelectedDate(null)}
@@ -200,8 +200,8 @@ export default function AdminDashboard() {
                 Go to today
               </button>
             )}
-            {dayLoading && <span className="text-xs text-gray-600 shrink-0">…</span>}
-            <span className="text-xs text-gray-500 shrink-0 hidden md:inline">
+            {dayLoading && <span className="text-xs text-stone-600 shrink-0">…</span>}
+            <span className="text-xs text-stone-500 shrink-0 hidden md:inline">
               {data.today.totalBookings} booking{data.today.totalBookings === 1 ? "" : "s"} &middot; {data.today.totalCovers} covers
             </span>
           </div>
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setSelectedDate(addDays(data.today.date, -1))}
               title="Previous day"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#0f0f0f] border border-gray-700 text-gray-300 hover:border-gold-400 hover:text-white transition"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-ink-950 border border-stone-700 text-stone-300 hover:border-gold-400 hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -218,7 +218,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setSelectedDate(addDays(data.today.date, 1))}
               title="Next day"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#0f0f0f] border border-gray-700 text-gray-300 hover:border-gold-400 hover:text-white transition"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-ink-950 border border-stone-700 text-stone-300 hover:border-gold-400 hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -228,14 +228,14 @@ export default function AdminDashboard() {
         </div>
 
         {data.today.bookings.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-stone-500">
             No bookings for this day
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
                   <th className="px-6 py-3">Code</th>
                   <th className="px-6 py-3">Type</th>
                   <th className="px-6 py-3">Guest</th>
@@ -248,12 +248,12 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {data.today.bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
+                  <tr key={b.id} className="border-b border-stone-800/50 hover:bg-white/[0.02]">
                     <td className="px-6 py-4 text-sm font-mono text-gold-300">
                       {b.confirmationCode}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[b.type] || "bg-gray-700 text-gray-300"}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[b.type] || "bg-stone-700 text-stone-300"}`}>
                         {b.type}
                       </span>
                     </td>
@@ -261,13 +261,13 @@ export default function AdminDashboard() {
                       {b.guest}
                       {b.notes && <span className="block text-xs text-amber-400/80 font-normal mt-0.5">📝 {b.notes}</span>}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-400">{b.location}</td>
-                    <td className="px-6 py-4 text-sm text-gray-300">{b.slot}</td>
+                    <td className="px-6 py-4 text-sm text-stone-400">{b.location}</td>
+                    <td className="px-6 py-4 text-sm text-stone-300">{b.slot}</td>
                     <td className="px-6 py-4 text-sm text-white">{b.partySize}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                          STATUS_COLORS[b.status] || "bg-gray-700 text-gray-300"
+                          STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"
                         }`}
                       >
                         {b.status.replace("_", " ")}
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
                             </svg>
                           </a>
                         ) : (
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-800/50 text-gray-700">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-stone-800/50 text-stone-700">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
                             </svg>
                           </button>
                         ) : (
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-800/50 text-gray-700">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-stone-800/50 text-stone-700">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
@@ -322,9 +322,9 @@ export default function AdminDashboard() {
       {/* In-app email composer */}
       {email && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setEmail(null)}>
-          <div className="w-full max-w-lg bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg bg-ink-900 border border-stone-800 rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-semibold text-white mb-1">Email guest</h2>
-            <p className="text-xs text-gray-500 mb-4">To: {email.name} &lt;{email.to}&gt;</p>
+            <p className="text-xs text-stone-500 mb-4">To: {email.name} &lt;{email.to}&gt;</p>
 
             <div className="space-y-3">
               <input
@@ -332,7 +332,7 @@ export default function AdminDashboard() {
                 value={email.subject}
                 onChange={(e) => setEmail((s) => s && { ...s, subject: e.target.value })}
                 placeholder="Subject"
-                className="w-full px-3 py-2.5 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400"
+                className="w-full px-3 py-2.5 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
                 autoFocus
               />
               <textarea
@@ -340,20 +340,20 @@ export default function AdminDashboard() {
                 onChange={(e) => setEmail((s) => s && { ...s, message: e.target.value })}
                 rows={6}
                 placeholder="Write your message…"
-                className="w-full px-3 py-2.5 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400 resize-none"
+                className="w-full px-3 py-2.5 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400 resize-none"
               />
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setEmail((s) => s && { ...s, provider: "smtp" })}
-                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-stone-700 text-stone-400 hover:text-white"}`}
                 >
                   SMTP
                 </button>
                 <button
                   type="button"
                   onClick={() => setEmail((s) => s && { ...s, provider: "resend" })}
-                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                  className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${email.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-stone-700 text-stone-400 hover:text-white"}`}
                 >
                   Resend
                 </button>
@@ -367,11 +367,11 @@ export default function AdminDashboard() {
               <button
                 onClick={sendDashboardEmail}
                 disabled={email.sending}
-                className="px-5 py-2 bg-gold-300 text-[#1a1a1a] rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50"
+                className="px-5 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50"
               >
                 {email.sending ? "Sending…" : "Send"}
               </button>
-              <button onClick={() => setEmail(null)} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition">
+              <button onClick={() => setEmail(null)} className="px-4 py-2 text-sm text-stone-400 hover:text-white transition">
                 Cancel
               </button>
             </div>

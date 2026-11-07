@@ -82,10 +82,10 @@ export function LiveChat() {
         <div
           role="dialog"
           aria-label="Demi's helper chat"
-          className="fixed bottom-24 right-4 sm:right-6 z-40 w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-white/10 bg-[#141210] shadow-[0_24px_70px_-20px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col"
+          className="fixed bottom-24 right-4 sm:right-6 z-40 w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-white/10 bg-ink-800 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col"
           style={{ maxHeight: "70vh" }}
         >
-          <div className="flex items-center justify-between px-4 py-3 bg-[#1c1a16] border-b border-white/10">
+          <div className="flex items-center justify-between px-4 py-3 bg-ink-700 border-b border-white/10">
             <div>
               <p className="text-sm font-semibold text-white">Demi&apos;s Helper</p>
               <p className="text-[11px] text-gold-300/70">Quick answers</p>

@@ -10,7 +10,8 @@
     "import:wordpress": "npx tsx prisma/import-wordpress.ts",
     "recompress:blog-images": "npx tsx prisma/recompress-blog-images.ts",
     "postinstall": "prisma generate",
-    "test:experiences": "npx tsx --test tests/experiences.test.ts"
+    "test:experiences": "npx tsx --test tests/experiences.test.ts",
+    "test:colours": "npx tsx --test tests/colours.test.ts"
   },
   "dependencies": {
     "@next/font": "^14.2.15",

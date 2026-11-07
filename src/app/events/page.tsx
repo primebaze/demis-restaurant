@@ -56,7 +56,7 @@ export default function EventsPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Afrobeats Friday */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
+            <div className="rounded-2xl border border-white/[0.06] bg-ink-800 p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-3xl">🎵</span>
                 <div>
@@ -73,7 +73,7 @@ export default function EventsPage() {
               </p>
               <a
                 href="/booking"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-ink-900 hover:bg-gold-200 transition-all"
               >
                 Book a Table &rarr;
               </a>
@@ -84,7 +84,7 @@ export default function EventsPage() {
             </div>
 
             {/* Sunday Buffet */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
+            <div className="rounded-2xl border border-white/[0.06] bg-ink-800 p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-3xl">🍲</span>
                 <div>
@@ -100,7 +100,7 @@ export default function EventsPage() {
               </p>
               <a
                 href="/sunday-buffet"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-ink-900 hover:bg-gold-200 transition-all"
               >
                 Book a Table &rarr;
               </a>
@@ -110,7 +110,7 @@ export default function EventsPage() {
             </div>
 
             {/* Sunday Feast */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-8 sm:p-10">
+            <div className="rounded-2xl border border-white/[0.06] bg-ink-800 p-8 sm:p-10">
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-3xl">🍗</span>
                 <div>
@@ -127,7 +127,7 @@ export default function EventsPage() {
               </p>
               <a
                 href="/sunday-feast"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-300 px-6 py-2.5 text-xs font-bold text-ink-900 hover:bg-gold-200 transition-all"
               >
                 Book a Table &rarr;
               </a>

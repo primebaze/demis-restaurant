@@ -125,19 +125,19 @@ export default function AdminBuffetPage() {
     fetchBookings();
   }
 
-  const inputCls = "w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 placeholder-gray-600";
-  const labelCls = "block text-xs text-gray-400 mb-1.5";
+  const inputCls = "w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 placeholder-stone-600";
+  const labelCls = "block text-xs text-stone-400 mb-1.5";
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Buffet Bookings</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{total} booking{total !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-stone-500 mt-0.5">{total} booking{total !== 1 ? "s" : ""}</p>
         </div>
         <button
           onClick={() => { setShowForm((s) => !s); setFormError(""); }}
-          className="px-4 py-2 bg-gold-300 text-[#1a1a1a] rounded-xl text-sm font-semibold hover:bg-gold-200 transition"
+          className="px-4 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition"
         >
           {showForm ? "Close" : "+ New Booking"}
         </button>
@@ -149,10 +149,10 @@ export default function AdminBuffetPage() {
 
       {/* New booking form */}
       {showForm && (
-        <div className="mb-8 bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-gray-800">
+        <div className="mb-8 bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-stone-800">
             <h2 className="text-base font-semibold text-white">New Buffet Booking</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Enter booking details taken by phone or in person.</p>
+            <p className="text-xs text-stone-500 mt-0.5">Enter booking details taken by phone or in person.</p>
           </div>
           <div className="p-6">
             <div className="grid sm:grid-cols-2 gap-4 mb-4">
@@ -198,10 +198,10 @@ export default function AdminBuffetPage() {
             )}
 
             <div className="flex gap-3">
-              <button onClick={createBooking} disabled={creating} className="px-5 py-2 bg-gold-300 text-[#1a1a1a] rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
+              <button onClick={createBooking} disabled={creating} className="px-5 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
                 {creating ? "Saving…" : "Save Booking"}
               </button>
-              <button onClick={() => { setShowForm(false); setFormError(""); }} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition">
+              <button onClick={() => { setShowForm(false); setFormError(""); }} className="px-4 py-2 text-sm text-stone-400 hover:text-white transition">
                 Cancel
               </button>
             </div>
@@ -214,30 +214,30 @@ export default function AdminBuffetPage() {
         <select
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Statuses</option>
           <option value="confirmed">Confirmed</option>
           <option value="cancelled">Cancelled</option>
         </select>
         {filterStatus && (
-          <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-gray-400 hover:text-white transition">
+          <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-stone-400 hover:text-white transition">
             Clear
           </button>
         )}
       </div>
 
       {/* Bookings table */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading bookings…</div>
+          <div className="p-8 text-center text-stone-500">Loading bookings…</div>
         ) : bookings.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No buffet bookings yet</div>
+          <div className="p-8 text-center text-stone-500">No buffet bookings yet</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
                   <th className="px-4 py-3">Code</th>
                   <th className="px-4 py-3">Guest</th>
                   <th className="px-4 py-3">Date</th>
@@ -250,18 +250,18 @@ export default function AdminBuffetPage() {
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
+                  <tr key={b.id} className="border-b border-stone-800/50 hover:bg-white/[0.02]">
                     <td className="px-4 py-3 text-sm font-mono text-gold-300 font-semibold">{b.bookingCode}</td>
                     <td className="px-4 py-3">
                       <p className="text-sm text-white">{b.name}</p>
-                      {(b.phone || b.email) && <p className="text-xs text-gray-500">{b.phone || b.email}</p>}
+                      {(b.phone || b.email) && <p className="text-xs text-stone-500">{b.phone || b.email}</p>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{formatDate(b.date)}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{b.time}</td>
-                    <td className="px-4 py-3 text-sm text-gray-400">{LOCATIONS[b.locationSlug] || b.locationSlug}</td>
+                    <td className="px-4 py-3 text-sm text-stone-300">{formatDate(b.date)}</td>
+                    <td className="px-4 py-3 text-sm text-stone-300">{b.time}</td>
+                    <td className="px-4 py-3 text-sm text-stone-400">{LOCATIONS[b.locationSlug] || b.locationSlug}</td>
                     <td className="px-4 py-3 text-sm text-white">{b.partySize}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-700 text-gray-300"}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"}`}>
                         {b.status}
                       </span>
                     </td>
@@ -281,7 +281,7 @@ export default function AdminBuffetPage() {
                         <button
                           onClick={() => deleteBooking(b.id)}
                           disabled={updating === b.id}
-                          className="text-xs px-2 py-1.5 text-gray-500 hover:text-red-400 transition disabled:opacity-50"
+                          className="text-xs px-2 py-1.5 text-stone-500 hover:text-red-400 transition disabled:opacity-50"
                         >
                           Delete
                         </button>
@@ -295,12 +295,12 @@ export default function AdminBuffetPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
               ← Previous
             </button>
-            <span className="text-sm text-gray-500">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition">
+            <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
               Next →
             </button>
           </div>

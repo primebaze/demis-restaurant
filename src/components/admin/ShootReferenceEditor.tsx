@@ -74,7 +74,7 @@ export default function ShootReferenceEditor({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="font-semibold">
           Reference frames{" "}
-          <span className="text-sm font-normal text-gray-400">
+          <span className="text-sm font-normal text-stone-400">
             {references.length}/{MAX_VIDEO_REFERENCES}
           </span>
         </h3>
@@ -105,7 +105,7 @@ export default function ShootReferenceEditor({
       </div>
       {uploading && (
         <div className="mb-4 flex flex-wrap items-center gap-3">
-          <p role="status" className="text-sm text-gray-400">
+          <p role="status" className="text-sm text-stone-400">
             Uploading {pending?.file.name}…
           </p>
           <Action

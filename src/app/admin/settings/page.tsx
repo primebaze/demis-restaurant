@@ -74,7 +74,7 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400">Loading settings...</div>
+        <div className="text-stone-400">Loading settings...</div>
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function AdminSettingsPage() {
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-[#1a1a1a] rounded-xl p-1 border border-gray-800 w-fit">
+      <div className="flex gap-1 mb-6 bg-ink-900 rounded-xl p-1 border border-stone-800 w-fit">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -92,7 +92,7 @@ export default function AdminSettingsPage() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
               tab === t.key
                 ? "bg-gold-300/10 text-gold-300"
-                : "text-gray-400 hover:text-white"
+                : "text-stone-400 hover:text-white"
             }`}
           >
             {t.label}
@@ -160,7 +160,7 @@ function PoliciesPanel({
   return (
     <div className="space-y-4">
       {policies.map((p) => (
-        <div key={p.id} className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6">
+        <div key={p.id} className="bg-ink-900 border border-stone-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-semibold">{p.locationName}</h3>
             {editId !== p.id && (
@@ -184,7 +184,7 @@ function PoliciesPanel({
                 { key: "maxAdvanceDays", label: "Max Advance Days" },
               ].map(({ key, label }) => (
                 <div key={key}>
-                  <label className="text-xs text-gray-500 block mb-1">{label}</label>
+                  <label className="text-xs text-stone-500 block mb-1">{label}</label>
                   <input
                     type="number"
                     value={(form as Record<string, unknown>)[key] as number || 0}
@@ -194,7 +194,7 @@ function PoliciesPanel({
                         [key]: parseInt(e.target.value) || 0,
                       }))
                     }
-                    className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                    className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
                   />
                 </div>
               ))}
@@ -209,7 +209,7 @@ function PoliciesPanel({
                   </button>
                   <button
                     onClick={() => setEditId(null)}
-                    className="px-4 py-2 text-gray-400 text-sm hover:text-white transition"
+                    className="px-4 py-2 text-stone-400 text-sm hover:text-white transition"
                   >
                     Cancel
                   </button>
@@ -219,23 +219,23 @@ function PoliciesPanel({
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="text-gray-500 block text-xs">Party Size</span>
+                <span className="text-stone-500 block text-xs">Party Size</span>
                 <span className="text-white">{p.minPartySize} – {p.maxPartySize}</span>
               </div>
               <div>
-                <span className="text-gray-500 block text-xs">Deposit Threshold</span>
+                <span className="text-stone-500 block text-xs">Deposit Threshold</span>
                 <span className="text-white">{p.depositThreshold}+ guests</span>
               </div>
               <div>
-                <span className="text-gray-500 block text-xs">Deposit Amount</span>
+                <span className="text-stone-500 block text-xs">Deposit Amount</span>
                 <span className="text-white">£{(p.depositAmountPence / 100).toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-gray-500 block text-xs">Cancel Window</span>
+                <span className="text-stone-500 block text-xs">Cancel Window</span>
                 <span className="text-white">{p.cancellationWindowH}h</span>
               </div>
               <div>
-                <span className="text-gray-500 block text-xs">Max Advance</span>
+                <span className="text-stone-500 block text-xs">Max Advance</span>
                 <span className="text-white">{p.maxAdvanceDays} days</span>
               </div>
             </div>
@@ -318,57 +318,57 @@ function AddOnsPanel({
   return (
     <div>
       {/* Existing add-ons */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-gray-800">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-stone-800">
           <h3 className="text-white font-semibold">Current Add-ons</h3>
         </div>
-        <div className="divide-y divide-gray-800">
+        <div className="divide-y divide-stone-800">
           {addOns.map((a) => (
             <div key={a.id} className="px-6 py-4">
               {editId === a.id ? (
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-3 items-end">
                     <div className="flex-1 min-w-[140px]">
-                      <label className="text-xs text-gray-500 block mb-1">Name</label>
+                      <label className="text-xs text-stone-500 block mb-1">Name</label>
                       <input
                         type="text"
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                        className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
                       />
                     </div>
                     <div className="flex-1 min-w-[180px]">
-                      <label className="text-xs text-gray-500 block mb-1">Description</label>
+                      <label className="text-xs text-stone-500 block mb-1">Description</label>
                       <input
                         type="text"
                         value={editForm.description}
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                        className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
                       />
                     </div>
                     <div className="w-28">
-                      <label className="text-xs text-gray-500 block mb-1">Price (£)</label>
+                      <label className="text-xs text-stone-500 block mb-1">Price (£)</label>
                       <input
                         type="number"
                         step="0.01"
                         value={(editForm.pricePence / 100).toFixed(2)}
                         onChange={(e) => setEditForm({ ...editForm, pricePence: Math.round(parseFloat(e.target.value || "0") * 100) })}
-                        className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                        className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
                       />
                     </div>
                   </div>
                   <div className="flex gap-2 justify-end">
                     <button onClick={saveEdit} className="px-3 py-1 text-xs bg-gold-300 text-black font-medium rounded-lg hover:bg-gold-400 transition">Save</button>
-                    <button onClick={() => setEditId(null)} className="px-3 py-1 text-xs text-gray-400 hover:text-white transition">Cancel</button>
+                    <button onClick={() => setEditId(null)} className="px-3 py-1 text-xs text-stone-400 hover:text-white transition">Cancel</button>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className={`font-medium ${a.isActive ? "text-white" : "text-gray-500 line-through"}`}>
+                    <p className={`font-medium ${a.isActive ? "text-white" : "text-stone-500 line-through"}`}>
                       {a.name}
                     </p>
-                    <p className="text-xs text-gray-500">{a.description}</p>
+                    <p className="text-xs text-stone-500">{a.description}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gold-300">
@@ -376,7 +376,7 @@ function AddOnsPanel({
                     </span>
                     <button
                       onClick={() => startEdit(a)}
-                      className="px-2 py-1 text-xs text-gray-400 hover:text-white transition"
+                      className="px-2 py-1 text-xs text-stone-400 hover:text-white transition"
                     >
                       Edit
                     </button>
@@ -384,8 +384,8 @@ function AddOnsPanel({
                       onClick={() => toggleActive(a.id, a.isActive)}
                       className={`px-2 py-1 text-xs rounded border transition ${
                         a.isActive
-                          ? "text-green-400 border-green-400/30 hover:bg-green-400/10"
-                          : "text-gray-500 border-gray-700 hover:bg-white/5"
+                          ? "text-emerald-400 border-emerald-400/30 hover:bg-emerald-400/10"
+                          : "text-stone-500 border-stone-700 hover:bg-white/5"
                       }`}
                     >
                       {a.isActive ? "Active" : "Inactive"}
@@ -405,39 +405,39 @@ function AddOnsPanel({
       </div>
 
       {/* Create new add-on */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6">
         <h3 className="text-white font-semibold mb-4">Add New</h3>
         <form onSubmit={createAddOn} className="flex flex-wrap gap-3 items-end">
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Name</label>
+            <label className="text-xs text-stone-500 block mb-1">Name</label>
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               required
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               placeholder="Birthday Cake"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Description</label>
+            <label className="text-xs text-stone-500 block mb-1">Description</label>
             <input
               type="text"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               placeholder="Custom celebration cake"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Price (£)</label>
+            <label className="text-xs text-stone-500 block mb-1">Price (£)</label>
             <input
               type="number"
               step="0.01"
               value={newPrice}
               onChange={(e) => setNewPrice(e.target.value)}
               required
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm w-24 focus:outline-none focus:border-gold-400"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm w-24 focus:outline-none focus:border-gold-400"
               placeholder="15.00"
             />
           </div>
@@ -518,14 +518,14 @@ function BlackoutsPanel({
   return (
     <div>
       {/* Existing blackout dates */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-gray-800">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-stone-800">
           <h3 className="text-white font-semibold">Blackout Dates</h3>
         </div>
         {blackoutDates.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">No blackout dates set</div>
+          <div className="p-6 text-center text-stone-500">No blackout dates set</div>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-stone-800">
             {blackoutDates.map((b) => (
               <div key={b.id} className="px-6 py-3 flex items-center justify-between">
                 <div>
@@ -535,11 +535,11 @@ function BlackoutsPanel({
                       {b.fromTime} to {b.toTime}
                     </span>
                   ) : (
-                    <span className="ml-2 px-1.5 py-0.5 rounded bg-white/5 text-gray-400 text-xs">Whole day</span>
+                    <span className="ml-2 px-1.5 py-0.5 rounded bg-white/5 text-stone-400 text-xs">Whole day</span>
                   )}
-                  <span className="text-gray-500 text-sm ml-2">— {b.reason}</span>
+                  <span className="text-stone-500 text-sm ml-2">— {b.reason}</span>
                   {b.location && (
-                    <span className="text-xs text-gray-600 ml-2">({b.location.name})</span>
+                    <span className="text-xs text-stone-600 ml-2">({b.location.name})</span>
                   )}
                   {!b.locationId && (
                     <span className="text-xs text-amber-500 ml-2">(All locations)</span>
@@ -558,40 +558,40 @@ function BlackoutsPanel({
       </div>
 
       {/* Add new blackout */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6">
         <h3 className="text-white font-semibold mb-1">Add Blackout</h3>
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-xs text-stone-500 mb-4">
           Leave From and To empty to block the whole day. Set them to block only those arrival times:
           19:00 to 21:00 blocks 19:00, 19:30, 20:00 and 20:30, and 21:00 stays bookable.
         </p>
         <form onSubmit={createBlackout} className="flex flex-wrap gap-3 items-end">
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Date</label>
+            <label className="text-xs text-stone-500 block mb-1">Date</label>
             <input
               type="date"
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
               required
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Reason</label>
+            <label className="text-xs text-stone-500 block mb-1">Reason</label>
             <input
               type="text"
               value={newReason}
               onChange={(e) => setNewReason(e.target.value)}
               required
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               placeholder="Private event"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Location</label>
+            <label className="text-xs text-stone-500 block mb-1">Location</label>
             <select
               value={newLocation}
               onChange={(e) => setNewLocation(e.target.value)}
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
             >
               <option value="">All Locations</option>
               {locations.map((l) => (
@@ -602,23 +602,23 @@ function BlackoutsPanel({
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">From (optional)</label>
+            <label className="text-xs text-stone-500 block mb-1">From (optional)</label>
             <input
               type="time"
               step={1800}
               value={newFrom}
               onChange={(e) => setNewFrom(e.target.value)}
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">To (optional)</label>
+            <label className="text-xs text-stone-500 block mb-1">To (optional)</label>
             <input
               type="time"
               step={1800}
               value={newTo}
               onChange={(e) => setNewTo(e.target.value)}
-              className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
+              className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 [color-scheme:dark]"
             />
           </div>
           <button
@@ -737,7 +737,7 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
             key={l.id}
             onClick={() => setFilterLoc(l.id)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              filterLoc === l.id ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-gray-400 border border-gray-800 hover:text-white"
+              filterLoc === l.id ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-stone-800 hover:text-white"
             }`}
           >
             {l.name}
@@ -746,50 +746,50 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
       </div>
 
       {loading ? (
-        <div className="text-gray-500 py-8 text-center">Loading time slots...</div>
+        <div className="text-stone-500 py-8 text-center">Loading time slots...</div>
       ) : (
         <div className="space-y-4">
           {[1, 2, 3, 4, 5, 6, 0].map((day) => {
             const daySlots = byDay[day] || [];
             return (
-              <div key={day} className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
-                <div className="px-6 py-3 border-b border-gray-800 flex items-center justify-between">
+              <div key={day} className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+                <div className="px-6 py-3 border-b border-stone-800 flex items-center justify-between">
                   <h4 className="text-white font-semibold text-sm">{DAY_NAMES[day]}</h4>
-                  <span className="text-xs text-gray-500">{daySlots.length} slot{daySlots.length !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-stone-500">{daySlots.length} slot{daySlots.length !== 1 ? "s" : ""}</span>
                 </div>
                 {daySlots.length === 0 ? (
-                  <div className="px-6 py-4 text-gray-600 text-sm">No slots</div>
+                  <div className="px-6 py-4 text-stone-600 text-sm">No slots</div>
                 ) : (
-                  <div className="divide-y divide-gray-800">
+                  <div className="divide-y divide-stone-800">
                     {daySlots.map((s) => (
                       <div key={s.id} className="px-6 py-3 flex items-center justify-between">
                         {editing === s.id ? (
                           <div className="flex items-center gap-3 flex-1">
-                            <input type="time" value={editForm.startTime} onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })} className="px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-sm [color-scheme:dark]" />
-                            <span className="text-gray-500">–</span>
-                            <input type="time" value={editForm.endTime} onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })} className="px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-sm [color-scheme:dark]" />
-                            <input type="number" value={editForm.maxCovers} onChange={(e) => setEditForm({ ...editForm, maxCovers: parseInt(e.target.value) || 0 })} className="px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-sm w-20" placeholder="Covers" />
+                            <input type="time" value={editForm.startTime} onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })} className="px-2 py-1 bg-ink-950 border border-stone-700 rounded text-white text-sm [color-scheme:dark]" />
+                            <span className="text-stone-500">–</span>
+                            <input type="time" value={editForm.endTime} onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })} className="px-2 py-1 bg-ink-950 border border-stone-700 rounded text-white text-sm [color-scheme:dark]" />
+                            <input type="number" value={editForm.maxCovers} onChange={(e) => setEditForm({ ...editForm, maxCovers: parseInt(e.target.value) || 0 })} className="px-2 py-1 bg-ink-950 border border-stone-700 rounded text-white text-sm w-20" placeholder="Covers" />
                             <button onClick={saveEdit} className="px-3 py-1 text-xs bg-gold-300 text-black rounded hover:bg-gold-400">Save</button>
-                            <button onClick={() => setEditing(null)} className="px-3 py-1 text-xs text-gray-400 hover:text-white">Cancel</button>
+                            <button onClick={() => setEditing(null)} className="px-3 py-1 text-xs text-stone-400 hover:text-white">Cancel</button>
                           </div>
                         ) : (
                           <>
                             <div className="flex items-center gap-4">
-                              <span className={`text-sm font-medium ${s.isActive ? "text-white" : "text-gray-600 line-through"}`}>
+                              <span className={`text-sm font-medium ${s.isActive ? "text-white" : "text-stone-600 line-through"}`}>
                                 {s.startTime} – {s.endTime}
                               </span>
-                              <span className="text-xs text-gray-500">{s.maxCovers} covers</span>
+                              <span className="text-xs text-stone-500">{s.maxCovers} covers</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => { setEditing(s.id); setEditForm({ startTime: s.startTime, endTime: s.endTime, maxCovers: s.maxCovers }); }}
-                                className="px-2 py-1 text-xs text-gray-400 hover:text-white transition"
+                                className="px-2 py-1 text-xs text-stone-400 hover:text-white transition"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => toggleActive(s.id, s.isActive)}
-                                className={`px-2 py-1 text-xs rounded border transition ${s.isActive ? "text-green-400 border-green-400/30 hover:bg-green-400/10" : "text-gray-500 border-gray-700 hover:bg-white/5"}`}
+                                className={`px-2 py-1 text-xs rounded border transition ${s.isActive ? "text-emerald-400 border-emerald-400/30 hover:bg-emerald-400/10" : "text-stone-500 border-stone-700 hover:bg-white/5"}`}
                               >
                                 {s.isActive ? "Active" : "Off"}
                               </button>
@@ -813,26 +813,26 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
       )}
 
       {/* Add new slot */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 mt-6">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 mt-6">
         <h3 className="text-white font-semibold mb-4">Add Time Slot</h3>
         <form onSubmit={createSlot} className="flex flex-wrap gap-3 items-end">
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Day</label>
-            <select value={newDay} onChange={(e) => setNewDay(Number(e.target.value))} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm">
+            <label className="text-xs text-stone-500 block mb-1">Day</label>
+            <select value={newDay} onChange={(e) => setNewDay(Number(e.target.value))} className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm">
               {[1, 2, 3, 4, 5, 6, 0].map((d) => <option key={d} value={d}>{DAY_NAMES[d]}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Start</label>
-            <input type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm [color-scheme:dark]" />
+            <label className="text-xs text-stone-500 block mb-1">Start</label>
+            <input type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm [color-scheme:dark]" />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">End</label>
-            <input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm [color-scheme:dark]" />
+            <label className="text-xs text-stone-500 block mb-1">End</label>
+            <input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm [color-scheme:dark]" />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Max Covers</label>
-            <input type="number" value={newCovers} onChange={(e) => setNewCovers(parseInt(e.target.value) || 0)} className="px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm w-24" />
+            <label className="text-xs text-stone-500 block mb-1">Max Covers</label>
+            <input type="number" value={newCovers} onChange={(e) => setNewCovers(parseInt(e.target.value) || 0)} className="px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm w-24" />
           </div>
           <button type="submit" disabled={creating} className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
             {creating ? "Adding..." : "Add Slot"}
@@ -891,14 +891,14 @@ function PasswordPanel() {
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 max-w-md">
+    <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 max-w-md">
       <h3 className="text-white font-semibold mb-4">Change Password</h3>
 
       {message && (
         <div
           className={`mb-4 px-4 py-3 rounded-lg text-sm ${
             message.type === "success"
-              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
               : "bg-red-500/10 text-red-400 border border-red-500/20"
           }`}
         >
@@ -908,35 +908,35 @@ function PasswordPanel() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Current Password</label>
+          <label className="text-xs text-stone-500 block mb-1">Current Password</label>
           <input
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 block mb-1">New Password</label>
+          <label className="text-xs text-stone-500 block mb-1">New Password</label>
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Confirm New Password</label>
+          <label className="text-xs text-stone-500 block mb-1">Confirm New Password</label>
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <button

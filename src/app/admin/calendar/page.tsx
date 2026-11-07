@@ -115,7 +115,7 @@ export default function CalendarPage() {
           <button
             onClick={() => setFilterLoc("")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              !filterLoc ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-gray-400 border border-gray-800 hover:text-white"
+              !filterLoc ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-stone-800 hover:text-white"
             }`}
           >
             All Locations
@@ -125,7 +125,7 @@ export default function CalendarPage() {
               key={l.id}
               onClick={() => setFilterLoc(l.slug)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                filterLoc === l.slug ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-gray-400 border border-gray-800 hover:text-white"
+                filterLoc === l.slug ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-stone-800 hover:text-white"
               }`}
             >
               {l.name}
@@ -136,16 +136,16 @@ export default function CalendarPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
-        <div className="lg:col-span-2 bg-[#141414] border border-gray-800 rounded-2xl p-6">
+        <div className="lg:col-span-2 bg-ink-950 border border-stone-800 rounded-2xl p-6">
           {/* Month navigation */}
           <div className="flex items-center justify-between mb-6">
-            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition text-lg">
+            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-400 hover:text-white hover:bg-white/5 transition text-lg">
               ‹
             </button>
             <h2 className="text-xl font-semibold text-white">
               {MONTH_NAMES[month]} {year}
             </h2>
-            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition text-lg">
+            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-400 hover:text-white hover:bg-white/5 transition text-lg">
               ›
             </button>
           </div>
@@ -153,7 +153,7 @@ export default function CalendarPage() {
           {/* Day headers */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {DAY_HEADERS.map((d) => (
-              <div key={d} className="text-center text-xs font-medium text-gray-500 py-1">
+              <div key={d} className="text-center text-xs font-medium text-stone-500 py-1">
                 {d}
               </div>
             ))}
@@ -161,7 +161,7 @@ export default function CalendarPage() {
 
           {/* Day cells */}
           {loading ? (
-            <div className="py-20 text-center text-gray-500">Loading...</div>
+            <div className="py-20 text-center text-stone-500">Loading...</div>
           ) : (
             <div className="grid grid-cols-7 gap-1">
               {cells.map((day, i) => {
@@ -182,8 +182,8 @@ export default function CalendarPage() {
                       isSelected
                         ? "bg-gold-300/20 text-gold-300 border border-gold-300/40"
                         : isToday
-                        ? "bg-white/5 text-white border border-gray-700"
-                        : "text-gray-300 hover:bg-white/5"
+                        ? "bg-white/5 text-white border border-stone-700"
+                        : "text-stone-300 hover:bg-white/5"
                     }`}
                   >
                     <span className={`font-medium ${isToday && !isSelected ? "text-gold-300" : ""}`}>
@@ -212,7 +212,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Side panel — booking list for selected date */}
-        <div className="bg-[#141414] border border-gray-800 rounded-2xl p-6">
+        <div className="bg-ink-950 border border-stone-800 rounded-2xl p-6">
           {selectedDate ? (
             <>
               <h3 className="text-white font-semibold mb-1">
@@ -224,28 +224,28 @@ export default function CalendarPage() {
               </h3>
               {selectedEntry ? (
                 <>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-stone-500 mb-4">
                     {selectedEntry.count} booking{selectedEntry.count !== 1 ? "s" : ""} · {selectedEntry.totalCovers} cover{selectedEntry.totalCovers !== 1 ? "s" : ""}
                   </p>
                   <div className="space-y-3">
                     {selectedEntry.bookings.map((b) => (
                       <div
                         key={b.id}
-                        className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4"
+                        className="bg-ink-900 border border-stone-800 rounded-xl p-4"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-white font-medium text-sm">{b.guest}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full ${
                             b.status === "confirmed"
-                              ? "bg-green-400/10 text-green-400"
+                              ? "bg-emerald-400/10 text-emerald-400"
                               : b.status === "pending_payment"
-                              ? "bg-yellow-400/10 text-yellow-400"
-                              : "bg-gray-400/10 text-gray-400"
+                              ? "bg-amber-400/10 text-amber-400"
+                              : "bg-stone-400/10 text-stone-400"
                           }`}>
                             {b.status.replace(/_/g, " ")}
                           </span>
                         </div>
-                        <div className="text-xs text-gray-500 space-y-0.5">
+                        <div className="text-xs text-stone-500 space-y-0.5">
                           <p>{b.time} · {b.partySize} guest{b.partySize !== 1 ? "s" : ""}</p>
                           <p>{b.location} · #{b.code}</p>
                           {b.notes && <p className="text-amber-400/80">📝 {b.notes}</p>}
@@ -255,13 +255,13 @@ export default function CalendarPage() {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-gray-500 mt-2">No bookings on this date.</p>
+                <p className="text-sm text-stone-500 mt-2">No bookings on this date.</p>
               )}
             </>
           ) : (
             <div className="text-center py-12">
               <div className="text-4xl mb-3">🗓️</div>
-              <p className="text-gray-500 text-sm">Select a date to view bookings</p>
+              <p className="text-stone-500 text-sm">Select a date to view bookings</p>
             </div>
           )}
         </div>

@@ -19,7 +19,7 @@ export default async function ConfirmPage({ searchParams }: { searchParams: Prom
   const valid = booking && booking.status !== "cancelled";
 
   return (
-    <main className="min-h-screen bg-[#0b0b0b] flex items-center justify-center px-5 py-20">
+    <main className="min-h-screen bg-ink-900 flex items-center justify-center px-5 py-20">
       <div className="w-full max-w-md rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-8 sm:p-10 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)]">
         {valid ? (
           <ConfirmClient

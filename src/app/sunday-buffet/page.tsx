@@ -51,12 +51,12 @@ const cardCls = "relative rounded-2xl border border-white/[0.08] bg-gradient-to-
 export default async function SundayBuffetPage() {
   const reviews = await getReviews();
   return (
-    <div className="min-h-screen bg-[#0b0a09] pb-24">
+    <div className="min-h-screen bg-ink-900 pb-24">
       {/* ── Hero video ── */}
       <section className="relative h-[62vh] min-h-[440px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <HeroVideo />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-[#0b0a09]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-ink-900" />
         </div>
         <div className="relative text-center px-6">
           <p className="text-xs uppercase tracking-[0.35em] text-gold-300 font-semibold mb-5">Streatham Hill · Every Sunday</p>
@@ -150,7 +150,7 @@ export default async function SundayBuffetPage() {
                 <div key={r.id} className="relative rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent p-6">
                   <div className="text-sm mb-3" aria-label={`${r.rating} out of 5`}>
                     <span className="text-gold-300">{"★".repeat(r.rating)}</span>
-                    <span className="text-gray-700">{"★".repeat(5 - r.rating)}</span>
+                    <span className="text-stone-700">{"★".repeat(5 - r.rating)}</span>
                   </div>
                   <p className="text-[15px] text-stone-300 leading-relaxed whitespace-pre-wrap break-words">{r.body}</p>
                   <p className="mt-4 text-sm font-medium text-white">

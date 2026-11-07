@@ -38,14 +38,14 @@ export default function BlogAdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-ink-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gold-300 mb-2">Demi&apos;s Blog</h1>
-          <p className="text-gray-400 text-sm">Author Login</p>
+          <p className="text-stone-400 text-sm">Author Login</p>
         </div>
 
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-8">
+        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-8">
           <h2 className="text-xl font-semibold text-white mb-6">Sign In</h2>
 
           {error && (
@@ -56,24 +56,24 @@ export default function BlogAdminLoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-stone-300 mb-1.5">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
+                className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
                 placeholder="Email address"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-stone-300 mb-1.5">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
+                className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400/30 transition"
                 placeholder="Password"
               />
             </div>
@@ -87,12 +87,12 @@ export default function BlogAdminLoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-gray-600 text-xs mt-6">
+        <p className="text-center text-stone-600 text-xs mt-6">
           &copy; {new Date().getFullYear()} Demi&apos;s Restaurant
         </p>
-        <p className="text-center text-gray-700 text-[10px] mt-2">
+        <p className="text-center text-stone-700 text-[10px] mt-2">
           Crafted and Designed By{" "}
-          <a href="https://bazeflix.co.uk" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors">
+          <a href="https://bazeflix.co.uk" target="_blank" rel="noopener noreferrer" className="text-stone-500 hover:text-white transition-colors">
             Bazeflix
           </a>
         </p>

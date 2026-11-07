@@ -96,23 +96,23 @@ export default function LinkClicksPage() {
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white">Link Clicks</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-stone-500 mt-0.5">
             Who clicked the links in an email blast. Security scanners are counted separately so the
             real numbers stay honest.
           </p>
         </div>
         <button
           onClick={refresh}
-          className="px-3 py-2 text-sm text-gray-300 border border-gray-700 rounded-lg hover:bg-white/5 transition"
+          className="px-3 py-2 text-sm text-stone-300 border border-stone-700 rounded-lg hover:bg-white/5 transition"
         >
           Refresh
         </button>
       </div>
 
       {campaigns.length === 0 && !loading ? (
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-8 text-center">
-          <p className="text-sm text-gray-400">No clicks tracked yet.</p>
-          <p className="text-xs text-gray-600 mt-2">
+        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-8 text-center">
+          <p className="text-sm text-stone-400">No clicks tracked yet.</p>
+          <p className="text-xs text-stone-600 mt-2">
             Links in an email blast are tracked automatically. Put <code className="text-gold-300">{"{vote}"}</code>{" "}
             in the message to insert the voting link.
           </p>
@@ -128,11 +128,11 @@ export default function LinkClicksPage() {
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   selected === c.campaign
                     ? "bg-gold-300 text-black border-gold-300 font-semibold"
-                    : "border-gray-700 text-gray-300 hover:bg-white/5"
+                    : "border-stone-700 text-stone-300 hover:bg-white/5"
                 }`}
               >
                 {c.campaign === "vote" ? "Vote" : pretty(c.campaign)}{" "}
-                <span className={selected === c.campaign ? "text-black/60" : "text-gray-500"}>({c.clicks})</span>
+                <span className={selected === c.campaign ? "text-black/60" : "text-stone-500"}>({c.clicks})</span>
               </button>
             ))}
           </div>
@@ -140,23 +140,23 @@ export default function LinkClicksPage() {
           {/* Summary */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             {cards.map((s) => (
-              <div key={s.label} className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{s.label}</p>
+              <div key={s.label} className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+                <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">{s.label}</p>
                 <p className="text-2xl font-bold text-white">{s.value}</p>
-                <p className="text-[11px] text-gray-600 mt-1 leading-tight">{s.hint}</p>
+                <p className="text-[11px] text-stone-600 mt-1 leading-tight">{s.hint}</p>
               </div>
             ))}
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Per link */}
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
+            <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
               <h2 className="text-sm font-semibold text-white mb-3">Links</h2>
               {stats?.byUrl?.length ? (
                 <ul className="space-y-2">
                   {stats.byUrl.map((u) => (
                     <li key={u.url} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-gray-400 truncate" title={u.url}>
+                      <span className="text-stone-400 truncate" title={u.url}>
                         {u.url}
                       </span>
                       <span className="text-white font-semibold shrink-0">{u.clicks}</span>
@@ -164,41 +164,41 @@ export default function LinkClicksPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-gray-600">No clicks yet.</p>
+                <p className="text-sm text-stone-600">No clicks yet.</p>
               )}
-              <p className="text-xs text-gray-600 mt-4 pt-3 border-t border-gray-800">
+              <p className="text-xs text-stone-600 mt-4 pt-3 border-t border-stone-800">
                 Last click: {when(stats?.lastClickAt ?? null)}
               </p>
             </div>
 
             {/* Who clicked */}
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
+            <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
               <h2 className="text-sm font-semibold text-white mb-3">
                 Who clicked{" "}
                 {stats?.identified ? (
-                  <span className="text-gray-500 font-normal">({stats.identified})</span>
+                  <span className="text-stone-500 font-normal">({stats.identified})</span>
                 ) : null}
               </h2>
               {stats?.clickers?.length ? (
                 <div className="max-h-96 overflow-y-auto -mx-1 px-1">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                      <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
                         <th className="py-2 font-medium">Contact</th>
                         <th className="py-2 font-medium text-right">First click</th>
                       </tr>
                     </thead>
                     <tbody>
                       {stats.clickers.map((c) => (
-                        <tr key={c.email + c.at} className="border-b border-gray-800/50">
+                        <tr key={c.email + c.at} className="border-b border-stone-800/50">
                           <td className="py-2 pr-2">
                             <span className="text-white">{c.name || c.email}</span>
-                            {c.name ? <span className="text-gray-600 text-xs block">{c.email}</span> : null}
+                            {c.name ? <span className="text-stone-600 text-xs block">{c.email}</span> : null}
                           </td>
-                          <td className="py-2 text-right text-gray-400 whitespace-nowrap align-top">
+                          <td className="py-2 text-right text-stone-400 whitespace-nowrap align-top">
                             {when(c.at)}
                             {c.count > 1 ? (
-                              <span className="text-gray-600 text-xs block">{c.count} clicks</span>
+                              <span className="text-stone-600 text-xs block">{c.count} clicks</span>
                             ) : null}
                           </td>
                         </tr>
@@ -209,21 +209,21 @@ export default function LinkClicksPage() {
               ) : null}
 
               {stats && stats.totalPages > 1 ? (
-                <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-800">
+                <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-stone-800">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page <= 1 || loading}
-                    className="px-3 py-1.5 text-sm text-gray-300 border border-gray-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 text-sm text-stone-300 border border-stone-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Previous
                   </button>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-stone-500">
                     Page {stats.page} of {stats.totalPages}
                   </span>
                   <button
                     onClick={() => setPage((p) => Math.min(stats.totalPages, p + 1))}
                     disabled={page >= stats.totalPages || loading}
-                    className="px-3 py-1.5 text-sm text-gray-300 border border-gray-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 text-sm text-stone-300 border border-stone-700 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Next
                   </button>
@@ -231,7 +231,7 @@ export default function LinkClicksPage() {
               ) : null}
 
               {!stats?.clickers?.length ? (
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-stone-600">
                   Nobody yet. Clicks from forwarded copies land under &ldquo;Forwarded&rdquo; instead, since
                   they carry no token.
                 </p>

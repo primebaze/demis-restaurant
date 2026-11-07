@@ -283,7 +283,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
               disabled={i >= step}
               className={`w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center transition-all ${
                 i === step
-                  ? "bg-gold-300 text-[#1a1a1a]"
+                  ? "bg-gold-300 text-ink-900"
                   : i < step
                   ? "bg-gold-300/20 text-gold-300 cursor-pointer hover:bg-gold-300/30"
                   : "bg-white/5 text-white/30"
@@ -316,7 +316,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
                 setSelectedLocation(loc);
                 setStep(1);
               }}
-              className="text-left p-6 rounded-2xl border border-white/[0.06] bg-[#222] hover:border-gold-300/30 hover:bg-[#282828] transition-all"
+              className="text-left p-6 rounded-2xl border border-white/[0.06] bg-ink-700 hover:border-gold-300/30 hover:bg-ink-600 transition-all"
             >
               <h3 className="text-lg font-bold text-white">{loc.name}</h3>
               <p className="text-sm text-stone-400 mt-1">{loc.address}</p>
@@ -333,7 +333,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
           {/* Sunday buffet shortcut */}
           <a
             href="/sunday-buffet"
-            className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-white/[0.06] bg-[#222] hover:border-gold-300/30 hover:bg-[#282828] transition-all"
+            className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-white/[0.06] bg-ink-700 hover:border-gold-300/30 hover:bg-ink-600 transition-all"
           >
             <div>
               <p className="text-[10px] uppercase tracking-widest text-stone-500 font-semibold mb-1">Every Sunday</p>
@@ -346,12 +346,12 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
           {/* Sunday Feast shortcut */}
           <a
             href="/sunday-feast"
-            className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-white/[0.06] bg-[#222] hover:border-gold-300/30 hover:bg-[#282828] transition-all"
+            className="sm:col-span-2 group flex items-center justify-between gap-4 text-left p-6 rounded-2xl border border-white/[0.06] bg-ink-700 hover:border-gold-300/30 hover:bg-ink-600 transition-all"
           >
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <p className="text-[10px] uppercase tracking-widest text-stone-500 font-semibold">Every Sunday</p>
-                <span className="rounded-full bg-gold-300 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#1a1a1a]">New</span>
+                <span className="rounded-full bg-gold-300 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-ink-900">New</span>
               </div>
               <h3 className="text-lg font-bold text-white">Sunday Feast at Cricklewood</h3>
               <p className="text-sm text-stone-400 mt-1">Three courses to share, £30pp for two or more.</p>
@@ -441,7 +441,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
                       ? "text-stone-700 cursor-not-allowed line-through decoration-red-500/60"
                       : "text-stone-700 cursor-not-allowed"
                     : isSelected
-                    ? "bg-gold-300 text-[#1a1a1a]"
+                    ? "bg-gold-300 text-ink-900"
                     : isToday
                     ? "border border-gold-300/40 text-gold-300 hover:bg-gold-300/10"
                     : "text-white hover:bg-white/[0.06]"
@@ -478,7 +478,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
           <div className="flex items-center gap-3">
             <button
               onClick={() => setPartySize(Math.max(1, partySize - 1))}
-              className="w-10 h-10 rounded-full border border-white/[0.1] bg-[#222] text-white text-lg flex items-center justify-center hover:border-gold-300/30 transition-all"
+              className="w-10 h-10 rounded-full border border-white/[0.1] bg-ink-700 text-white text-lg flex items-center justify-center hover:border-gold-300/30 transition-all"
             >
               −
             </button>
@@ -486,7 +486,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             <button
               onClick={() => setPartySize(Math.min(maxGroup, partySize + 1))}
               disabled={partySize >= maxGroup}
-              className="w-10 h-10 rounded-full border border-white/[0.1] bg-[#222] text-white text-lg flex items-center justify-center hover:border-gold-300/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-white/[0.1]"
+              className="w-10 h-10 rounded-full border border-white/[0.1] bg-ink-700 text-white text-lg flex items-center justify-center hover:border-gold-300/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-white/[0.1]"
             >
               +
             </button>
@@ -544,10 +544,10 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
                           }}
                           className={`px-3 py-3 rounded-xl border text-center transition-all ${
                             !canFit
-                              ? "border-white/[0.04] bg-[#1e1e1e] text-stone-600 cursor-not-allowed"
+                              ? "border-white/[0.04] bg-ink-800 text-stone-600 cursor-not-allowed"
                               : selectedSlot?.id === slot.id
                               ? "border-gold-300 bg-gold-300/10 text-gold-300"
-                              : "border-white/[0.06] bg-[#222] text-white hover:border-gold-300/20"
+                              : "border-white/[0.06] bg-ink-700 text-white hover:border-gold-300/20"
                           }`}
                         >
                           <p className="text-sm font-bold">
@@ -607,7 +607,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
               value={guestName}
               onChange={(e) => setGuestName(e.target.value)}
               placeholder="e.g. Tunde Adeyemi"
-              className="w-full px-4 py-3 rounded-xl bg-[#222] border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-ink-700 border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all"
             />
           </div>
 
@@ -620,7 +620,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
               value={guestEmail}
               onChange={(e) => setGuestEmail(e.target.value)}
               placeholder="tunde@email.com"
-              className="w-full px-4 py-3 rounded-xl bg-[#222] border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-ink-700 border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all"
             />
           </div>
 
@@ -633,7 +633,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
               value={guestPhone}
               onChange={(e) => setGuestPhone(e.target.value)}
               placeholder="07400 123456"
-              className="w-full px-4 py-3 rounded-xl bg-[#222] border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-ink-700 border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all"
             />
           </div>
 
@@ -646,7 +646,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
               onChange={(e) => setGuestNotes(e.target.value)}
               placeholder="Allergies, birthday celebration, high chair needed..."
               rows={3}
-              className="w-full px-4 py-3 rounded-xl bg-[#222] border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all resize-none"
+              className="w-full px-4 py-3 rounded-xl bg-ink-700 border border-white/[0.06] text-white text-sm placeholder:text-stone-600 focus:border-gold-300/40 focus:outline-none transition-all resize-none"
             />
           </div>
 
@@ -670,7 +670,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
                       className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between ${
                         selected
                           ? "border-gold-300/40 bg-gold-300/5"
-                          : "border-white/[0.06] bg-[#222] hover:border-white/[0.1]"
+                          : "border-white/[0.06] bg-ink-700 hover:border-white/[0.1]"
                       }`}
                     >
                       <div>
@@ -683,7 +683,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
                         <span className="text-sm font-bold text-gold-300">{formatPence(addon.pricePence)}</span>
                         <span
                           className={`w-5 h-5 rounded-md border flex items-center justify-center text-xs transition-all ${
-                            selected ? "border-gold-300 bg-gold-300 text-[#1a1a1a]" : "border-white/20"
+                            selected ? "border-gold-300 bg-gold-300 text-ink-900" : "border-white/20"
                           }`}
                         >
                           {selected ? "✓" : ""}
@@ -706,7 +706,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             disabled={!guestName || !guestEmail}
             className={`flex-1 py-3 rounded-full font-bold text-sm transition-all ${
               guestName && guestEmail
-                ? "bg-gold-300 text-[#1a1a1a] hover:bg-gold-200"
+                ? "bg-gold-300 text-ink-900 hover:bg-gold-200"
                 : "bg-white/5 text-stone-600 cursor-not-allowed"
             }`}
           >
@@ -730,7 +730,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
         <h2 className="text-xl font-bold text-white mb-2">Confirm your booking</h2>
         <p className="text-sm text-stone-400 mb-6">Please review the details below.</p>
 
-        <div className="rounded-2xl border border-white/[0.06] bg-[#222] divide-y divide-white/[0.04]">
+        <div className="rounded-2xl border border-white/[0.06] bg-ink-700 divide-y divide-white/[0.04]">
           <div className="p-5">
             <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Location</p>
             <p className="text-sm font-semibold text-white">{selectedLocation?.name}</p>
@@ -832,7 +832,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
             disabled={!acceptedTerms || loading}
             className={`flex-1 py-3.5 rounded-full font-bold text-sm transition-all ${
               acceptedTerms && !loading
-                ? "bg-gold-300 text-[#1a1a1a] hover:bg-gold-200"
+                ? "bg-gold-300 text-ink-900 hover:bg-gold-200"
                 : "bg-white/5 text-stone-600 cursor-not-allowed"
             }`}
           >
@@ -847,7 +847,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
   if (step === 5 && bookingResult) {
     return (
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
           <span className="text-3xl">✓</span>
         </div>
 
@@ -856,7 +856,7 @@ export default function BookingWidget({ initialLocations, initialAddOns, initial
           A confirmation email has been sent to your inbox.
         </p>
 
-        <div className="rounded-2xl border border-white/[0.06] bg-[#222] p-6 text-left max-w-sm mx-auto">
+        <div className="rounded-2xl border border-white/[0.06] bg-ink-700 p-6 text-left max-w-sm mx-auto">
           <div className="mb-4">
             <p className="text-xs text-stone-500 uppercase tracking-wider">Confirmation Code</p>
             <p className="text-xl font-bold text-gold-300 mt-1">{bookingResult.confirmationCode}</p>

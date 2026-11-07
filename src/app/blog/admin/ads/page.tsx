@@ -102,22 +102,22 @@ export default function AdsAdminPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Ads</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <p className="text-sm text-stone-500 mt-0.5">
           Upload banner ads. Active ads rotate automatically on the blog.
         </p>
       </div>
 
       {/* New ad */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-8">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5 mb-8">
         <h2 className="text-sm font-semibold text-white mb-4">New ad</h2>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Ad image (wide banner works best)</label>
+            <label className="block text-xs text-stone-500 mb-1">Ad image (wide banner works best)</label>
             {imageUrl ? (
               <div className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imageUrl} alt="Ad preview" className="w-full rounded-lg border border-gray-700" />
+                <img src={imageUrl} alt="Ad preview" className="w-full rounded-lg border border-stone-700" />
                 <button
                   onClick={() => setImageUrl("")}
                   className="absolute top-2 right-2 px-2 py-1 text-xs bg-black/60 text-white rounded"
@@ -126,7 +126,7 @@ export default function AdsAdminPage() {
                 </button>
               </div>
             ) : (
-              <label className="flex items-center justify-center h-32 border border-dashed border-gray-700 rounded-lg cursor-pointer text-sm text-gray-500 hover:border-gold-400 transition">
+              <label className="flex items-center justify-center h-32 border border-dashed border-stone-700 rounded-lg cursor-pointer text-sm text-stone-500 hover:border-gold-400 transition">
                 {uploading ? "Uploading…" : "Click to upload image"}
                 <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
               </label>
@@ -135,21 +135,21 @@ export default function AdsAdminPage() {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Title (optional, for your reference)</label>
+              <label className="block text-xs text-stone-500 mb-1">Title (optional, for your reference)</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Summer promo"
-                className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Link URL (where the ad goes)</label>
+              <label className="block text-xs text-stone-500 mb-1">Link URL (where the ad goes)</label>
               <input
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 placeholder="https://…"
-                className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               />
             </div>
             {error && <p className="text-xs text-red-400">{error}</p>}
@@ -166,29 +166,29 @@ export default function AdsAdminPage() {
 
       {/* Existing ads */}
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading…</p>
+        <p className="text-stone-500 text-sm">Loading…</p>
       ) : ads.length === 0 ? (
-        <p className="text-gray-500 text-sm">No ads yet.</p>
+        <p className="text-stone-500 text-sm">No ads yet.</p>
       ) : (
         <div className="space-y-3">
           {ads.map((ad) => (
             <div
               key={ad.id}
-              className="flex items-center gap-4 bg-[#1a1a1a] border border-gray-800 rounded-xl p-3"
+              className="flex items-center gap-4 bg-ink-900 border border-stone-800 rounded-xl p-3"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={ad.imageUrl} alt={ad.title} className="w-28 h-16 object-cover rounded-lg shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-white truncate">{ad.title || "Untitled ad"}</p>
-                <p className="text-xs text-gray-500 truncate">{ad.linkUrl || "No link"}</p>
-                <p className="text-[11px] text-gray-600 mt-0.5">{ad.clicks} clicks</p>
+                <p className="text-xs text-stone-500 truncate">{ad.linkUrl || "No link"}</p>
+                <p className="text-[11px] text-stone-600 mt-0.5">{ad.clicks} clicks</p>
               </div>
               <button
                 onClick={() => toggleActive(ad)}
                 className={`text-xs px-3 py-1.5 rounded-full font-medium transition ${
                   ad.active
                     ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25"
-                    : "bg-gray-600/20 text-gray-400 hover:bg-gray-600/30"
+                    : "bg-stone-600/20 text-stone-400 hover:bg-stone-600/30"
                 }`}
               >
                 {ad.active ? "Active" : "Paused"}

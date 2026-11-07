@@ -224,7 +224,7 @@ export default function MailingPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Email Blast</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <p className="text-sm text-stone-500 mt-0.5">
           Send marketing emails to your client list. This list is separate from your bookings and never touches the website.
         </p>
       </div>
@@ -236,8 +236,8 @@ export default function MailingPage() {
           { label: "Unsubscribed", value: summary.unsubscribed },
           { label: "Total contacts", value: summary.all },
         ].map((s) => (
-          <div key={s.label} className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{s.label}</p>
+          <div key={s.label} className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+            <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">{s.label}</p>
             <p className="text-2xl font-bold text-white">{s.value}</p>
           </div>
         ))}
@@ -245,17 +245,17 @@ export default function MailingPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Upload */}
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
+        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-white mb-1">Upload a client list</h2>
-          <p className="text-xs text-gray-500 mb-4">Excel (.xlsx), CSV, or PDF. Emails are extracted and duplicates are merged automatically.</p>
-          <label className="flex items-center justify-center h-28 border border-dashed border-gray-700 rounded-xl cursor-pointer text-sm text-gray-500 hover:border-gold-400 transition">
+          <p className="text-xs text-stone-500 mb-4">Excel (.xlsx), CSV, or PDF. Emails are extracted and duplicates are merged automatically.</p>
+          <label className="flex items-center justify-center h-28 border border-dashed border-stone-700 rounded-xl cursor-pointer text-sm text-stone-500 hover:border-gold-400 transition">
             {uploading ? "Reading file…" : "Click to upload .xlsx, .csv or .pdf"}
             <input type="file" accept=".xlsx,.xls,.csv,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/pdf" onChange={handleUpload} className="hidden" disabled={uploading} />
           </label>
 
           {/* Add one by hand */}
-          <div className="mt-4 pt-4 border-t border-gray-800">
-            <p className="text-xs text-gray-500 mb-2">Or add one contact by hand</p>
+          <div className="mt-4 pt-4 border-t border-stone-800">
+            <p className="text-xs text-stone-500 mb-2">Or add one contact by hand</p>
             <div className="flex flex-wrap gap-2">
               <input
                 type="email"
@@ -263,7 +263,7 @@ export default function MailingPage() {
                 onChange={(e) => setNewEmail(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") addContact(); }}
                 placeholder="email@example.com"
-                className="flex-1 min-w-[150px] px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                className="flex-1 min-w-[150px] px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               />
               <input
                 type="text"
@@ -271,7 +271,7 @@ export default function MailingPage() {
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") addContact(); }}
                 placeholder="Name (optional)"
-                className="flex-1 min-w-[120px] px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                className="flex-1 min-w-[120px] px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               />
               <button
                 onClick={addContact}
@@ -283,11 +283,11 @@ export default function MailingPage() {
             </div>
           </div>
 
-          {uploadResult && <p className="mt-3 text-xs text-gray-300">{uploadResult}</p>}
+          {uploadResult && <p className="mt-3 text-xs text-stone-300">{uploadResult}</p>}
         </div>
 
         {/* Compose */}
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
+        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-white mb-4">Compose</h2>
 
           {/* Saved emails — one click fills the form, you still press Send. */}
@@ -296,19 +296,19 @@ export default function MailingPage() {
               {templates.map((t) => (
                 <span
                   key={t.key}
-                  className="inline-flex items-center rounded-full border border-gray-700 overflow-hidden"
+                  className="inline-flex items-center rounded-full border border-stone-700 overflow-hidden"
                 >
                   <button
                     onClick={() => loadTemplate(t)}
                     title="Load this into the form"
-                    className="px-3 py-1.5 text-sm text-gray-300 hover:bg-white/5 transition"
+                    className="px-3 py-1.5 text-sm text-stone-300 hover:bg-white/5 transition"
                   >
                     {t.name}
                   </button>
                   <button
                     onClick={() => deleteTemplate(t)}
                     title={`Delete "${t.name}"`}
-                    className="px-2 py-1.5 text-gray-600 hover:text-red-400 hover:bg-white/5 transition text-sm"
+                    className="px-2 py-1.5 text-stone-600 hover:text-red-400 hover:bg-white/5 transition text-sm"
                   >
                     ×
                   </button>
@@ -317,12 +317,12 @@ export default function MailingPage() {
               <button
                 onClick={saveTemplate}
                 disabled={!subject.trim() || !body.trim()}
-                className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-gray-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-stone-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 + Save current
               </button>
             </div>
-            {templateNote ? <p className="text-[11px] text-gray-500 mt-2">{templateNote}</p> : null}
+            {templateNote ? <p className="text-[11px] text-stone-500 mt-2">{templateNote}</p> : null}
           </div>
 
           <div className="space-y-3">
@@ -330,16 +330,16 @@ export default function MailingPage() {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Subject line"
-              className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
             />
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder={"Hi {name},\n\nWrite your message here… links become clickable, blank lines start new paragraphs."}
               rows={7}
-              className="w-full px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-y"
+              className="w-full px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-y"
             />
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-stone-500">
               Use <code className="text-gold-300">{"{name}"}</code> for the recipient&apos;s first name,{" "}
               <code className="text-gold-300">{"{buffet}"}</code> or{" "}
               <code className="text-gold-300">{"{feast}"}</code> for a tracked booking link, and{" "}
@@ -348,7 +348,7 @@ export default function MailingPage() {
             </p>
             {/* Email style */}
             <div>
-              <div className="inline-flex rounded-lg border border-gray-700 overflow-hidden">
+              <div className="inline-flex rounded-lg border border-stone-700 overflow-hidden">
                 {([
                   { key: "branded", label: "Demi's template" },
                   { key: "plain", label: "Plain / personal" },
@@ -357,7 +357,7 @@ export default function MailingPage() {
                     key={o.key}
                     type="button"
                     onClick={() => setEmailStyle(o.key)}
-                    className={`px-3 py-1.5 text-xs transition ${emailStyle === o.key ? "bg-gold-300 text-[#1a1a1a] font-semibold" : "bg-[#0f0f0f] text-gray-400 hover:text-white"}`}
+                    className={`px-3 py-1.5 text-xs transition ${emailStyle === o.key ? "bg-gold-300 text-ink-900 font-semibold" : "bg-ink-950 text-stone-400 hover:text-white"}`}
                   >
                     {o.label}
                   </button>
@@ -369,12 +369,12 @@ export default function MailingPage() {
                 value={testEmail}
                 onChange={(e) => setTestEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="flex-1 min-w-[160px] px-3 py-2 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                className="flex-1 min-w-[160px] px-3 py-2 bg-ink-950 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
               />
               <button
                 onClick={() => send(testEmail.trim())}
                 disabled={sending || !testEmail.trim()}
-                className="px-3 py-2 text-sm text-gray-300 border border-gray-700 rounded-lg hover:bg-white/5 transition disabled:opacity-40"
+                className="px-3 py-2 text-sm text-stone-300 border border-stone-700 rounded-lg hover:bg-white/5 transition disabled:opacity-40"
               >
                 Send test
               </button>
@@ -382,9 +382,9 @@ export default function MailingPage() {
           </div>
 
           {/* Send — separated + two-step confirm to prevent accidental blasts */}
-          <div className="mt-8 pt-6 border-t border-gray-800">
+          <div className="mt-8 pt-6 border-t border-stone-800">
             {selected.size > 0 && (
-              <p className="text-xs text-center text-gray-400 mb-2">
+              <p className="text-xs text-center text-stone-400 mb-2">
                 Sending to <span className="text-gold-300 font-semibold">{selected.size} selected</span> · <button onClick={() => setSelected(new Set())} className="underline hover:text-white">clear</button>
               </p>
             )}
@@ -403,14 +403,14 @@ export default function MailingPage() {
 
                 {/* Warm-up: send the next N who haven't received it yet */}
                 {selected.size === 0 && (
-                  <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                  <div className="flex items-center justify-center gap-2 text-xs text-stone-400">
                     <span>or send the next</span>
                     <input
                       type="number"
                       min={1}
                       value={batchSize}
                       onChange={(e) => setBatchSize(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-16 px-2 py-1 bg-[#0f0f0f] border border-gray-700 rounded text-white text-center focus:outline-none focus:border-gold-400"
+                      className="w-16 px-2 py-1 bg-ink-950 border border-stone-700 rounded text-white text-center focus:outline-none focus:border-gold-400"
                     />
                     <button
                       onClick={() => {
@@ -418,7 +418,7 @@ export default function MailingPage() {
                         setSendResult(null); setPendingLimit(batchSize); setConfirming(true);
                       }}
                       disabled={sending}
-                      className="px-3 py-1.5 border border-gray-700 rounded-lg text-gray-300 hover:bg-white/5 transition disabled:opacity-50"
+                      className="px-3 py-1.5 border border-stone-700 rounded-lg text-stone-300 hover:bg-white/5 transition disabled:opacity-50"
                     >
                       Send next {batchSize} not yet emailed
                     </button>
@@ -438,7 +438,7 @@ export default function MailingPage() {
                   <button
                     onClick={() => setConfirming(false)}
                     disabled={sending}
-                    className="flex-1 px-4 py-3 border border-gray-700 text-gray-300 rounded-lg text-sm hover:bg-white/5 transition disabled:opacity-50"
+                    className="flex-1 px-4 py-3 border border-stone-700 text-stone-300 rounded-lg text-sm hover:bg-white/5 transition disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -452,7 +452,7 @@ export default function MailingPage() {
                 </div>
               </div>
             )}
-            {sendResult && <p className="text-xs text-gray-300 mt-3 text-center">{sendResult}</p>}
+            {sendResult && <p className="text-xs text-stone-300 mt-3 text-center">{sendResult}</p>}
           </div>
         </div>
       </div>
@@ -465,24 +465,24 @@ export default function MailingPage() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search email or name…"
-            className="px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 w-64 max-w-full"
+            className="px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 w-64 max-w-full"
           />
         </div>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-stone-500 mb-3">
           Tick contacts to send to just them (e.g. a warm-up batch). Leave everything unticked to send to all subscribers.
           {selected.size > 0 && <span className="text-gold-300"> · {selected.size} selected</span>}
         </p>
 
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+        <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
           {loading ? (
-            <p className="p-6 text-gray-500 text-sm">Loading…</p>
+            <p className="p-6 text-stone-500 text-sm">Loading…</p>
           ) : contacts.length === 0 ? (
-            <p className="p-6 text-gray-500 text-sm">No contacts yet. Upload a CSV or PDF to get started.</p>
+            <p className="p-6 text-stone-500 text-sm">No contacts yet. Upload a CSV or PDF to get started.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                  <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
                     <th className="px-4 py-3 w-10">
                       <input
                         type="checkbox"
@@ -501,7 +501,7 @@ export default function MailingPage() {
                 </thead>
                 <tbody>
                   {contacts.map((c) => (
-                    <tr key={c.id} className={`border-b border-gray-800/50 hover:bg-white/[0.02] ${selected.has(c.id) ? "bg-gold-300/[0.06]" : ""}`}>
+                    <tr key={c.id} className={`border-b border-stone-800/50 hover:bg-white/[0.02] ${selected.has(c.id) ? "bg-gold-300/[0.06]" : ""}`}>
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
@@ -513,8 +513,8 @@ export default function MailingPage() {
                         />
                       </td>
                       <td className="px-4 py-3 text-sm text-white">{c.email}</td>
-                      <td className="px-4 py-3 text-sm text-gray-400">{c.name || "—"}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500 uppercase">{c.source}</td>
+                      <td className="px-4 py-3 text-sm text-stone-400">{c.name || "—"}</td>
+                      <td className="px-4 py-3 text-xs text-stone-500 uppercase">{c.source}</td>
                       <td className="px-4 py-3">
                         {c.unsubscribed ? (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">Unsubscribed</span>
@@ -535,12 +535,12 @@ export default function MailingPage() {
           )}
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
-              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
                 ← Previous
               </button>
-              <span className="text-sm text-gray-500">Page {page} of {totalPages}</span>
-              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition">
+              <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
+              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
                 Next →
               </button>
             </div>

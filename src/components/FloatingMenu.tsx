@@ -203,7 +203,7 @@ export function FloatingMenu() {
         <div
           className={`relative transition-all duration-500 ${
             scrolled
-              ? "bg-[#1a1a1a]/80 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
+              ? "bg-ink-900/80 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
               : "bg-gradient-to-b from-black/60 via-black/25 to-transparent"
           }`}
         >

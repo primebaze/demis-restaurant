@@ -125,18 +125,18 @@ export default function AdminSaturdayBrunchPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Sunday Feast</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Reservations for {prettyDate || "…"}.</p>
+          <p className="text-sm text-stone-500 mt-0.5">Reservations for {prettyDate || "…"}.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setDate(shiftWeeks(resolvedDate, -1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white disabled:opacity-40">← Prev</button>
-          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">This Sunday</button>
-          <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">Next →</button>
+          <button onClick={() => setDate(shiftWeeks(resolvedDate, -1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white disabled:opacity-40">← Prev</button>
+          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white">This Sunday</button>
+          <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white">Next →</button>
         </div>
       </div>
 
       {/* ── Master switch: Sunday Feast bookings on / off ── */}
       <div className={`flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5 mb-6 max-w-2xl ${
-        bookingsOpen === false ? "border-red-500/30 bg-red-500/[0.06]" : "border-gray-800 bg-[#1a1a1a]"
+        bookingsOpen === false ? "border-red-500/30 bg-red-500/[0.06]" : "border-stone-800 bg-ink-900"
       }`}>
         <div>
           <p className="text-sm font-semibold text-white">
@@ -145,7 +145,7 @@ export default function AdminSaturdayBrunchPage() {
               ? <span className="text-emerald-400">ON</span>
               : <span className="text-red-400">OFF</span>}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-stone-500 mt-0.5">
             {bookingsOpen === false
               ? "Guests see “Bookings closed” and can’t reserve. Existing reservations are kept."
               : "Guests can reserve on the Sunday Feast page."}
@@ -157,80 +157,80 @@ export default function AdminSaturdayBrunchPage() {
           role="switch"
           aria-checked={!!bookingsOpen}
           aria-label="Sunday Feast bookings"
-          className={`relative w-16 h-9 rounded-full transition-colors disabled:opacity-50 ${bookingsOpen ? "bg-emerald-500" : "bg-gray-700"}`}
+          className={`relative w-16 h-9 rounded-full transition-colors disabled:opacity-50 ${bookingsOpen ? "bg-emerald-500" : "bg-stone-700"}`}
         >
           <span className={`absolute top-1 left-1 w-7 h-7 rounded-full bg-white shadow transition-transform ${bookingsOpen ? "translate-x-7" : ""}`} />
         </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Reservations</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Reservations</p>
           <p className="text-2xl font-bold text-white">{summary.reservations}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">People</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People</p>
           <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Expected</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Expected</p>
           <p className="text-2xl font-bold text-emerald-400">£{summary.revenue}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Cancelled</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Cancelled</p>
           <p className="text-2xl font-bold text-white">{summary.cancelled}</p>
         </div>
       </div>
 
       {/* ── Where guests heard about the feast ── */}
       {summary.reservations > 0 && (
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6 max-w-2xl">
+        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5 mb-6 max-w-2xl">
           <p className="text-sm text-white font-semibold mb-3">Heard about us</p>
           <div className="space-y-2">
             {heardFrom.map((h) => {
               const pct = summary.reservations ? Math.round((h.count / summary.reservations) * 100) : 0;
               return (
                 <div key={h.label} className="flex items-center gap-3 text-sm">
-                  <span className="w-28 shrink-0 text-gray-400">{h.label}</span>
+                  <span className="w-28 shrink-0 text-stone-400">{h.label}</span>
                   <div className="flex-1 h-1.5 bg-black/50 rounded-full overflow-hidden">
                     <div className="h-full bg-gold-300 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="w-16 shrink-0 text-right text-white tabular-nums">{h.count} <span className="text-gray-500 text-xs">{pct}%</span></span>
+                  <span className="w-16 shrink-0 text-right text-white tabular-nums">{h.count} <span className="text-stone-500 text-xs">{pct}%</span></span>
                 </div>
               );
             })}
           </div>
-          <p className="mt-3 text-[11px] text-gray-500">Counted per booking. The question is optional on the booking form.</p>
+          <p className="mt-3 text-[11px] text-stone-500">Counted per booking. The question is optional on the booking form.</p>
         </div>
       )}
 
       {/* ── Availability: block / unblock each upcoming Sunday ── */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5 mb-6">
         <p className="text-sm text-white font-semibold mb-1">Availability</p>
-        <p className="text-xs text-gray-500 mb-4">
-          <strong className="text-gray-400">Mark sold out</strong> keeps the date on the form but shows it crossed out. <strong className="text-gray-400">Hide</strong> removes it from the form entirely. A capacity sells the date out automatically once that many covers are booked.
+        <p className="text-xs text-stone-500 mb-4">
+          <strong className="text-stone-400">Mark sold out</strong> keeps the date on the form but shows it crossed out. <strong className="text-stone-400">Hide</strong> removes it from the form entirely. A capacity sells the date out automatically once that many covers are booked.
         </p>
         <div className="space-y-2">
           {dateRows.length === 0 ? (
-            <p className="text-xs text-gray-600">Loading dates…</p>
+            <p className="text-xs text-stone-600">Loading dates…</p>
           ) : dateRows.map((d) => (
-            <div key={d.date} className={`flex flex-wrap items-center gap-3 py-2.5 px-3 rounded-xl bg-black/30 border border-gray-800 ${d.hidden ? "opacity-50" : ""}`}>
+            <div key={d.date} className={`flex flex-wrap items-center gap-3 py-2.5 px-3 rounded-xl bg-black/30 border border-stone-800 ${d.hidden ? "opacity-50" : ""}`}>
               <span className="text-sm text-white min-w-[170px]">{d.prettyDate}</span>
 
               {d.hidden ? (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-700 text-gray-300">Hidden</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-stone-700 text-stone-300">Hidden</span>
               ) : d.soldOut ? (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/15 text-red-400">Sold out</span>
               ) : (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400">Open</span>
               )}
 
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-stone-500">
                 {d.booked} booked{d.capacity !== null ? ` of ${d.capacity}` : ""}
               </span>
 
               <div className="flex items-center gap-2 ml-auto">
-                <label className="text-[11px] text-gray-500">Capacity</label>
+                <label className="text-[11px] text-stone-500">Capacity</label>
                 <input
                   type="number"
                   min={0}
@@ -241,7 +241,7 @@ export default function AdminSaturdayBrunchPage() {
                     const next = raw === "" ? null : parseInt(raw);
                     if (next !== d.capacity) saveDate(d.date, { capacity: next });
                   }}
-                  className="w-20 px-2 py-1.5 bg-black/40 border border-gray-700 rounded-lg text-white text-xs focus:outline-none focus:border-gold-300/60"
+                  className="w-20 px-2 py-1.5 bg-black/40 border border-stone-700 rounded-lg text-white text-xs focus:outline-none focus:border-gold-300/60"
                 />
                 <button
                   onClick={() => saveDate(d.date, { blocked: !d.blocked })}
@@ -258,7 +258,7 @@ export default function AdminSaturdayBrunchPage() {
                   onClick={() => saveDate(d.date, { hidden: !d.hidden })}
                   disabled={savingDate === d.date}
                   title={d.hidden ? "Show this date to guests" : "Remove this date from the booking form"}
-                  className="px-3 py-1.5 text-xs rounded-lg border border-gray-700 text-gray-300 hover:text-white hover:bg-white/5 transition disabled:opacity-40"
+                  className="px-3 py-1.5 text-xs rounded-lg border border-stone-700 text-stone-300 hover:text-white hover:bg-white/5 transition disabled:opacity-40"
                 >
                   {d.hidden ? "Show" : "Hide"}
                 </button>
@@ -272,16 +272,16 @@ export default function AdminSaturdayBrunchPage() {
         <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this Sunday</button>
       </div>
 
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <p className="p-8 text-center text-gray-500">Loading…</p>
+          <p className="p-8 text-center text-stone-500">Loading…</p>
         ) : bookings.length === 0 ? (
-          <p className="p-8 text-center text-gray-500">No reservations for this Sunday yet.</p>
+          <p className="p-8 text-center text-stone-500">No reservations for this Sunday yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
                   <th className="px-4 py-3">Guest</th>
                   <th className="px-4 py-3">Arrives</th>
                   <th className="px-4 py-3">Party</th>
@@ -295,28 +295,28 @@ export default function AdminSaturdayBrunchPage() {
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className={`border-b border-gray-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
+                  <tr key={b.id} className={`border-b border-stone-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 text-sm text-white">{b.name}</td>
                     <td className="px-4 py-3 text-sm text-white font-semibold tabular-nums">{b.arrivalTime}</td>
                     <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
                     <td className="px-4 py-3 text-xs">
-                      <span className="text-gray-400">{b.packageLabel}</span>
+                      <span className="text-stone-400">{b.packageLabel}</span>
                       <br />
-                      <span className="text-gray-500">£{b.pricePerHead} pp · £{b.pricePerHead * b.partySize}</span>
+                      <span className="text-stone-500">£{b.pricePerHead} pp · £{b.pricePerHead * b.partySize}</span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{b.heardFrom || "—"}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>
+                    <td className="px-4 py-3 text-xs text-stone-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
+                    <td className="px-4 py-3 text-xs text-stone-400">{b.heardFrom || "—"}</td>
+                    <td className="px-4 py-3 text-xs text-stone-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-700 text-gray-300"}`}>{b.status}</span>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"}`}>{b.status}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-xs">
                         {b.status !== "arrived" && <button onClick={() => setStatus(b.id, "arrived")} className="text-emerald-400 hover:text-emerald-300">Arrived</button>}
                         {b.status !== "cancelled" ? (
-                          <button onClick={() => setStatus(b.id, "cancelled")} className="text-gray-400 hover:text-white">Cancel</button>
+                          <button onClick={() => setStatus(b.id, "cancelled")} className="text-stone-400 hover:text-white">Cancel</button>
                         ) : (
-                          <button onClick={() => setStatus(b.id, "booked")} className="text-gray-400 hover:text-white">Restore</button>
+                          <button onClick={() => setStatus(b.id, "booked")} className="text-stone-400 hover:text-white">Restore</button>
                         )}
                         <button onClick={() => remove(b.id)} className="text-red-400 hover:text-red-300">Delete</button>
                       </div>

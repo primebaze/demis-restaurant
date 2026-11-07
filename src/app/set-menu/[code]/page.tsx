@@ -127,7 +127,7 @@ export default function GuestSelectionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
+      <div className="min-h-screen bg-ink-900 flex items-center justify-center">
         <p className="text-stone-400 text-sm">Loading your event…</p>
       </div>
     );
@@ -135,7 +135,7 @@ export default function GuestSelectionPage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-ink-900 flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
           <p className="text-2xl font-bold text-white mb-3">Link not found</p>
           <p className="text-stone-400 text-sm leading-relaxed">{loadError}</p>
@@ -147,7 +147,7 @@ export default function GuestSelectionPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-ink-900 flex items-center justify-center px-6">
         <div className="text-center max-w-md w-full">
           <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-gold-300/[0.08] border border-gold-300/20 flex items-center justify-center">
             <svg className="w-7 h-7 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,9 +186,9 @@ export default function GuestSelectionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a]">
+    <div className="min-h-screen bg-ink-900">
       {/* Header */}
-      <div className="relative overflow-hidden px-6 pt-16 pb-10 text-center bg-gradient-to-b from-[#0f0f0f] to-[#1a1a1a]">
+      <div className="relative overflow-hidden px-6 pt-16 pb-10 text-center bg-gradient-to-b from-ink-950 to-ink-900">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full bg-gold-300/[0.04] blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <Link href="/" className="inline-block mb-6">

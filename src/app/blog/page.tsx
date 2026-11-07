@@ -87,7 +87,7 @@ export default async function BlogPage({
   const shorts = showExtras ? (await getInstagramPosts(8)).items : [];
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] pt-32 pb-20">
+    <div className="min-h-screen bg-ink-900 pt-32 pb-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white font-[family-name:var(--font-display)]">
@@ -106,7 +106,7 @@ export default async function BlogPage({
               name="search"
               defaultValue={search}
               placeholder="Search articles..."
-              className="w-full px-5 py-3 bg-[#1a1a1a] border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 text-sm"
+              className="w-full px-5 py-3 bg-ink-800 border border-white/10 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400 text-sm"
             />
           </form>
           <div className="flex flex-wrap gap-2">
@@ -145,7 +145,7 @@ export default async function BlogPage({
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
-                <article className="bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition">
+                <article className="bg-ink-800 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition">
                   {post.featuredImage && (
                     <div className="aspect-[16/9] overflow-hidden relative">
                       <Image
@@ -202,7 +202,7 @@ export default async function BlogPage({
             {page > 1 && (
               <Link
                 href={`/blog?page=${page - 1}${category ? `&category=${category}` : ""}${search ? `&search=${search}` : ""}`}
-                className="px-5 py-2.5 text-sm text-stone-400 bg-[#1a1a1a] border border-white/10 rounded-xl hover:text-white transition"
+                className="px-5 py-2.5 text-sm text-stone-400 bg-ink-800 border border-white/10 rounded-xl hover:text-white transition"
               >
                 Previous
               </Link>
@@ -211,7 +211,7 @@ export default async function BlogPage({
             {page < totalPages && (
               <Link
                 href={`/blog?page=${page + 1}${category ? `&category=${category}` : ""}${search ? `&search=${search}` : ""}`}
-                className="px-5 py-2.5 text-sm text-stone-400 bg-[#1a1a1a] border border-white/10 rounded-xl hover:text-white transition"
+                className="px-5 py-2.5 text-sm text-stone-400 bg-ink-800 border border-white/10 rounded-xl hover:text-white transition"
               >
                 Next
               </Link>

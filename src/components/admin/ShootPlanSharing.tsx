@@ -210,7 +210,7 @@ export default function ShootPlanSharing({
           >
             <label
               htmlFor={`${prefix}-pin`}
-              className="mb-2 block text-sm font-medium text-gray-300"
+              className="mb-2 block text-sm font-medium text-stone-300"
             >
               {editable
                 ? share?.enabled

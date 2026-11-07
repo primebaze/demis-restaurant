@@ -53,7 +53,7 @@ export default function BuffetPage() {
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden px-6 pt-28 pb-16 sm:pt-36 sm:pb-20 lg:pt-40 lg:pb-24">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a] via-[#1a1a1a] to-[#111]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink-900 via-ink-900 to-ink-950" />
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -189,7 +189,7 @@ export default function BuffetPage() {
       </section>
 
       {/* ─── IMPORTANT NOTICES ─── */}
-      <section className="py-20 sm:py-28 bg-[#111]">
+      <section className="py-20 sm:py-28 bg-ink-950">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="text-center mb-14">
             <p className="section-label">Important Info</p>
@@ -273,7 +273,7 @@ export default function BuffetPage() {
               </div>
 
               {/* Bank details */}
-              <div className="rounded-xl bg-[#1a1a1a] border border-white/[0.06] overflow-hidden">
+              <div className="rounded-xl bg-ink-900 border border-white/[0.06] overflow-hidden">
                 <div className="px-6 py-4 border-b border-white/[0.06] bg-white/[0.02]">
                   <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/70">
                     Bank Details

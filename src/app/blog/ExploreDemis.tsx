@@ -23,7 +23,7 @@ export function ExploreDemis() {
           {EXPERIENCES.map((item) => (
             <div
               key={item.href}
-              className="flex flex-col bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden hover:border-gold-300/40 transition"
+              className="flex flex-col bg-ink-800 border border-white/5 rounded-2xl overflow-hidden hover:border-gold-300/40 transition"
             >
               <Link href={item.href} className="group block">
                 <div className="relative aspect-[16/10] overflow-hidden">

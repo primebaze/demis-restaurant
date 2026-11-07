@@ -11,9 +11,9 @@ import { useRouter } from "next/navigation";
 import { SHOOT_STATUSES, type ShootStatus } from "@/lib/shoot-plans";
 
 export const fieldClass =
-  "w-full min-h-11 rounded-lg border border-gray-700 bg-[#0f0f0f] px-3 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-300/70 disabled:opacity-60 [color-scheme:dark]";
+  "w-full min-h-11 rounded-lg border border-stone-700 bg-ink-950 px-3 py-2.5 text-sm text-white placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-gold-300/70 disabled:opacity-60 [color-scheme:dark]";
 export const linkClass =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-300 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300";
 export function Action({
   primary = false,
   className = "",
@@ -25,7 +25,7 @@ export function Action({
       type="button"
       onClick={onClick}
       {...props}
-      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-gold-300 text-[#1a1a1a] hover:bg-gold-200" : "border border-gray-700 text-gray-200 hover:bg-white/5"} ${className}`}
+      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-gold-300 text-ink-900 hover:bg-gold-200" : "border border-stone-700 text-stone-200 hover:bg-white/5"} ${className}`}
     />
   );
 }
@@ -44,7 +44,7 @@ export function Field({
     <div className="min-w-0">
       <label
         htmlFor={id}
-        className="mb-2 block text-sm font-medium text-gray-300"
+        className="mb-2 block text-sm font-medium text-stone-300"
       >
         {label}
       </label>
@@ -76,9 +76,9 @@ export function Feedback({
 export function StatusBadge({ status }: { status: ShootStatus }) {
   const colours = {
     planned: "bg-gold-300/10 text-gold-300",
-    in_progress: "bg-blue-400/10 text-blue-200",
+    in_progress: "bg-gold-300/10 text-gold-200",
     completed: "bg-emerald-400/10 text-emerald-200",
-    cancelled: "bg-gray-400/10 text-gray-300",
+    cancelled: "bg-stone-400/10 text-stone-300",
   };
   return (
     <span
@@ -97,7 +97,7 @@ export function CaptureProgress({
 }) {
   return (
     <div>
-      <div className="mb-2 flex justify-between gap-3 text-xs text-gray-400">
+      <div className="mb-2 flex justify-between gap-3 text-xs text-stone-400">
         <span>Shot list</span>
         <span>
           {captured} / {total} captured
@@ -208,14 +208,14 @@ export function UnsavedGuard({ dirty }: { dirty: boolean }) {
     <dialog
       ref={dialog}
       onCancel={close}
-      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-gray-700 bg-[#1a1a1a] p-6 text-white backdrop:bg-black/70"
+      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-stone-700 bg-ink-900 p-6 text-white backdrop:bg-black/70"
       aria-labelledby="leave-title"
       aria-describedby="leave-description"
     >
       <h2 id="leave-title" className="text-xl font-bold">
         Leave without saving?
       </h2>
-      <p id="leave-description" className="mt-3 text-sm text-gray-300">
+      <p id="leave-description" className="mt-3 text-sm text-stone-300">
         Your latest changes to this plan haven’t been saved.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
@@ -268,14 +268,14 @@ export function ConfirmDelete({
         event.preventDefault();
         if (!busy) onCancel();
       }}
-      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-gray-700 bg-[#1a1a1a] p-6 text-white backdrop:bg-black/70"
+      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-stone-700 bg-ink-900 p-6 text-white backdrop:bg-black/70"
     >
       <h2 id="delete-plan-title" className="text-xl font-bold">
         Delete plan?
       </h2>
       <p
         id="delete-plan-description"
-        className="mt-3 break-words text-sm text-gray-300"
+        className="mt-3 break-words text-sm text-stone-300"
       >
         “{title}” and its activities, shots, reference images and sharing links
         will be permanently removed.

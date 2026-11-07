@@ -21,7 +21,7 @@ function fmtTime(d: string) {
   return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
-const BG = "bg-[#0f0f0f]";
+const BG = "bg-ink-950";
 
 export default function BrunchCheckinKioskPage() {
   const [unlocked, setUnlocked] = useState<boolean | null>(null);
@@ -122,7 +122,7 @@ export default function BrunchCheckinKioskPage() {
       <div className={`min-h-screen ${BG} text-white flex items-center justify-center p-6 select-none`}>
         <head><meta name="robots" content="noindex, nofollow" /></head>
         <div className="w-full max-w-xs text-center">
-          <p className="text-gray-400 mb-6">Enter staff PIN</p>
+          <p className="text-stone-400 mb-6">Enter staff PIN</p>
           <div className="flex justify-center gap-4 mb-2">
             {[0, 1, 2, 3].map((i) => (
               <span key={i} className={`w-4 h-4 rounded-full transition ${i < pin.length ? "bg-gold-300" : "bg-white/15"}`} />
@@ -133,9 +133,9 @@ export default function BrunchCheckinKioskPage() {
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
               <button key={d} onClick={() => press(d)} className="py-5 rounded-2xl bg-white/[0.04] border border-white/10 text-2xl font-medium text-white hover:bg-white/[0.08] transition">{d}</button>
             ))}
-            <button onClick={() => setShowPin(false)} className="py-5 rounded-2xl text-sm text-gray-500 hover:text-white transition">Cancel</button>
+            <button onClick={() => setShowPin(false)} className="py-5 rounded-2xl text-sm text-stone-500 hover:text-white transition">Cancel</button>
             <button onClick={() => press("0")} className="py-5 rounded-2xl bg-white/[0.04] border border-white/10 text-2xl font-medium text-white hover:bg-white/[0.08] transition">0</button>
-            <button onClick={() => press("back")} className="py-5 rounded-2xl text-xl text-gray-400 hover:text-white transition">⌫</button>
+            <button onClick={() => press("back")} className="py-5 rounded-2xl text-xl text-stone-400 hover:text-white transition">⌫</button>
           </div>
         </div>
       </div>
@@ -152,22 +152,22 @@ export default function BrunchCheckinKioskPage() {
         <head><meta name="robots" content="noindex, nofollow" /></head>
         <div className="w-full max-w-sm text-center">
           <div className="mb-8 p-8 bg-white/[0.03] border border-white/10 rounded-3xl">
-            <p className="text-sm text-gray-500">{result.partySize > 1 ? "You are" : "You are"}</p>
+            <p className="text-sm text-stone-500">{result.partySize > 1 ? "You are" : "You are"}</p>
             <p className="text-7xl font-extrabold text-white my-2 tracking-tight">
               No. {result.number}{result.partySize > 1 ? `–${result.endCover}` : ""}
             </p>
             <p className="text-5xl font-extrabold text-emerald-400">£{result.totalPrice}</p>
-            {result.partySize > 1 && <p className="text-sm text-gray-400 mt-2">Party of {result.partySize}</p>}
-            <div className="mt-6 pt-5 border-t border-white/10 text-sm text-gray-400 leading-relaxed">
-              Checked in <span className="text-gray-200 font-medium">{fmtTime(result.checkedInAt)}</span>
+            {result.partySize > 1 && <p className="text-sm text-stone-400 mt-2">Party of {result.partySize}</p>}
+            <div className="mt-6 pt-5 border-t border-white/10 text-sm text-stone-400 leading-relaxed">
+              Checked in <span className="text-stone-200 font-medium">{fmtTime(result.checkedInAt)}</span>
               <br />
               Please finish by <span className="text-white font-semibold">{fmtTime(result.endsAt)}</span>
             </div>
           </div>
           <div className="flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full border-2 border-white/15 flex items-center justify-center text-xl font-bold text-gold-300">{countdown}</div>
-            <p className="text-sm text-gray-500">Ready for the next guest in {countdown}s</p>
-            <p className="text-xs text-gray-600">or tap anywhere to start now</p>
+            <p className="text-sm text-stone-500">Ready for the next guest in {countdown}s</p>
+            <p className="text-xs text-stone-600">or tap anywhere to start now</p>
           </div>
         </div>
       </div>
@@ -181,7 +181,7 @@ export default function BrunchCheckinKioskPage() {
         <head><meta name="robots" content="noindex, nofollow" /></head>
         <div className="w-full max-w-sm text-center">
           <h2 className="text-2xl font-bold mb-1">How many at the table?</h2>
-          <p className="text-sm text-gray-500 mb-6">Sunday Feast · £{FEAST_PRICE} per person</p>
+          <p className="text-sm text-stone-500 mb-6">Sunday Feast · £{FEAST_PRICE} per person</p>
 
           <div className="rounded-3xl bg-white/[0.03] border border-white/10 p-5 mb-6">
             <div className="flex items-center justify-between">
@@ -197,7 +197,7 @@ export default function BrunchCheckinKioskPage() {
             </div>
           </div>
 
-          <div className="mb-6 text-sm text-gray-400">
+          <div className="mb-6 text-sm text-stone-400">
             {party === 0 ? (
               "Add at least one person"
             ) : (
@@ -213,13 +213,13 @@ export default function BrunchCheckinKioskPage() {
           <button
             onClick={checkIn}
             disabled={busy || party < 1}
-            className="w-full py-6 bg-gold-300 text-[#1a1a1a] rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-40"
+            className="w-full py-6 bg-gold-300 text-ink-900 rounded-3xl text-2xl font-bold hover:bg-gold-200 transition disabled:opacity-40"
           >
             {busy ? "…" : party < 1 ? "Check in" : `Check in ${party} · £${total}`}
           </button>
           <button
             onClick={() => { setChoosing(false); setParty(2); setError(""); }}
-            className="mt-4 text-sm text-gray-500 hover:text-white transition"
+            className="mt-4 text-sm text-stone-500 hover:text-white transition"
           >
             Cancel
           </button>
@@ -245,13 +245,13 @@ export default function BrunchCheckinKioskPage() {
           <span className="text-[3.25rem] sm:text-[5rem] leading-none font-extralight tracking-tight tabular-nums">{hh}:{mm}</span>
           <span className="text-lg sm:text-2xl text-gold-300/70 ml-2 mt-1.5 tabular-nums">{ss}</span>
         </div>
-        <p className="text-gray-500 mt-2 text-sm sm:text-base">{dateStr}</p>
+        <p className="text-stone-500 mt-2 text-sm sm:text-base">{dateStr}</p>
 
         {/* big tap target */}
         <div className="mt-12 mb-6 flex items-center justify-center">
-          <div className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gold-300 text-[#1a1a1a] flex items-center justify-center active:scale-95 transition">
+          <div className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gold-300 text-ink-900 flex items-center justify-center active:scale-95 transition">
             {busy ? (
-              <div className="w-16 h-16 rounded-full border-[3px] border-[#1a1a1a]/30 border-t-[#1a1a1a] animate-spin" />
+              <div className="w-16 h-16 rounded-full border-[3px] border-ink-900/30 border-t-[#1a1a1a] animate-spin" />
             ) : (
               <svg className="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
@@ -261,7 +261,7 @@ export default function BrunchCheckinKioskPage() {
         </div>
 
         <h2 className="text-3xl sm:text-4xl font-bold">{busy ? "Checking you in…" : "Tap to check in"}</h2>
-        <p className="text-gray-500 mt-2 text-base">{unlocked ? "Touch anywhere on the screen" : "Enter the 4-digit staff PIN to start"}</p>
+        <p className="text-stone-500 mt-2 text-base">{unlocked ? "Touch anywhere on the screen" : "Enter the 4-digit staff PIN to start"}</p>
         {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
       </div>
     </div>

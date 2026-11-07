@@ -16,7 +16,7 @@ export default function BlogAdminSettingsPage() {
     <div>
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
 
-      <div className="flex gap-1 mb-6 bg-[#1a1a1a] rounded-xl p-1 border border-gray-800 w-fit">
+      <div className="flex gap-1 mb-6 bg-ink-900 rounded-xl p-1 border border-stone-800 w-fit">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -24,7 +24,7 @@ export default function BlogAdminSettingsPage() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
               tab === t.key
                 ? "bg-gold-300/10 text-gold-300"
-                : "text-gray-400 hover:text-white"
+                : "text-stone-400 hover:text-white"
             }`}
           >
             {t.label}
@@ -120,18 +120,18 @@ function ProfilePanel() {
   }
 
   if (loading) {
-    return <div className="text-gray-400 py-8">Loading profile...</div>;
+    return <div className="text-stone-400 py-8">Loading profile...</div>;
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 max-w-md">
+    <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 max-w-md">
       <h2 className="text-white font-semibold mb-4">Edit Profile</h2>
 
       {message && (
         <div
           className={`mb-4 px-4 py-3 rounded-lg text-sm ${
             message.type === "success"
-              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
               : "bg-red-500/10 text-red-400 border border-red-500/20"
           }`}
         >
@@ -141,11 +141,11 @@ function ProfilePanel() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#0f0f0f] border border-gray-700 overflow-hidden flex-shrink-0">
+          <div className="w-16 h-16 rounded-full bg-ink-950 border border-stone-700 overflow-hidden flex-shrink-0">
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-600 text-xl">
+              <div className="w-full h-full flex items-center justify-center text-stone-600 text-xl">
                 {name.charAt(0).toUpperCase() || "?"}
               </div>
             )}
@@ -174,28 +174,28 @@ function ProfilePanel() {
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Display Name</label>
+          <label className="text-xs text-stone-500 block mb-1">Display Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
             maxLength={100}
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Bio</label>
+          <label className="text-xs text-stone-500 block mb-1">Bio</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             maxLength={500}
             rows={3}
             placeholder="A short bio that appears on your blog posts..."
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
           />
-          <span className="text-[10px] text-gray-600">{bio.length}/500</span>
+          <span className="text-[10px] text-stone-600">{bio.length}/500</span>
         </div>
 
         <button
@@ -257,14 +257,14 @@ function PasswordPanel() {
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 max-w-md">
+    <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 max-w-md">
       <h2 className="text-white font-semibold mb-4">Change Password</h2>
 
       {message && (
         <div
           className={`mb-4 px-4 py-3 rounded-lg text-sm ${
             message.type === "success"
-              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
               : "bg-red-500/10 text-red-400 border border-red-500/20"
           }`}
         >
@@ -274,35 +274,35 @@ function PasswordPanel() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Current Password</label>
+          <label className="text-xs text-stone-500 block mb-1">Current Password</label>
           <input
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 block mb-1">New Password</label>
+          <label className="text-xs text-stone-500 block mb-1">New Password</label>
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Confirm New Password</label>
+          <label className="text-xs text-stone-500 block mb-1">Confirm New Password</label>
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
           />
         </div>
         <button

@@ -75,7 +75,7 @@ export default function ShootPlanList() {
         </div>
         <Link
           href="/admin/shoot-plans/new"
-          className={`${linkClass} bg-gold-300 !text-[#1a1a1a] hover:!bg-gold-200`}
+          className={`${linkClass} bg-gold-300 !text-ink-900 hover:!bg-gold-200`}
         >
           <Plus size={17} aria-hidden="true" />
           New weekly plan
@@ -85,7 +85,7 @@ export default function ShootPlanList() {
         <div>
           <label
             htmlFor="shoot-filter"
-            className="mb-2 block text-xs font-medium text-gray-400"
+            className="mb-2 block text-xs font-medium text-stone-400"
           >
             Status
           </label>
@@ -106,7 +106,7 @@ export default function ShootPlanList() {
         <div>
           <label
             htmlFor="week-filter"
-            className="mb-2 block text-xs font-medium text-gray-400"
+            className="mb-2 block text-xs font-medium text-stone-400"
           >
             Week starting
           </label>
@@ -121,7 +121,7 @@ export default function ShootPlanList() {
         {week && (
           <Action onClick={() => navigate(status, 1, "")}>All weeks</Action>
         )}
-        <p className="text-sm text-gray-400" role="status">
+        <p className="text-sm text-stone-400" role="status">
           {loading
             ? "Loading weekly plans…"
             : data && !error
@@ -146,7 +146,7 @@ export default function ShootPlanList() {
         </Feedback>
       ) : loading ? (
         <div
-          className="flex min-h-64 items-center justify-center rounded-2xl border border-gray-800 text-sm text-gray-400"
+          className="flex min-h-64 items-center justify-center rounded-2xl border border-stone-800 text-sm text-stone-400"
           role="status"
         >
           Loading weekly plans…
@@ -158,20 +158,20 @@ export default function ShootPlanList() {
               <Link
                 href={`/admin/shoot-plans/${plan.id}`}
                 key={plan.id}
-                className="group flex min-w-0 flex-col rounded-2xl border border-gray-800 bg-[#1a1a1a] p-5 transition-colors hover:border-gold-300/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300"
+                className="group flex min-w-0 flex-col rounded-2xl border border-stone-800 bg-ink-900 p-5 transition-colors hover:border-gold-300/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300"
               >
                 <div className="flex items-center justify-between gap-3">
                   <StatusBadge status={plan.status} />
                   <ArrowRight
                     size={17}
                     aria-hidden="true"
-                    className="text-gray-500 group-hover:text-gold-300"
+                    className="text-stone-500 group-hover:text-gold-300"
                   />
                 </div>
                 <h2 className="mb-4 mt-5 break-words text-lg font-semibold text-white">
                   {plan.title}
                 </h2>
-                <div className="space-y-2 text-sm text-gray-400">
+                <div className="space-y-2 text-sm text-stone-400">
                   <p className="flex items-start gap-2">
                     <CalendarDays
                       size={16}
@@ -188,11 +188,11 @@ export default function ShootPlanList() {
                   </p>
                 </div>
                 {plan.objective && (
-                  <p className="mt-4 line-clamp-2 break-words text-sm leading-relaxed text-gray-400">
+                  <p className="mt-4 line-clamp-2 break-words text-sm leading-relaxed text-stone-400">
                     {plan.objective}
                   </p>
                 )}
-                <div className="mt-auto space-y-3 pt-6 text-sm text-gray-400">
+                <div className="mt-auto space-y-3 pt-6 text-sm text-stone-400">
                   {!!plan.activities?.length ? (
                     <>
                       <p className="text-xs text-gold-300">
@@ -233,7 +233,7 @@ export default function ShootPlanList() {
             >
               Previous
             </Action>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-stone-400">
               Page {data.page} of {data.pages}
             </p>
             <Action
@@ -245,7 +245,7 @@ export default function ShootPlanList() {
           </nav>
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed border-gray-700 px-6 py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-stone-700 px-6 py-16 text-center">
           <Camera
             size={32}
             aria-hidden="true"

@@ -79,9 +79,9 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
   if (!editor) return null;
 
   return (
-    <div className="border border-gray-700 rounded-xl overflow-hidden bg-[#1a1a1a]">
+    <div className="border border-stone-700 rounded-xl overflow-hidden bg-ink-900">
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-0.5 px-2 py-2 border-b border-gray-700 bg-[#141414]">
+      <div className="flex flex-wrap gap-0.5 px-2 py-2 border-b border-stone-700 bg-ink-950">
         {/* Text type */}
         <ToolbarGroup>
           <ToolbarButton
@@ -151,7 +151,7 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
             onClick={() => editor.chain().focus().toggleHighlight().run()}
             title="Highlight"
           >
-            <span className="bg-yellow-500/30 px-0.5 rounded">H</span>
+            <span className="bg-gold-300/30 px-0.5 rounded">H</span>
           </ToolbarButton>
         </ToolbarGroup>
 
@@ -294,7 +294,7 @@ function ToolbarButton({
       className={`px-2 py-1.5 rounded text-xs font-medium transition flex items-center justify-center min-w-[28px] ${
         active
           ? "bg-gold-300/20 text-gold-300"
-          : "text-gray-400 hover:text-white hover:bg-white/10"
+          : "text-stone-400 hover:text-white hover:bg-white/10"
       } ${disabled ? "opacity-30 cursor-not-allowed" : ""}`}
     >
       {children}
@@ -307,5 +307,5 @@ function ToolbarGroup({ children }: { children: React.ReactNode }) {
 }
 
 function Divider() {
-  return <div className="w-px bg-gray-700 mx-1.5 my-1" />;
+  return <div className="w-px bg-stone-700 mx-1.5 my-1" />;
 }

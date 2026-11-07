@@ -253,19 +253,19 @@ export default function AdminGuestsPage() {
     }
   }
 
-  const inputCls = "w-full px-3 py-2.5 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400";
+  const inputCls = "w-full px-3 py-2.5 bg-ink-950 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400";
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Guest CRM</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{total} guests</p>
+          <p className="text-sm text-stone-500 mt-0.5">{total} guests</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/admin/guests/import"
-            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
+            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-stone-700 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
@@ -275,7 +275,7 @@ export default function AdminGuestsPage() {
           <button
             onClick={exportPdf}
             disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
+            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-stone-700 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -285,7 +285,7 @@ export default function AdminGuestsPage() {
           <button
             onClick={exportCsv}
             disabled={exportingCsv}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
+            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-stone-700 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -294,7 +294,7 @@ export default function AdminGuestsPage() {
           </button>
           <button
             onClick={openComposeAll}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
+            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-stone-700 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
           >
             <EnvelopeIcon />
             Email All Guests
@@ -310,7 +310,7 @@ export default function AdminGuestsPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search by name, email, or phone..."
-            className="flex-1 px-4 py-2.5 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400"
+            className="flex-1 px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
           />
           <button
             type="submit"
@@ -326,7 +326,7 @@ export default function AdminGuestsPage() {
                 setSearchInput("");
                 setPage(1);
               }}
-              className="px-3 py-2.5 text-sm text-gray-400 hover:text-white transition"
+              className="px-3 py-2.5 text-sm text-stone-400 hover:text-white transition"
             >
               Clear
             </button>
@@ -335,13 +335,13 @@ export default function AdminGuestsPage() {
       </form>
 
       {/* Guest list */}
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading guests...</div>
+          <div className="p-8 text-center text-stone-500">Loading guests...</div>
         ) : guests.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No guests found</div>
+          <div className="p-8 text-center text-stone-500">No guests found</div>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-stone-800">
             {guests.map((g) => (
               <div key={g.id} className="p-4 hover:bg-white/[0.02]">
                 <div className="flex items-start justify-between gap-4">
@@ -366,12 +366,12 @@ export default function AdminGuestsPage() {
                         </div>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-0.5">
+                    <p className="text-sm text-stone-500 mt-0.5">
                       {g.email} {g.phone && `· ${g.phone}`}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs text-gray-400 shrink-0">
+                  <div className="flex items-center gap-4 text-xs text-stone-400 shrink-0">
                     <div className="text-center hidden sm:block">
                       <p className="text-white font-medium text-sm">{g.totalBookings}</p>
                       <p>Bookings</p>
@@ -390,14 +390,14 @@ export default function AdminGuestsPage() {
                       <button
                         onClick={() => openComposeSingle(g)}
                         title="Email this guest"
-                        className="px-2 py-1 text-xs text-gray-400 hover:text-gold-300 border border-gray-700 hover:border-gold-300/40 rounded transition flex items-center gap-1"
+                        className="px-2 py-1 text-xs text-stone-400 hover:text-gold-300 border border-stone-700 hover:border-gold-300/40 rounded transition flex items-center gap-1"
                       >
                         <EnvelopeIcon />
                       </button>
                     )}
                     <button
                       onClick={() => startEdit(g)}
-                      className="px-2 py-1 text-xs text-gray-400 hover:text-gold-300 border border-gray-700 rounded transition"
+                      className="px-2 py-1 text-xs text-stone-400 hover:text-gold-300 border border-stone-700 rounded transition"
                     >
                       Edit
                     </button>
@@ -405,32 +405,32 @@ export default function AdminGuestsPage() {
                 </div>
 
                 {g.lastBooking && (
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-stone-600 mt-1">
                     Last booking: {g.lastBooking.date} ({g.lastBooking.status})
                   </p>
                 )}
 
                 {/* Inline edit */}
                 {editingId === g.id && (
-                  <div className="mt-3 p-3 bg-[#0f0f0f] rounded-xl space-y-2">
+                  <div className="mt-3 p-3 bg-ink-950 rounded-xl space-y-2">
                     <div>
-                      <label className="text-xs text-gray-500">Tags (comma-separated)</label>
+                      <label className="text-xs text-stone-500">Tags (comma-separated)</label>
                       <input
                         type="text"
                         value={editTags}
                         onChange={(e) => setEditTags(e.target.value)}
                         placeholder="VIP, regular, birthday"
-                        className="w-full mt-1 px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                        className="w-full mt-1 px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-500">Notes</label>
+                      <label className="text-xs text-stone-500">Notes</label>
                       <textarea
                         value={editNotes}
                         onChange={(e) => setEditNotes(e.target.value)}
                         rows={2}
                         placeholder="Allergies, preferences..."
-                        className="w-full mt-1 px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
+                        className="w-full mt-1 px-3 py-2 bg-ink-900 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
                       />
                     </div>
                     <div className="flex gap-2">
@@ -442,7 +442,7 @@ export default function AdminGuestsPage() {
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-3 py-1.5 text-gray-400 text-xs hover:text-white transition"
+                        className="px-3 py-1.5 text-stone-400 text-xs hover:text-white transition"
                       >
                         Cancel
                       </button>
@@ -456,21 +456,21 @@ export default function AdminGuestsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-800">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition"
+              className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition"
             >
               ← Previous
             </button>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-stone-500">
               Page {page} of {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="px-3 py-1.5 text-sm text-gray-400 hover:text-white disabled:opacity-30 transition"
+              className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition"
             >
               Next →
             </button>
@@ -481,18 +481,18 @@ export default function AdminGuestsPage() {
       {/* Compose modal */}
       {compose && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 w-full max-w-lg">
+          <div className="bg-ink-900 border border-stone-800 rounded-2xl p-6 w-full max-w-lg">
             <h2 className="text-lg font-semibold text-white mb-5">Send Email</h2>
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider">To</label>
-                <p className="mt-1 px-3 py-2.5 bg-[#0f0f0f] border border-gray-800 rounded-xl text-sm text-gray-400 truncate">
+                <label className="text-xs text-stone-500 uppercase tracking-wider">To</label>
+                <p className="mt-1 px-3 py-2.5 bg-ink-950 border border-stone-800 rounded-xl text-sm text-stone-400 truncate">
                   {compose.toLabel}
                 </p>
               </div>
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider">Subject</label>
+                <label className="text-xs text-stone-500 uppercase tracking-wider">Subject</label>
                 <input
                   type="text"
                   value={compose.subject}
@@ -503,7 +503,7 @@ export default function AdminGuestsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider">Message</label>
+                <label className="text-xs text-stone-500 uppercase tracking-wider">Message</label>
                 <textarea
                   value={compose.message}
                   onChange={(e) => setCompose((c) => c && { ...c, message: e.target.value })}
@@ -514,19 +514,19 @@ export default function AdminGuestsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider">Send via</label>
+                <label className="text-xs text-stone-500 uppercase tracking-wider">Send via</label>
                 <div className="mt-1.5 flex gap-2">
                   <button
                     type="button"
                     onClick={() => setCompose((c) => c && { ...c, provider: "smtp" })}
-                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-stone-700 text-stone-400 hover:text-white"}`}
                   >
                     SMTP <span className="text-xs opacity-70">{compose.mode === "all" ? "· 15/hour, queued" : "· inbox-friendly"}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setCompose((c) => c && { ...c, provider: "resend" })}
-                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-[#0f0f0f] border-gray-700 text-gray-400 hover:text-white"}`}
+                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-stone-700 text-stone-400 hover:text-white"}`}
                   >
                     Resend <span className="text-xs opacity-70">· fast, no cap</span>
                   </button>
@@ -549,7 +549,7 @@ export default function AdminGuestsPage() {
                     <p className="text-xs text-red-400 font-medium mb-2">Failed deliveries:</p>
                     <ul className="space-y-1">
                       {compose.failures.map((f) => (
-                        <li key={f.email} className="text-xs text-gray-400">
+                        <li key={f.email} className="text-xs text-stone-400">
                           {f.name} — <span className="text-red-400">{f.email}</span>
                         </li>
                       ))}
@@ -570,7 +570,7 @@ export default function AdminGuestsPage() {
               <button
                 onClick={() => setCompose(null)}
                 disabled={compose.sending}
-                className="px-5 py-2.5 text-sm text-gray-400 hover:text-white border border-gray-700 rounded-xl transition"
+                className="px-5 py-2.5 text-sm text-stone-400 hover:text-white border border-stone-700 rounded-xl transition"
               >
                 Cancel
               </button>

@@ -68,7 +68,7 @@ export default function WeeklyActivityEditor({
       {removed && (
         <div
           role="status"
-          className="flex items-center gap-3 text-sm text-gray-400"
+          className="flex items-center gap-3 text-sm text-stone-400"
         >
           Activity removed.
           <Action
@@ -89,7 +89,7 @@ export default function WeeklyActivityEditor({
         </div>
       )}
       {!items.length && (
-        <div className="rounded-2xl border border-dashed border-gray-700 px-6 py-12 text-center text-gray-400">
+        <div className="rounded-2xl border border-dashed border-stone-700 px-6 py-12 text-center text-stone-400">
           No activities yet
         </div>
       )}
@@ -99,7 +99,7 @@ export default function WeeklyActivityEditor({
           <fieldset
             key={item.id}
             disabled={disabled}
-            className="min-w-0 space-y-5 rounded-2xl border border-gray-800 bg-[#1a1a1a] p-5 sm:p-7"
+            className="min-w-0 space-y-5 rounded-2xl border border-stone-800 bg-ink-900 p-5 sm:p-7"
           >
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-sm font-semibold text-gold-300">

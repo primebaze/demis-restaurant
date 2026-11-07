@@ -38,11 +38,11 @@ export default function BlogDashboard() {
   }, []);
 
   if (!stats) {
-    return <div className="text-gray-400">Loading dashboard...</div>;
+    return <div className="text-stone-400">Loading dashboard...</div>;
   }
 
   const statCards = [
-    { label: "Total Posts", value: stats.totalPosts, color: "text-blue-400" },
+    { label: "Total Posts", value: stats.totalPosts, color: "text-gold-300" },
     { label: "Published", value: stats.published, color: "text-emerald-400" },
     { label: "Drafts", value: stats.drafts, color: "text-amber-400" },
     { label: "Pending Comments", value: stats.pendingComments, color: "text-red-400" },
@@ -62,21 +62,21 @@ export default function BlogDashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statCards.map((s) => (
-          <div key={s.label} className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">{s.label}</p>
+          <div key={s.label} className="bg-ink-900 border border-stone-800 rounded-2xl p-5">
+            <p className="text-xs text-stone-500 uppercase tracking-wider">{s.label}</p>
             <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-800">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-stone-800">
           <h2 className="text-lg font-semibold text-white">Recent Posts</h2>
         </div>
         {stats.recentPosts.length === 0 ? (
-          <p className="p-6 text-gray-500 text-sm">No posts yet. Create your first post!</p>
+          <p className="p-6 text-stone-500 text-sm">No posts yet. Create your first post!</p>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-stone-800">
             {stats.recentPosts.map((post) => (
               <Link
                 key={post.slug}
@@ -85,7 +85,7 @@ export default function BlogDashboard() {
               >
                 <div>
                   <p className="text-white font-medium">{post.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-stone-500 mt-0.5">
                     {new Date(post.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
                 </div>

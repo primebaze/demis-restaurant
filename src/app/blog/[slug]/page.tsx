@@ -193,7 +193,7 @@ export default async function BlogPostPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] pt-32 pb-20">
+    <div className="min-h-screen bg-ink-900 pt-32 pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -302,7 +302,7 @@ export default async function BlogPostPage({
 
         {/* Author Bio */}
         {post.author.bio && (
-          <div className="mt-14 p-6 bg-[#1a1a1a] border border-white/5 rounded-2xl">
+          <div className="mt-14 p-6 bg-ink-800 border border-white/5 rounded-2xl">
             <div className="flex items-center gap-4">
               {post.author.avatarUrl && (
                 <img
@@ -330,7 +330,7 @@ export default async function BlogPostPage({
             <div className="grid sm:grid-cols-3 gap-6">
               {related.map((r) => (
                 <Link key={r.slug} href={`/blog/${r.slug}`} className="group">
-                  <article className="h-full bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition">
+                  <article className="h-full bg-ink-800 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition">
                     {r.featuredImage && (
                       <div className="aspect-[16/9] overflow-hidden relative">
                         <Image
@@ -368,7 +368,7 @@ export default async function BlogPostPage({
           ) : (
             <div className="space-y-6 mb-10">
               {post.comments.map((comment) => (
-                <div key={comment.id} className="p-5 bg-[#1a1a1a] border border-white/5 rounded-xl">
+                <div key={comment.id} className="p-5 bg-ink-800 border border-white/5 rounded-xl">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-white">{comment.name}</span>
                     <time className="text-[10px] text-stone-600">

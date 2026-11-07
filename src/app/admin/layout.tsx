@@ -3,26 +3,55 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import {
+  CalendarCheck, CalendarDays, ChefHat, ClipboardCheck, Clapperboard, DoorOpen, Drumstick, LayoutDashboard,
+  LogOut, Mail, Megaphone, MousePointerClick, Settings, Soup, Star, Users, UtensilsCrossed, ArrowUpRight,
+  type LucideIcon,
+} from "lucide-react";
 
-const NAV_ITEMS = [
-  { href: "/admin", label: "Dashboard", icon: "📊" },
-  { href: "/admin/door/cricklewood", label: "Cricklewood", icon: "🚪" },
-  { href: "/admin/door/streatham", label: "Streatham", icon: "🚪" },
-  { href: "/admin/bookings", label: "Bookings", icon: "📅" },
-  { href: "/admin/set-menu", label: "Set Menu", icon: "🍽️" },
-  { href: "/admin/buffet", label: "Buffet", icon: "🍲" },
-  { href: "/admin/sunday-buffet", label: "Sunday Buffet", icon: "🍛" },
-  { href: "/admin/saturday-brunch", label: "Sunday Feast", icon: "🍗" },
-  { href: "/admin/checkins", label: "Check-ins", icon: "✅" },
-  { href: "/admin/brunch-checkins", label: "Feast Check-ins", icon: "🧾" },
-  { href: "/admin/calendar", label: "Calendar", icon: "🗓️" },
-  { href: "/admin/guests", label: "Guests", icon: "👥" },
-  { href: "/admin/email-logs", label: "Email Logs", icon: "📧" },
-  { href: "/admin/reviews", label: "Reviews", icon: "⭐" },
-  { href: "/admin/shoot-plans", label: "Weekly Plans", icon: "🎬" },
-  { href: "/admin/mailing", label: "Email Blast", icon: "📣" },
-  { href: "/admin/link-clicks", label: "Link Clicks", icon: "🖱️" },
-  { href: "/admin/settings", label: "Settings", icon: "⚙️" },
+// Grouped by what staff are doing. Line icons only (see docs/COLOURS.md).
+const NAV_GROUPS: { title: string; items: { href: string; label: string; icon: LucideIcon }[] }[] = [
+  {
+    title: "Today",
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/calendar", label: "Calendar", icon: CalendarDays },
+      { href: "/admin/door/cricklewood", label: "Door: Cricklewood", icon: DoorOpen },
+      { href: "/admin/door/streatham", label: "Door: Streatham", icon: DoorOpen },
+    ],
+  },
+  {
+    title: "Bookings",
+    items: [
+      { href: "/admin/bookings", label: "Table bookings", icon: CalendarCheck },
+      { href: "/admin/set-menu", label: "Set Menu", icon: UtensilsCrossed },
+      { href: "/admin/buffet", label: "Buffet", icon: ChefHat },
+    ],
+  },
+  {
+    title: "Experiences",
+    items: [
+      { href: "/admin/sunday-buffet", label: "Sunday Buffet", icon: Soup },
+      { href: "/admin/checkins", label: "Buffet Check-ins", icon: ClipboardCheck },
+      { href: "/admin/saturday-brunch", label: "Sunday Feast", icon: Drumstick },
+      { href: "/admin/brunch-checkins", label: "Feast Check-ins", icon: ClipboardCheck },
+    ],
+  },
+  {
+    title: "Guests & marketing",
+    items: [
+      { href: "/admin/guests", label: "Guests", icon: Users },
+      { href: "/admin/mailing", label: "Email Blast", icon: Megaphone },
+      { href: "/admin/email-logs", label: "Email Logs", icon: Mail },
+      { href: "/admin/reviews", label: "Reviews", icon: Star },
+      { href: "/admin/link-clicks", label: "Link Clicks", icon: MousePointerClick },
+      { href: "/admin/shoot-plans", label: "Weekly Plans", icon: Clapperboard },
+    ],
+  },
+  {
+    title: "Setup",
+    items: [{ href: "/admin/settings", label: "Settings", icon: Settings }],
+  },
 ];
 
 export default function AdminLayout({
@@ -67,7 +96,7 @@ export default function AdminLayout({
   // Loading state
   if (authed === null) {
     return (
-      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+      <div className="min-h-screen bg-ink-950 flex items-center justify-center">
         <div className="text-gold-300 text-lg">Loading...</div>
       </div>
     );
@@ -81,7 +110,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex">
+    <div className="min-h-screen bg-ink-950 flex">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -92,57 +121,69 @@ export default function AdminLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky lg:top-0 lg:self-start lg:h-screen inset-y-0 left-0 z-50 w-64 bg-[#141414] border-r border-gray-800 transform transition-transform lg:transform-none ${
+        className={`fixed lg:sticky lg:top-0 lg:self-start lg:h-screen inset-y-0 left-0 z-50 w-60 bg-ink-950 border-r border-white/[0.06] transform transition-transform lg:transform-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Brand */}
-          <div className="p-6 border-b border-gray-800">
+          <div className="px-6 py-5 border-b border-white/[0.06]">
             <Link href="/admin" className="block">
-              <h1 className="text-xl font-bold text-gold-300">Demi&apos;s</h1>
-              <p className="text-gray-500 text-xs mt-0.5">Booking Admin</p>
+              <p className="font-serif text-xl text-gold-300 leading-none">Demi&apos;s</p>
+              <p className="mt-1.5 text-[11px] uppercase tracking-[0.14em] text-stone-500">Admin</p>
             </Link>
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {NAV_ITEMS.map((item) => {
-              const isActive =
-                item.href === "/admin"
-                  ? pathname === "/admin"
-                  : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
-                    isActive
-                      ? "bg-gold-300/10 text-gold-300"
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  {item.label}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 overflow-y-auto px-3 py-4">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.title} className="mb-5 last:mb-0">
+                <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-600">
+                  {group.title}
+                </p>
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive =
+                      item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition ${
+                          isActive
+                            ? "bg-white/[0.06] font-medium text-white"
+                            : "text-stone-400 hover:bg-white/[0.03] hover:text-stone-100"
+                        }`}
+                      >
+                        {isActive && <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-gold-300" />}
+                        <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-gold-300" : "text-stone-500"}`} strokeWidth={1.75} />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-800">
+          <div className="border-t border-white/[0.06] p-3 space-y-0.5">
             <Link
               href="/"
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-300 transition"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-stone-400 transition hover:bg-white/[0.03] hover:text-stone-100"
             >
-              ← Back to Site
+              <ArrowUpRight className="h-4 w-4 text-stone-500" strokeWidth={1.75} />
+              View website
             </Link>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 transition text-left"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] text-stone-400 transition hover:bg-red-500/10 hover:text-red-300"
             >
-              Sign Out
+              <LogOut className="h-4 w-4 text-stone-500" strokeWidth={1.75} />
+              Sign out
             </button>
           </div>
         </div>
@@ -151,7 +192,7 @@ export default function AdminLayout({
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
         {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between p-4 border-b border-gray-800 bg-[#141414]">
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-ink-950">
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-white p-2"
@@ -170,7 +211,7 @@ export default function AdminLayout({
               />
             </svg>
           </button>
-          <span className="text-gold-300 font-bold">Demi&apos;s Admin</span>
+          <span className="font-serif text-lg text-gold-300">Demi&apos;s</span>
           <div className="w-10" />
         </header>
 

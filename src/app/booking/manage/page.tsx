@@ -35,9 +35,9 @@ function formatPence(p: number) {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  confirmed: { label: "Confirmed", color: "text-green-400 bg-green-400/10 border-green-400/20" },
+  confirmed: { label: "Confirmed", color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" },
   pending_payment: { label: "Awaiting Payment", color: "text-amber-400 bg-amber-400/10 border-amber-400/20" },
-  modified: { label: "Modified", color: "text-blue-400 bg-blue-400/10 border-blue-400/20" },
+  modified: { label: "Modified", color: "text-gold-300 bg-gold-300/10 border-gold-300/20" },
   cancelled_guest: { label: "Cancelled", color: "text-red-400 bg-red-400/10 border-red-400/20" },
   cancelled_admin: { label: "Cancelled by Restaurant", color: "text-red-400 bg-red-400/10 border-red-400/20" },
   no_show: { label: "No Show", color: "text-stone-400 bg-stone-400/10 border-stone-400/20" },
@@ -121,7 +121,7 @@ function ManageContent() {
       </div>
 
       {/* Booking details */}
-      <div className="rounded-2xl border border-white/[0.06] bg-[#222] divide-y divide-white/[0.04]">
+      <div className="rounded-2xl border border-white/[0.06] bg-ink-700 divide-y divide-white/[0.04]">
         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.04]">
           <div className="p-5">
             <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Location</p>
@@ -212,7 +212,7 @@ export default function ManageBookingPage() {
 
       <section className="pb-20 sm:pb-28">
         <div className="mx-auto max-w-lg md:max-w-xl lg:max-w-2xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-white/[0.06] bg-[#1f1f1f] p-6 sm:p-8">
+          <div className="rounded-3xl border border-white/[0.06] bg-ink-800 p-6 sm:p-8">
             <Suspense fallback={<div className="text-center py-12"><div className="w-8 h-8 border-2 border-gold-300/30 border-t-gold-300 rounded-full animate-spin mx-auto" /></div>}>
               <ManageContent />
             </Suspense>

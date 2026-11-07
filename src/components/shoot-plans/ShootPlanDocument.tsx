@@ -22,7 +22,7 @@ export function ReferenceImage({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="flex aspect-[9/13] items-center justify-center overflow-hidden rounded-lg bg-black/5">
       {failed ? (
-        <span className="flex flex-col items-center gap-2 p-4 text-center text-sm text-gray-500">
+        <span className="flex flex-col items-center gap-2 p-4 text-center text-sm text-stone-500">
           <ImageOff aria-hidden="true" size={22} />
           Image unavailable
         </span>
@@ -44,7 +44,7 @@ function Row({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
     <div className="grid gap-2 border-t border-black/10 py-5 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-8">
-      <dt className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+      <dt className="text-xs font-bold uppercase tracking-wider text-stone-500">
         {label}
       </dt>
       <dd className="whitespace-pre-wrap break-words text-sm leading-7 sm:text-base">
@@ -62,7 +62,7 @@ function Shots({ shots }: { shots: DocumentPlan["shots"] }) {
         {shots.map((shot, index) => (
           <li key={index} className="flex gap-4 py-4">
             <span
-              className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-neutral-400 text-neutral-700"
+              className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-stone-400 text-stone-700"
               role="img"
               aria-label={shot.captured ? "Captured" : "To capture"}
             >
@@ -70,7 +70,7 @@ function Shots({ shots }: { shots: DocumentPlan["shots"] }) {
             </span>
             <div className="min-w-0 flex-1">
               <p className="break-words font-semibold">{shot.title}</p>
-              <p className="mt-1 text-xs text-neutral-500">
+              <p className="mt-1 text-xs text-stone-500">
                 {SHOT_FORMATS[shot.format]}
                 {shot.assignee && ` · ${shot.assignee}`}
               </p>
@@ -118,7 +118,7 @@ export default function ShootPlanDocument({
     !!plan.shots.length;
   const ungrouped = plan.shots.filter((shot) => !shot.videoId);
   return (
-    <article className="shoot-document overflow-hidden rounded-2xl border border-black/10 bg-[#faf9f6] text-[#25221d] shadow-sm">
+    <article className="shoot-document overflow-hidden rounded-2xl border border-black/10 bg-cream-50 text-stone-800 shadow-sm">
       <header className="border-b border-black/10 px-6 py-9 sm:px-12 sm:py-12">
         <div className="mb-10 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.18em]">
           <Image
@@ -134,7 +134,7 @@ export default function ShootPlanDocument({
         <h1 className="break-words font-sans text-4xl font-semibold leading-tight sm:text-6xl">
           {plan.title || "Untitled weekly plan"}
         </h1>
-        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-neutral-600">
+        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-stone-600">
           <span>{formatWeek(plan.weekStart || startOfWeek(plan.date))}</span>
           <span>{SHOOT_LOCATIONS[plan.location]}</span>
           <span>{SHOOT_STATUSES[plan.status]}</span>
@@ -172,7 +172,7 @@ export default function ShootPlanDocument({
                     <ul className="space-y-6">
                       {scheduled.map((item) => (
                         <li key={item.id}>
-                          <div className="flex flex-wrap justify-between gap-2 text-xs text-neutral-500">
+                          <div className="flex flex-wrap justify-between gap-2 text-xs text-stone-500">
                             <span>{WORK_TYPES[item.type]}</span>
                             <span>{SHOOT_STATUSES[item.status]}</span>
                           </div>
@@ -180,7 +180,7 @@ export default function ShootPlanDocument({
                             {item.title}
                           </p>
                           {item.assignee && (
-                            <p className="mt-2 text-sm text-neutral-600">
+                            <p className="mt-2 text-sm text-stone-600">
                               {item.assignee}
                             </p>
                           )}
@@ -219,7 +219,7 @@ export default function ShootPlanDocument({
                     href={`#document-video-${video.id}`}
                     className="flex min-h-11 gap-4 rounded py-2 text-sm hover:bg-black/5 focus-visible:outline focus-visible:outline-2"
                   >
-                    <span className="shrink-0 font-semibold text-neutral-500">
+                    <span className="shrink-0 font-semibold text-stone-500">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="break-words">
@@ -238,14 +238,14 @@ export default function ShootPlanDocument({
               {plan.checklist.map((item) => (
                 <li className="flex items-start gap-3" key={item.id}>
                   <span
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-neutral-400"
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stone-400"
                     role="img"
                     aria-label={item.completed ? "Complete" : "Not complete"}
                   >
                     {item.completed && <Check size={14} />}
                   </span>
                   <span
-                    className={`whitespace-pre-wrap break-words text-sm ${item.completed ? "text-neutral-500 line-through" : ""}`}
+                    className={`whitespace-pre-wrap break-words text-sm ${item.completed ? "text-stone-500 line-through" : ""}`}
                   >
                     {item.text}
                   </span>
@@ -261,7 +261,7 @@ export default function ShootPlanDocument({
           id={`document-video-${video.id}`}
           className="scroll-mt-6 border-t border-black/15 px-6 py-9 sm:px-12 sm:py-12"
         >
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-neutral-500">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-stone-500">
             {activities.find((item) => item.id === video.activityId)?.title ||
               "Content shoot"}{" "}
             · Video {String(index + 1).padStart(2, "0")}
@@ -270,7 +270,7 @@ export default function ShootPlanDocument({
             {video.title || `Video ${index + 1}`}
           </h2>
           {video.style && (
-            <p className="mt-3 whitespace-pre-wrap break-words text-base italic text-neutral-600">
+            <p className="mt-3 whitespace-pre-wrap break-words text-base italic text-stone-600">
               {video.style}
             </p>
           )}
@@ -295,7 +295,7 @@ export default function ShootPlanDocument({
                       alt={ref.caption || `${video.title} reference ${i + 1}`}
                     />
                     {ref.caption && (
-                      <figcaption className="mt-2 whitespace-pre-wrap break-words text-xs leading-5 text-neutral-600">
+                      <figcaption className="mt-2 whitespace-pre-wrap break-words text-xs leading-5 text-stone-600">
                         {ref.caption}
                       </figcaption>
                     )}
@@ -311,7 +311,7 @@ export default function ShootPlanDocument({
           <Shots shots={ungrouped} />
         </section>
       )}
-      <footer className="flex flex-wrap justify-between gap-3 border-t border-black/10 px-6 py-5 text-xs text-neutral-500 sm:px-12">
+      <footer className="flex flex-wrap justify-between gap-3 border-t border-black/10 px-6 py-5 text-xs text-stone-500 sm:px-12">
         <span>Demi’s · Weekly planner</span>
       </footer>
     </article>

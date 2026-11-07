@@ -65,12 +65,12 @@ export default function BlogPostsPage() {
           placeholder="Search posts..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 px-4 py-2.5 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-400"
+          className="flex-1 px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
         />
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-4 py-2.5 bg-[#1a1a1a] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-4 py-2.5 bg-ink-900 border border-stone-700 rounded-xl text-white text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Status</option>
           <option value="published">Published</option>
@@ -78,13 +78,13 @@ export default function BlogPostsPage() {
         </select>
       </div>
 
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <p className="p-6 text-gray-500 text-sm">Loading...</p>
+          <p className="p-6 text-stone-500 text-sm">Loading...</p>
         ) : posts.length === 0 ? (
-          <p className="p-6 text-gray-500 text-sm">No posts found.</p>
+          <p className="p-6 text-stone-500 text-sm">No posts found.</p>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-stone-800">
             {posts.map((post) => (
               <div key={post.id} className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
                 <div className="min-w-0 flex-1">
@@ -92,14 +92,14 @@ export default function BlogPostsPage() {
                     {post.title}
                   </Link>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-gray-500">{post.author.name}</span>
+                    <span className="text-xs text-stone-500">{post.author.name}</span>
                     {post.category && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400">{post.category.name}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-stone-400">{post.category.name}</span>
                     )}
-                    <span className="text-xs text-gray-600">
+                    <span className="text-xs text-stone-600">
                       {new Date(post.publishedAt || post.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
-                    <span className="text-xs text-gray-500">{post.views.toLocaleString("en-GB")} views</span>
+                    <span className="text-xs text-stone-500">{post.views.toLocaleString("en-GB")} views</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 ml-4">
@@ -130,15 +130,15 @@ export default function BlogPostsPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="px-4 py-2 text-sm text-gray-400 bg-[#1a1a1a] border border-gray-800 rounded-xl disabled:opacity-30"
+            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-stone-800 rounded-xl disabled:opacity-30"
           >
             Previous
           </button>
-          <span className="text-sm text-gray-500">Page {page} of {totalPages}</span>
+          <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-4 py-2 text-sm text-gray-400 bg-[#1a1a1a] border border-gray-800 rounded-xl disabled:opacity-30"
+            className="px-4 py-2 text-sm text-stone-400 bg-ink-900 border border-stone-800 rounded-xl disabled:opacity-30"
           >
             Next
           </button>

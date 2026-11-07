@@ -194,36 +194,36 @@ export default function AdminSundayBuffetPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Sunday Buffet</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Reservations for {prettyDate || "…"}.</p>
+          <p className="text-sm text-stone-500 mt-0.5">Reservations for {prettyDate || "…"}.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setDate(shiftWeeks(resolvedDate, -1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white disabled:opacity-40">← Prev</button>
-          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">This Sunday</button>
-          <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-[#1a1a1a] border border-gray-700 rounded-lg text-gray-300 hover:text-white">Next →</button>
+          <button onClick={() => setDate(shiftWeeks(resolvedDate, -1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white disabled:opacity-40">← Prev</button>
+          <button onClick={() => setDate("")} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white">This Sunday</button>
+          <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} className="px-3 py-2 text-sm bg-ink-900 border border-stone-700 rounded-lg text-stone-300 hover:text-white">Next →</button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Reservations</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Reservations</p>
           <p className="text-2xl font-bold text-white">{summary.reservations}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">People</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People</p>
           <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Confirmed</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Confirmed</p>
           <p className="text-2xl font-bold text-emerald-400">{summary.confirmed}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-[#1a1a1a] border-gray-800">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Cancelled</p>
+        <div className="rounded-xl p-4 border bg-ink-900 border-stone-800">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Cancelled</p>
           <p className="text-2xl font-bold text-white">{summary.cancelled}</p>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
-        {confirmNote && <span className="text-xs text-gray-400 mr-auto">{confirmNote}</span>}
+        {confirmNote && <span className="text-xs text-stone-400 mr-auto">{confirmNote}</span>}
         <button onClick={() => askToConfirm()} disabled={withEmail === 0 || confirming} className="px-3 py-2 text-xs text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/10 transition disabled:opacity-40">
           {confirming ? "Sending…" : `✓ Ask guests to confirm${withEmail ? ` (${withEmail})` : ""}`}
         </button>
@@ -234,18 +234,18 @@ export default function AdminSundayBuffetPage() {
       </div>
 
       {mailOpen && (
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-5 mb-6">
+        <div className="bg-ink-900 border border-stone-800 rounded-2xl p-5 mb-6">
           <div className="inline-flex gap-1 p-1 bg-black/40 rounded-xl mb-4">
             <button
               onClick={() => setMailScope("day")}
               disabled={withEmail === 0}
-              className={`px-3 py-1.5 text-xs rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${mailScope === "day" ? "bg-gold-300 text-black font-semibold" : "text-gray-400 hover:text-white"}`}
+              className={`px-3 py-1.5 text-xs rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${mailScope === "day" ? "bg-gold-300 text-black font-semibold" : "text-stone-400 hover:text-white"}`}
             >
               Booked for {prettyDate} ({withEmail})
             </button>
             <button
               onClick={() => setMailScope("all")}
-              className={`px-3 py-1.5 text-xs rounded-lg transition ${mailScope === "all" ? "bg-gold-300 text-black font-semibold" : "text-gray-400 hover:text-white"}`}
+              className={`px-3 py-1.5 text-xs rounded-lg transition ${mailScope === "all" ? "bg-gold-300 text-black font-semibold" : "text-stone-400 hover:text-white"}`}
             >
               All past guests ({allCount ?? "…"})
             </button>
@@ -253,12 +253,12 @@ export default function AdminSundayBuffetPage() {
           {mailScope === "day" ? (
             <>
               <p className="text-sm text-white font-semibold mb-1">Email everyone booked for {prettyDate}</p>
-              <p className="text-xs text-gray-500 mb-4">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
+              <p className="text-xs text-stone-500 mb-4">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
             </>
           ) : (
             <>
               <p className="text-sm text-white font-semibold mb-1">Email everyone who has been to the buffet</p>
-              <p className="text-xs text-gray-500 mb-4">Goes to {allCount ?? "…"} {allCount === 1 ? "person" : "people"} booked for a Sunday that has already happened, one email each even if they came more than once. Upcoming and cancelled bookings are left out. Sent from your normal bookings address.</p>
+              <p className="text-xs text-stone-500 mb-4">Goes to {allCount ?? "…"} {allCount === 1 ? "person" : "people"} booked for a Sunday that has already happened, one email each even if they came more than once. Upcoming and cancelled bookings are left out. Sent from your normal bookings address.</p>
             </>
           )}
           {/* Saved emails for this screen. One click fills the form; you still press Send. */}
@@ -267,7 +267,7 @@ export default function AdminSundayBuffetPage() {
               <button
                 key={t.key}
                 onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
-                className="px-3 py-1.5 text-sm text-gray-300 border border-gray-700 rounded-full hover:bg-white/5 transition"
+                className="px-3 py-1.5 text-sm text-stone-300 border border-stone-700 rounded-full hover:bg-white/5 transition"
               >
                 {t.name}
               </button>
@@ -275,40 +275,40 @@ export default function AdminSundayBuffetPage() {
             <button
               onClick={saveMailTemplate}
               disabled={!mailSubject.trim() || !mailMessage.trim()}
-              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-gray-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-stone-700 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
             >
               + Save current
             </button>
           </div>
           <input
             value={mailSubject} onChange={(e) => setMailSubject(e.target.value)} placeholder="Subject"
-            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-300/60"
+            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-stone-700 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60"
           />
           <textarea
             value={mailMessage} onChange={(e) => setMailMessage(e.target.value)} rows={6}
             placeholder="Your message. Line breaks are kept. Each guest is greeted by name automatically."
-            className="w-full px-3 py-2.5 bg-black/40 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold-300/60 resize-y"
+            className="w-full px-3 py-2.5 bg-black/40 border border-stone-700 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60 resize-y"
           />
           <div className="flex items-center gap-3 mt-3">
             <button onClick={sendMailAll} disabled={mailing} className="px-4 py-2 text-sm bg-gold-300 text-black font-semibold rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
               {mailing ? "Sending…" : `Send to ${mailScope === "all" ? (allCount ?? "…") : withEmail}`}
             </button>
-            <button onClick={() => { setMailOpen(false); setMailNote(""); }} className="text-sm text-gray-400 hover:text-white">Cancel</button>
-            {mailNote && <span className="text-xs text-gray-400">{mailNote}</span>}
+            <button onClick={() => { setMailOpen(false); setMailNote(""); }} className="text-sm text-stone-400 hover:text-white">Cancel</button>
+            {mailNote && <span className="text-xs text-stone-400">{mailNote}</span>}
           </div>
         </div>
       )}
 
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <p className="p-8 text-center text-gray-500">Loading…</p>
+          <p className="p-8 text-center text-stone-500">Loading…</p>
         ) : bookings.length === 0 ? (
-          <p className="p-8 text-center text-gray-500">No reservations for this Sunday yet.</p>
+          <p className="p-8 text-center text-stone-500">No reservations for this Sunday yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-800">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-800">
                   <th className="px-4 py-3">Guest</th>
                   <th className="px-4 py-3">Arrives</th>
                   <th className="px-4 py-3">Party</th>
@@ -320,20 +320,20 @@ export default function AdminSundayBuffetPage() {
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className={`border-b border-gray-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
+                  <tr key={b.id} className={`border-b border-stone-800/50 hover:bg-white/[0.02] ${b.status === "cancelled" ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 text-sm text-white">{b.name}</td>
                     <td className="px-4 py-3 text-sm text-white font-semibold tabular-nums">{b.arrivalTime}</td>
                     <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{b.partySize}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{fmt(b.createdAt)}</td>
+                    <td className="px-4 py-3 text-xs text-stone-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
+                    <td className="px-4 py-3 text-xs text-stone-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col items-start gap-1">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-700 text-gray-300"}`}>{b.status}</span>
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-stone-700 text-stone-300"}`}>{b.status}</span>
                         {b.status !== "cancelled" && (
                           b.confirmedAt
                             ? <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400" title={`Confirmed ${fmt(b.confirmedAt)}`}>✓ confirmed</span>
                             : b.confirmSentAt
-                              ? <span className="text-[11px] text-gray-600" title={`Confirmation requested ${fmt(b.confirmSentAt)}`}>awaiting</span>
+                              ? <span className="text-[11px] text-stone-600" title={`Confirmation requested ${fmt(b.confirmSentAt)}`}>awaiting</span>
                               : null
                         )}
                       </div>
@@ -352,9 +352,9 @@ export default function AdminSundayBuffetPage() {
                         )}
                         {b.status !== "arrived" && <button onClick={() => setStatus(b.id, "arrived")} className="text-emerald-400 hover:text-emerald-300">Arrived</button>}
                         {b.status !== "cancelled" ? (
-                          <button onClick={() => setStatus(b.id, "cancelled")} className="text-gray-400 hover:text-white">Cancel</button>
+                          <button onClick={() => setStatus(b.id, "cancelled")} className="text-stone-400 hover:text-white">Cancel</button>
                         ) : (
-                          <button onClick={() => setStatus(b.id, "booked")} className="text-gray-400 hover:text-white">Restore</button>
+                          <button onClick={() => setStatus(b.id, "booked")} className="text-stone-400 hover:text-white">Restore</button>
                         )}
                         <button onClick={() => remove(b.id)} className="text-red-400 hover:text-red-300">Delete</button>
                       </div>

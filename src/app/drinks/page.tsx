@@ -124,7 +124,7 @@ export default function DrinksPage() {
       </section>
 
       {/* ─── Sticky category nav ─── */}
-      <div className="sticky top-[72px] z-50 bg-[#1a1a1a]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+      <div className="sticky top-[72px] z-50 bg-ink-900/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
         <div
           ref={navRef}
           className="flex items-center gap-2 overflow-x-auto px-4 sm:px-6 py-3 max-w-7xl mx-auto scrollbar-hide"
@@ -159,7 +159,7 @@ export default function DrinksPage() {
           >
             {/* Section header */}
             <div className="flex items-center gap-4 mb-8">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br ${section.accent} border border-white/[0.08] shrink-0`}>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-gold-300/[0.06] border border-gold-300/15 shrink-0`}>
                 {section.icon}
               </div>
               <div>

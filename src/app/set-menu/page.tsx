@@ -95,7 +95,7 @@ export default function SetMenuPage() {
       </section>
 
       {/* ─── FOUR COURSES ─── */}
-      <section className="py-20 sm:py-28 bg-[#111]">
+      <section className="py-20 sm:py-28 bg-ink-950">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-center mb-16">
             <p className="section-label">The Menu</p>
@@ -195,7 +195,7 @@ export default function SetMenuPage() {
       </section>
 
       {/* ─── CONTACT CTA ─── */}
-      <section className="py-16 sm:py-24 bg-[#111]">
+      <section className="py-16 sm:py-24 bg-ink-950">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <p className="section-label">Get in Touch</p>
           <h2 className="mt-3 heading-lg">Ready to Book?</h2>

@@ -59,13 +59,13 @@ export default function CategoriesPage() {
         <div className="mb-4 p-3 rounded-lg bg-red-900/30 border border-red-800 text-red-300 text-sm">{error}</div>
       )}
 
-      <form onSubmit={handleCreate} className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 mb-6">
+      <form onSubmit={handleCreate} className="bg-ink-900 border border-stone-800 rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-semibold text-white mb-4">Add Category</h2>
         <div className="space-y-4">
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Category name"
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400" />
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400" />
           <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optional)"
-            className="w-full px-4 py-3 bg-[#0f0f0f] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gold-400" />
+            className="w-full px-4 py-3 bg-ink-950 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-gold-400" />
           <button type="submit" disabled={saving || !name.trim()}
             className="px-6 py-2.5 bg-gold-300 text-black font-semibold rounded-xl text-sm hover:bg-gold-400 transition disabled:opacity-50">
             {saving ? "Adding..." : "Add Category"}
@@ -73,17 +73,17 @@ export default function CategoriesPage() {
         </div>
       </form>
 
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl overflow-hidden">
+      <div className="bg-ink-900 border border-stone-800 rounded-2xl overflow-hidden">
         {categories.length === 0 ? (
-          <p className="p-6 text-gray-500 text-sm">No categories yet.</p>
+          <p className="p-6 text-stone-500 text-sm">No categories yet.</p>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-stone-800">
             {categories.map((cat) => (
               <div key={cat.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="text-white font-medium">{cat.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">/{cat.slug}</p>
-                  {cat.description && <p className="text-xs text-gray-600 mt-0.5">{cat.description}</p>}
+                  <p className="text-xs text-stone-500 mt-0.5">/{cat.slug}</p>
+                  {cat.description && <p className="text-xs text-stone-600 mt-0.5">{cat.description}</p>}
                 </div>
                 <button onClick={() => handleDelete(cat.id, cat.name)}
                   className="text-xs text-red-400 hover:text-red-300 transition">

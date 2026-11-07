@@ -116,7 +116,7 @@ export function ShareButtons({ url, title }: { url: string; title: string }) {
           </svg>
         </button>
         {igHint && (
-          <span className="absolute left-1/2 -translate-x-1/2 top-11 z-10 whitespace-nowrap rounded-lg bg-[#1a1a1a] border border-white/10 px-3 py-1.5 text-[11px] text-white shadow-lg">
+          <span className="absolute left-1/2 -translate-x-1/2 top-11 z-10 whitespace-nowrap rounded-lg bg-ink-800 border border-white/10 px-3 py-1.5 text-[11px] text-white shadow-lg">
             Link copied — paste into your Instagram story or bio
           </span>
         )}

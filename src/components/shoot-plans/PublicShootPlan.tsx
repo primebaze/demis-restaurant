@@ -144,26 +144,26 @@ export default function PublicShootPlan({
     }
   }
   return (
-    <div className="min-h-screen bg-[#0f0f0f] px-4 py-8 text-white sm:px-8">
+    <div className="min-h-screen bg-ink-950 px-4 py-8 text-white sm:px-8">
       <div className={`mx-auto max-w-6xl`}>
-        <header className="mb-8 flex items-center justify-between gap-3 border-b border-gray-800 pb-5">
+        <header className="mb-8 flex items-center justify-between gap-3 border-b border-stone-800 pb-5">
           <div>
             <p className="text-xl font-bold text-gold-300">Demi’s</p>
-            <p className="mt-1 text-xs uppercase tracking-widest text-gray-400">
+            <p className="mt-1 text-xs uppercase tracking-widest text-stone-400">
               {editable ? "Collaborator weekly plan" : "Weekly plan"}
             </p>
           </div>
-          <span className="flex items-center gap-2 text-xs text-gray-400">
+          <span className="flex items-center gap-2 text-xs text-stone-400">
             <LockKeyhole size={14} aria-hidden="true" />
             Private access
           </span>
         </header>
         {state === "loading" ? (
-          <p className="py-20 text-center text-gray-400" role="status">
+          <p className="py-20 text-center text-stone-400" role="status">
             Checking access…
           </p>
         ) : state === "locked" ? (
-          <section className="mx-auto my-16 max-w-md rounded-2xl border border-gray-800 bg-[#1a1a1a] p-6 sm:p-8">
+          <section className="mx-auto my-16 max-w-md rounded-2xl border border-stone-800 bg-ink-900 p-6 sm:p-8">
             <LockKeyhole
               size={28}
               className="mb-5 text-gold-300"
@@ -181,7 +181,7 @@ export default function PublicShootPlan({
             >
               <label
                 htmlFor="visitor-pin"
-                className="mb-2 block text-sm font-medium text-gray-300"
+                className="mb-2 block text-sm font-medium text-stone-300"
               >
                 Six-digit PIN
               </label>
@@ -273,7 +273,7 @@ export default function PublicShootPlan({
         ) : (
           <>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <span className="text-xs text-gray-400">Read-only</span>
+              <span className="text-xs text-stone-400">Read-only</span>
               <div className="flex gap-2">
                 <Action disabled={busy} onClick={() => void load()}>
                   Refresh plan

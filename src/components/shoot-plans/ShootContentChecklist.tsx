@@ -42,7 +42,7 @@ function ItemText({
         // Example content: highlight reel, decor, buffet service or food review.
         aria-invalid={!!error || undefined}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={`block min-h-11 w-full resize-none overflow-hidden rounded-lg border border-transparent bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-gray-500 hover:border-gray-700 focus:border-gold-300 focus:outline-none focus:ring-1 focus:ring-gold-300 sm:text-lg ${item.completed ? "text-gray-400 line-through" : "text-gray-200"}`}
+        className={`block min-h-11 w-full resize-none overflow-hidden rounded-lg border border-transparent bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-stone-500 hover:border-stone-700 focus:border-gold-300 focus:outline-none focus:ring-1 focus:ring-gold-300 sm:text-lg ${item.completed ? "text-stone-400 line-through" : "text-stone-200"}`}
       />
       {error && (
         <p id={`${id}-error`} className="mt-2 text-sm text-red-300">
@@ -102,18 +102,18 @@ export default function ShootContentChecklist({
       id="checklist"
       tabIndex={-1}
       aria-labelledby="checklist-heading"
-      className="rounded-2xl border border-gray-800 bg-[#141414] p-5 focus-visible:outline focus-visible:outline-gold-300 sm:p-6"
+      className="rounded-2xl border border-stone-800 bg-ink-950 p-5 focus-visible:outline focus-visible:outline-gold-300 sm:p-6"
     >
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 id="checklist-heading" className="text-lg font-semibold">
             Content checklist
           </h2>
-          <p className="mt-2 text-base text-gray-300">
+          <p className="mt-2 text-base text-stone-300">
             {formatShootDate(date)}
           </p>
         </div>
-        <span className="text-xs text-gray-400" aria-live="polite">
+        <span className="text-xs text-stone-400" aria-live="polite">
           {completed} of {items.length} complete
         </span>
       </div>
@@ -121,7 +121,7 @@ export default function ShootContentChecklist({
       {editable && removed && (
         <div
           role="status"
-          className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-300"
+          className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm text-stone-300"
         >
           <span>Item removed.</span>
           <Action
@@ -166,13 +166,13 @@ export default function ShootContentChecklist({
                           )
                         : onToggle?.(item.id)
                     }
-                    className="h-7 w-7 cursor-pointer appearance-none rounded-full border-2 border-gray-500 bg-transparent checked:border-gold-300 checked:bg-gold-300 hover:border-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-300 disabled:cursor-wait disabled:opacity-50"
+                    className="h-7 w-7 cursor-pointer appearance-none rounded-full border-2 border-stone-500 bg-transparent checked:border-gold-300 checked:bg-gold-300 hover:border-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-300 disabled:cursor-wait disabled:opacity-50"
                   />
                   {item.completed && (
                     <Check
                       size={18}
                       aria-hidden="true"
-                      className="pointer-events-none absolute text-[#141414]"
+                      className="pointer-events-none absolute text-ink-950"
                     />
                   )}
                 </label>
@@ -183,7 +183,7 @@ export default function ShootContentChecklist({
                   className="flex h-11 w-11 shrink-0 items-center justify-center"
                 >
                   <span
-                    className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${item.completed ? "border-gold-300 bg-gold-300 text-[#141414]" : "border-gray-500"}`}
+                    className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${item.completed ? "border-gold-300 bg-gold-300 text-ink-950" : "border-stone-500"}`}
                   >
                     {item.completed && <Check size={18} aria-hidden="true" />}
                   </span>
@@ -206,7 +206,7 @@ export default function ShootContentChecklist({
                 />
               ) : (
                 <p
-                  className={`min-w-0 flex-1 whitespace-pre-wrap break-words py-2 text-base leading-relaxed sm:text-lg ${item.completed ? "text-gray-400 line-through" : "text-gray-200"}`}
+                  className={`min-w-0 flex-1 whitespace-pre-wrap break-words py-2 text-base leading-relaxed sm:text-lg ${item.completed ? "text-stone-400 line-through" : "text-stone-200"}`}
                 >
                   {item.text}
                 </p>

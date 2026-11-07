@@ -46,7 +46,7 @@ const GALLERY = [
   { src: "/feast/oct-13.webp", alt: "House salad, jollof rice and fried plantain" },
 ];
 
-const card = "rounded-2xl border border-white/[0.07] bg-[#161412]";
+const card = "rounded-2xl border border-white/[0.07] bg-ink-800";
 const label = "text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/70";
 
 function Course({ no, title, children }: { no: string; title: string; children: React.ReactNode }) {
@@ -63,11 +63,11 @@ function Course({ no, title, children }: { no: string; title: string; children: 
 
 export default function SundayFeastPage() {
   return (
-    <div className="min-h-screen bg-[#0e0d0c] pb-24">
+    <div className="min-h-screen bg-ink-900 pb-24">
       {/* ── Hero ── */}
       <section className="relative h-[72vh] min-h-[540px] flex items-end overflow-hidden">
         <Image src="/feast/oct-2.webp" alt="The Sunday Feast spread at Demi's" fill priority sizes="100vw" className="object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-[#0e0d0c]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-ink-900" />
         <div className="relative w-full mx-auto max-w-6xl px-6 pb-24 text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-gold-300 font-semibold mb-5">Cricklewood · Every Sunday</p>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold text-white font-[family-name:var(--font-display)] leading-[1.02]">
@@ -76,7 +76,7 @@ export default function SundayFeastPage() {
           <p className="mt-4 text-base text-stone-300">A three course feast to share</p>
           <p className="mt-1.5 text-sm text-stone-400">1:30pm to 6pm</p>
           <div className="mt-7 flex items-center justify-center gap-2.5 flex-wrap">
-            <span className="rounded-full bg-gold-300 px-4 py-2 text-[13px] font-semibold text-[#1a1a1a]">£30 per person</span>
+            <span className="rounded-full bg-gold-300 px-4 py-2 text-[13px] font-semibold text-ink-900">£30 per person</span>
             <span className="rounded-full border border-white/25 bg-black/40 px-4 py-2 text-[13px] font-medium text-white backdrop-blur-sm">
               For two or more
             </span>
@@ -90,20 +90,28 @@ export default function SundayFeastPage() {
           {/* ── Info column ── */}
           <div className="space-y-8 order-2 lg:order-1">
             {/* The deal */}
-            <section className={`${card} p-8 sm:p-10`}>
-              <p className={`${label} mb-2`}>The deal</p>
-              <div className="grid sm:grid-cols-[1fr_auto] gap-6 items-end">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">Two or more people?</h2>
-                  <p className="mt-3 text-[15px] text-stone-300 leading-relaxed">
-                    Get all 5 dishes on the menu to share at your table for £30pp. The menu includes one cup of any
-                    winter warmer drink.
-                  </p>
-                </div>
-                <div className="sm:text-right">
-                  <p className="text-5xl font-semibold text-gold-300 leading-none">£30</p>
-                  <p className="mt-1.5 text-sm text-stone-500">per person</p>
-                </div>
+            <section className={`${card} overflow-hidden`}>
+              <div className="flex items-center justify-between gap-4 bg-gold-300 px-8 sm:px-10 py-4 text-ink-900">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-900/70">Sunday Feast · For two or more</p>
+                <p className="font-serif text-4xl leading-none">£30<span className="ml-1.5 font-sans text-xs font-semibold text-ink-900/70">pp</span></p>
+              </div>
+              <div className="p-8 sm:p-10">
+                <p className={`${label} mb-2`}>The deal</p>
+                <h2 className="text-2xl sm:text-[28px] font-bold text-white leading-tight">
+                  Two or more people? The whole menu is yours.
+                </h2>
+                <p className="mt-3 text-[15px] text-stone-300 leading-relaxed">
+                  Get all 5 dishes on the menu to share at your table for £30pp. The menu includes one cup of any
+                  winter warmer drink.
+                </p>
+                <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 border-t border-white/[0.06] pt-6">
+                  {["Three courses to share", "Whole chicken and whole fish", "One winter warmer each", "For two or more"].map((v) => (
+                    <li key={v} className="flex items-center gap-2.5 text-[14px] text-stone-200">
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold-300" />
+                      {v}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </section>
 

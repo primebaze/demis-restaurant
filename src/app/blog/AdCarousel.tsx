@@ -35,7 +35,7 @@ export function AdCarousel({ className = "" }: { className?: string }) {
 
   return (
     <section className={`mt-16 ${className}`}>
-      <div className="relative w-full aspect-[16/5] sm:aspect-[16/4] rounded-2xl overflow-hidden border border-white/10 bg-[#141414]">
+      <div className="relative w-full aspect-[16/5] sm:aspect-[16/4] rounded-2xl overflow-hidden border border-white/10 bg-ink-950">
         {ads.map((ad, idx) => {
           const inner = (
             /* eslint-disable-next-line @next/next/no-img-element */

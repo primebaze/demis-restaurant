@@ -49,7 +49,7 @@ export function InstagramShorts({ items }: { items: InstaItem[] }) {
             rel="noopener noreferrer"
             className="group shrink-0 w-[44%] sm:w-[31%] lg:w-[23%] snap-start"
           >
-            <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/5">
+            <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-ink-800 border border-white/5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={it.thumb}

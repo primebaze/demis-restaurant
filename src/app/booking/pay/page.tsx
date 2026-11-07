@@ -127,8 +127,8 @@ function PayContent() {
       )}
 
       {isConfirmed && (
-        <div className="mb-6 rounded-xl bg-green-500/10 border border-green-500/20 p-4">
-          <p className="text-sm text-green-300">
+        <div className="mb-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4">
+          <p className="text-sm text-emerald-300">
             This booking is already confirmed. No payment needed.
           </p>
         </div>
@@ -148,7 +148,7 @@ function PayContent() {
         Booking: <span className="text-gold-300 font-mono">{booking.confirmationCode}</span>
       </p>
 
-      <div className="bg-[#1a1a1a] rounded-xl p-6 mb-6 text-left">
+      <div className="bg-ink-900 rounded-xl p-6 mb-6 text-left">
         <p className="text-white font-medium text-sm">{booking.location}</p>
         <p className="text-stone-500 text-xs mt-1 mb-5">
           {new Date(booking.date + "T12:00:00").toLocaleDateString("en-GB", {
@@ -200,7 +200,7 @@ function PayContent() {
         <button
           onClick={handlePay}
           disabled={paying}
-          className="w-full rounded-full bg-gold-300 px-8 py-3.5 text-sm font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-full bg-gold-300 px-8 py-3.5 text-sm font-bold text-ink-900 hover:bg-gold-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {paying ? "Redirecting to payment..." : `Pay ${formatPence(totalPence)}`}
         </button>
@@ -213,7 +213,7 @@ function PayContent() {
       {isExpired && (
         <Link
           href="/booking"
-          className="inline-block w-full rounded-full bg-gold-300 px-8 py-3.5 text-sm font-bold text-[#1a1a1a] hover:bg-gold-200 transition-all"
+          className="inline-block w-full rounded-full bg-gold-300 px-8 py-3.5 text-sm font-bold text-ink-900 hover:bg-gold-200 transition-all"
         >
           Make a New Booking
         </Link>
@@ -238,7 +238,7 @@ export default function BookingPayPage() {
     <div className="min-h-[80vh] flex items-center justify-center">
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-lg px-4 sm:px-6">
-          <div className="rounded-3xl border border-white/[0.06] bg-[#1f1f1f] p-6 sm:p-10">
+          <div className="rounded-3xl border border-white/[0.06] bg-ink-800 p-6 sm:p-10">
             <Suspense
               fallback={
                 <div className="text-center py-16">

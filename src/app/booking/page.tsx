@@ -58,7 +58,7 @@ export default async function BookingPage() {
       {/* ─── Booking Widget ─── */}
       <section className="pb-20 sm:pb-28">
         <div className="mx-auto max-w-2xl lg:max-w-3xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-white/[0.06] bg-[#1f1f1f] p-6 sm:p-10">
+          <div className="rounded-3xl border border-white/[0.06] bg-ink-800 p-6 sm:p-10">
             <BookingWidget initialLocations={locations} initialAddOns={addOns} initialBlackoutDates={blackoutDates} />
           </div>
 

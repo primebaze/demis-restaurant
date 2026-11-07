@@ -51,7 +51,7 @@ export default function ShootShotEditor({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-lg font-semibold">
           Shot list{" "}
-          <span className="ml-2 text-sm font-normal text-gray-400">
+          <span className="ml-2 text-sm font-normal text-stone-400">
             {group.length}
           </span>
         </h3>
@@ -81,8 +81,8 @@ export default function ShootShotEditor({
         </div>
       )}
       {!group.length && (
-        <div className="rounded-xl border border-dashed border-gray-700 p-8 text-center">
-          <p className="mb-4 text-sm text-gray-400">No shots yet</p>
+        <div className="rounded-xl border border-dashed border-stone-700 p-8 text-center">
+          <p className="mb-4 text-sm text-stone-400">No shots yet</p>
           <Action onClick={add} disabled={shots.length >= MAX_SHOTS}>
             Add your first shot
           </Action>
@@ -91,7 +91,7 @@ export default function ShootShotEditor({
       {group.map(({ shot, index }, position) => (
         <div
           key={shot.id}
-          className="rounded-xl border border-gray-800 bg-black/15 p-4 sm:p-5"
+          className="rounded-xl border border-stone-800 bg-black/15 p-4 sm:p-5"
         >
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <label className="flex min-h-11 items-center gap-3 text-sm">
