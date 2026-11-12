@@ -116,7 +116,7 @@ export default function SundayFeastPage() {
                 />
               </div>
               <div className="p-7 sm:p-9">
-                <p className={label}>Sunday Feast · for two or more</p>
+                <p className={label}>Sunday Feast</p>
                 <p className="mt-4 flex items-baseline gap-2.5">
                   <span className="text-6xl leading-none text-gold-300 font-[family-name:var(--font-display)]">£30</span>
                   <span className="text-sm text-stone-400">per person</span>
