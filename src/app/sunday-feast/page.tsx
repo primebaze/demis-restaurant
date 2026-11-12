@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { Check } from "lucide-react";
 import { FeastBooking } from "./FeastBooking";
 
 export const metadata: Metadata = {
@@ -37,26 +38,40 @@ const WARMERS = [
   { name: "Mint Tea", price: "2.50" },
 ];
 
-const GALLERY = [
-  { src: "/feast/oct-51.webp", alt: "Sauce being poured over a whole rotisserie chicken", tall: true },
-  { src: "/feast/oct-10.webp", alt: "Puff puff, moi moi and pepper sauce on the table" },
-  { src: "/feast/oct-12.webp", alt: "Jollof rice, plantain, pepper soup and salad" },
-  { src: "/feast/oct-20.webp", alt: "Whole rotisserie chicken on a bed of salad", tall: true },
+const DEAL_POINTS = ["Three courses to share", "Whole chicken and whole fish", "One winter warmer each", "For two or more"];
+
+// The table, shot by shot: a staggered strip that leads into the closing "Book a table".
+const STRIP = [
+  { src: "/feast/oct-20.webp", alt: "Whole rotisserie chicken on a bed of salad" },
   { src: "/feast/oct-49.webp", alt: "Rotisserie chicken with jollof rice and fried plantain" },
+  { src: "/feast/oct-11.webp", alt: "Rotisserie chicken in pepper sauce with moi moi on the side" },
   { src: "/feast/oct-13.webp", alt: "House salad, jollof rice and fried plantain" },
 ];
 
-const card = "rounded-2xl border border-white/[0.07] bg-ink-800";
+// Near-black cards with a hairline edge: crisp on the page colour, where the grey looked muddy.
+const card = "rounded-2xl border border-white/[0.06] bg-ink-950";
 const label = "text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/70";
 
-function Course({ no, title, children }: { no: string; title: string; children: React.ReactNode }) {
+/** One course of the menu, with its photo beside it (above it on phones), alternating sides. */
+function Course({
+  no, title, img, alt, flip = false, children,
+}: { no: string; title: string; img: string; alt: string; flip?: boolean; children: React.ReactNode }) {
   return (
-    <div className="py-7 first:pt-0 last:pb-0 border-b border-white/[0.06] last:border-0">
-      <div className="flex items-baseline gap-3 mb-5">
-        <span className="text-xs font-semibold text-gold-300 tabular-nums">{no}</span>
-        <h3 className="text-xl font-bold text-white">{title}</h3>
+    <div
+      className={`py-8 first:pt-0 last:pb-0 border-b border-white/[0.06] last:border-0 sm:grid sm:items-center sm:gap-8 ${
+        flip ? "sm:grid-cols-[180px_1fr]" : "sm:grid-cols-[1fr_180px]"
+      }`}
+    >
+      <div className={`relative mb-6 sm:mb-0 aspect-[16/10] sm:aspect-[4/5] overflow-hidden rounded-xl ${flip ? "" : "sm:order-last"}`}>
+        <Image src={img} alt={alt} fill sizes="(min-width: 640px) 180px, 100vw" className="object-cover" />
       </div>
-      {children}
+      <div>
+        <div className="flex items-baseline gap-3 mb-5">
+          <span className="text-xs font-semibold text-gold-300 tabular-nums">{no}</span>
+          <h3 className="text-xl font-bold text-white">{title}</h3>
+        </div>
+        {children}
+      </div>
     </div>
   );
 }
@@ -90,24 +105,29 @@ export default function SundayFeastPage() {
           {/* ── Info column ── */}
           <div className="space-y-8 order-2 lg:order-1">
             {/* The deal */}
-            <section className={`${card} overflow-hidden`}>
-              <div className="flex items-center justify-between gap-4 bg-gold-300 px-8 sm:px-10 py-4 text-ink-900">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-900/70">Sunday Feast · For two or more</p>
-                <p className="font-serif text-4xl leading-none">£30<span className="ml-1.5 font-sans text-xs font-semibold text-ink-900/70">pp</span></p>
+            <section className={`${card} overflow-hidden sm:grid sm:grid-cols-[0.95fr_1.05fr]`}>
+              <div className="relative aspect-[16/10] sm:aspect-auto sm:min-h-[340px]">
+                <Image
+                  src="/feast/oct-14.webp"
+                  alt="The whole Sunday Feast laid out on one table"
+                  fill
+                  sizes="(min-width: 1024px) 320px, (min-width: 640px) 45vw, 100vw"
+                  className="object-cover"
+                />
               </div>
-              <div className="p-8 sm:p-10">
-                <p className={`${label} mb-2`}>The deal</p>
-                <h2 className="text-2xl sm:text-[28px] font-bold text-white leading-tight">
-                  Two or more people? The whole menu is yours.
-                </h2>
-                <p className="mt-3 text-[15px] text-stone-300 leading-relaxed">
-                  Get all 5 dishes on the menu to share at your table for £30pp. The menu includes one cup of any
-                  winter warmer drink.
+              <div className="p-7 sm:p-9">
+                <p className={label}>Sunday Feast · for two or more</p>
+                <p className="mt-4 flex items-baseline gap-2.5">
+                  <span className="text-6xl leading-none text-gold-300 font-[family-name:var(--font-display)]">£30</span>
+                  <span className="text-sm text-stone-400">per person</span>
                 </p>
-                <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 border-t border-white/[0.06] pt-6">
-                  {["Three courses to share", "Whole chicken and whole fish", "One winter warmer each", "For two or more"].map((v) => (
-                    <li key={v} className="flex items-center gap-2.5 text-[14px] text-stone-200">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold-300" />
+                <p className="mt-4 text-[15px] text-stone-300 leading-relaxed">
+                  Three courses brought to your table to share, with a winter warmer each.
+                </p>
+                <ul className="mt-6 space-y-2.5 border-t border-white/[0.06] pt-6">
+                  {DEAL_POINTS.map((v) => (
+                    <li key={v} className="flex items-center gap-3 text-[14px] text-stone-200">
+                      <Check className="h-4 w-4 shrink-0 text-gold-300" strokeWidth={1.75} aria-hidden />
                       {v}
                     </li>
                   ))}
@@ -118,9 +138,9 @@ export default function SundayFeastPage() {
             {/* The menu */}
             <section className={`${card} p-8 sm:p-10`}>
               <p className={`${label} mb-2`}>The menu</p>
-              <h2 className="text-2xl font-bold text-white mb-8">Three courses, all to share</h2>
+              <h2 className="text-2xl font-bold text-white">Three courses, all to share</h2>
 
-              <Course no="01" title="Appetisers">
+              <Course no="01" title="Appetisers" img="/feast/oct-10.webp" alt="Puff puff, moi moi and pepper sauce on the table">
                 <div className="flex flex-wrap gap-2.5">
                   {APPETISERS.map((a) => (
                     <span key={a} className="rounded-full border border-white/[0.09] px-4 py-2 text-[14px] font-medium text-stone-200">
@@ -130,7 +150,7 @@ export default function SundayFeastPage() {
                 </div>
               </Course>
 
-              <Course no="02" title="Starters">
+              <Course no="02" title="Starters" img="/feast/oct-12.webp" alt="Pepper soup, house salad, jollof rice and plantain" flip>
                 <ul className="space-y-5">
                   {STARTERS.map((d) => (
                     <li key={d.name}>
@@ -141,7 +161,7 @@ export default function SundayFeastPage() {
                 </ul>
               </Course>
 
-              <Course no="03" title="The Feast">
+              <Course no="03" title="The Feast" img="/feast/oct-51.webp" alt="Sauce being poured over a whole rotisserie chicken">
                 <ul className="space-y-5">
                   {FEAST.map((d) => (
                     <li key={d.name}>
@@ -154,15 +174,6 @@ export default function SundayFeastPage() {
                   Both served with smoky party jollof rice &amp; sweet fried plantain
                 </p>
               </Course>
-            </section>
-
-            {/* Photos */}
-            <section className="grid grid-cols-2 gap-3 sm:gap-4">
-              {GALLERY.map((g) => (
-                <div key={g.src} className={`relative overflow-hidden rounded-2xl ${g.tall ? "row-span-2 aspect-[2/3]" : "aspect-[4/3]"}`}>
-                  <Image src={g.src} alt={g.alt} fill sizes="(min-width: 1024px) 340px, 50vw" className="object-cover" />
-                </div>
-              ))}
             </section>
 
             {/* Winter warmers */}
@@ -211,6 +222,20 @@ export default function SundayFeastPage() {
             </div>
           </div>
         </div>
+
+        {/* The table, shot by shot. Swipes on phones; a staggered row on wider screens. */}
+        <section aria-label="Photos of the Sunday Feast" className="mt-20 -mx-6 sm:mx-0">
+          <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-8">
+            {STRIP.map((g, i) => (
+              <div
+                key={g.src}
+                className={`relative w-[64%] shrink-0 snap-center aspect-[3/4] overflow-hidden rounded-2xl sm:w-auto ${i % 2 ? "sm:translate-y-8" : ""}`}
+              >
+                <Image src={g.src} alt={g.alt} fill sizes="(min-width: 640px) 25vw, 64vw" className="object-cover" />
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Bottom CTA */}
         <div className="mt-16 text-center">
