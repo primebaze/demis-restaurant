@@ -186,7 +186,7 @@ export function FeastBooking() {
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold-300/70 mb-1">Reserve your table</p>
         <p className="text-lg font-semibold text-white">{selected?.prettyDate ?? avail?.prettyDate ?? "This Sunday"}</p>
         <p className="text-[13px] text-stone-500 mt-0.5">
-          £{avail?.price ?? 30} per person · for {minParty} or more
+          £{avail?.price ?? 30} per person
         </p>
         <p className="text-[12px] text-stone-500 mt-2">This booking is for the Sunday Feast at Cricklewood.</p>
       </div>

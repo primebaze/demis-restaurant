@@ -6,11 +6,11 @@ import { FeastBooking } from "./FeastBooking";
 export const metadata: Metadata = {
   title: "Sunday Feast | Demi's Restaurant Cricklewood",
   description:
-    "Sunday Feast at Demi's Cricklewood. Two or more people? Get all five dishes on the menu to share at your table for £30 per person, with one winter warmer drink each.",
+    "Sunday Feast at Demi's Cricklewood: three courses brought to your table to share, £30 per person, with a winter warmer each.",
   alternates: { canonical: "https://www.demisrestaurant.co.uk/sunday-feast" },
   openGraph: {
     title: "Sunday Feast at Demi's, Cricklewood",
-    description: "A three course feast to share. £30 per person for two or more.",
+    description: "A three course feast to share. £30 per person.",
     url: "https://www.demisrestaurant.co.uk/sunday-feast",
     images: [{ url: "https://www.demisrestaurant.co.uk/feast/oct-2.webp" }],
   },
@@ -38,7 +38,7 @@ const WARMERS = [
   { name: "Mint Tea", price: "2.50" },
 ];
 
-const DEAL_POINTS = ["Three courses to share", "Whole chicken and whole fish", "One winter warmer each", "For two or more"];
+const DEAL_POINTS = ["Three courses to share", "Whole chicken and whole fish", "One winter warmer each"];
 
 // The table, shot by shot: a staggered strip that leads into the closing "Book a table".
 const STRIP = [
@@ -92,9 +92,6 @@ export default function SundayFeastPage() {
           <p className="mt-1.5 text-sm text-stone-400">1:30pm to 6pm</p>
           <div className="mt-7 flex items-center justify-center gap-2.5 flex-wrap">
             <span className="rounded-full bg-gold-300 px-4 py-2 text-[13px] font-semibold text-ink-900">£30 per person</span>
-            <span className="rounded-full border border-white/25 bg-black/40 px-4 py-2 text-[13px] font-medium text-white backdrop-blur-sm">
-              For two or more
-            </span>
           </div>
         </div>
       </section>
@@ -197,7 +194,7 @@ export default function SundayFeastPage() {
                 {[
                   { k: "When", v: ["Every Sunday", "1:30pm to 6pm"] },
                   { k: "Where", v: ["Cricklewood", "89 Cricklewood Broadway, NW2 3JG"] },
-                  { k: "Price", v: ["£30 per person", "For two or more"] },
+                  { k: "Price", v: ["£30 per person"] },
                 ].map((d) => (
                   <div key={d.k}>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-gold-300/70 mb-2">{d.k}</p>
