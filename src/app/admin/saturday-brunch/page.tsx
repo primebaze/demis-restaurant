@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; package: string; packageLabel: string; pricePerHead: number; heardFrom: string; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
-type Summary = { reservations: number; people: number; drinkers: number; confirmed: number; cancelled: number; revenue: number };
+type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; package: string; packageLabel: string; pricePerHead: number; heardFrom: string; fromPopup?: boolean; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
+type Summary = { reservations: number; people: number; drinkers: number; confirmed: number; cancelled: number; revenue: number; fromPopup?: number };
 
 const STATUS_COLORS: Record<string, string> = {
   booked: "bg-gold-300/15 text-gold-300",
@@ -201,6 +201,11 @@ export default function AdminSaturdayBrunchPage() {
             })}
           </div>
           <p className="mt-3 text-[11px] text-stone-500">Counted per booking. The question is optional on the booking form.</p>
+          <p className="mt-4 pt-4 border-t border-white/[0.06] text-sm text-stone-400">
+            Booked through the website pop-up:{" "}
+            <span className="text-white font-semibold tabular-nums">{summary.fromPopup ?? 0}</span>
+            <span className="text-stone-500"> of {summary.reservations}</span>
+          </p>
         </div>
       )}
 
@@ -305,7 +310,10 @@ export default function AdminSaturdayBrunchPage() {
                       <span className="text-stone-500">£{b.pricePerHead} pp · £{b.pricePerHead * b.partySize}</span>
                     </td>
                     <td className="px-4 py-3 text-xs text-stone-400">{b.email || "—"}{b.phone ? <><br />{b.phone}</> : null}</td>
-                    <td className="px-4 py-3 text-xs text-stone-400">{b.heardFrom || "—"}</td>
+                    <td className="px-4 py-3 text-xs text-stone-400">
+                      {b.heardFrom || "—"}
+                      {b.fromPopup && <span className="ml-1.5 inline-block px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-stone-200">Pop-up</span>}
+                    </td>
                     <td className="px-4 py-3 text-xs text-stone-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"}`}>{b.status}</span>

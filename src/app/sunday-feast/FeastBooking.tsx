@@ -38,6 +38,11 @@ export function FeastBooking() {
   const [heardFrom, setHeardFrom] = useState(""); // optional, for analytics
   const [bookingDate, setBookingDate] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
+  // "popup" when they came from the website pop-up (?src=popup), so admin can count what it brings in.
+  const [source, setSource] = useState("");
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("src") === "popup") setSource("popup");
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
@@ -115,7 +120,7 @@ export function FeastBooking() {
       const res = await fetch("/api/saturday-brunch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, heardFrom, date: bookingDate, website, turnstileToken: token }),
+        body: JSON.stringify({ name, email, phone, partySize, arrivalTime, heardFrom, source, date: bookingDate, website, turnstileToken: token }),
       });
       const d = await res.json();
       if (!res.ok) {

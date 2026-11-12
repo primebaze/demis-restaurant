@@ -43,6 +43,7 @@ export async function GET(req: Request) {
       packageLabel: packageLabel(b.package),
       pricePerHead: b.pricePerHead || packagePrice(b.package),
       heardFrom: heardFromLabel(b.heardFrom),
+      fromPopup: b.source === "popup",
       status: b.status,
       confirmSentAt: b.confirmSentAt,
       confirmedAt: b.confirmedAt,
@@ -52,6 +53,7 @@ export async function GET(req: Request) {
     const people = active.reduce((s, b) => s + b.partySize, 0);
     const drinkers = active.reduce((s, b) => s + (b.package === "drinks" ? b.partySize : 0), 0);
     const confirmed = active.filter((b) => b.confirmedAt).length;
+    const fromPopup = active.filter((b) => b.source === "popup").length;
     // Expected takings at each guest's chosen package; the door check-in is the final word.
     const revenue = active.reduce((s, b) => s + (b.pricePerHead || packagePrice(b.package)) * b.partySize, 0);
     // "Where did you hear about us?" counts for this date, by booking (not by head).
@@ -64,7 +66,7 @@ export async function GET(req: Request) {
       prettyDate: prettyDate(date),
       price: BRUNCH_PRICE,
       bookings,
-      summary: { reservations: active.length, people, drinkers, confirmed, cancelled: rows.length - active.length, revenue },
+      summary: { reservations: active.length, people, drinkers, confirmed, cancelled: rows.length - active.length, revenue, fromPopup },
       heardFrom,
     });
   } catch {

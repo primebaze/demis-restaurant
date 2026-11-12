@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { LayoutShell } from "@/components/LayoutShell";
 import { Analytics } from "@vercel/analytics/react";
+import { FeastPromo } from "@/components/FeastPromo";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -112,6 +113,7 @@ export default function RootLayout({
         <ScrollToTop />
         <JsonLd />
         <LayoutShell>{children}</LayoutShell>
+        <FeastPromo />
         <Analytics />
       </body>
     </html>

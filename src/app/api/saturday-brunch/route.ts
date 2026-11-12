@@ -185,6 +185,8 @@ export async function POST(req: Request) {
   const pricePerHead = BRUNCH_PRICE;
   // Optional, for marketing analytics. Anything unrecognised is stored as "" (skipped).
   const heardFrom = parseHeardFrom(body.heardFrom);
+  // Set by the form when the guest arrived from the website pop-up. Anything else is stored as "".
+  const source = body.source === "popup" ? "popup" : "";
 
   if (!name) return NextResponse.json({ error: "Please enter your name" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "Please enter your phone number" }, { status: 400 });
@@ -233,7 +235,7 @@ export async function POST(req: Request) {
   }
 
   const booking = await prisma.saturdayBrunchBooking.create({
-    data: { date, name, email, phone, partySize, arrivalTime, package: pkg, pricePerHead, heardFrom, ip },
+    data: { date, name, email, phone, partySize, arrivalTime, package: pkg, pricePerHead, heardFrom, source, ip },
   });
 
   // Must be awaited — Vercel freezes the function once the response is returned.
