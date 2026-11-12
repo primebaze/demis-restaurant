@@ -168,6 +168,30 @@ export function injectTrackedLinks(html: string, email: string, campaign = "blas
   );
 }
 
+/**
+ * For the Guests "Send Email" screen, whose message is plain text escaped into
+ * paragraphs with no links at all. Run on those paragraphs, BEFORE the layout is
+ * wrapped around them, so the layout's own markup is never touched.
+ *
+ * Unlike a blast, a web address typed here is tracked even when it is one of our
+ * own pages: this screen has no other way to tell whether anyone clicked.
+ */
+export function linkGuestBody(html: string, email: string, campaign: string): string {
+  const style = "color:#b8862f;text-decoration:underline;";
+  const linked = html.replace(/https?:\/\/[^\s<]+/g, (raw) => {
+    // A full stop or bracket after the address belongs to the sentence, not the link.
+    const tail = raw.match(/(?:&[a-z]+;|[.,!?;:)\]])+$/i)?.[0] ?? "";
+    const shown = tail ? raw.slice(0, -tail.length) : raw;
+    const dest = shown.replace(/&amp;/g, "&");
+    // Links that already log themselves, or are personal to the recipient, go direct.
+    const direct = /^https?:\/\/(?:www\.)?demisrestaurant\.co\.uk\/(?:vote|r|api)(?:[/?#]|$)/i.test(dest);
+    const href = direct ? shown : trackedUrl(dest, campaign, email);
+    return `<a href="${href}" style="${style}">${shown}</a>${tail}`;
+  });
+  // {feast} / {buffet} / {vote}. Everything linked above already points at our own domain.
+  return injectTrackedLinks(linked, email, campaign);
+}
+
 // ── Body formatting: treat the admin's input as plain text, safely ──
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { buildGuestEmailHtml, sendResendBatch, sendByProvider, isResendConfigured } from "@/lib/email";
+import { personalize, linkGuestBody, campaignSlug } from "@/lib/marketing";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
@@ -24,6 +25,13 @@ export async function POST(req: Request) {
   if (!message?.trim() || message.trim().length > 5000)
     return NextResponse.json({ error: "Message is required (max 5000 chars)" }, { status: 400 });
 
+  // One email per person: {name} becomes their first name, and every link
+  // ({feast}, {buffet}, or a typed web address) is routed through /r so the
+  // Link Clicks screen can show who clicked.
+  const clickCampaign = campaignSlug(subject.trim());
+  const render = (to: string, name: string) =>
+    buildGuestEmailHtml(personalize(message.trim(), name), (html) => linkGuestBody(html, to, clickCampaign));
+
   if (all) {
     const guests = await prisma.guest.findMany({
       where: { email: { not: "" } },
@@ -33,7 +41,6 @@ export async function POST(req: Request) {
     if (guests.length === 0)
       return NextResponse.json({ error: "No guests with email addresses found" }, { status: 400 });
 
-    const html = buildGuestEmailHtml(message.trim());
     const subj = subject.trim();
     const campaign = `${subj} · ${new Date().toISOString().slice(0, 16).replace("T", " ")}`;
 
@@ -42,8 +49,8 @@ export async function POST(req: Request) {
       let sent = 0;
       let failed = 0;
       for (let i = 0; i < guests.length; i += 100) {
-        const chunk = guests.slice(i, i + 100);
-        const ok = await sendResendBatch(chunk.map((g) => ({ to: g.email, subject: subj, html })));
+        const chunk = guests.slice(i, i + 100).map((g) => ({ email: g.email, html: render(g.email, g.name) }));
+        const ok = await sendResendBatch(chunk.map((g) => ({ to: g.email, subject: subj, html: g.html })));
         await prisma.emailLog.createMany({
           data: chunk.map((g) => ({
             recipient: g.email,
@@ -52,7 +59,7 @@ export async function POST(req: Request) {
             provider: "resend",
             status: ok ? "sent" : "failed",
             error: ok ? "" : "resend batch failed",
-            bodyHtml: html,
+            bodyHtml: g.html,
             campaign,
             sentAt: ok ? new Date() : null,
           })),
@@ -71,7 +78,7 @@ export async function POST(req: Request) {
         type: "bulk",
         provider: "smtp",
         status: "queued",
-        bodyHtml: html,
+        bodyHtml: render(g.email, g.name),
         campaign,
       })),
     });
@@ -82,23 +89,26 @@ export async function POST(req: Request) {
   // Single recipient: by guestId, or a raw `to` address (used by the dashboard icon)
   let recipient = "";
   let recipientName = "";
+  let greetingName = "";
   if (guestId) {
     const guest = await prisma.guest.findUnique({ where: { id: guestId }, select: { email: true, name: true } });
     if (!guest) return NextResponse.json({ error: "Guest not found" }, { status: 404 });
     if (!guest.email) return NextResponse.json({ error: "This guest has no email address on file" }, { status: 400 });
     recipient = guest.email;
     recipientName = guest.name;
+    greetingName = guest.name;
   } else if (typeof body.to === "string" && body.to.trim()) {
     const to = body.to.trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to))
       return NextResponse.json({ error: "Invalid recipient email" }, { status: 400 });
     recipient = to;
     recipientName = to;
+    greetingName = ""; // no name on file, so {name} reads "there"
   } else {
     return NextResponse.json({ error: "Provide guestId, to, or all: true" }, { status: 400 });
   }
 
-  const html = buildGuestEmailHtml(message.trim());
+  const html = render(recipient, greetingName);
   const ok = await sendByProvider(recipient, subject.trim(), html, provider);
 
   await prisma.emailLog.create({

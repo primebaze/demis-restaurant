@@ -183,12 +183,14 @@ async function send(
 }
 
 /** Build the branded HTML for a plain-text guest message (used for direct + bulk). */
-export function buildGuestEmailHtml(message: string): string {
-  const paragraphs = escapeHtml(message)
+export function buildGuestEmailHtml(message: string, linkify?: (bodyHtml: string) => string): string {
+  const escaped = escapeHtml(message)
     .split(/\n+/)
     .filter((p) => p.trim())
     .map((p) => `<p style="margin:0 0 16px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#555; font-size:14px; line-height:1.7;">${p}</p>`)
     .join("");
+  // Links are added to the message only, never to the layout around it.
+  const paragraphs = linkify ? linkify(escaped) : escaped;
   return emailLayout(`<div style="padding:4px 0;">${paragraphs}</div>`);
 }
 

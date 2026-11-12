@@ -73,11 +73,13 @@ export async function GET(req: Request) {
     }),
   ]);
 
-  // token -> contact, built once rather than per click. Recipients come from two
-  // places: the marketing list for blasts, and buffet bookings for the Sunday
+  // token -> contact, built once rather than per click. Recipients come from three
+  // places: the marketing list for blasts, the guest list, and buffet bookings for the Sunday
   // email, which goes to people who booked rather than to subscribers.
-  const [contacts, buffetGuests] = await Promise.all([
+  const [contacts, guests, buffetGuests] = await Promise.all([
     prisma.mailingContact.findMany({ select: { email: true, name: true } }),
+    // The Guests screen's "Send Email" goes to the guest list, not the marketing list.
+    prisma.guest.findMany({ where: { email: { not: "" } }, select: { email: true, name: true } }),
     prisma.sundayBuffetBooking.findMany({
       where: { email: { not: "" } },
       select: { email: true, name: true },
@@ -85,7 +87,7 @@ export async function GET(req: Request) {
     }),
   ]);
   const byToken = new Map<string, { email: string; name: string }>();
-  for (const c of [...contacts, ...buffetGuests]) {
+  for (const c of [...contacts, ...guests, ...buffetGuests]) {
     const t = unsubToken(c.email);
     if (!byToken.has(t)) byToken.set(t, c);
   }

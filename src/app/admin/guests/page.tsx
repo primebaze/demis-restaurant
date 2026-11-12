@@ -511,6 +511,10 @@ export default function AdminGuestsPage() {
                   placeholder="Write your message here..."
                   className={`mt-1 ${inputCls} resize-none`}
                 />
+                <p className="mt-1.5 text-xs text-stone-500 leading-relaxed">
+                  Type {"{name}"} for their first name and {"{feast}"} for a link to the Sunday Feast page. Links are
+                  tracked, see who clicked in Link Clicks.
+                </p>
               </div>
 
               <div>
