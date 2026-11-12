@@ -187,7 +187,7 @@ export default function CricklewoodPage() {
             <div className="mt-7 flex items-center justify-center gap-3 flex-wrap">
               <a
                 href="/booking"
-                className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-7 py-3 text-sm font-semibold text-white hover:bg-white/[0.06] transition-all"
+                className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-7 py-3 text-sm font-semibold text-white hover:bg-ink-700 transition-all"
               >
                 Reserve a Table
               </a>

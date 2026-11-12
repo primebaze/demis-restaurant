@@ -357,17 +357,17 @@ export function FloatingMenu() {
           {/* Hamburger / X icon */}
           <div className="relative w-5 h-4 flex flex-col justify-between">
             <span
-              className={`block h-[1.5px] w-full bg-white/[0.06] transition-all duration-300 origin-center ${
+              className={`block h-[1.5px] w-full bg-ink-900 transition-all duration-300 origin-center ${
                 mobileOpen ? "translate-y-[7px] rotate-45" : ""
               }`}
             />
             <span
-              className={`block h-[1.5px] w-full bg-white/[0.06] transition-all duration-300 ${
+              className={`block h-[1.5px] w-full bg-ink-900 transition-all duration-300 ${
                 mobileOpen ? "opacity-0 scale-x-0" : ""
               }`}
             />
             <span
-              className={`block h-[1.5px] w-full bg-white/[0.06] transition-all duration-300 origin-center ${
+              className={`block h-[1.5px] w-full bg-ink-900 transition-all duration-300 origin-center ${
                 mobileOpen ? "-translate-y-[7px] -rotate-45" : ""
               }`}
             />

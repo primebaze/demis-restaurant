@@ -154,7 +154,7 @@ export default function EventsPage() {
                 <div className="mt-7 flex items-center gap-3 flex-wrap">
                   <Link
                     href="/contact"
-                    className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-7 py-3 text-sm font-semibold text-white hover:bg-white/[0.06] transition-all"
+                    className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-7 py-3 text-sm font-semibold text-white hover:bg-ink-700 transition-all"
                   >
                     Enquire Now
                   </Link>

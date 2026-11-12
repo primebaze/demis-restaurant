@@ -62,7 +62,7 @@
   }
 
   .btn-dark {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-stone-900 px-7 py-3.5 text-sm tracking-wide font-semibold text-white transition-all duration-300 hover:bg-white/[0.06] active:scale-[0.97];
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-stone-900 px-7 py-3.5 text-sm tracking-wide font-semibold text-white transition-all duration-300 hover:bg-ink-700 active:scale-[0.97];
   }
 
   /* ── Typography ── */
