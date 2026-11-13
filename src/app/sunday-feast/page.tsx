@@ -41,14 +41,14 @@ const WARMERS = [
 
 const DEAL_POINTS = ["Three courses to share", "Whole chicken and whole fish", "One winter warmer each"];
 
-// The table, shot by shot: the slider between the hero and the booking form.
+// The table, shot by shot: the slider between the hero and the booking form. Captions are short on purpose.
 const SLIDES = [
-  { src: "/feast/oct-10.webp", alt: "Puff puff, moi moi and pepper sauce on the table" },
-  { src: "/feast/oct-12.webp", alt: "Pepper soup, house salad, jollof rice and plantain" },
-  { src: "/feast/oct-20.webp", alt: "Whole rotisserie chicken on a bed of salad" },
-  { src: "/feast/oct-49.webp", alt: "Rotisserie chicken with jollof rice and fried plantain" },
-  { src: "/feast/oct-11.webp", alt: "Rotisserie chicken in pepper sauce with moi moi on the side" },
-  { src: "/feast/oct-13.webp", alt: "House salad, jollof rice and fried plantain" },
+  { src: "/feast/oct-10.webp", alt: "Puff puff, moi moi and pepper sauce on the table", caption: "Puff puff & moi moi" },
+  { src: "/feast/oct-12.webp", alt: "Pepper soup, house salad, jollof rice and plantain", caption: "Pepper soup & party jollof" },
+  { src: "/feast/oct-20.webp", alt: "Whole rotisserie chicken on a bed of salad", caption: "Whole rotisserie chicken" },
+  { src: "/feast/oct-49.webp", alt: "Rotisserie chicken with jollof rice and fried plantain", caption: "Chicken, jollof & plantain" },
+  { src: "/feast/oct-11.webp", alt: "Rotisserie chicken in pepper sauce with moi moi on the side", caption: "Chicken in pepper sauce" },
+  { src: "/feast/oct-13.webp", alt: "House salad, jollof rice and fried plantain", caption: "House salad & jollof" },
 ];
 
 // Near-black cards with a hairline edge: crisp on the page colour, where the grey looked muddy.
