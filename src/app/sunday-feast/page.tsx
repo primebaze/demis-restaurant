@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { FeastBooking } from "./FeastBooking";
+import { FeastSlider } from "./FeastSlider";
 
 export const metadata: Metadata = {
   title: "Sunday Feast | Demi's Restaurant Cricklewood",
@@ -40,8 +41,10 @@ const WARMERS = [
 
 const DEAL_POINTS = ["Three courses to share", "Whole chicken and whole fish", "One winter warmer each"];
 
-// The table, shot by shot: a staggered strip that leads into the closing "Book a table".
-const STRIP = [
+// The table, shot by shot: the slider between the hero and the booking form.
+const SLIDES = [
+  { src: "/feast/oct-10.webp", alt: "Puff puff, moi moi and pepper sauce on the table" },
+  { src: "/feast/oct-12.webp", alt: "Pepper soup, house salad, jollof rice and plantain" },
   { src: "/feast/oct-20.webp", alt: "Whole rotisserie chicken on a bed of salad" },
   { src: "/feast/oct-49.webp", alt: "Rotisserie chicken with jollof rice and fried plantain" },
   { src: "/feast/oct-11.webp", alt: "Rotisserie chicken in pepper sauce with moi moi on the side" },
@@ -52,19 +55,21 @@ const STRIP = [
 const card = "rounded-2xl border border-white/[0.06] bg-ink-950";
 const label = "text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/70";
 
-/** One course of the menu, with its photo beside it (above it on phones), alternating sides. */
+/** One course of the menu. With a photo (only The Feast has one), it sits beside the text, or above it on phones. */
 function Course({
-  no, title, img, alt, flip = false, children,
-}: { no: string; title: string; img: string; alt: string; flip?: boolean; children: React.ReactNode }) {
+  no, title, img, alt = "", children,
+}: { no: string; title: string; img?: string; alt?: string; children: React.ReactNode }) {
   return (
     <div
-      className={`py-8 first:pt-0 last:pb-0 border-b border-white/[0.06] last:border-0 sm:grid sm:items-center sm:gap-8 ${
-        flip ? "sm:grid-cols-[180px_1fr]" : "sm:grid-cols-[1fr_180px]"
+      className={`py-8 first:pt-0 last:pb-0 border-b border-white/[0.06] last:border-0 ${
+        img ? "sm:grid sm:items-center sm:gap-8 sm:grid-cols-[1fr_180px]" : ""
       }`}
     >
-      <div className={`relative mb-6 sm:mb-0 aspect-[16/10] sm:aspect-[4/5] overflow-hidden rounded-xl ${flip ? "" : "sm:order-last"}`}>
-        <Image src={img} alt={alt} fill sizes="(min-width: 640px) 180px, 100vw" className="object-cover" />
-      </div>
+      {img && (
+        <div className="relative mb-6 sm:mb-0 aspect-[16/10] sm:aspect-[4/5] overflow-hidden rounded-xl sm:order-last">
+          <Image src={img} alt={alt} fill sizes="(min-width: 640px) 180px, 100vw" className="object-cover" />
+        </div>
+      )}
       <div>
         <div className="flex items-baseline gap-3 mb-5">
           <span className="text-xs font-semibold text-gold-300 tabular-nums">{no}</span>
@@ -97,8 +102,11 @@ export default function SundayFeastPage() {
       </section>
 
       <div className="mx-auto max-w-6xl px-6 -mt-12 relative">
+        {/* Photos first, rising over the bottom of the hero, then the booking form. */}
+        <FeastSlider photos={SLIDES} />
+
         {/* No items-start: the booking column must stretch to the row height, or the sticky card inside it has no travel. */}
-        <div className="grid lg:grid-cols-[1fr_400px] gap-8 lg:gap-12">
+        <div className="mt-8 grid lg:grid-cols-[1fr_400px] gap-8 lg:gap-12">
           {/* ── Info column ── */}
           <div className="space-y-8 order-2 lg:order-1">
             {/* The deal */}
@@ -137,7 +145,7 @@ export default function SundayFeastPage() {
               <p className={`${label} mb-2`}>The menu</p>
               <h2 className="text-2xl font-bold text-white">Three courses, all to share</h2>
 
-              <Course no="01" title="Appetisers" img="/feast/oct-10.webp" alt="Puff puff, moi moi and pepper sauce on the table">
+              <Course no="01" title="Appetisers">
                 <div className="flex flex-wrap gap-2.5">
                   {APPETISERS.map((a) => (
                     <span key={a} className="rounded-full border border-white/[0.09] px-4 py-2 text-[14px] font-medium text-stone-200">
@@ -147,7 +155,7 @@ export default function SundayFeastPage() {
                 </div>
               </Course>
 
-              <Course no="02" title="Starters" img="/feast/oct-12.webp" alt="Pepper soup, house salad, jollof rice and plantain" flip>
+              <Course no="02" title="Starters">
                 <ul className="space-y-5">
                   {STARTERS.map((d) => (
                     <li key={d.name}>
@@ -219,20 +227,6 @@ export default function SundayFeastPage() {
             </div>
           </div>
         </div>
-
-        {/* The table, shot by shot. Swipes on phones; a staggered row on wider screens. */}
-        <section aria-label="Photos of the Sunday Feast" className="mt-20 -mx-6 sm:mx-0">
-          <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-8">
-            {STRIP.map((g, i) => (
-              <div
-                key={g.src}
-                className={`relative w-[64%] shrink-0 snap-center aspect-[3/4] overflow-hidden rounded-2xl sm:w-auto ${i % 2 ? "sm:translate-y-8" : ""}`}
-              >
-                <Image src={g.src} alt={g.alt} fill sizes="(min-width: 640px) 25vw, 64vw" className="object-cover" />
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* Bottom CTA */}
         <div className="mt-16 text-center">
