@@ -55,21 +55,10 @@ const SLIDES = [
 const card = "rounded-2xl border border-white/[0.06] bg-ink-950";
 const label = "text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300/70";
 
-/** One course of the menu. With a photo (only The Feast has one), it sits beside the text, or above it on phones. */
-function Course({
-  no, title, img, alt = "", children,
-}: { no: string; title: string; img?: string; alt?: string; children: React.ReactNode }) {
+/** One course of the menu. */
+function Course({ no, title, children }: { no: string; title: string; children: React.ReactNode }) {
   return (
-    <div
-      className={`py-8 first:pt-0 last:pb-0 border-b border-white/[0.06] last:border-0 ${
-        img ? "sm:grid sm:items-center sm:gap-8 sm:grid-cols-[1fr_180px]" : ""
-      }`}
-    >
-      {img && (
-        <div className="relative mb-6 sm:mb-0 aspect-[16/10] sm:aspect-[4/5] overflow-hidden rounded-xl sm:order-last">
-          <Image src={img} alt={alt} fill sizes="(min-width: 640px) 180px, 100vw" className="object-cover" />
-        </div>
-      )}
+    <div className="py-8 first:pt-0 last:pb-0 border-b border-white/[0.06] last:border-0">
       <div>
         <div className="flex items-baseline gap-3 mb-5">
           <span className="text-xs font-semibold text-gold-300 tabular-nums">{no}</span>
@@ -166,7 +155,7 @@ export default function SundayFeastPage() {
                 </ul>
               </Course>
 
-              <Course no="03" title="The Feast" img="/feast/oct-51.webp" alt="Sauce being poured over a whole rotisserie chicken">
+              <Course no="03" title="The Feast">
                 <ul className="space-y-5">
                   {FEAST.map((d) => (
                     <li key={d.name}>
