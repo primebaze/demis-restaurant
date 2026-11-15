@@ -1,4 +1,5 @@
 import { serviceDate } from "@/lib/checkin-auth";
+import { SITE_URL } from "@/lib/sunday-buffet";
 
 /*
  * Sunday Feast at Cricklewood.
@@ -109,6 +110,11 @@ export function addMinutes(hhmm: string, minutes: number): string {
   const [h, m] = hhmm.split(":").map(Number);
   const t = Math.min(23 * 60 + 59, h * 60 + m + minutes);
   return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
+}
+
+/** The link in the "are you still coming?" email: a guest taps it to confirm their table. */
+export function feastConfirmUrl(token: string): string {
+  return `${SITE_URL}/sunday-feast/confirm?token=${encodeURIComponent(token)}`;
 }
 
 /** Pretty UK date, e.g. "Sunday 9 November". */

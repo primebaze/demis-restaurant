@@ -227,7 +227,7 @@ async function ensureSeeded() {
   });
 }
 
-/** GET ?scope=blast|buffet|bookings — saved templates for one screen. */
+/** GET ?scope=blast|buffet|bookings|feast — saved templates for one screen. */
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -251,7 +251,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Name, subject and message are all required" }, { status: 400 });
   }
 
-  const where = scope === "buffet" || scope === "bookings" ? scope : "blast";
+  const where = scope === "buffet" || scope === "bookings" || scope === "feast" ? scope : "blast";
   const slug =
     String(name)
       .toLowerCase()

@@ -38,6 +38,52 @@ export default function AdminSaturdayBrunchPage() {
   const [dateRows, setDateRows] = useState<DateRow[]>([]);
   const [savingDate, setSavingDate] = useState("");
 
+  // "Email everyone" composer (bulk custom message)
+  const [mailOpen, setMailOpen] = useState(false);
+  const [mailSubject, setMailSubject] = useState("");
+  const [mailMessage, setMailMessage] = useState("");
+  const [mailing, setMailing] = useState(false);
+  const [mailNote, setMailNote] = useState("");
+  // "day" = guests booked for the Sunday on screen; "all" = everyone from past Sundays.
+  const [mailScope, setMailScope] = useState<"day" | "all">("day");
+  const [allCount, setAllCount] = useState<number | null>(null);
+
+  // Saved emails scoped to this screen. They omit the greeting and sign-off,
+  // which this route adds, so they are not interchangeable with blast templates.
+  type MailTemplate = { key: string; name: string; subject: string; body: string };
+  const [mailTemplates, setMailTemplates] = useState<MailTemplate[]>([]);
+
+  const fetchMailTemplates = useCallback(async () => {
+    const res = await fetch("/api/admin/mailing/templates?scope=feast");
+    if (!res.ok) return;
+    const data = await res.json();
+    setMailTemplates(data.templates || []);
+  }, []);
+
+  useEffect(() => {
+    fetchMailTemplates();
+  }, [fetchMailTemplates]);
+
+  async function saveMailTemplate() {
+    const name = window.prompt("Save this email as:", "")?.trim();
+    if (!name) return;
+    const res = await fetch("/api/admin/mailing/templates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, subject: mailSubject, body: mailMessage, scope: "feast" }),
+    });
+    if (!res.ok) { setMailNote("Could not save that one."); return; }
+    await fetchMailTemplates();
+    setMailNote(`Saved as "${name}".`);
+  }
+
+  // "Ask guests to confirm attendance": everyone at once, or one guest
+  const [confirming, setConfirming] = useState(false);
+  const [confirmNote, setConfirmNote] = useState("");
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+
+  const withEmail = bookings.filter((b) => b.status !== "cancelled" && b.email).length;
+
   // Master on/off for brunch bookings. null while loading.
   const [bookingsOpen, setBookingsOpen] = useState<boolean | null>(null);
   const [savingOpen, setSavingOpen] = useState(false);
@@ -111,6 +157,86 @@ export default function AdminSaturdayBrunchPage() {
     await fetch(`/api/admin/saturday-brunch/${id}`, { method: "DELETE" });
     fetchData();
   }
+  async function openMail() {
+    const opening = !mailOpen;
+    setMailOpen(opening);
+    if (!opening) return;
+    if (withEmail === 0) setMailScope("all");
+    fetch("/api/admin/saturday-brunch/mail?scope=all")
+      .then((r) => r.json())
+      .then((d) => setAllCount(typeof d.total === "number" ? d.total : 0))
+      .catch(() => setAllCount(0));
+  }
+
+  async function sendMailEveryone() {
+    const total = allCount ?? 0;
+    if (!confirm(`Email all ${total} past Sunday Feast guests? Each person gets one email.`)) return;
+    setMailing(true);
+    setMailNote("");
+    let sent = 0, failed = 0, offset: number | null = 0;
+    try {
+      // The server sends 25 at a time; keep asking until it says we're done.
+      while (offset !== null) {
+        const res: Response = await fetch("/api/admin/saturday-brunch/mail", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scope: "all", offset, subject: mailSubject, message: mailMessage }),
+        });
+        const d: { sent: number; failed: number; total: number; nextOffset: number | null; error?: string } = await res.json();
+        if (!res.ok) {
+          setMailNote(`${d.error || "Could not send."}${sent ? ` ${sent} sent before it stopped.` : ""}`);
+          return;
+        }
+        sent += d.sent; failed += d.failed;
+        offset = d.nextOffset;
+        if (offset !== null) setMailNote(`Sending… ${sent + failed} of ${d.total}`);
+      }
+      setMailNote(`Sent to ${sent} of ${sent + failed}${failed ? ` (${failed} failed)` : ""}.`);
+      setMailSubject(""); setMailMessage("");
+    } finally {
+      setMailing(false);
+    }
+  }
+
+  async function sendMailAll() {
+    if (!mailSubject.trim() || !mailMessage.trim()) { setMailNote("Add a subject and a message first."); return; }
+    if (mailScope === "all") return sendMailEveryone();
+    if (!confirm(`Email all ${withEmail} guest${withEmail === 1 ? "" : "s"} booked for ${prettyDate}?`)) return;
+    setMailing(true);
+    setMailNote("");
+    try {
+      const res = await fetch("/api/admin/saturday-brunch/mail", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: resolvedDate, subject: mailSubject, message: mailMessage }),
+      });
+      const d = await res.json();
+      if (!res.ok) { setMailNote(d.error || "Could not send."); return; }
+      setMailNote(`Sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+      setMailSubject(""); setMailMessage("");
+    } finally {
+      setMailing(false);
+    }
+  }
+
+  async function askToConfirm(b?: Booking) {
+    const prompt = b
+      ? `Send ${b.name} the confirmation email now?`
+      : `Email all ${withEmail} guest${withEmail === 1 ? "" : "s"} a link to confirm they're coming on ${prettyDate}?`;
+    if (!confirm(prompt)) return;
+    if (b) setConfirmingId(b.id); else setConfirming(true);
+    setConfirmNote("");
+    try {
+      const res = await fetch("/api/admin/saturday-brunch/confirm-request", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: resolvedDate, id: b?.id }),
+      });
+      const d = await res.json();
+      if (!res.ok) { setConfirmNote(d.error || "Could not send."); return; }
+      setConfirmNote(b ? `Confirmation email sent to ${b.name}.` : `Confirmation request sent to ${d.sent} of ${d.total}${d.failed ? ` (${d.failed} failed)` : ""}.`);
+    } finally {
+      if (b) setConfirmingId(null); else setConfirming(false);
+    }
+  }
+
   async function resetDay() {
     if (!confirm(`Clear ALL reservations for ${prettyDate}? This cannot be undone.`)) return;
     await fetch("/api/admin/saturday-brunch", {
@@ -163,7 +289,7 @@ export default function AdminSaturdayBrunchPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6 max-w-3xl">
         <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Reservations</p>
           <p className="text-2xl font-bold text-white">{summary.reservations}</p>
@@ -171,6 +297,10 @@ export default function AdminSaturdayBrunchPage() {
         <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People</p>
           <p className="text-2xl font-bold text-gold-300">{summary.people}</p>
+        </div>
+        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
+          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Confirmed</p>
+          <p className="text-2xl font-bold text-emerald-400">{summary.confirmed}</p>
         </div>
         <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Expected</p>
@@ -274,8 +404,82 @@ export default function AdminSaturdayBrunchPage() {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+        {confirmNote && <span className="text-xs text-stone-400 mr-auto">{confirmNote}</span>}
+        <button onClick={() => askToConfirm()} disabled={withEmail === 0 || confirming} className="px-3 py-2 text-xs text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/10 transition disabled:opacity-40">
+          {confirming ? "Sending…" : `✓ Ask guests to confirm${withEmail ? ` (${withEmail})` : ""}`}
+        </button>
+        <button onClick={openMail} className="px-3 py-2 text-xs text-gold-300 border border-gold-300/30 rounded-xl hover:bg-gold-300/10 transition disabled:opacity-40">
+          ✉ Email everyone{withEmail ? ` (${withEmail})` : ""}
+        </button>
         <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this Sunday</button>
       </div>
+
+      {mailOpen && (
+        <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-5 mb-6">
+          <div className="inline-flex gap-1 p-1 bg-black/40 rounded-xl mb-4">
+            <button
+              onClick={() => setMailScope("day")}
+              disabled={withEmail === 0}
+              className={`px-3 py-1.5 text-xs rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${mailScope === "day" ? "bg-gold-300 text-black font-semibold" : "text-stone-400 hover:text-white"}`}
+            >
+              Booked for {prettyDate} ({withEmail})
+            </button>
+            <button
+              onClick={() => setMailScope("all")}
+              className={`px-3 py-1.5 text-xs rounded-lg transition ${mailScope === "all" ? "bg-gold-300 text-black font-semibold" : "text-stone-400 hover:text-white"}`}
+            >
+              All past guests ({allCount ?? "…"})
+            </button>
+          </div>
+          {mailScope === "day" ? (
+            <>
+              <p className="text-sm text-white font-semibold mb-1">Email everyone booked for {prettyDate}</p>
+              <p className="text-xs text-stone-500 mb-4">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-white font-semibold mb-1">Email everyone who has been to the Sunday Feast</p>
+              <p className="text-xs text-stone-500 mb-4">Goes to {allCount ?? "…"} {allCount === 1 ? "person" : "people"} booked for a Sunday that has already happened, one email each even if they came more than once. Upcoming and cancelled bookings are left out. Sent from your normal bookings address.</p>
+            </>
+          )}
+          {/* Saved emails for this screen. One click fills the form; you still press Send. */}
+          <div className="flex items-center gap-2 flex-wrap mb-3">
+            {mailTemplates.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
+                className="px-3 py-1.5 text-sm text-stone-300 border border-white/10 rounded-full hover:bg-white/5 transition"
+              >
+                {t.name}
+              </button>
+            ))}
+            <button
+              onClick={saveMailTemplate}
+              disabled={!mailSubject.trim() || !mailMessage.trim()}
+              className="px-3 py-1.5 text-sm text-gold-300 border border-dashed border-white/10 rounded-full hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              + Save current
+            </button>
+          </div>
+          <input
+            value={mailSubject} onChange={(e) => setMailSubject(e.target.value)} placeholder="Subject"
+            className="w-full px-3 py-2.5 mb-3 bg-black/40 border border-white/10 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60"
+          />
+          <textarea
+            value={mailMessage} onChange={(e) => setMailMessage(e.target.value)} rows={6}
+            placeholder="Your message. Line breaks are kept. Each guest is greeted by name automatically. Type {feast} for a link to book."
+            className="w-full px-3 py-2.5 bg-black/40 border border-white/10 rounded-lg text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-300/60 resize-y"
+          />
+          <div className="flex items-center gap-3 mt-3">
+            <button onClick={sendMailAll} disabled={mailing} className="px-4 py-2 text-sm bg-gold-300 text-black font-semibold rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
+              {mailing ? "Sending…" : `Send to ${mailScope === "all" ? (allCount ?? "…") : withEmail}`}
+            </button>
+            <button onClick={() => { setMailOpen(false); setMailNote(""); }} className="text-sm text-stone-400 hover:text-white">Cancel</button>
+            {mailNote && <span className="text-xs text-stone-400">{mailNote}</span>}
+          </div>
+        </div>
+      )}
+
 
       <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
         {loading ? (
@@ -316,10 +520,29 @@ export default function AdminSaturdayBrunchPage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-stone-400">{fmt(b.createdAt)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"}`}>{b.status}</span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"}`}>{b.status}</span>
+                        {b.status !== "cancelled" && (
+                          b.confirmedAt
+                            ? <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400" title={`Confirmed ${fmt(b.confirmedAt)}`}>✓ confirmed</span>
+                            : b.confirmSentAt
+                              ? <span className="text-[11px] text-stone-600" title={`Confirmation requested ${fmt(b.confirmSentAt)}`}>awaiting</span>
+                              : null
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-xs">
+                        {b.email && b.status !== "cancelled" && (
+                          <button
+                            onClick={() => askToConfirm(b)}
+                            disabled={confirmingId === b.id}
+                            title={b.confirmedAt ? `Resend the confirmation email to ${b.name}` : `Email ${b.name} a link to confirm they're coming`}
+                            className="text-gold-300 hover:text-gold-200 disabled:opacity-40 whitespace-nowrap"
+                          >
+                            {confirmingId === b.id ? "Sending…" : b.confirmSentAt ? "✉ Resend" : "✉ Confirm"}
+                          </button>
+                        )}
                         {b.status !== "arrived" && <button onClick={() => setStatus(b.id, "arrived")} className="text-emerald-400 hover:text-emerald-300">Arrived</button>}
                         {b.status !== "cancelled" ? (
                           <button onClick={() => setStatus(b.id, "cancelled")} className="text-stone-400 hover:text-white">Cancel</button>
