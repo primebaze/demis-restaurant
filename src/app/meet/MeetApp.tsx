@@ -89,6 +89,7 @@ export default function MeetApp() {
   return (
     <>
       <IconFont />
+      <style>{`html,body{background:${C.bg}}`}</style>
       <div style={{ minHeight: "100dvh", background: C.bg, color: "#fff", fontSize: 14 }}>{screen}</div>
     </>
   );
@@ -116,7 +117,7 @@ function Phone({ children, style }: { children: ReactNode; style?: CSSProperties
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        padding: "max(24px, env(safe-area-inset-top)) 22px max(24px, env(safe-area-inset-bottom))",
+        padding: "calc(env(safe-area-inset-top) + 24px) 22px calc(env(safe-area-inset-bottom) + 24px)",
         gap: 22,
         ...style,
       }}
@@ -129,7 +130,7 @@ function Phone({ children, style }: { children: ReactNode; style?: CSSProperties
 function Logo() {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, paddingTop: 30 }}>
-      <img src="/logo.png" alt="Demi's" style={{ height: 24, width: "auto" }} />
+      <img src="/meet/logo.png" alt="Demi's" style={{ height: 24, width: "auto" }} />
       <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: C.gold }}>Meetings</span>
     </div>
   );
@@ -363,7 +364,7 @@ function InstallGuide() {
     <Phone style={{ gap: 20 }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: 24, textAlign: "center" }}>
         <span style={{ width: 84, height: 84, borderRadius: 22, background: "#141414", boxShadow: "0 0 0 1px #2a2a2a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 }}>
-          <img src="/logo.png" alt="" style={{ height: 12, width: "auto" }} />
+          <img src="/meet/logo.png" alt="" style={{ height: 12, width: "auto" }} />
           <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.18em", color: C.gold }}>MEETINGS</span>
         </span>
         <div>
@@ -488,7 +489,7 @@ function Home({ me }: { me: ApprovedMe }) {
   const col = personColour(me.person.id);
   const on = !!me.clockedInSince;
   return (
-    <main style={{ flex: 1, boxSizing: "border-box", padding: "max(18px, env(safe-area-inset-top)) 18px 18px", display: "flex", flexDirection: "column", gap: 18 }}>
+    <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 18px) 18px 18px", display: "flex", flexDirection: "column", gap: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
         <span style={{ width: 40, height: 40, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 600 }}>{initial(me.person.name)}</span>
         <div style={{ flex: 1 }}>
@@ -530,7 +531,7 @@ function MeScreen({ me, onSignOut }: { me: ApprovedMe; onSignOut: () => void }) 
   const col = personColour(me.person.id);
   const role = me.person.role ? me.person.role[0].toUpperCase() + me.person.role.slice(1) : "";
   return (
-    <main style={{ flex: 1, boxSizing: "border-box", padding: "max(18px, env(safe-area-inset-top)) 18px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+    <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 18px) 18px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
         <span style={{ width: 52, height: 52, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 600 }}>{initial(me.person.name)}</span>
         <div style={{ flex: 1 }}>

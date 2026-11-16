@@ -80,6 +80,7 @@ export default function StaffPage() {
   return (
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap" }} onClick={() => setMenu(null)}>
       <IconFont />
+      <style>{`html,body{background:${C.page}}`}</style>
       <Sidebar waiting={counts.waiting} />
       <TopBar />
 
@@ -316,7 +317,7 @@ function Sidebar({ waiting }: { waiting: number }) {
   return (
     <nav aria-label="Main" className="hidden md:flex" style={{ flex: "1 1 220px", maxWidth: 244, boxSizing: "border-box", padding: "18px 14px", flexDirection: "column", gap: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, height: 48, padding: "0 16px", borderRadius: 16, background: C.ink }}>
-        <img src="/logo.png" alt="Demi's" style={{ height: 15, width: "auto" }} />
+        <img src="/meet/logo.png" alt="Demi's" style={{ height: 15, width: "auto" }} />
         <span aria-hidden="true" style={{ width: 1, height: 18, background: "#3a3632" }} />
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#e8cc9c" }}>Meetings</span>
       </div>
@@ -348,12 +349,12 @@ function Sidebar({ waiting }: { waiting: number }) {
 /* Phones: a slim bar instead of the sidebar. */
 function TopBar() {
   return (
-    <div className="flex md:hidden" style={{ width: "100%", boxSizing: "border-box", padding: "max(14px, env(safe-area-inset-top)) 16px 0", alignItems: "center", gap: 10 }}>
+    <div className="flex md:hidden" style={{ width: "100%", boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 14px) 16px 0", alignItems: "center", gap: 10 }}>
       <a href="/meet" aria-label="Back to the app" style={{ width: 40, height: 40, borderRadius: 20, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)", color: C.ink }}>
         <Icon name="arrow_back" size={20} />
       </a>
       <div style={{ display: "flex", alignItems: "center", gap: 10, height: 40, padding: "0 14px", borderRadius: 14, background: C.ink }}>
-        <img src="/logo.png" alt="Demi's" style={{ height: 12, width: "auto" }} />
+        <img src="/meet/logo.png" alt="Demi's" style={{ height: 12, width: "auto" }} />
         <span aria-hidden="true" style={{ width: 1, height: 14, background: "#3a3632" }} />
         <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#e8cc9c" }}>Meetings</span>
       </div>
