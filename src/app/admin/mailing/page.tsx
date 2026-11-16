@@ -229,7 +229,7 @@ export default function MailingPage() {
     if (!subject.trim() || !body.trim()) { setSendResult("Add a subject and a message first."); return; }
     setSendResult(null); setPendingLimit(limit); setConfirming(true);
   };
-  const box = "h-[18px] w-[18px] shrink-0 cursor-pointer rounded accent-gold-300 align-middle disabled:cursor-not-allowed disabled:opacity-30";
+  const box = "h-[18px] w-[18px] shrink-0 cursor-pointer rounded accent-stone-900 align-middle disabled:cursor-not-allowed disabled:opacity-40";
   const codeCls = "rounded-md bg-sand-200 px-1.5 py-px font-outfit text-stone-900";
 
   return (
@@ -359,7 +359,7 @@ export default function MailingPage() {
                         <p className="truncate text-sm text-stone-900">{c.email}</p>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-stone-500">
                           <span>{c.name || "Not given"}</span>
-                          <span className="text-[11px] uppercase tracking-wider">{c.source}</span>
+                          <span>{c.source === "manual" || c.source === "MANUAL" ? "Added by hand" : String(c.source).toUpperCase()}</span>
                           {c.unsubscribed ? <Tag tone="bad">Unsubscribed</Tag> : <Tag tone="ok">Subscribed</Tag>}
                         </div>
                       </div>
@@ -401,7 +401,7 @@ export default function MailingPage() {
                         </td>
                         <td className="max-w-[220px] truncate text-stone-900">{c.email}</td>
                         <td className="max-w-[140px] truncate text-stone-500">{c.name || "Not given"}</td>
-                        <td className="text-[11px] uppercase tracking-wider text-stone-500">{c.source}</td>
+                        <td><Tag tone="off">{c.source === "manual" || c.source === "MANUAL" ? "Added by hand" : String(c.source).toUpperCase()}</Tag></td>
                         <td>{c.unsubscribed ? <Tag tone="bad">Unsubscribed</Tag> : <Tag tone="ok">Subscribed</Tag>}</td>
                         <td className="!pr-5 text-right">
                           <button onClick={() => deleteContact(c.id)} className="text-[13px] text-stone-500 transition hover:text-red-700">
@@ -438,7 +438,7 @@ export default function MailingPage() {
         </Sheet>
 
         {/* Compose */}
-        <Sheet label="Compose" className="p-4 md:p-5 lg:sticky lg:top-[96px] lg:self-start">
+        <Sheet label="Compose" className="p-4 md:p-5 lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:self-start">
           <div className="flex items-center gap-3">
             <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">Compose</h2>
             <button

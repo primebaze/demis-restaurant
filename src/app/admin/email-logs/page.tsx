@@ -140,7 +140,7 @@ export default function EmailLogsPage() {
     { label: "Total logged", value: total },
   ];
 
-  const box = "h-[18px] w-[18px] shrink-0 cursor-pointer rounded accent-gold-300 align-middle";
+  const box = "h-[18px] w-[18px] shrink-0 cursor-pointer rounded accent-stone-900 align-middle";
   const allOn = logs.length > 0 && selected.size === logs.length;
 
   const typeTag = (t: string) => (

@@ -460,7 +460,7 @@ export default function AdminSundayBuffetPage() {
         </Sheet>
 
         {mailOpen && (
-          <Sheet label="Email everyone" className="order-first flex flex-col p-[18px] lg:order-none lg:sticky lg:top-[96px] lg:self-start">
+          <Sheet label="Email everyone" className="order-first flex flex-col p-[18px] lg:order-none lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:self-start">
             <SheetTitle
               aside={
                 <button onClick={() => { setMailOpen(false); setMailNote(""); }} aria-label="Close" className={ibtn}>

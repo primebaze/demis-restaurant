@@ -127,7 +127,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
 
       <div className="grid gap-3 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
         {/* The detail behind the headline */}
-        <Sheet label="Where the money came from and where the day stands" className="p-[18px] lg:sticky lg:top-[96px] lg:self-start">
+        <Sheet label="Where the money came from and where the day stands" className="p-[18px] lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:self-start">
           <div className="grid gap-x-6 md:grid-cols-2 lg:grid-cols-1">
             <div>
               <SheetTitle>Where the money came from</SheetTitle>

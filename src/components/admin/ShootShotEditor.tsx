@@ -101,7 +101,7 @@ export default function ShootShotEditor({
                 onChange={(e) =>
                   update(shot.id, { captured: e.target.checked })
                 }
-                className="h-5 w-5 accent-[#e8cc9c]"
+                className="h-5 w-5 accent-stone-900"
               />
               Captured
             </label>

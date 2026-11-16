@@ -94,12 +94,12 @@ export const btn = {
   glass:
     "inline-flex items-center gap-2 h-11 px-4 rounded-full text-[15px] font-light text-white bg-[rgba(58,52,48,0.48)] border border-white/10 backdrop-blur-xl hover:bg-[rgba(58,52,48,0.65)] transition",
   primary:
-    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-[15px] font-medium text-ink-900 bg-honey-300 hover:bg-honey-200 transition disabled:opacity-50",
+    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-[15px] font-medium text-ink-900 bg-honey-300 hover:bg-honey-200 transition disabled:cursor-not-allowed disabled:bg-sand-300 disabled:text-stone-500",
   light:
-    "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-stone-900 bg-sand-50 border border-sand-300 hover:border-stone-300 transition disabled:opacity-50",
-  dark: "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-white bg-stone-900 hover:bg-black transition disabled:opacity-50",
+    "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-stone-900 bg-sand-50 border border-sand-300 hover:border-stone-300 transition disabled:cursor-not-allowed disabled:text-stone-500 disabled:hover:border-sand-300",
+  dark: "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-white bg-stone-900 hover:bg-black transition disabled:cursor-not-allowed disabled:bg-sand-300 disabled:text-stone-500",
   small:
-    "inline-flex items-center gap-1 h-8 px-3 rounded-full text-[13px] text-stone-900 bg-sand-50 border border-sand-300 hover:border-stone-300 transition disabled:opacity-50",
+    "inline-flex items-center gap-1 h-8 px-3 rounded-full text-[13px] text-stone-900 bg-sand-50 border border-sand-300 hover:border-stone-300 transition disabled:cursor-not-allowed disabled:text-stone-500 disabled:hover:border-sand-300",
 };
 
 /** Initials circle for a guest. */
