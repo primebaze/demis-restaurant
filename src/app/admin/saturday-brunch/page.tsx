@@ -664,56 +664,56 @@ export default function AdminSaturdayBrunchPage() {
 
             {/* Availability: block / unblock each upcoming Sunday */}
             <h2 className="font-outfit text-[17px] font-normal tracking-tight">Availability</h2>
-            <p className="mt-1 text-xs font-light leading-relaxed text-stone-500">
-              <span className="font-normal text-stone-700">Mark sold out</span> keeps the date on the form but shows it crossed out. <span className="font-normal text-stone-700">Hide</span> removes it from the form entirely. A capacity sells the date out automatically once that many covers are booked.
-            </p>
             <div className="mt-2">
               {dateRows.length === 0 ? (
                 <p className="py-3 text-xs text-stone-500">Loading dates…</p>
               ) : (
                 dateRows.map((d) => (
-                  <div key={d.date} className={`flex items-center gap-2 border-t border-stone-100 py-2 text-[13px] ${d.hidden ? "opacity-60" : ""}`}>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="whitespace-nowrap" title={d.prettyDate}>{shortDate(d.date, true)}</span>
-                        {d.hidden ? <Tag tone="off">Hidden</Tag> : d.soldOut ? <Tag tone="bad">Sold out</Tag> : <Tag tone="ok">Open</Tag>}
-                      </div>
-                      <div className="mt-0.5 text-xs text-stone-500">
+                  <div key={d.date} className="border-t border-stone-100 py-3 text-[13px]">
+                    <div className={`flex items-center gap-2 ${d.hidden ? "opacity-60" : ""}`}>
+                      <span className="whitespace-nowrap text-[15px]" title={d.prettyDate}>{shortDate(d.date, true)}</span>
+                      {d.hidden ? <Tag tone="off">Hidden</Tag> : d.soldOut ? <Tag tone="bad">Sold out</Tag> : <Tag tone="ok">Open</Tag>}
+                      <span className="ml-auto whitespace-nowrap text-xs text-stone-500">
                         {d.booked} booked{d.capacity !== null ? ` of ${d.capacity}` : ""}
-                      </div>
+                      </span>
                     </div>
-                    <input
-                      type="number"
-                      min={0}
-                      defaultValue={d.capacity ?? ""}
-                      placeholder="∞"
-                      aria-label={`Capacity for ${d.prettyDate}`}
-                      title="Capacity"
-                      onBlur={(e) => {
-                        const raw = e.target.value.trim();
-                        const next = raw === "" ? null : parseInt(raw);
-                        if (next !== d.capacity) saveDate(d.date, { capacity: next });
-                      }}
-                      className="h-8 w-[60px] shrink-0 rounded-full border border-stone-200 bg-stone-50 px-2.5 text-center text-xs text-stone-900 outline-none transition focus:border-stone-500 focus:bg-white"
-                    />
-                    <button
-                      onClick={() => saveDate(d.date, { blocked: !d.blocked })}
-                      disabled={savingDate === d.date}
-                      title={d.blocked ? "Reopen" : "Mark sold out"}
-                      aria-label={`${d.blocked ? "Reopen" : "Mark sold out"} ${d.prettyDate}`}
-                      className={`${ibtn} ${d.blocked ? "text-emerald-700" : "hover:text-red-700"}`}
-                    >
-                      {savingDate === d.date ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} /> : d.blocked ? <CalendarCheck className="h-4 w-4" strokeWidth={1.5} /> : <Ban className="h-4 w-4" strokeWidth={1.5} />}
-                    </button>
-                    <button
-                      onClick={() => saveDate(d.date, { hidden: !d.hidden })}
-                      disabled={savingDate === d.date}
-                      title={d.hidden ? "Show this date to guests" : "Remove this date from the booking form"}
-                      aria-label={`${d.hidden ? "Show" : "Hide"} ${d.prettyDate}`}
-                      className={ibtn}
-                    >
-                      {d.hidden ? <Eye className="h-4 w-4" strokeWidth={1.5} /> : <EyeOff className="h-4 w-4" strokeWidth={1.5} />}
-                    </button>
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <label className="flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 pl-3 pr-1 text-xs text-stone-500 focus-within:border-stone-500 focus-within:bg-white">
+                        Max
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          defaultValue={d.capacity ?? ""}
+                          placeholder="No limit"
+                          aria-label={`Most covers for ${d.prettyDate}`}
+                          onBlur={(e) => {
+                            const raw = e.target.value.trim();
+                            const next = raw === "" ? null : parseInt(raw);
+                            if (next !== d.capacity) saveDate(d.date, { capacity: next });
+                          }}
+                          className="h-7 w-[64px] bg-transparent text-[13px] text-stone-900 outline-none placeholder:text-stone-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        />
+                      </label>
+                      <button
+                        onClick={() => saveDate(d.date, { blocked: !d.blocked })}
+                        disabled={savingDate === d.date}
+                        aria-label={`${d.blocked ? "Reopen" : "Mark sold out"} ${d.prettyDate}`}
+                        className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs transition disabled:opacity-50 ${d.blocked ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100" : "border-stone-200 bg-white text-stone-800 hover:border-red-200 hover:text-red-700"}`}
+                      >
+                        {savingDate === d.date ? <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.75} /> : d.blocked ? <CalendarCheck className="h-3.5 w-3.5" strokeWidth={1.75} /> : <Ban className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                        {d.blocked ? "Reopen" : "Sold out"}
+                      </button>
+                      <button
+                        onClick={() => saveDate(d.date, { hidden: !d.hidden })}
+                        disabled={savingDate === d.date}
+                        aria-label={`${d.hidden ? "Show" : "Hide"} ${d.prettyDate}`}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 text-xs text-stone-800 transition hover:border-stone-300 disabled:opacity-50"
+                      >
+                        {d.hidden ? <Eye className="h-3.5 w-3.5" strokeWidth={1.75} /> : <EyeOff className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                        {d.hidden ? "Show" : "Hide"}
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
