@@ -547,7 +547,7 @@ export default function AdminSetMenuPage() {
                 const guestUrl = `${SITE_URL}/set-menu/${g.groupCode}`;
                 const isExpanded = expanded === g.id;
                 return (
-                  <article key={g.id} className={`rounded-[18px] p-3.5 ${isExpanded ? "bg-stone-100" : "bg-stone-50"}`}>
+                  <article key={g.id} className={`rounded-[18px] p-3.5 ${isExpanded ? "bg-ember-50" : "bg-stone-50"}`}>
                     <button type="button" onClick={() => setExpanded(isExpanded ? null : g.id)} aria-expanded={isExpanded} className="block w-full text-left">
                       <div className="flex items-start gap-2">
                         <div className="min-w-0 flex-1">

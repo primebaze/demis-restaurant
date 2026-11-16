@@ -393,7 +393,7 @@ export default function AdminBookingsPage() {
   function renderCard(b: BookingRow) {
       const open = expanded === b.id;
       return (
-        <article key={b.id} className="min-w-0 rounded-[22px] bg-white p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)]">
+        <article key={b.id} className={`min-w-0 rounded-[22px] p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] transition-colors ${open ? "bg-ember-50" : "bg-white"}`}>
           <button
             type="button"
             onClick={() => setExpanded(open ? null : b.id)}
