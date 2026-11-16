@@ -253,7 +253,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Plain numbers */}
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:-mb-12 lg:mt-auto lg:pt-4 xl:grid-cols-4">
+      <div className="rise-stagger mt-4 grid gap-3 sm:grid-cols-2 lg:-mb-12 lg:mt-auto lg:pt-4 xl:grid-cols-4">
         <section aria-label="Last 30 days" className="rounded-[22px] bg-white p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
           <h2 className="text-[21px] font-normal tracking-tight whitespace-nowrap">Last 30 days</h2>
           <div className="mt-3.5 flex h-[50px] items-center rounded-full bg-stone-100 pl-4 pr-1.5">
