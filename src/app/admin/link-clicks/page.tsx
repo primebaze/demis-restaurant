@@ -191,7 +191,7 @@ export default function LinkClicksPage() {
                         >
                           <span className="relative flex h-[170px] items-end">
                             <span
-                              className={`relative w-full rounded-t-[12px] rounded-b-[4px] transition-colors ${on ? "bg-gold-300" : "bg-stone-100 group-hover:bg-gold-200"}`}
+                              className={`relative w-full rounded-t-[12px] rounded-b-[4px] transition-colors ${on ? "bg-honey-300" : "bg-stone-100 group-hover:bg-honey-200"}`}
                               style={{ height: `${h}%` }}
                             >
                               <span

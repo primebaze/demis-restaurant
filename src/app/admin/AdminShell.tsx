@@ -6,9 +6,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarCheck, CalendarDays, ChefHat, ClipboardCheck, Clapperboard, Clock, DoorOpen, Drumstick, LayoutGrid,
   LogOut, Menu, MailCheck, Megaphone, MousePointerClick, Settings2, Soup, Users, UtensilsCrossed, Video, ArrowUpRight,
-  X, type LucideIcon,
+  type LucideIcon,
 } from "lucide-react";
-import { PageHead } from "@/components/admin/ui";
+import { BottomSheet, PageHead } from "@/components/admin/ui";
 
 type Item = { href: string; label: string; icon: LucideIcon; external?: boolean };
 
@@ -243,7 +243,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               onClick={() => setUserOpen((o) => !o)}
               aria-expanded={userOpen}
               aria-label="Account"
-              className="flex h-10 w-10 md:h-[46px] md:w-[46px] items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-gold-200 to-gold-500 text-[15px] font-medium text-ink-900"
+              className="flex h-10 w-10 md:h-[46px] md:w-[46px] items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-honey-200 to-honey-400 text-[15px] font-medium text-ink-900"
             >
               D
             </button>
@@ -356,45 +356,32 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </button>
       </nav>
 
-      {/* More sheet */}
-      {moreOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setMoreOpen(false)}>
-          <div
-            className="absolute inset-x-3 bottom-3 max-h-[80vh] overflow-y-auto rounded-[28px] bg-white p-3 text-stone-900"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-label="More pages"
-          >
-            <div className="flex items-center px-2 pb-1 pt-1">
-              <h2 className="text-xl font-normal">More</h2>
-              <button onClick={() => setMoreOpen(false)} aria-label="Close" className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-stone-100">
-                <X className="h-5 w-5" strokeWidth={1.75} />
+      {/* More: slides up like an app on iPad portrait and phones */}
+      <BottomSheet open={moreOpen} onClose={() => setMoreOpen(false)} title="More">
+        <div className="rounded-[22px] bg-white px-2 py-1">
+              {[...moreItems, { href: "/admin/email-logs", label: "Email Logs", icon: MailCheck }, { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen }]
+                .filter((v, i, a) => a.findIndex((x) => x.href === v.href) === i)
+                .map((item) => {
+                  const Icon = item.icon;
+                  const props = item.external ? { target: "_blank", rel: "noopener" } : {};
+                  return (
+                    <Link key={item.href} href={item.href} {...props} className="flex h-12 items-center gap-3.5 border-t border-stone-100 px-2 text-base first-of-type:border-t-0">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-600">
+                        <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                      </span>
+                      {item.label}
+                      {item.external && <ArrowUpRight className="ml-auto h-4 w-4 text-stone-400" strokeWidth={1.75} />}
+                    </Link>
+                  );
+                })}
+              <button onClick={handleLogout} className="mt-2 flex h-12 w-full items-center gap-3.5 rounded-2xl px-2 text-left text-base text-red-700 hover:bg-red-50">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50">
+                  <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                </span>
+                Sign out
               </button>
-            </div>
-            {[...moreItems, { href: "/admin/email-logs", label: "Email Logs", icon: MailCheck }, { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen }]
-              .filter((v, i, a) => a.findIndex((x) => x.href === v.href) === i)
-              .map((item) => {
-                const Icon = item.icon;
-                const props = item.external ? { target: "_blank", rel: "noopener" } : {};
-                return (
-                  <Link key={item.href} href={item.href} {...props} className="flex h-12 items-center gap-3.5 border-t border-stone-100 px-2 text-base first-of-type:border-t-0">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-600">
-                      <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                    </span>
-                    {item.label}
-                    {item.external && <ArrowUpRight className="ml-auto h-4 w-4 text-stone-400" strokeWidth={1.75} />}
-                  </Link>
-                );
-              })}
-            <button onClick={handleLogout} className="mt-2 flex h-12 w-full items-center gap-3.5 rounded-2xl px-2 text-left text-base text-red-700 hover:bg-red-50">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50">
-                <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
-              </span>
-              Sign out
-            </button>
-          </div>
         </div>
-      )}
+      </BottomSheet>
     </div>
   );
 }

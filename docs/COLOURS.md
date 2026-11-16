@@ -89,7 +89,9 @@ still apply to the guest site, the door kiosks and the blog.
   class `admin-bg` in `src/app/admin/admin.css`). Nothing else goes behind pages.
 - **On the photo:** white text, frosted panels (`glass`) and dark glass buttons.
 - **Content:** white sheets (`bg-white`, rounded 22px) with `stone` text.
-- **Accent: Demi's gold** (`gold-300` with `text-ink-900`): main buttons, the
+- **Accent: honey gold** (`honey-300`, #edc25e, with `text-ink-900`). The
+  website's `gold-300` looked muddy on white, so the admin uses this brighter
+  gold instead: main buttons, the
   active day, the arrow buttons, and the one number that matters most in a group.
   On white, gold text is `gold-700`. Solid fills only: no dots, stripes or
   patterns.
@@ -97,7 +99,7 @@ still apply to the guest site, the door kiosks and the blog.
   guest requirements on bookings (`text-ember-700`) and the initials circles
   (`bg-ember-100 text-ember-700`). Nowhere else.
 - **Text on white is never gold.** Use `stone-900` for main text and `stone-500`
-  for hints. Gold is only a solid fill (`bg-gold-300` with `text-ink-900`).
+  for hints. Gold is only a solid fill (`bg-honey-300` with `text-ink-900`).
 - **Status:** the same three meanings, light versions on white: `emerald-50/700`
   (done), `amber-50/800` (waiting), `red-50/700` (cancelled, failed). Modified is
   `gold-100/800`.

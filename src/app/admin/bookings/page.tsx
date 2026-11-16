@@ -96,7 +96,7 @@ const updSelBase =
 const smallSel =
   "h-9 rounded-full border border-stone-200 bg-white px-3.5 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-stone-500";
 const callBtnBase =
-  "inline-flex items-center justify-center gap-1.5 px-4 rounded-full text-sm font-medium text-ink-900 bg-gold-300 hover:bg-gold-200 transition";
+  "inline-flex items-center justify-center gap-1.5 px-4 rounded-full text-sm font-medium text-ink-900 bg-honey-300 hover:bg-honey-200 transition";
 
 function Detail({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -601,7 +601,7 @@ export default function AdminBookingsPage() {
                   <span className="leading-none">{Number(ds.slice(8))}</span>
                   <span className="flex h-2 items-center gap-[3px]">
                     {Array.from({ length: Math.min(n, 4) }).map((_, j) => (
-                      <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSel ? "bg-gold-300" : "bg-ember-400"}`} />
+                      <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSel ? "bg-honey-300" : "bg-ember-400"}`} />
                     ))}
                   </span>
                 </button>

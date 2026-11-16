@@ -369,7 +369,7 @@ export default function AdminSaturdayBrunchPage() {
                 role="switch"
                 aria-checked={!!bookingsOpen}
                 aria-label="Sunday Feast bookings"
-                className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors disabled:opacity-50 ${bookingsOpen ? "bg-gold-300" : "bg-white/25"}`}
+                className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors disabled:opacity-50 ${bookingsOpen ? "bg-honey-300" : "bg-white/25"}`}
               >
                 <span className={`absolute left-[3px] top-[3px] h-6 w-6 rounded-full bg-white shadow transition-transform ${bookingsOpen ? "translate-x-[22px]" : ""}`} />
               </button>
@@ -645,7 +645,7 @@ export default function AdminSaturdayBrunchPage() {
                       <div key={h.label} className="grid h-[26px] grid-cols-[96px_1fr_64px] items-center gap-2.5 text-[13px]">
                         <span className="truncate text-stone-500">{h.label}</span>
                         <div className="h-2 overflow-hidden rounded-full bg-stone-100">
-                          <div className="h-full rounded-full bg-gold-300" style={{ width: `${pct}%` }} />
+                          <div className="h-full rounded-full bg-honey-300" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="text-right tabular-nums">
                           {h.count} <span className="text-xs text-stone-500">{pct}%</span>

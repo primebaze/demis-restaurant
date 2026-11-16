@@ -580,7 +580,7 @@ function MailButton({ on, name, onClick }: { on: boolean; name: string; onClick:
       title="Email this guest"
       aria-label={`Email ${name}`}
       className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
-        on ? "border-stone-200 bg-gold-300 text-ink-900" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
+        on ? "border-stone-200 bg-honey-300 text-ink-900" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
       }`}
     >
       <Mail className="h-4 w-4" strokeWidth={1.75} />

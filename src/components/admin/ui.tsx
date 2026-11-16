@@ -63,8 +63,8 @@ const TONES = {
   wait: "bg-amber-100 text-amber-900",
   bad: "bg-red-100 text-red-800",
   off: "bg-stone-100 text-stone-700",
-  hot: "bg-gold-300 text-ink-900",
-  gold: "bg-gold-300 text-ink-900",
+  hot: "bg-honey-300 text-ink-900",
+  gold: "bg-honey-300 text-ink-900",
 } as const;
 export type Tone = keyof typeof TONES;
 
@@ -94,7 +94,7 @@ export const btn = {
   glass:
     "inline-flex items-center gap-2 h-11 px-4 rounded-full text-[15px] font-light text-white bg-[rgba(58,52,48,0.48)] border border-white/10 backdrop-blur-xl hover:bg-[rgba(58,52,48,0.65)] transition",
   primary:
-    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-[15px] font-medium text-ink-900 bg-gold-300 hover:bg-gold-200 transition disabled:opacity-50",
+    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-[15px] font-medium text-ink-900 bg-honey-300 hover:bg-honey-200 transition disabled:opacity-50",
   light:
     "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-stone-900 bg-white border border-stone-200 hover:border-stone-300 transition disabled:opacity-50",
   dark: "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-white bg-stone-900 hover:bg-black transition disabled:opacity-50",
@@ -166,7 +166,7 @@ export const fieldArea =
 /** Small grey stat tile inside a white sheet. `hot` = the one number that matters most (solid gold). */
 export function StatTile({ label, value, hot = false }: { label: string; value: ReactNode; hot?: boolean }) {
   return (
-    <div className={`rounded-[18px] p-3.5 ${hot ? "bg-gold-300 text-ink-900" : "bg-stone-100"}`}>
+    <div className={`rounded-[18px] p-3.5 ${hot ? "bg-honey-300 text-ink-900" : "bg-stone-100"}`}>
       <div className={`text-xs font-light whitespace-nowrap ${hot ? "" : "text-stone-500"}`}>{label}</div>
       <div className="mt-1 text-[22px]">{value}</div>
     </div>
@@ -192,10 +192,31 @@ export const table = "w-full border-collapse text-sm [&_th]:whitespace-nowrap [&
  * Closes on the backdrop, the X, Escape, or a swipe down on the handle area.
  */
 export function BottomSheet({ open, onClose, title, subtitle, children }: { open: boolean; onClose: () => void; title: ReactNode; subtitle?: ReactNode; children: ReactNode }) {
-  return open ? <BottomSheetInner onClose={onClose} title={title} subtitle={subtitle}>{children}</BottomSheetInner> : null;
+  // Stay on screen for a moment after closing so it can slide back down.
+  const [mounted, setMounted] = useState(open);
+  const [closing, setClosing] = useState(false);
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      setClosing(false);
+      return;
+    }
+    if (!mounted) return;
+    setClosing(true);
+    const t = setTimeout(() => {
+      setMounted(false);
+      setClosing(false);
+    }, 260);
+    return () => clearTimeout(t);
+  }, [open, mounted]);
+  return mounted ? (
+    <BottomSheetInner onClose={onClose} title={title} subtitle={subtitle} closing={closing}>
+      {children}
+    </BottomSheetInner>
+  ) : null;
 }
 
-function BottomSheetInner({ onClose, title, subtitle, children }: { onClose: () => void; title: ReactNode; subtitle?: ReactNode; children: ReactNode }) {
+function BottomSheetInner({ onClose, title, subtitle, children, closing }: { onClose: () => void; title: ReactNode; subtitle?: ReactNode; children: ReactNode; closing: boolean }) {
   const [drag, setDrag] = useState(0);
   const start = useRef<number | null>(null);
 
@@ -212,9 +233,9 @@ function BottomSheetInner({ onClose, title, subtitle, children }: { onClose: () 
 
   return (
     <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : "Details"}>
-      <div className="sheet-fade absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={onClose} />
+      <div className={`${closing ? "sheet-fade-out" : "sheet-fade"} absolute inset-0 bg-black/50 backdrop-blur-[2px]`} onClick={onClose} />
       <div
-        className="sheet-up absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-[28px] bg-stone-50 text-stone-900 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]"
+        className={`${closing ? "sheet-down" : "sheet-up"} absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-[28px] bg-stone-50 text-stone-900 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]`}
         style={drag ? { transform: `translateY(${drag}px)`, transition: "none" } : undefined}
       >
         <div

@@ -125,4 +125,8 @@ main:has(.own-layout) .shell-sheet { background: transparent; padding: 0; box-sh
 @keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
 .sheet-up { animation: sheet-up 0.38s cubic-bezier(0.2, 0.9, 0.25, 1); transition: transform 0.25s ease; }
 .sheet-fade { animation: sheet-fade 0.25s ease; }
-@media (prefers-reduced-motion: reduce) { .sheet-up, .sheet-fade { animation: none; } }
+@keyframes sheet-down { from { transform: translateY(0); } to { transform: translateY(100%); } }
+@keyframes sheet-fade-out { from { opacity: 1; } to { opacity: 0; } }
+.sheet-down { animation: sheet-down 0.26s cubic-bezier(0.4, 0, 1, 1) forwards; }
+.sheet-fade-out { animation: sheet-fade-out 0.26s ease forwards; }
+@media (prefers-reduced-motion: reduce) { .sheet-up, .sheet-fade, .sheet-down, .sheet-fade-out { animation: none; } }

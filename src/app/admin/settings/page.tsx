@@ -54,7 +54,7 @@ const TABS: { key: Tab; label: string; sub: string; intro: string; icon: LucideI
 const label = "mb-1.5 ml-1 block text-xs text-stone-500";
 const card = "rounded-[20px] border border-stone-200 p-4 md:p-5";
 const smallPrimary =
-  "inline-flex h-8 items-center gap-1 rounded-full bg-gold-300 px-3 text-[13px] font-medium text-ink-900 transition hover:bg-gold-200 disabled:opacity-50";
+  "inline-flex h-8 items-center gap-1 rounded-full bg-honey-300 px-3 text-[13px] font-medium text-ink-900 transition hover:bg-honey-200 disabled:opacity-50";
 const iconDelete =
   "inline-flex h-8 w-8 items-center justify-center rounded-full text-red-700 transition hover:bg-red-50";
 
@@ -130,7 +130,7 @@ export default function AdminSettingsPage() {
                       onClick={() => setTab(t.key)}
                       aria-current={on ? "page" : undefined}
                       className={`flex items-center gap-3 rounded-[18px] px-3 py-2.5 text-left transition ${
-                        on ? "bg-gold-300 text-ink-900" : "text-stone-900 hover:bg-stone-50"
+                        on ? "bg-honey-300 text-ink-900" : "text-stone-900 hover:bg-stone-50"
                       }`}
                     >
                       <span className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full ${on ? "bg-white/45" : "bg-stone-100"}`}>

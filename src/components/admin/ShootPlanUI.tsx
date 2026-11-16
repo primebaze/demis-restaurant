@@ -13,7 +13,7 @@ import { SHOOT_STATUSES, type ShootStatus } from "@/lib/shoot-plans";
 export const fieldClass =
   "w-full min-h-11 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-300 disabled:opacity-60 [color-scheme:light]";
 export const linkClass =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-honey-300";
 export function Action({
   primary = false,
   className = "",
@@ -25,7 +25,7 @@ export function Action({
       type="button"
       onClick={onClick}
       {...props}
-      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-gold-300 text-ink-900 hover:bg-gold-200" : "border border-stone-200 text-stone-800 hover:bg-stone-50"} ${className}`}
+      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-honey-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-honey-300 text-ink-900 hover:bg-honey-200" : "border border-stone-200 text-stone-800 hover:bg-stone-50"} ${className}`}
     />
   );
 }
@@ -112,7 +112,7 @@ export function CaptureProgress({
         className="h-1.5 overflow-hidden rounded-full bg-stone-100"
       >
         <div
-          className="h-full rounded-full bg-gold-300"
+          className="h-full rounded-full bg-honey-300"
           style={{ width: `${total ? (captured / total) * 100 : 0}%` }}
         />
       </div>

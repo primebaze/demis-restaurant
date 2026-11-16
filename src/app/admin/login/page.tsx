@@ -108,7 +108,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-gold-300 text-base font-medium text-ink-900 transition hover:bg-gold-200 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-4 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-honey-300 text-base font-medium text-ink-900 transition hover:bg-honey-200 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Signing in…" : "Sign in"}
             {!loading && <ArrowRight className="h-5 w-5" strokeWidth={1.75} />}

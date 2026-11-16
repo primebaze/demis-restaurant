@@ -198,7 +198,7 @@ export default function AdminSetMenuPage() {
         <span className="text-xs text-stone-400">/ {g.partySize}</span>
         <div className="h-1.5 w-16 overflow-hidden rounded-full bg-stone-100">
           <div
-            className={`h-full rounded-full ${g.status === "active" ? "bg-gold-400" : "bg-stone-400"}`}
+            className={`h-full rounded-full ${g.status === "active" ? "bg-honey-400" : "bg-stone-400"}`}
             style={{ width: `${Math.min(100, (g.selections.length / g.partySize) * 100)}%` }}
           />
         </div>

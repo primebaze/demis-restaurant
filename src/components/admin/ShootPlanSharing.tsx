@@ -186,7 +186,7 @@ export default function ShootPlanSharing({
                   href={`${publicPath}/${share.token}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center rounded-lg px-4 text-sm text-stone-900 hover:bg-stone-50 focus-visible:outline focus-visible:outline-gold-300"
+                  className="inline-flex min-h-11 items-center rounded-lg px-4 text-sm text-stone-900 hover:bg-stone-50 focus-visible:outline focus-visible:outline-honey-300"
                 >
                   {editable
                     ? "Open collaborator page ↗"

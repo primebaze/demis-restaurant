@@ -132,7 +132,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
             <div>
               <SheetTitle>Where the money came from</SheetTitle>
               <div className="mt-2.5">
-                <Split label="Dining" pence={totals.diningTakingsPence} total={totals.takingsPence} tone="bg-gold-300" />
+                <Split label="Dining" pence={totals.diningTakingsPence} total={totals.takingsPence} tone="bg-honey-300" />
                 <Split label="Takeaway" pence={totals.takeawayTakingsPence} total={totals.takingsPence} tone="bg-stone-300" />
               </div>
               <div className="mt-1 grid grid-cols-2 gap-1.5">
@@ -172,7 +172,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
               <p className="mt-3 text-xs font-light text-stone-500">No orders taken {isToday ? "yet today" : "on this day"}.</p>
             ) : (
               <div className="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
-                {([["Food", soldFood, "bg-gold-300"], ["Drinks", soldDrinks, "bg-stone-300"]] as const).map(([title, list, bar]) => {
+                {([["Food", soldFood, "bg-honey-300"], ["Drinks", soldDrinks, "bg-stone-300"]] as const).map(([title, list, bar]) => {
                   const top = list.slice(0, 8);
                   const max = top[0]?.[1] || 1;
                   return (
@@ -338,7 +338,7 @@ function OrderLines({ items }: { items: OrderLine[] }) {
 /** Small label-and-number row, so the summary card stays short. */
 function Mini({ label, value, hot = false }: { label: string; value: React.ReactNode; hot?: boolean }) {
   return (
-    <div className={`flex items-baseline justify-between gap-2 rounded-xl px-3 py-2 ${hot ? "bg-gold-300 text-ink-900" : "bg-stone-50"}`}>
+    <div className={`flex items-baseline justify-between gap-2 rounded-xl px-3 py-2 ${hot ? "bg-honey-300 text-ink-900" : "bg-stone-50"}`}>
       <span className={`truncate text-xs font-light ${hot ? "" : "text-stone-500"}`}>{label}</span>
       <span className="text-[15px] tabular-nums">{value}</span>
     </div>

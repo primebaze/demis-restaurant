@@ -31,7 +31,7 @@ const STATUS_TONE: Record<ShootStatus, Tone> = {
 
 /** Glass pill on the photo that holds a native control (select or date). */
 const glassPill =
-  "relative inline-flex h-11 items-center gap-2 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] pl-4 pr-3 text-[15px] font-light text-white backdrop-blur-xl transition hover:bg-[rgba(58,52,48,0.65)] focus-within:ring-2 focus-within:ring-gold-300";
+  "relative inline-flex h-11 items-center gap-2 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] pl-4 pr-3 text-[15px] font-light text-white backdrop-blur-xl transition hover:bg-[rgba(58,52,48,0.65)] focus-within:ring-2 focus-within:ring-honey-300";
 
 const TITLE = "Weekly Plans";
 const SUBTITLE = "The food, people and moments to capture each week";
@@ -161,7 +161,7 @@ export default function ShootPlanList() {
                   <Link
                     href={`/admin/shoot-plans/${plan.id}`}
                     key={plan.id}
-                    className={`group flex min-w-0 flex-col rounded-[20px] p-4 text-stone-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300 md:px-[18px] ${
+                    className={`group flex min-w-0 flex-col rounded-[20px] p-4 text-stone-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-honey-300 md:px-[18px] ${
                       hot ? "border-[1.5px] border-stone-200 bg-stone-100" : "border border-stone-200 bg-white hover:border-stone-300"
                     }`}
                   >

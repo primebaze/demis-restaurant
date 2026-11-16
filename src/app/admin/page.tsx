@@ -205,7 +205,7 @@ export default function AdminDashboard() {
                           <span className="truncate">{b.guest}</span>
                           <span className={gtag}>{b.type}</span>
                         </span>
-                        <span className={`mt-0.5 flex items-center gap-1.5 text-xs font-light ${b.notes ? "text-gold-200" : "text-white/60"}`}>
+                        <span className={`mt-0.5 flex items-center gap-1.5 text-xs font-light ${b.notes ? "text-honey-200" : "text-white/60"}`}>
                           <StickyNote className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
                           <span className="truncate">{b.notes || "No requirements"}</span>
                         </span>
@@ -259,12 +259,12 @@ export default function AdminDashboard() {
           <div className="mt-3.5 flex h-[50px] items-center rounded-full bg-stone-100 pl-4 pr-1.5">
             <span className="text-sm font-light text-stone-500">Bookings</span>
             <span className="ml-2 text-[21px]">{data.stats.totalBookings30d}</span>
-            <Link href="/admin/bookings" aria-label="Open table bookings" className="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full bg-gold-300 text-ink-900 hover:bg-gold-200">
+            <Link href="/admin/bookings" aria-label="Open table bookings" className="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full bg-honey-300 text-ink-900 hover:bg-honey-200">
               <ArrowUpRight className="h-[18px] w-[18px]" strokeWidth={1.75} />
             </Link>
           </div>
           <div className="mt-2.5 grid grid-cols-2 gap-2">
-            <div className="rounded-[18px] bg-gold-300 p-3 text-ink-900">
+            <div className="rounded-[18px] bg-honey-300 p-3 text-ink-900">
               <div className="text-xs font-light whitespace-nowrap">Covers</div>
               <div className="mt-1 text-[22px]">{data.stats.totalCovers30d}</div>
             </div>
