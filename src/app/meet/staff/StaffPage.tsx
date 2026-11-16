@@ -228,7 +228,7 @@ function Row({ p, open, busy, onMenu, onBranch, onSignOut }: { p: Person; open: 
   const col = p.active ? personColourLight(p.id) : { bg: C.line, fg: C.sub };
   const notif =
     p.notifications === "on" ? <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#047857" }}><Icon name="notifications_active" size={17} />On</span>
-    : p.notifications === "off" ? <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#b45309" }}><Icon name="notifications_off" size={17} />Off · gets emails</span>
+    : p.notifications === "off" ? <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#b45309" }}><Icon name="notifications_off" size={17} />Off · email only</span>
     : p.notifications === "not_asked" ? <span style={{ color: C.sub }}>Not asked yet</span>
     : <span style={{ color: C.sub }}>Not set up</span>;
   const dim = !p.active;
