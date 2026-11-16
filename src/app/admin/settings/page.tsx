@@ -52,7 +52,7 @@ const TABS: { key: Tab; label: string; sub: string; intro: string; icon: LucideI
 
 /* Small shared bits for this page */
 const label = "mb-1.5 ml-1 block text-xs text-stone-500";
-const card = "rounded-[20px] border border-stone-200 p-4 md:p-5";
+const card = "rounded-[20px] border border-sand-300 p-4 md:p-5";
 const smallPrimary =
   "inline-flex h-8 items-center gap-1 rounded-full bg-honey-300 px-3 text-[13px] font-medium text-ink-900 transition hover:bg-honey-200 disabled:opacity-50";
 const iconDelete =
@@ -74,7 +74,7 @@ function ActiveToggle({ active, onClick, offLabel }: { active: boolean; onClick:
       onClick={onClick}
       aria-pressed={active}
       className={`inline-flex h-8 items-center rounded-full px-3 text-xs transition ${
-        active ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+        active ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-sand-200 text-stone-500 hover:bg-sand-300"
       }`}
     >
       {active ? "Active" : offLabel}
@@ -130,10 +130,10 @@ export default function AdminSettingsPage() {
                       onClick={() => setTab(t.key)}
                       aria-current={on ? "page" : undefined}
                       className={`flex items-center gap-3 rounded-[18px] px-3 py-2.5 text-left transition ${
-                        on ? "bg-honey-300 text-ink-900" : "text-stone-900 hover:bg-stone-50"
+                        on ? "bg-honey-300 text-ink-900" : "text-stone-900 hover:bg-sand-100"
                       }`}
                     >
-                      <span className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full ${on ? "bg-white/45" : "bg-stone-100"}`}>
+                      <span className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full ${on ? "bg-white/45" : "bg-sand-200"}`}>
                         <Icon className="h-5 w-5" strokeWidth={1.5} />
                       </span>
                       <span className="min-w-0">
@@ -150,7 +150,7 @@ export default function AdminSettingsPage() {
 
           <div className="lg:hidden">
             <div className="hidden md:block">
-              <div className="inline-flex rounded-full bg-white p-1">
+              <div className="inline-flex rounded-full bg-sand-50 p-1">
                 <Seg label="Settings sections" options={TABS.map((t) => ({ value: t.key, label: t.label }))} value={tab} onChange={setTab} />
               </div>
             </div>
@@ -227,7 +227,7 @@ function PoliciesPanel({
       {policies.map((p) => {
         const editing = editId === p.id;
         return (
-          <div key={p.id} className={editing ? "rounded-[20px] border-[1.5px] border-stone-200 bg-stone-100 p-4 md:p-5" : card}>
+          <div key={p.id} className={editing ? "rounded-[20px] border-[1.5px] border-sand-300 bg-sand-200 p-4 md:p-5" : card}>
             <div className="mb-3.5 flex items-center gap-2.5">
               <Store className={`h-5 w-5 ${editing ? "text-stone-900" : "text-stone-500"}`} strokeWidth={1.5} />
               <h3 className="text-base font-normal text-stone-900">{p.locationName}</h3>
@@ -292,7 +292,7 @@ function PoliciesPanel({
       })}
 
       {policies.length > 0 && (
-        <div className="rounded-[20px] bg-stone-50 px-4 py-3 md:px-[18px]">
+        <div className="rounded-[20px] bg-sand-100 px-4 py-3 md:px-[18px]">
           <div className="flex items-center gap-2 text-sm text-stone-900">
             <Info className="h-[18px] w-[18px] text-stone-500" strokeWidth={1.5} />
             In plain words
@@ -383,16 +383,16 @@ function AddOnsPanel({
   return (
     <div className="space-y-3.5">
       {/* Existing add-ons */}
-      <div className="overflow-hidden rounded-[20px] border border-stone-200">
+      <div className="overflow-hidden rounded-[20px] border border-sand-300">
         <div className="flex items-center px-4 py-3 md:px-5">
           <h3 className="text-base font-normal text-stone-900">Current add-ons</h3>
           <span className="ml-2 text-[13px] text-stone-500">{addOns.length}</span>
         </div>
         {addOns.length === 0 ? (
-          <p className="border-t border-stone-100 px-5 py-8 text-center text-sm font-light text-stone-500">No add-ons yet</p>
+          <p className="border-t border-sand-200 px-5 py-8 text-center text-sm font-light text-stone-500">No add-ons yet</p>
         ) : (
           addOns.map((a) => (
-            <div key={a.id} className="border-t border-stone-100 px-4 py-3 md:px-5">
+            <div key={a.id} className="border-t border-sand-200 px-4 py-3 md:px-5">
               {editId === a.id ? (
                 <div className="space-y-3">
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_120px]">
@@ -543,16 +543,16 @@ function BlackoutsPanel({
   return (
     <div className="space-y-3.5">
       {/* Existing blackout dates */}
-      <div className="overflow-hidden rounded-[20px] border border-stone-200">
+      <div className="overflow-hidden rounded-[20px] border border-sand-300">
         <div className="flex items-center px-4 py-3 md:px-5">
           <h3 className="text-base font-normal text-stone-900">Blackout dates</h3>
           <span className="ml-2 text-[13px] text-stone-500">{blackoutDates.length}</span>
         </div>
         {blackoutDates.length === 0 ? (
-          <p className="border-t border-stone-100 px-5 py-8 text-center text-sm font-light text-stone-500">No blackout dates set</p>
+          <p className="border-t border-sand-200 px-5 py-8 text-center text-sm font-light text-stone-500">No blackout dates set</p>
         ) : (
           blackoutDates.map((b) => (
-            <div key={b.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-stone-100 px-4 py-3 md:px-5">
+            <div key={b.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-sand-200 px-4 py-3 md:px-5">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
                 <span className="text-sm tabular-nums text-stone-900">{b.date}</span>
                 {b.fromTime && b.toTime ? (
@@ -716,7 +716,7 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
     byDay[d].push(s);
   }
 
-  const small = "h-9 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm text-stone-900 outline-none focus:border-stone-500 focus:bg-white [color-scheme:light]";
+  const small = "h-9 rounded-full border border-sand-300 bg-sand-100 px-3 text-sm text-stone-900 outline-none focus:border-stone-500 focus:bg-sand-50 [color-scheme:light]";
 
   return (
     <div className="space-y-3.5">
@@ -728,11 +728,11 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
       {loading ? (
         <div className="py-8 text-center text-sm font-light text-stone-500">Loading time slots...</div>
       ) : (
-        <div className="overflow-hidden rounded-[20px] border border-stone-200">
+        <div className="overflow-hidden rounded-[20px] border border-sand-300">
           {[1, 2, 3, 4, 5, 6, 0].map((day, i) => {
             const daySlots = byDay[day] || [];
             return (
-              <div key={day} className={`grid gap-x-4 gap-y-1 px-4 py-3 md:grid-cols-[80px_minmax(0,1fr)] md:px-5 ${i > 0 ? "border-t border-stone-100" : ""}`}>
+              <div key={day} className={`grid gap-x-4 gap-y-1 px-4 py-3 md:grid-cols-[80px_minmax(0,1fr)] md:px-5 ${i > 0 ? "border-t border-sand-200" : ""}`}>
                 <div className="flex items-baseline gap-2 md:block md:pt-1.5">
                   <h4 className="text-[15px] text-stone-900">{DAY_NAMES[day]}</h4>
                   <span className="text-xs text-stone-500">
@@ -742,7 +742,7 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
                 {daySlots.length === 0 ? (
                   <div className="py-1.5 text-sm font-light text-stone-500">No slots</div>
                 ) : (
-                  <div className="divide-y divide-stone-100">
+                  <div className="divide-y divide-sand-200">
                     {daySlots.map((s) => (
                       <div key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-1.5">
                         {editing === s.id ? (

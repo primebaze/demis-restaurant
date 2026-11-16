@@ -141,7 +141,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
               </div>
             </div>
 
-            <div className="mt-3 border-t border-stone-100 pt-3 md:mt-0 md:border-t-0 md:pt-0 lg:mt-3 lg:border-t lg:pt-3">
+            <div className="mt-3 border-t border-sand-200 pt-3 md:mt-0 md:border-t-0 md:pt-0 lg:mt-3 lg:border-t lg:pt-3">
               <SheetTitle>Where the day stands</SheetTitle>
               <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                 <Mini label="Still in" value={totals.stillIn} />
@@ -158,7 +158,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
           </div>
 
           {/* What sold, from the orders staff took at the door */}
-          <div className="mt-4 border-t border-stone-100 pt-4">
+          <div className="mt-4 border-t border-sand-200 pt-4">
             <SheetTitle
               aside={
                 <span className="text-xs font-light text-stone-500">
@@ -188,7 +188,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                                 <span className="truncate text-[13px] text-stone-700">{name}</span>
                                 <span className="text-sm tabular-nums text-stone-900">{qty}</span>
                               </div>
-                              <div className="h-1.5 overflow-hidden rounded-full bg-stone-100">
+                              <div className="h-1.5 overflow-hidden rounded-full bg-sand-200">
                                 <div className={`h-full rounded-full ${bar}`} style={{ width: `${(qty / max) * 100}%` }} />
                               </div>
                             </div>
@@ -222,7 +222,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                 {visits.map((v) => {
                   const isDining = v.visitType === "dining";
                   return (
-                    <li key={v.id} className="border-t border-stone-100 px-4 py-3">
+                    <li key={v.id} className="border-t border-sand-200 px-4 py-3">
                       <div className="flex items-start gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -242,7 +242,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                         <span className="text-[15px] tabular-nums">{v.amountPence != null ? money(v.amountPence) : <Blank />}</span>
                       </div>
                       {v.items?.length > 0 && (
-                        <div className="mt-2 rounded-2xl bg-stone-50 px-3 py-2 text-xs text-stone-600">
+                        <div className="mt-2 rounded-2xl bg-sand-100 px-3 py-2 text-xs text-stone-600">
                           <OrderLines items={v.items} />
                         </div>
                       )}
@@ -317,7 +317,7 @@ function TypeTag({ dining }: { dining: boolean }) {
   return dining ? (
     <Tag tone="off">Dining</Tag>
   ) : (
-    <span className="inline-flex h-6 items-center rounded-full border border-stone-200 bg-white px-2.5 text-xs text-stone-600">Takeaway</span>
+    <span className="inline-flex h-6 items-center rounded-full border border-sand-300 bg-sand-50 px-2.5 text-xs text-stone-600">Takeaway</span>
   );
 }
 
@@ -338,7 +338,7 @@ function OrderLines({ items }: { items: OrderLine[] }) {
 /** Small label-and-number row, so the summary card stays short. */
 function Mini({ label, value, hot = false }: { label: string; value: React.ReactNode; hot?: boolean }) {
   return (
-    <div className={`flex items-baseline justify-between gap-2 rounded-xl px-3 py-2 ${hot ? "bg-honey-300 text-ink-900" : "bg-stone-50"}`}>
+    <div className={`flex items-baseline justify-between gap-2 rounded-xl px-3 py-2 ${hot ? "bg-honey-300 text-ink-900" : "bg-sand-100"}`}>
       <span className={`truncate text-xs font-light ${hot ? "" : "text-stone-500"}`}>{label}</span>
       <span className="text-[15px] tabular-nums">{value}</span>
     </div>
@@ -356,7 +356,7 @@ function Split({ label, pence, total, tone }: { label: string; pence: number; to
           <span className="ml-2 text-xs text-stone-500">{pct}%</span>
         </span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-stone-100">
+      <div className="h-1.5 overflow-hidden rounded-full bg-sand-200">
         <div className={`h-full rounded-full ${tone} transition-all`} style={{ width: `${pct}%` }} />
       </div>
     </div>

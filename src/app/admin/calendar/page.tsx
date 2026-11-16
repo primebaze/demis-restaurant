@@ -110,7 +110,7 @@ export default function CalendarPage() {
   const nextName = MONTH_NAMES[(month + 1) % 12];
 
   const navBtn =
-    "inline-flex h-9 items-center gap-1 rounded-full border border-stone-200 px-3 text-[13px] text-stone-900 transition hover:border-stone-300";
+    "inline-flex h-9 items-center gap-1 rounded-full border border-sand-300 px-3 text-[13px] text-stone-900 transition hover:border-stone-300";
 
   // The chosen day's bookings: in the side sheet, and in the slide-up panel on phones and iPad portrait.
   const dayDetails = selectedDate ? (
@@ -131,7 +131,7 @@ export default function CalendarPage() {
                   </div>
                   <div className="mt-3 space-y-2 lg:max-h-[calc(100vh-330px)] lg:overflow-y-auto">
                     {selectedEntry.bookings.map((b) => (
-                      <div key={b.id} className="rounded-[18px] bg-stone-50 px-4 py-3">
+                      <div key={b.id} className="rounded-[18px] bg-sand-100 px-4 py-3">
                         <div className="flex items-center justify-between gap-2">
                           <span className="truncate text-[15px] text-stone-900">{b.guest}</span>
                           <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
@@ -249,8 +249,8 @@ export default function CalendarPage() {
                       isSelected
                         ? "bg-stone-900 text-white"
                         : isToday
-                        ? "bg-white text-stone-900 ring-1 ring-inset ring-stone-900"
-                        : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-500" : "text-stone-900"}`
+                        ? "bg-sand-50 text-stone-900 ring-1 ring-inset ring-stone-900"
+                        : `bg-sand-200 hover:bg-sand-300 ${isPast ? "text-stone-500" : "text-stone-900"}`
                     }`}
                   >
                     <span className="text-sm md:text-[17px] leading-none">{day}</span>

@@ -45,7 +45,7 @@ function campaignLabel(campaign: string): string {
 /** Round "@" circle for a click we only have an email for. */
 function EmailAvatar() {
   return (
-    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-500">
+    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sand-200 text-stone-500">
       <AtSign className="h-4 w-4" strokeWidth={1.75} />
     </span>
   );
@@ -191,7 +191,7 @@ export default function LinkClicksPage() {
                         >
                           <span className="relative flex h-[170px] items-end">
                             <span
-                              className={`relative w-full rounded-t-[12px] rounded-b-[4px] transition-colors ${on ? "bg-honey-300" : "bg-stone-100 group-hover:bg-honey-200"}`}
+                              className={`relative w-full rounded-t-[12px] rounded-b-[4px] transition-colors ${on ? "bg-honey-300" : "bg-sand-200 group-hover:bg-honey-200"}`}
                               style={{ height: `${h}%` }}
                             >
                               <span
@@ -215,7 +215,7 @@ export default function LinkClicksPage() {
               {stats?.byUrl?.length ? (
                 <ul>
                   {stats.byUrl.map((u) => (
-                    <li key={u.url} className="flex items-center gap-3 border-t border-stone-100 py-2.5 text-sm">
+                    <li key={u.url} className="flex items-center gap-3 border-t border-sand-200 py-2.5 text-sm">
                       <Link2 className="h-[18px] w-[18px] shrink-0 text-stone-500" strokeWidth={1.5} />
                       <span className="min-w-0 flex-1 truncate text-stone-600" title={u.url}>
                         {u.url}
@@ -225,11 +225,11 @@ export default function LinkClicksPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="border-t border-stone-100 py-3 text-sm text-stone-500">No clicks yet.</p>
+                <p className="border-t border-sand-200 py-3 text-sm text-stone-500">No clicks yet.</p>
               )}
 
               <div className="min-h-4 flex-1" />
-              <p className="flex items-center gap-2 border-t border-stone-100 pt-3 text-[13px] text-stone-600">
+              <p className="flex items-center gap-2 border-t border-sand-200 pt-3 text-[13px] text-stone-600">
                 <Clock className="h-4 w-4" strokeWidth={1.5} />
                 Last click: {when(stats?.lastClickAt ?? null)}
               </p>
@@ -249,7 +249,7 @@ export default function LinkClicksPage() {
                   {/* Phones: a simple list */}
                   <ul className="md:hidden">
                     {stats.clickers.map((c) => (
-                      <li key={c.email + c.at} className="flex items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm">
+                      <li key={c.email + c.at} className="flex items-center gap-3 border-t border-sand-200 px-4 py-3 text-sm">
                         <div className="min-w-0 flex-1">
                           <Contact c={c} />
                         </div>

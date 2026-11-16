@@ -11,9 +11,9 @@ import { useRouter } from "next/navigation";
 import { SHOOT_STATUSES, type ShootStatus } from "@/lib/shoot-plans";
 
 export const fieldClass =
-  "w-full min-h-11 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-300 disabled:opacity-60 [color-scheme:light]";
+  "w-full min-h-11 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-300 disabled:opacity-60 [color-scheme:light]";
 export const linkClass =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-honey-300";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-sand-100 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-honey-300";
 export function Action({
   primary = false,
   className = "",
@@ -25,7 +25,7 @@ export function Action({
       type="button"
       onClick={onClick}
       {...props}
-      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-honey-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-honey-300 text-ink-900 hover:bg-honey-200" : "border border-stone-200 text-stone-800 hover:bg-stone-50"} ${className}`}
+      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-honey-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-honey-300 text-ink-900 hover:bg-honey-200" : "border border-sand-300 text-stone-800 hover:bg-sand-100"} ${className}`}
     />
   );
 }
@@ -75,8 +75,8 @@ export function Feedback({
 }
 export function StatusBadge({ status }: { status: ShootStatus }) {
   const colours = {
-    planned: "bg-stone-100 text-stone-900",
-    in_progress: "bg-stone-100 text-stone-900",
+    planned: "bg-sand-200 text-stone-900",
+    in_progress: "bg-sand-200 text-stone-900",
     completed: "bg-emerald-50 text-emerald-700",
     cancelled: "bg-stone-400/10 text-stone-700",
   };
@@ -109,7 +109,7 @@ export function CaptureProgress({
         aria-valuenow={captured}
         aria-valuemin={0}
         aria-valuemax={total || 1}
-        className="h-1.5 overflow-hidden rounded-full bg-stone-100"
+        className="h-1.5 overflow-hidden rounded-full bg-sand-200"
       >
         <div
           className="h-full rounded-full bg-honey-300"
@@ -208,7 +208,7 @@ export function UnsavedGuard({ dirty }: { dirty: boolean }) {
     <dialog
       ref={dialog}
       onCancel={close}
-      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-stone-200 bg-white p-6 text-stone-900 backdrop:bg-black/70"
+      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-sand-300 bg-sand-50 p-6 text-stone-900 backdrop:bg-black/70"
       aria-labelledby="leave-title"
       aria-describedby="leave-description"
     >
@@ -268,7 +268,7 @@ export function ConfirmDelete({
         event.preventDefault();
         if (!busy) onCancel();
       }}
-      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 text-stone-900 backdrop:bg-black/70"
+      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-sand-300 bg-sand-50 p-6 text-stone-900 backdrop:bg-black/70"
     >
       <h2 id="delete-plan-title" className="text-xl font-bold">
         Delete plan?

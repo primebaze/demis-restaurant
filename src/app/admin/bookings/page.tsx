@@ -77,8 +77,8 @@ function ukTodayStr() {
 function dayTag(date: string): { label: string; cls: string } {
   const ukToday = ukTodayStr();
   if (date > ukToday) return { label: "Upcoming", cls: "bg-emerald-50 text-emerald-700" };
-  if (date === ukToday) return { label: "Today", cls: "bg-stone-100 text-stone-900" };
-  return { label: "Past", cls: "bg-stone-100 text-stone-500" };
+  if (date === ukToday) return { label: "Today", cls: "bg-sand-200 text-stone-900" };
+  return { label: "Past", cls: "bg-sand-200 text-stone-500" };
 }
 
 /** "Sun 15 Nov" */
@@ -92,9 +92,9 @@ function plural(n: number, one: string, many: string) {
 }
 
 const updSelBase =
-  "rounded-full border border-stone-200 bg-white pl-3.5 pr-2 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-stone-500 disabled:opacity-50";
+  "rounded-full border border-sand-300 bg-sand-50 pl-3.5 pr-2 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-stone-500 disabled:opacity-50";
 const smallSel =
-  "h-9 rounded-full border border-stone-200 bg-white px-3.5 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-stone-500";
+  "h-9 rounded-full border border-sand-300 bg-sand-50 px-3.5 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-stone-500";
 const callBtnBase =
   "inline-flex items-center justify-center gap-1.5 px-4 rounded-full text-sm font-medium text-ink-900 bg-honey-300 hover:bg-honey-200 transition";
 
@@ -428,7 +428,7 @@ export default function AdminBookingsPage() {
           </button>
 
           {open && (
-            <div className="mt-3 border-t border-stone-100 pt-3">
+            <div className="mt-3 border-t border-sand-200 pt-3">
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">{detailItems(b)}</div>
               {(b.notes || b.addOns.length > 0) && <div className="mt-3">{extras(b)}</div>}
               <div className="mt-4 grid grid-cols-2 gap-2">
@@ -438,7 +438,7 @@ export default function AdminBookingsPage() {
                     Call
                   </a>
                 ) : (
-                  <span className="flex h-11 items-center justify-center rounded-full bg-stone-100 text-[13px] text-stone-500">No phone</span>
+                  <span className="flex h-11 items-center justify-center rounded-full bg-sand-200 text-[13px] text-stone-500">No phone</span>
                 )}
                 {statusSelect(b, "h-11 w-full text-center")}
               </div>
@@ -494,7 +494,7 @@ export default function AdminBookingsPage() {
         <Sheet label="Email past guests" className="mb-4 p-5 md:p-6">
           <SheetTitle
             aside={
-              <button onClick={() => { setMailOpen(false); setMailNote(""); }} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:text-stone-900">
+              <button onClick={() => { setMailOpen(false); setMailNote(""); }} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded-full bg-sand-200 text-stone-600 hover:text-stone-900">
                 <X className="h-4 w-4" strokeWidth={1.75} />
               </button>
             }
@@ -530,7 +530,7 @@ export default function AdminBookingsPage() {
             <button
               onClick={saveMailTemplate}
               disabled={!mailSubject.trim() || !mailMessage.trim()}
-              className="inline-flex h-8 items-center rounded-full border border-stone-300 bg-white px-3 text-[13px] text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:text-stone-500"
+              className="inline-flex h-8 items-center rounded-full border border-stone-300 bg-sand-50 px-3 text-[13px] text-stone-900 transition hover:bg-sand-100 disabled:cursor-not-allowed disabled:text-stone-500"
             >
               + Save current
             </button>
@@ -564,10 +564,10 @@ export default function AdminBookingsPage() {
               </p>
             </div>
             <div className="ml-auto flex gap-1.5">
-              <button onClick={() => shiftMonth(-1)} aria-label="Previous month" className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900">
+              <button onClick={() => shiftMonth(-1)} aria-label="Previous month" className="flex h-9 w-9 items-center justify-center rounded-full border border-sand-300 text-stone-600 hover:border-stone-300 hover:text-stone-900">
                 <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
               </button>
-              <button onClick={() => shiftMonth(1)} aria-label="Next month" className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900">
+              <button onClick={() => shiftMonth(1)} aria-label="Next month" className="flex h-9 w-9 items-center justify-center rounded-full border border-sand-300 text-stone-600 hover:border-stone-300 hover:text-stone-900">
                 <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
               </button>
             </div>
@@ -594,8 +594,8 @@ export default function AdminBookingsPage() {
                     isSel
                       ? "bg-stone-900 text-white"
                       : isToday
-                      ? "bg-white text-stone-900 ring-1 ring-inset ring-stone-900"
-                      : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-500" : "text-stone-900"}`
+                      ? "bg-sand-50 text-stone-900 ring-1 ring-inset ring-stone-900"
+                      : `bg-sand-200 hover:bg-sand-300 ${isPast ? "text-stone-500" : "text-stone-900"}`
                   }`}
                 >
                   <span className="leading-none">{Number(ds.slice(8))}</span>
@@ -615,7 +615,7 @@ export default function AdminBookingsPage() {
               <ul className="mt-1">
                 {comingUp.map((e) => (
                   <li key={e.date}>
-                    <button onClick={() => pickDay(e.date)} className="flex w-full items-center border-t border-stone-100 py-2.5 text-left text-[13px] hover:text-stone-900">
+                    <button onClick={() => pickDay(e.date)} className="flex w-full items-center border-t border-sand-200 py-2.5 text-left text-[13px] hover:text-stone-900">
                       <span>{dayLabel(e.date)}</span>
                       <span className="ml-auto text-xs font-light text-stone-500">
                         {plural(e.count, "booking", "bookings")} · {plural(e.totalCovers, "cover", "covers")}
@@ -631,7 +631,7 @@ export default function AdminBookingsPage() {
         {/* Bookings list: a white sheet on iPad landscape and desktop, cards on the photo below that */}
         <section
           aria-label="Bookings"
-          className="min-w-0 lg:rounded-[22px] lg:bg-white lg:text-stone-900 lg:shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)]"
+          className="min-w-0 lg:rounded-[22px] lg:bg-sand-50 lg:text-stone-900 lg:shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)]"
         >
           <div className="flex flex-wrap items-center gap-3 pb-3 pt-2 lg:px-5 lg:pt-5">
             <div className="min-w-0">
@@ -712,11 +712,11 @@ export default function AdminBookingsPage() {
           )}
 
           {loading ? (
-            <div className="rounded-[22px] bg-white lg:rounded-none lg:bg-transparent">
+            <div className="rounded-[22px] bg-sand-50 lg:rounded-none lg:bg-transparent">
               <Empty>Loading bookings…</Empty>
             </div>
           ) : bookings.length === 0 ? (
-            <div className="rounded-[22px] bg-white lg:rounded-none lg:bg-transparent">
+            <div className="rounded-[22px] bg-sand-50 lg:rounded-none lg:bg-transparent">
               <Empty>{mode === "day" ? "No bookings on this day" : "No bookings found"}</Empty>
             </div>
           ) : (
@@ -741,7 +741,7 @@ export default function AdminBookingsPage() {
                       return (
                         <Fragment key={b.id}>
                           <tr
-                            className={`cursor-pointer transition-colors ${open ? "bg-ember-50" : "hover:bg-stone-50"}`}
+                            className={`cursor-pointer transition-colors ${open ? "bg-ember-50" : "hover:bg-sand-100"}`}
                             onClick={() => setExpanded(open ? null : b.id)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") setExpanded(open ? null : b.id);
@@ -788,7 +788,7 @@ export default function AdminBookingsPage() {
                           {open && (
                             <tr className="bg-ember-50">
                               <td colSpan={cols} className="!border-t-0 !pt-0">
-                                <div className="rounded-[18px] bg-white px-4 py-3.5">
+                                <div className="rounded-[18px] bg-sand-50 px-4 py-3.5">
                                   <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
                                     {detailItems(b)}
                                     {b.guest.phone && (
@@ -798,7 +798,7 @@ export default function AdminBookingsPage() {
                                       </a>
                                     )}
                                   </div>
-                                  {(b.notes || b.addOns.length > 0) && <div className="mt-3 border-t border-stone-100 pt-3">{extras(b)}</div>}
+                                  {(b.notes || b.addOns.length > 0) && <div className="mt-3 border-t border-sand-200 pt-3">{extras(b)}</div>}
                                 </div>
                               </td>
                             </tr>
@@ -819,7 +819,7 @@ export default function AdminBookingsPage() {
 
           {/* Footer: hint and pagination */}
           {(mode === "day" || totalPages > 1) && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] lg:mt-0 lg:border-t lg:border-stone-100 lg:px-5 lg:py-3">
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] lg:mt-0 lg:border-t lg:border-sand-200 lg:px-5 lg:py-3">
               {mode === "day" && (
                 <span className="font-light text-white/85 lg:text-stone-500">Tap a day on the calendar to see its bookings</span>
               )}

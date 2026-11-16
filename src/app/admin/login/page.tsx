@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, EyeOff, Globe, KeyRound, Lock, Mail, MapPin, Shield } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Globe, KeyRound, Lock, Mail, MapPin } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -113,10 +113,6 @@ export default function AdminLoginPage() {
             {loading ? "Signing in…" : "Sign in"}
             {!loading && <ArrowRight className="h-5 w-5" strokeWidth={1.75} />}
           </button>
-          <p className="mt-4 flex items-center gap-1.5 text-xs font-light text-white/80">
-            <Shield className="h-4 w-4" strokeWidth={1.5} />
-            Too many wrong tries locks sign-in for a while.
-          </p>
         </form>
       </div>
 

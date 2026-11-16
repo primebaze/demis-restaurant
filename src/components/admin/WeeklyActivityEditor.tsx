@@ -89,7 +89,7 @@ export default function WeeklyActivityEditor({
         </div>
       )}
       {!items.length && (
-        <div className="rounded-2xl border border-dashed border-stone-200 px-6 py-12 text-center text-stone-500">
+        <div className="rounded-2xl border border-dashed border-sand-300 px-6 py-12 text-center text-stone-500">
           No activities yet
         </div>
       )}
@@ -99,7 +99,7 @@ export default function WeeklyActivityEditor({
           <fieldset
             key={item.id}
             disabled={disabled}
-            className="min-w-0 space-y-5 rounded-2xl border border-stone-100 bg-white p-5 sm:p-7"
+            className="min-w-0 space-y-5 rounded-2xl border border-sand-200 bg-sand-50 p-5 sm:p-7"
           >
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-sm font-semibold text-stone-900">

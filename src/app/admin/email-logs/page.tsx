@@ -20,10 +20,10 @@ type Log = {
 const STATUS_TONE: Record<string, Tone> = { sent: "ok", queued: "wait", failed: "bad" };
 
 const TYPE_COLORS: Record<string, string> = {
-  transactional: "bg-stone-100 text-stone-700",
-  direct: "bg-stone-100 text-stone-900",
-  bulk: "bg-stone-100 text-stone-500",
-  admin: "bg-stone-100 text-stone-700",
+  transactional: "bg-sand-200 text-stone-700",
+  direct: "bg-sand-200 text-stone-900",
+  bulk: "bg-sand-200 text-stone-500",
+  admin: "bg-sand-200 text-stone-700",
 };
 
 function fmt(dateStr: string | null) {
@@ -144,7 +144,7 @@ export default function EmailLogsPage() {
   const allOn = logs.length > 0 && selected.size === logs.length;
 
   const typeTag = (t: string) => (
-    <span className={`inline-flex h-6 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${TYPE_COLORS[t] || "bg-stone-100 text-stone-700"}`}>{t}</span>
+    <span className={`inline-flex h-6 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${TYPE_COLORS[t] || "bg-sand-200 text-stone-700"}`}>{t}</span>
   );
   const statusTag = (l: Log) => (
     <span title={l.error || undefined}>
@@ -158,7 +158,7 @@ export default function EmailLogsPage() {
           onClick={() => resend(l.id)}
           disabled={resending === l.id}
           title="Send this email again now"
-          className="inline-flex h-8 items-center rounded-full border border-stone-200 bg-stone-100 px-3 text-[13px] text-stone-900 transition hover:bg-stone-100 disabled:opacity-50"
+          className="inline-flex h-8 items-center rounded-full border border-sand-300 bg-sand-200 px-3 text-[13px] text-stone-900 transition hover:bg-sand-200 disabled:opacity-50"
         >
           {resending === l.id ? "…" : "Resend"}
         </button>
@@ -219,13 +219,13 @@ export default function EmailLogsPage() {
           <>
             {/* Phones: one card per email */}
             <div className="md:hidden">
-              <label className="flex items-center gap-3 border-t border-stone-100 px-4 py-2.5 text-xs text-stone-500">
+              <label className="flex items-center gap-3 border-t border-sand-200 px-4 py-2.5 text-xs text-stone-500">
                 <input type="checkbox" aria-label="Select all" checked={allOn} onChange={toggleSelectAll} className={box} />
                 Select all on this page
               </label>
               <ul>
                 {logs.map((l) => (
-                  <li key={l.id} className={`flex gap-3 border-t border-stone-100 px-4 py-3 ${selected.has(l.id) ? "bg-stone-100" : ""}`}>
+                  <li key={l.id} className={`flex gap-3 border-t border-sand-200 px-4 py-3 ${selected.has(l.id) ? "bg-sand-200" : ""}`}>
                     <input
                       type="checkbox"
                       aria-label={`Select email to ${l.recipient}`}
@@ -272,7 +272,7 @@ export default function EmailLogsPage() {
                 </thead>
                 <tbody>
                   {logs.map((l) => (
-                    <tr key={l.id} className={selected.has(l.id) ? "bg-ember-50" : "hover:bg-stone-50"}>
+                    <tr key={l.id} className={selected.has(l.id) ? "bg-ember-50" : "hover:bg-sand-100"}>
                       <td className="!pl-5">
                         <input
                           type="checkbox"
@@ -326,23 +326,23 @@ export default function EmailLogsPage() {
 
       {/* View email */}
       {viewing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" onClick={() => setViewing(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm" onClick={() => setViewing(null)}>
           <div
             role="dialog"
             aria-label="Email preview"
-            className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] bg-white text-stone-900"
+            className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] bg-sand-50 text-stone-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start gap-3 border-b border-stone-100 px-5 py-4">
+            <div className="flex items-start gap-3 border-b border-sand-200 px-5 py-4">
               <div className="min-w-0">
                 <h2 className="truncate font-outfit text-lg font-normal">{viewing.subject || "…"}</h2>
                 <p className="truncate text-xs text-stone-500">To: {viewing.recipient}</p>
               </div>
-              <button onClick={() => setViewing(null)} aria-label="Close" className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:text-stone-900">
+              <button onClick={() => setViewing(null)} aria-label="Close" className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sand-200 text-stone-600 hover:text-stone-900">
                 <X className="h-4 w-4" strokeWidth={1.75} />
               </button>
             </div>
-            <div className="flex-1 overflow-auto bg-white">
+            <div className="flex-1 overflow-auto bg-sand-50">
               {viewLoading ? (
                 <Empty>Loading…</Empty>
               ) : viewing.bodyHtml ? (
@@ -351,7 +351,7 @@ export default function EmailLogsPage() {
                 <Empty>No stored body for this email (logged before full-body capture).</Empty>
               )}
             </div>
-            <div className="border-t border-stone-100 px-5 py-3 text-right">
+            <div className="border-t border-sand-200 px-5 py-3 text-right">
               <button onClick={() => setViewing(null)} className={btn.light}>Close</button>
             </div>
           </div>

@@ -43,7 +43,7 @@ export function GlassStats({ items }: { items: { label: string; value: ReactNode
 /** White content panel. */
 export function Sheet({ children, className = "", label }: { children: ReactNode; className?: string; label?: string }) {
   return (
-    <section aria-label={label} className={`rounded-[22px] bg-white text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] ${className}`}>
+    <section aria-label={label} className={`rounded-[22px] bg-sand-50 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] ${className}`}>
       {children}
     </section>
   );
@@ -62,9 +62,9 @@ const TONES = {
   ok: "bg-emerald-100 text-emerald-800",
   wait: "bg-amber-100 text-amber-900",
   bad: "bg-red-100 text-red-800",
-  off: "bg-stone-100 text-stone-700",
-  hot: "bg-stone-100 text-stone-800",
-  gold: "bg-stone-100 text-stone-800",
+  off: "bg-sand-200 text-stone-700",
+  hot: "bg-sand-200 text-stone-800",
+  gold: "bg-sand-200 text-stone-800",
 } as const;
 export type Tone = keyof typeof TONES;
 
@@ -96,10 +96,10 @@ export const btn = {
   primary:
     "inline-flex items-center gap-2 h-11 px-5 rounded-full text-[15px] font-medium text-ink-900 bg-honey-300 hover:bg-honey-200 transition disabled:opacity-50",
   light:
-    "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-stone-900 bg-white border border-stone-200 hover:border-stone-300 transition disabled:opacity-50",
+    "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-stone-900 bg-sand-50 border border-sand-300 hover:border-stone-300 transition disabled:opacity-50",
   dark: "inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-white bg-stone-900 hover:bg-black transition disabled:opacity-50",
   small:
-    "inline-flex items-center gap-1 h-8 px-3 rounded-full text-[13px] text-stone-900 bg-white border border-stone-200 hover:border-stone-300 transition disabled:opacity-50",
+    "inline-flex items-center gap-1 h-8 px-3 rounded-full text-[13px] text-stone-900 bg-sand-50 border border-sand-300 hover:border-stone-300 transition disabled:opacity-50",
 };
 
 /** Initials circle for a guest. */
@@ -128,7 +128,7 @@ export function PillSwitch({ items, current, label = "Switch" }: { items: { href
             key={s.href}
             href={s.href}
             aria-current={on ? "page" : undefined}
-            className={`inline-flex h-9 items-center rounded-full px-4 text-sm whitespace-nowrap transition ${on ? "bg-white text-stone-900" : "text-white/90 hover:text-white"}`}
+            className={`inline-flex h-9 items-center rounded-full px-4 text-sm whitespace-nowrap transition ${on ? "bg-sand-50 text-stone-900" : "text-white/90 hover:text-white"}`}
           >
             {s.label}
           </a>
@@ -141,14 +141,14 @@ export function PillSwitch({ items, current, label = "Switch" }: { items: { href
 /** Segmented control on a white sheet. */
 export function Seg<T extends string>({ options, value, onChange, label }: { options: { value: T; label: ReactNode }[]; value: T; onChange: (v: T) => void; label?: string }) {
   return (
-    <div className="inline-flex flex-wrap gap-0.5 rounded-full bg-stone-100 p-1" role="group" aria-label={label}>
+    <div className="inline-flex flex-wrap gap-0.5 rounded-full bg-sand-200 p-1" role="group" aria-label={label}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           aria-pressed={value === o.value}
-          className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${value === o.value ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+          className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${value === o.value ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
         >
           {o.label}
         </button>
@@ -159,14 +159,14 @@ export function Seg<T extends string>({ options, value, onChange, label }: { opt
 
 /** Inputs on white sheets. */
 export const field =
-  "h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition focus:border-stone-500 focus:bg-white [color-scheme:light]";
+  "h-11 w-full rounded-full border border-sand-300 bg-sand-100 px-4 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition focus:border-stone-500 focus:bg-sand-50 [color-scheme:light]";
 export const fieldArea =
-  "w-full rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition focus:border-stone-500 focus:bg-white";
+  "w-full rounded-[18px] border border-sand-300 bg-sand-100 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition focus:border-stone-500 focus:bg-sand-50";
 
 /** Small grey stat tile inside a white sheet. `hot` = the one number that matters most (solid gold). */
 export function StatTile({ label, value, hot = false }: { label: string; value: ReactNode; hot?: boolean }) {
   return (
-    <div className={`rounded-[18px] p-3.5 ${hot ? "bg-honey-300 text-ink-900" : "bg-stone-100"}`}>
+    <div className={`rounded-[18px] p-3.5 ${hot ? "bg-honey-300 text-ink-900" : "bg-sand-200"}`}>
       <div className={`text-xs font-light whitespace-nowrap ${hot ? "" : "text-stone-500"}`}>{label}</div>
       <div className="mt-1 text-[22px]">{value}</div>
     </div>
@@ -175,7 +175,7 @@ export function StatTile({ label, value, hot = false }: { label: string; value: 
 
 /** Footer bar at the bottom of a sheet (paging, summary, a main action). */
 export function SheetFooter({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-center gap-2 border-t border-stone-100 px-4 py-3 text-[13px] md:px-5">{children}</div>;
+  return <div className="flex flex-wrap items-center gap-2 border-t border-sand-200 px-4 py-3 text-[13px] md:px-5">{children}</div>;
 }
 
 /** Empty state inside a sheet. */
@@ -185,7 +185,7 @@ export function Empty({ children }: { children: ReactNode }) {
 
 /** Table look shared by every list. Wrap the <table> in <div className={tableWrap}> so it scrolls on small screens. */
 export const tableWrap = "overflow-x-auto";
-export const table = "w-full border-collapse text-sm [&_th]:whitespace-nowrap [&_th]:px-3.5 [&_th]:pb-2.5 [&_th]:pt-1 [&_th]:text-left [&_th]:text-xs [&_th]:font-normal [&_th]:text-stone-500 [&_td]:border-t [&_td]:border-stone-100 [&_td]:px-3.5 [&_td]:py-3 [&_td]:align-middle";
+export const table = "w-full border-collapse text-sm [&_th]:whitespace-nowrap [&_th]:px-3.5 [&_th]:pb-2.5 [&_th]:pt-1 [&_th]:text-left [&_th]:text-xs [&_th]:font-normal [&_th]:text-stone-500 [&_td]:border-t [&_td]:border-sand-200 [&_td]:px-3.5 [&_td]:py-3 [&_td]:align-middle";
 
 /**
  * Panel that slides up from the bottom on phones and iPad portrait (hidden from lg up).
@@ -233,9 +233,9 @@ function BottomSheetInner({ onClose, title, subtitle, children, closing }: { onC
 
   return (
     <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : "Details"}>
-      <div className={`${closing ? "sheet-fade-out" : "sheet-fade"} absolute inset-0 bg-black/50 backdrop-blur-[2px]`} onClick={onClose} />
+      <div className={`${closing ? "sheet-fade-out" : "sheet-fade"} absolute inset-0 bg-black/65 backdrop-blur-[2px]`} onClick={onClose} />
       <div
-        className={`${closing ? "sheet-down" : "sheet-up"} absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-[28px] bg-stone-50 text-stone-900 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]`}
+        className={`${closing ? "sheet-down" : "sheet-up"} absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-[28px] bg-sand-100 text-stone-900 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]`}
         style={drag ? { transform: `translateY(${drag}px)`, transition: "none" } : undefined}
       >
         <div
@@ -254,7 +254,7 @@ function BottomSheetInner({ onClose, title, subtitle, children, closing }: { onC
               <h2 className="font-outfit text-xl font-normal tracking-tight">{title}</h2>
               {subtitle && <p className="mt-0.5 text-[13px] font-light text-stone-500">{subtitle}</p>}
             </div>
-            <button type="button" onClick={onClose} aria-label="Close" className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-stone-600 shadow-sm">
+            <button type="button" onClick={onClose} aria-label="Close" className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-50 text-stone-600 shadow-sm">
               <X className="h-5 w-5" strokeWidth={1.75} />
             </button>
           </div>
@@ -287,8 +287,8 @@ export function useTypedConfirm(): [(o: { title: string; message: ReactNode; wor
   };
 
   const dialog = req ? (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-3 backdrop-blur-[2px] sm:items-center" role="alertdialog" aria-modal="true" aria-label={req.title} onClick={() => close(false)}>
-      <div className="sheet-up w-full max-w-md rounded-[24px] bg-white p-6 text-stone-900" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/65 p-3 backdrop-blur-[2px] sm:items-center" role="alertdialog" aria-modal="true" aria-label={req.title} onClick={() => close(false)}>
+      <div className="sheet-up w-full max-w-md rounded-[24px] bg-sand-50 p-6 text-stone-900" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-outfit text-xl font-normal">{req.title}</h2>
         <div className="mt-2 text-sm font-light text-stone-600">{req.message}</div>
         <p className="mt-2 text-sm font-light text-red-700">This can&apos;t be undone.</p>
@@ -388,7 +388,7 @@ export function DateField({
   const trigger =
     variant === "glass"
       ? "inline-flex h-11 items-center gap-2 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] px-4 text-[15px] font-light text-white backdrop-blur-xl hover:bg-[rgba(58,52,48,0.65)]"
-      : `inline-flex h-11 w-full items-center gap-2 rounded-full border bg-stone-50 px-4 text-sm text-stone-900 hover:border-stone-300 ${invalid ? "border-red-300" : "border-stone-200"}`;
+      : `inline-flex h-11 w-full items-center gap-2 rounded-full border bg-sand-100 px-4 text-sm text-stone-900 hover:border-stone-300 ${invalid ? "border-red-300" : "border-sand-300"}`;
 
   return (
     <div ref={ref} className={`relative ${variant === "light" ? "w-full" : "inline-block"} ${className}`}>
@@ -399,13 +399,13 @@ export function DateField({
       </button>
 
       {open && (
-        <div role="dialog" aria-label={ariaLabel} className={`absolute ${variant === "glass" ? "right-0" : "left-0"} top-[calc(100%+8px)] z-[55] w-[300px] max-w-[calc(100vw-32px)] rounded-[22px] bg-white p-3.5 text-stone-900 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-stone-100`}>
+        <div role="dialog" aria-label={ariaLabel} className={`absolute ${variant === "glass" ? "right-0" : "left-0"} top-[calc(100%+8px)] z-[55] w-[300px] max-w-[calc(100vw-32px)] rounded-[22px] bg-sand-50 p-3.5 text-stone-900 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-stone-100`}>
           <div className="mb-2 flex items-center gap-1">
             <span className="pl-1.5 font-outfit text-[17px]">{monthName}</span>
-            <button type="button" onClick={() => shift(-1)} aria-label="Previous month" className="ml-auto flex h-9 w-9 items-center justify-center rounded-full hover:bg-stone-100">
+            <button type="button" onClick={() => shift(-1)} aria-label="Previous month" className="ml-auto flex h-9 w-9 items-center justify-center rounded-full hover:bg-sand-200">
               <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
             </button>
-            <button type="button" onClick={() => shift(1)} aria-label="Next month" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-stone-100">
+            <button type="button" onClick={() => shift(1)} aria-label="Next month" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-sand-200">
               <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
             </button>
           </div>
@@ -425,7 +425,7 @@ export function DateField({
                   onClick={() => pick(iso)}
                   aria-pressed={sel}
                   className={`flex h-9 items-center justify-center rounded-full text-sm transition ${
-                    sel ? "bg-stone-900 font-medium text-white" : isToday ? "ring-1 ring-inset ring-stone-900 hover:bg-stone-100" : "hover:bg-stone-100"
+                    sel ? "bg-stone-900 font-medium text-white" : isToday ? "ring-1 ring-inset ring-stone-900 hover:bg-sand-200" : "hover:bg-sand-200"
                   }`}
                 >
                   {d}
@@ -433,7 +433,7 @@ export function DateField({
               );
             })}
           </div>
-          <div className="mt-2.5 flex items-center gap-2 border-t border-stone-100 pt-2.5">
+          <div className="mt-2.5 flex items-center gap-2 border-t border-sand-200 pt-2.5">
             <button type="button" onClick={() => pick(today)} className={btn.small}>Today</button>
             {allowClear && value && (
               <button type="button" onClick={() => { onChange(""); setOpen(false); }} className="ml-auto h-8 rounded-full px-3 text-[13px] text-stone-500 hover:text-stone-900">

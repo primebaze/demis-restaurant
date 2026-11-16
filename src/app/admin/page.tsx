@@ -254,9 +254,9 @@ export default function AdminDashboard() {
 
       {/* Plain numbers */}
       <div className="rise-stagger mt-4 grid gap-3 sm:grid-cols-2 lg:-mb-12 lg:mt-auto lg:pt-4 xl:grid-cols-4">
-        <section aria-label="Last 30 days" className="rounded-[22px] bg-white p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
+        <section aria-label="Last 30 days" className="rounded-[22px] bg-sand-50 p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
           <h2 className="text-[21px] font-normal tracking-tight whitespace-nowrap">Last 30 days</h2>
-          <div className="mt-3.5 flex h-[50px] items-center rounded-full bg-stone-100 pl-4 pr-1.5">
+          <div className="mt-3.5 flex h-[50px] items-center rounded-full bg-sand-200 pl-4 pr-1.5">
             <span className="text-sm font-light text-stone-500">Bookings</span>
             <span className="ml-2 text-[21px]">{data.stats.totalBookings30d}</span>
             <Link href="/admin/bookings" aria-label="Open table bookings" className="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full bg-honey-300 text-ink-900 hover:bg-honey-200">
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
               ["Total guests", data.stats.totalGuests],
               ["Deposits", `£${(data.stats.depositsCapturedPence / 100).toFixed(2)}`],
             ].map(([l, v]) => (
-              <div key={String(l)} className="rounded-[18px] bg-stone-100 p-3">
+              <div key={String(l)} className="rounded-[18px] bg-sand-200 p-3">
                 <div className="text-xs font-light text-stone-500 whitespace-nowrap">{l}</div>
                 <div className="mt-1 text-[22px]">{v}</div>
               </div>
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        <section aria-label="Dine-in today, live" className="rounded-[22px] bg-white p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
+        <section aria-label="Dine-in today, live" className="rounded-[22px] bg-sand-50 p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
           <div className="flex items-center gap-2">
             <h2 className="text-[21px] font-normal tracking-tight">Dine-in</h2>
             <span className="ml-auto inline-flex h-6 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 text-xs text-emerald-700">
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
           </div>
           <p className="mt-0.5 mb-3 text-[13px] font-light text-stone-500">Guests dining today, from the door tablets</p>
           {(data.dineIn || []).map((d) => (
-            <Link key={d.slug} href={`/admin/door/${d.slug}`} className="flex items-end justify-between border-t border-stone-100 py-3.5 hover:opacity-80">
+            <Link key={d.slug} href={`/admin/door/${d.slug}`} className="flex items-end justify-between border-t border-sand-200 py-3.5 hover:opacity-80">
               <div>
                 <div className="text-[15px]">{d.name}</div>
                 <div className="mt-0.5 text-xs font-light text-stone-500">{d.tables ? `across ${d.tables} ${d.tables === 1 ? "table" : "tables"}` : "Nobody checked in yet"}</div>
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
             </Link>
           ))}
           {!data.dineIn?.length && (
-            <p className="flex items-center gap-2 border-t border-stone-100 py-4 text-sm text-stone-500">
+            <p className="flex items-center gap-2 border-t border-sand-200 py-4 text-sm text-stone-500">
               <DoorOpen className="h-4 w-4" strokeWidth={1.5} /> Nothing logged yet today
             </p>
           )}
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
             ["Sunday Buffet", "/admin/sunday-buffet", data.events?.buffet],
           ] as const
         ).map(([name, href, ev]) => (
-          <section key={name} aria-label={name} className="rounded-[22px] bg-white p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
+          <section key={name} aria-label={name} className="rounded-[22px] bg-sand-50 p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
             <div className="flex items-center">
               <h2 className="text-[21px] font-normal tracking-tight whitespace-nowrap">{name}</h2>
               <Link href={href} aria-label={`Open ${name}`} className="ml-auto text-stone-600 hover:text-stone-900">
@@ -321,18 +321,18 @@ export default function AdminDashboard() {
             </div>
             {ev ? (
               <>
-                <span className="mt-3 inline-flex h-7 items-center gap-1.5 rounded-full bg-stone-100 px-3 text-xs text-stone-600">
+                <span className="mt-3 inline-flex h-7 items-center gap-1.5 rounded-full bg-sand-200 px-3 text-xs text-stone-600">
                   <CalendarDays className="h-3.5 w-3.5" strokeWidth={1.75} />
                   {whenLabel(ev.date, today)}
                 </span>
                 <p className="mt-2 text-xs font-light text-stone-500">
                   {ev.location} · {ev.hours}
                 </p>
-                <div className="mt-4 flex items-baseline justify-between border-t border-stone-100 py-3">
+                <div className="mt-4 flex items-baseline justify-between border-t border-sand-200 py-3">
                   <span className="text-[15px]">Bookings</span>
                   <span className="text-[40px] font-light leading-none tracking-tight">{ev.bookings}</span>
                 </div>
-                <div className="flex items-baseline justify-between border-t border-stone-100 py-3">
+                <div className="flex items-baseline justify-between border-t border-sand-200 py-3">
                   <span className="text-[15px]">People</span>
                   <span className="text-[40px] font-light leading-none tracking-tight text-stone-900">{ev.people}</span>
                 </div>
@@ -346,8 +346,8 @@ export default function AdminDashboard() {
 
       {/* Email a guest */}
       {email && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" onClick={() => setEmail(null)}>
-          <div className="w-full max-w-lg rounded-[24px] bg-white p-6 text-stone-900" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Email guest">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm" onClick={() => setEmail(null)}>
+          <div className="w-full max-w-lg rounded-[24px] bg-sand-50 p-6 text-stone-900" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Email guest">
             <h2 className="text-xl font-normal">Email guest</h2>
             <p className="mb-4 mt-1 text-xs text-stone-500">
               To: {email.name} &lt;{email.to}&gt;
@@ -358,7 +358,7 @@ export default function AdminDashboard() {
                 value={email.subject}
                 onChange={(e) => setEmail((s) => s && { ...s, subject: e.target.value })}
                 placeholder="Subject"
-                className="h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-sm outline-none focus:border-stone-500"
+                className="h-11 w-full rounded-full border border-sand-300 bg-sand-100 px-4 text-sm outline-none focus:border-stone-500"
                 autoFocus
               />
               <textarea
@@ -366,15 +366,15 @@ export default function AdminDashboard() {
                 onChange={(e) => setEmail((s) => s && { ...s, message: e.target.value })}
                 rows={6}
                 placeholder="Write your message…"
-                className="w-full resize-none rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none focus:border-stone-500"
+                className="w-full resize-none rounded-[18px] border border-sand-300 bg-sand-100 px-4 py-3 text-sm outline-none focus:border-stone-500"
               />
-              <div className="inline-flex rounded-full bg-stone-100 p-1" role="group" aria-label="Send with">
+              <div className="inline-flex rounded-full bg-sand-200 p-1" role="group" aria-label="Send with">
                 {(["smtp", "resend"] as const).map((p) => (
                   <button
                     key={p}
                     type="button"
                     onClick={() => setEmail((s) => s && { ...s, provider: p })}
-                    className={`h-8 rounded-full px-4 text-[13px] ${email.provider === p ? "bg-white text-stone-900 shadow-sm" : "text-stone-500"}`}
+                    className={`h-8 rounded-full px-4 text-[13px] ${email.provider === p ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500"}`}
                   >
                     {p === "smtp" ? "SMTP" : "Resend"}
                   </button>

@@ -144,7 +144,7 @@ export default function AdminBrunchCheckinsPage() {
             ) : (
               <>
                 {/* Phones: one card per group */}
-                <ul className="divide-y divide-stone-100 border-t border-stone-100 md:hidden">
+                <ul className="divide-y divide-sand-200 border-t border-sand-200 md:hidden">
                   {data.checkins.map((c) => {
                     const left = remaining(c.endsAt, now);
                     return (
@@ -189,7 +189,7 @@ export default function AdminBrunchCheckinsPage() {
                       {data.checkins.map((c) => {
                         const left = remaining(c.endsAt, now);
                         return (
-                          <tr key={c.id} className="hover:bg-stone-50">
+                          <tr key={c.id} className="hover:bg-sand-100">
                             <td className="whitespace-nowrap font-medium tabular-nums">{covers(c)}</td>
                             <td>
                               <span className="inline-flex items-center gap-1">
@@ -226,7 +226,7 @@ export default function AdminBrunchCheckinsPage() {
             href="/brunch-checkin"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 flex items-center gap-2.5 rounded-2xl bg-stone-100 px-3.5 py-3 text-sm transition hover:bg-stone-200"
+            className="mt-3 flex items-center gap-2.5 rounded-2xl bg-sand-200 px-3.5 py-3 text-sm transition hover:bg-sand-300"
           >
             <Tablet className="h-5 w-5 shrink-0 text-stone-900" strokeWidth={1.5} />
             <span>

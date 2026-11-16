@@ -107,7 +107,7 @@ export default function GuestProfilePage() {
                 <p className="text-xs font-light text-stone-500">Member since {new Date(guest.createdAt).toLocaleDateString("en-GB")}</p>
               </div>
             </div>
-            <dl className="mt-4 space-y-3 border-t border-stone-100 pt-4 text-sm">
+            <dl className="mt-4 space-y-3 border-t border-sand-200 pt-4 text-sm">
               <div>
                 <dt className="text-xs font-light text-stone-500">Email</dt>
                 <dd className="mt-0.5 break-all">{guest.email || <span className="text-stone-500">Not given</span>}</dd>
@@ -139,7 +139,7 @@ export default function GuestProfilePage() {
               {guest.notes && (
                 <div>
                   <dt className="text-xs font-light text-stone-500">Notes</dt>
-                  <dd className="mt-1 rounded-2xl bg-stone-50 px-3.5 py-2.5 text-[13px] text-stone-700">{guest.notes}</dd>
+                  <dd className="mt-1 rounded-2xl bg-sand-100 px-3.5 py-2.5 text-[13px] text-stone-700">{guest.notes}</dd>
                 </div>
               )}
             </dl>
@@ -155,7 +155,7 @@ export default function GuestProfilePage() {
             ) : (
               <ul>
                 {guest.visits.map((v) => (
-                  <li key={v.id} className="flex items-start justify-between gap-3 border-t border-stone-100 px-[18px] py-3">
+                  <li key={v.id} className="flex items-start justify-between gap-3 border-t border-sand-200 px-[18px] py-3">
                     <div className="min-w-0">
                       <p className="text-sm text-stone-900">{v.visitDate}</p>
                       {v.notes && <p className="mt-0.5 text-xs font-light text-stone-500">{v.notes}</p>}
@@ -178,7 +178,7 @@ export default function GuestProfilePage() {
           ) : (
             <ul>
               {guest.bookings.map((b) => (
-                <li key={b.id} className="border-t border-stone-100 px-4 py-3.5 md:px-5">
+                <li key={b.id} className="border-t border-sand-200 px-4 py-3.5 md:px-5">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-sm text-stone-900">{b.confirmationCode}</span>
                     <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
@@ -208,7 +208,7 @@ export default function GuestProfilePage() {
                     </div>
                   )}
                   {b.changes.length > 0 && (
-                    <div className="mt-2 space-y-0.5 border-l-2 border-stone-100 pl-3">
+                    <div className="mt-2 space-y-0.5 border-l-2 border-sand-200 pl-3">
                       {b.changes.map((c, i) => (
                         <p key={i} className="text-xs text-stone-500">
                           {c.fieldChanged}: {c.oldValue} → {c.newValue}{" "}

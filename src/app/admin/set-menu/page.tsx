@@ -196,7 +196,7 @@ export default function AdminSetMenuPage() {
       <div className="flex items-center gap-2">
         <span className="text-[15px] text-stone-900">{g.selections.length}</span>
         <span className="text-xs text-stone-500">/ {g.partySize}</span>
-        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-stone-100">
+        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-sand-200">
           <div
             className={`h-full rounded-full ${g.status === "active" ? "bg-ember-400" : "bg-stone-400"}`}
             style={{ width: `${Math.min(100, (g.selections.length / g.partySize) * 100)}%` }}
@@ -241,9 +241,9 @@ export default function AdminSetMenuPage() {
   /** Organiser details, guest selections and appetiser totals, shown when a group is opened. */
   function groupDetail(g: Group) {
     return (
-      <div className="rounded-[18px] bg-white p-4 text-stone-900 md:px-5" onClick={(e) => e.stopPropagation()}>
+      <div className="rounded-[18px] bg-sand-50 p-4 text-stone-900 md:px-5" onClick={(e) => e.stopPropagation()}>
         {/* Organiser details */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-b border-stone-100 pb-4 md:flex md:flex-wrap md:gap-x-10">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-b border-sand-200 pb-4 md:flex md:flex-wrap md:gap-x-10">
           {[
             ["Email", g.organizerEmail || "Not given"],
             ["Phone", g.organizerPhone || "Not given"],
@@ -313,7 +313,7 @@ export default function AdminSetMenuPage() {
             </div>
             <ul className="mt-2 space-y-2 md:hidden">
               {g.selections.map((s, i) => (
-                <li key={s.id} className="rounded-[16px] bg-stone-50 px-3.5 py-3">
+                <li key={s.id} className="rounded-[16px] bg-sand-100 px-3.5 py-3">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-stone-500">{i + 1}.</span>
                     <span className="text-sm">{s.guestName}</span>
@@ -331,7 +331,7 @@ export default function AdminSetMenuPage() {
             </ul>
 
             {/* Appetiser summary */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-stone-100 pt-3 text-[13px]">
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-sand-200 pt-3 text-[13px]">
               <span className="font-light text-stone-500">Appetisers</span>
               {appetiserTotals(g).map((a) => (
                 <span key={a.name}>
@@ -387,7 +387,7 @@ export default function AdminSetMenuPage() {
               <button
                 onClick={() => { setShowForm(false); setFormError(""); setNewGroupResult(null); }}
                 aria-label="Close"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:text-stone-900"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-sand-200 text-stone-600 hover:text-stone-900"
               >
                 <X className="h-4 w-4" strokeWidth={1.75} />
               </button>
@@ -400,7 +400,7 @@ export default function AdminSetMenuPage() {
           {newGroupResult ? (
             <div className="mt-5">
               <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-stone-900">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sand-200 text-stone-900">
                   <Check className="h-5 w-5" strokeWidth={2} />
                 </span>
                 <div>
@@ -408,7 +408,7 @@ export default function AdminSetMenuPage() {
                   <p className="text-xs font-light text-stone-500">Share the link below with the organiser</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 py-1.5 pl-4 pr-1.5">
+              <div className="flex items-center gap-2 rounded-full border border-sand-300 bg-sand-100 py-1.5 pl-4 pr-1.5">
                 <span className="flex-1 truncate font-mono text-sm text-stone-700">{newGroupResult.guestSelectionUrl}</span>
                 <button onClick={() => copyLink(newGroupResult.guestSelectionUrl, newGroupResult.groupCode)} className={`${btn.small} shrink-0`}>
                   <LinkIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -508,7 +508,7 @@ export default function AdminSetMenuPage() {
                     return (
                       <Fragment key={g.id}>
                         <tr
-                          className={`cursor-pointer transition-colors ${isExpanded ? "bg-ember-50" : "hover:bg-stone-50"}`}
+                          className={`cursor-pointer transition-colors ${isExpanded ? "bg-ember-50" : "hover:bg-sand-100"}`}
                           onClick={() => setExpanded(isExpanded ? null : g.id)}
                           onKeyDown={(e) => { if (e.key === "Enter") setExpanded(isExpanded ? null : g.id); }}
                           tabIndex={0}

@@ -230,7 +230,7 @@ export default function MailingPage() {
     setSendResult(null); setPendingLimit(limit); setConfirming(true);
   };
   const box = "h-[18px] w-[18px] shrink-0 cursor-pointer rounded accent-gold-300 align-middle disabled:cursor-not-allowed disabled:opacity-30";
-  const codeCls = "rounded-md bg-stone-100 px-1.5 py-px font-outfit text-stone-900";
+  const codeCls = "rounded-md bg-sand-200 px-1.5 py-px font-outfit text-stone-900";
 
   return (
     <OwnLayout>
@@ -340,13 +340,13 @@ export default function MailingPage() {
             <>
               {/* Phones: one card per contact */}
               <div className="md:hidden">
-                <label className="flex items-center gap-3 border-t border-stone-100 px-4 py-2.5 text-xs text-stone-500">
+                <label className="flex items-center gap-3 border-t border-sand-200 px-4 py-2.5 text-xs text-stone-500">
                   <input type="checkbox" aria-label="Select all on this page" checked={allPageOn} onChange={toggleSelectPage} className={box} />
                   Select all on this page
                 </label>
                 <ul>
                   {contacts.map((c) => (
-                    <li key={c.id} className={`flex items-center gap-3 border-t border-stone-100 px-4 py-3 ${selected.has(c.id) ? "bg-stone-100" : ""}`}>
+                    <li key={c.id} className={`flex items-center gap-3 border-t border-sand-200 px-4 py-3 ${selected.has(c.id) ? "bg-sand-200" : ""}`}>
                       <input
                         type="checkbox"
                         aria-label={`Select ${c.email}`}
@@ -388,7 +388,7 @@ export default function MailingPage() {
                   </thead>
                   <tbody>
                     {contacts.map((c) => (
-                      <tr key={c.id} className={selected.has(c.id) ? "bg-ember-50" : "hover:bg-stone-50"}>
+                      <tr key={c.id} className={selected.has(c.id) ? "bg-ember-50" : "hover:bg-sand-100"}>
                         <td className="!pl-5">
                           <input
                             type="checkbox"
@@ -444,7 +444,7 @@ export default function MailingPage() {
             <button
               onClick={saveTemplate}
               disabled={!subject.trim() || !body.trim()}
-              className="ml-auto inline-flex h-8 items-center gap-1 rounded-full border border-stone-200 bg-white px-3 text-[13px] text-stone-900 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-500"
+              className="ml-auto inline-flex h-8 items-center gap-1 rounded-full border border-sand-300 bg-sand-50 px-3 text-[13px] text-stone-900 transition hover:bg-sand-200 disabled:cursor-not-allowed disabled:text-stone-500"
             >
               <Plus className="h-4 w-4" strokeWidth={1.75} />
               Save current
@@ -456,15 +456,15 @@ export default function MailingPage() {
             <span className="mr-1 text-xs font-light text-stone-500">Saved emails</span>
             {templates.length === 0 && <span className="text-xs text-stone-500">None yet</span>}
             {templates.map((t) => (
-              <span key={t.key} className="inline-flex h-8 items-center overflow-hidden rounded-full border border-stone-200 bg-white">
-                <button onClick={() => loadTemplate(t)} title="Load this into the form" className="h-full pl-3 pr-2 text-[13px] text-stone-800 transition hover:bg-stone-50">
+              <span key={t.key} className="inline-flex h-8 items-center overflow-hidden rounded-full border border-sand-300 bg-sand-50">
+                <button onClick={() => loadTemplate(t)} title="Load this into the form" className="h-full pl-3 pr-2 text-[13px] text-stone-800 transition hover:bg-sand-100">
                   {t.name}
                 </button>
                 <button
                   onClick={() => deleteTemplate(t)}
                   title={`Delete "${t.name}"`}
                   aria-label={`Delete saved email ${t.name}`}
-                  className="flex h-full items-center border-l border-stone-100 px-2 text-stone-500 transition hover:bg-stone-50 hover:text-red-700"
+                  className="flex h-full items-center border-l border-sand-200 px-2 text-stone-500 transition hover:bg-sand-100 hover:text-red-700"
                 >
                   <X className="h-3.5 w-3.5" strokeWidth={1.75} />
                 </button>
@@ -516,7 +516,7 @@ export default function MailingPage() {
           </div>
 
           {/* Send: separated, with a two-step confirm to prevent accidental blasts */}
-          <div className="mt-4 border-t border-stone-100 pt-4">
+          <div className="mt-4 border-t border-sand-200 pt-4">
             {selected.size > 0 && (
               <p className="mb-2 text-center text-xs text-stone-500">
                 Sending to <span className="font-medium text-stone-900">{selected.size} selected</span> ·{" "}
@@ -540,7 +540,7 @@ export default function MailingPage() {
                       value={batchSize}
                       onChange={(e) => setBatchSize(Math.max(1, parseInt(e.target.value) || 1))}
                       aria-label="How many to send next"
-                      className="h-8 w-16 rounded-full border border-stone-200 bg-stone-50 px-2 text-center text-[13px] text-stone-900 outline-none focus:border-stone-500"
+                      className="h-8 w-16 rounded-full border border-sand-300 bg-sand-100 px-2 text-center text-[13px] text-stone-900 outline-none focus:border-stone-500"
                     />
                     <button onClick={() => startConfirm(batchSize)} disabled={sending} className={btn.small}>
                       Send next {batchSize} not yet emailed
@@ -549,7 +549,7 @@ export default function MailingPage() {
                 )}
               </div>
             ) : (
-              <div className="space-y-3 rounded-[18px] bg-stone-50 p-4">
+              <div className="space-y-3 rounded-[18px] bg-sand-100 p-4">
                 <p className="text-center text-sm text-stone-900">
                   {pendingLimit != null
                     ? <>Send to the next <span className="font-medium text-stone-900">{pendingLimit}</span> who haven&apos;t received this yet? This can&apos;t be undone.</>

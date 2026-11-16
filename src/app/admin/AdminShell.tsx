@@ -217,7 +217,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   key={item.href}
                   href={item.href}
                   aria-current="page"
-                  className="inline-flex h-[46px] shrink-0 items-center gap-2 rounded-full bg-white pl-3.5 pr-[18px] text-[15px] text-stone-900 whitespace-nowrap"
+                  className="inline-flex h-[46px] shrink-0 items-center gap-2 rounded-full bg-sand-50 pl-3.5 pr-[18px] text-[15px] text-stone-900 whitespace-nowrap"
                 >
                   <Icon className="h-5 w-5" strokeWidth={1.5} />
                   {item.label}
@@ -248,12 +248,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               D
             </button>
             {userOpen && (
-              <div className="absolute right-0 top-[calc(100%+10px)] w-52 rounded-2xl bg-white p-1.5 text-stone-900 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]">
-                <Link href="/admin/email-logs" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-stone-100">
+              <div className="absolute right-0 top-[calc(100%+10px)] w-52 rounded-2xl bg-sand-50 p-1.5 text-stone-900 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]">
+                <Link href="/admin/email-logs" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-sand-200">
                   <MailCheck className="h-4 w-4 text-stone-500" strokeWidth={1.75} />
                   Email Logs
                 </Link>
-                <Link href="/" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-stone-100">
+                <Link href="/" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-sand-200">
                   <ArrowUpRight className="h-4 w-4 text-stone-500" strokeWidth={1.75} />
                   View website
                 </Link>
@@ -308,7 +308,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                       key={s.href}
                       href={s.href}
                       aria-current={on ? "page" : undefined}
-                      className={`h-9 inline-flex items-center rounded-full px-4 text-sm transition ${on ? "bg-white text-stone-900" : "text-white/90 hover:text-white"}`}
+                      className={`h-9 inline-flex items-center rounded-full px-4 text-sm transition ${on ? "bg-sand-50 text-stone-900" : "text-white/90 hover:text-white"}`}
                     >
                       {s.label}
                     </Link>
@@ -317,7 +317,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </div>
             )}
             <div
-              className={`shell-sheet rounded-[22px] bg-white p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] md:p-6 ${
+              className={`shell-sheet rounded-[22px] bg-sand-50 p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] md:p-6 ${
                 pathname.startsWith("/admin/shoot-plans") ? "overflow-visible" : "overflow-x-auto"
               }`}
             >
@@ -338,7 +338,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={`${i === 4 ? "hidden md:flex" : "flex"} h-[52px] min-w-[52px] flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 rounded-full px-3 md:px-4 text-[10.5px] md:text-sm transition ${
-                active ? "bg-white text-stone-900" : "text-white/85"
+                active ? "bg-sand-50 text-stone-900" : "text-white/85"
               }`}
             >
               <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -349,7 +349,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <button
           type="button"
           onClick={() => setMoreOpen(true)}
-          className={`flex h-[52px] min-w-[52px] flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 rounded-full px-3 md:px-4 text-[10.5px] md:text-sm ${moreOpen ? "bg-white text-stone-900" : "text-white/85"}`}
+          className={`flex h-[52px] min-w-[52px] flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 rounded-full px-3 md:px-4 text-[10.5px] md:text-sm ${moreOpen ? "bg-sand-50 text-stone-900" : "text-white/85"}`}
         >
           <Menu className="h-5 w-5" strokeWidth={1.5} />
           More
@@ -358,15 +358,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* More: slides up like an app on iPad portrait and phones */}
       <BottomSheet open={moreOpen} onClose={() => setMoreOpen(false)} title="More">
-        <div className="rounded-[22px] bg-white px-2 py-1">
+        <div className="rounded-[22px] bg-sand-50 px-2 py-1">
               {[...moreItems, { href: "/admin/email-logs", label: "Email Logs", icon: MailCheck }, { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen }]
                 .filter((v, i, a) => a.findIndex((x) => x.href === v.href) === i)
                 .map((item) => {
                   const Icon = item.icon;
                   const props = item.external ? { target: "_blank", rel: "noopener" } : {};
                   return (
-                    <Link key={item.href} href={item.href} {...props} className="flex h-12 items-center gap-3.5 border-t border-stone-100 px-2 text-base first-of-type:border-t-0">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-600">
+                    <Link key={item.href} href={item.href} {...props} className="flex h-12 items-center gap-3.5 border-t border-sand-200 px-2 text-base first-of-type:border-t-0">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sand-200 text-stone-600">
                         <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                       </span>
                       {item.label}

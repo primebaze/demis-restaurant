@@ -112,7 +112,7 @@ export default function AdminReviewsPage() {
               <span className="mb-1.5 ml-1 block text-xs text-stone-500">Location</span>
               <input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={80} placeholder="Optional, e.g. Streatham Hill" className={field} />
             </label>
-            <div className="flex items-center gap-3 rounded-full bg-stone-50 px-4 py-2">
+            <div className="flex items-center gap-3 rounded-full bg-sand-100 px-4 py-2">
               <span className="text-xs text-stone-500">Rating</span>
               <Stars n={rating} onChange={setRating} />
             </div>
@@ -142,7 +142,7 @@ export default function AdminReviewsPage() {
           ) : (
             <ul>
               {reviews.map((r) => (
-                <li key={r.id} className="flex items-start gap-3 border-t border-stone-100 px-4 py-3.5 md:px-5">
+                <li key={r.id} className="flex items-start gap-3 border-t border-sand-200 px-4 py-3.5 md:px-5">
                   <Avatar name={r.author} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -159,7 +159,7 @@ export default function AdminReviewsPage() {
                       aria-pressed={r.active}
                       title={r.active ? "Shown on the page. Click to hide." : "Hidden. Click to show."}
                       className={`inline-flex h-7 items-center rounded-full px-3 text-xs transition ${
-                        r.active ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+                        r.active ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-sand-200 text-stone-500 hover:bg-sand-300"
                       }`}
                     >
                       {r.active ? "Live" : "Hidden"}

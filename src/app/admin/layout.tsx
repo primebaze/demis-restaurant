@@ -6,7 +6,7 @@ const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500"]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={outfit.variable}>
+    <div className={`admin-root ${outfit.variable}`}>
       <AdminShell>{children}</AdminShell>
     </div>
   );

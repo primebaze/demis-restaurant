@@ -22,7 +22,7 @@ const gseg = "inline-flex h-[46px] items-center gap-0.5 rounded-full border bord
 const gsegBtn = "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-light whitespace-nowrap transition disabled:opacity-40";
 /** Small round icon button on a white sheet. */
 const ibtn =
-  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-stone-300 hover:text-stone-900 disabled:opacity-40";
+  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-sand-300 bg-sand-50 text-stone-600 transition hover:border-stone-300 hover:text-stone-900 disabled:opacity-40";
 
 /** "2026-11-22" to "22 Nov". */
 function shortDate(iso: string) {
@@ -313,7 +313,7 @@ export default function AdminSundayBuffetPage() {
               onClick={() => setDate("")}
               aria-pressed={isThisSunday}
               title={isThisSunday ? undefined : "Back to this Sunday"}
-              className={`${gsegBtn} ${isThisSunday ? "bg-white font-normal text-stone-900" : "text-white hover:bg-white/10"}`}
+              className={`${gsegBtn} ${isThisSunday ? "bg-sand-50 font-normal text-stone-900" : "text-white hover:bg-white/10"}`}
             >
               <CalendarDays className="h-4 w-4" strokeWidth={1.75} />
               {isThisSunday || !resolvedDate
@@ -359,7 +359,7 @@ export default function AdminSundayBuffetPage() {
               </button>
             </div>
             {confirmNote && (
-              <p className="mt-3 flex items-center gap-2 rounded-xl bg-stone-100 px-3 py-2 text-[13px] text-stone-900" role="status">
+              <p className="mt-3 flex items-center gap-2 rounded-xl bg-sand-200 px-3 py-2 text-[13px] text-stone-900" role="status">
                 <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 {confirmNote}
               </p>
@@ -374,7 +374,7 @@ export default function AdminSundayBuffetPage() {
             ) : (
               <>
                 {/* Phones: one card per booking */}
-                <ul className="divide-y divide-stone-100 border-t border-stone-100 md:hidden">
+                <ul className="divide-y divide-sand-200 border-t border-sand-200 md:hidden">
                   {bookings.map((b) => (
                     <li key={b.id} className={`px-4 py-3.5 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                       <div className="flex items-start gap-3">
@@ -421,7 +421,7 @@ export default function AdminSundayBuffetPage() {
                     </thead>
                     <tbody>
                       {bookings.map((b) => (
-                        <tr key={b.id} className={`hover:bg-stone-50 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
+                        <tr key={b.id} className={`hover:bg-sand-100 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                           <td className="whitespace-nowrap">
                             <div>
                               {b.name}
@@ -470,19 +470,19 @@ export default function AdminSundayBuffetPage() {
             >
               Email everyone
             </SheetTitle>
-            <div className="mt-3 inline-flex flex-wrap gap-0.5 self-start rounded-full bg-stone-100 p-1" role="group" aria-label="Who gets it">
+            <div className="mt-3 inline-flex flex-wrap gap-0.5 self-start rounded-full bg-sand-200 p-1" role="group" aria-label="Who gets it">
               <button
                 onClick={() => setMailScope("day")}
                 disabled={withEmail === 0}
                 aria-pressed={mailScope === "day"}
-                className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition disabled:cursor-not-allowed disabled:opacity-40 ${mailScope === "day" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+                className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition disabled:cursor-not-allowed disabled:opacity-40 ${mailScope === "day" ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
               >
                 Booked for {dayLabel || prettyDate} ({withEmail})
               </button>
               <button
                 onClick={() => setMailScope("all")}
                 aria-pressed={mailScope === "all"}
-                className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${mailScope === "all" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+                className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${mailScope === "all" ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
               >
                 All past guests ({allCount ?? "…"})
               </button>
@@ -504,7 +504,7 @@ export default function AdminSundayBuffetPage() {
                 <button
                   key={t.key}
                   onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
-                  className="inline-flex h-7 items-center rounded-full bg-stone-100 px-3 text-xs text-stone-700 transition hover:bg-stone-200"
+                  className="inline-flex h-7 items-center rounded-full bg-sand-200 px-3 text-xs text-stone-700 transition hover:bg-sand-300"
                 >
                   {t.name}
                 </button>
@@ -512,7 +512,7 @@ export default function AdminSundayBuffetPage() {
               <button
                 onClick={saveMailTemplate}
                 disabled={!mailSubject.trim() || !mailMessage.trim()}
-                className="inline-flex h-7 items-center gap-1 rounded-full border border-stone-300 bg-white px-3 text-xs text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:text-stone-500"
+                className="inline-flex h-7 items-center gap-1 rounded-full border border-stone-300 bg-sand-50 px-3 text-xs text-stone-900 transition hover:bg-sand-100 disabled:cursor-not-allowed disabled:text-stone-500"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                 Save current

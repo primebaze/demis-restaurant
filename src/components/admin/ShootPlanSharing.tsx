@@ -121,7 +121,7 @@ export default function ShootPlanSharing({
   return (
     <section
       aria-labelledby={`${prefix}-heading`}
-      className="mb-6 rounded-2xl border border-stone-200 bg-stone-100 p-5"
+      className="mb-6 rounded-2xl border border-sand-300 bg-sand-200 p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -186,7 +186,7 @@ export default function ShootPlanSharing({
                   href={`${publicPath}/${share.token}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center rounded-lg px-4 text-sm text-stone-900 hover:bg-stone-50 focus-visible:outline focus-visible:outline-honey-300"
+                  className="inline-flex min-h-11 items-center rounded-lg px-4 text-sm text-stone-900 hover:bg-sand-100 focus-visible:outline focus-visible:outline-honey-300"
                 >
                   {editable
                     ? "Open collaborator page ↗"

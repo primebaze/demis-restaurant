@@ -162,7 +162,7 @@ export default function ShootPlanList() {
                     href={`/admin/shoot-plans/${plan.id}`}
                     key={plan.id}
                     className={`group flex min-w-0 flex-col rounded-[20px] p-4 text-stone-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-honey-300 md:px-[18px] ${
-                      hot ? "border-[1.5px] border-stone-200 bg-stone-100" : "border border-stone-200 bg-white hover:border-stone-300"
+                      hot ? "border-[1.5px] border-sand-300 bg-sand-200" : "border border-sand-300 bg-sand-50 hover:border-stone-300"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -228,7 +228,7 @@ export default function ShootPlanList() {
             </nav>
           </>
         ) : (
-          <div className="mx-4 mb-5 rounded-[20px] border border-dashed border-stone-200 px-6 py-14 text-center md:mx-5">
+          <div className="mx-4 mb-5 rounded-[20px] border border-dashed border-sand-300 px-6 py-14 text-center md:mx-5">
             <Camera size={32} aria-hidden="true" className="mx-auto mb-5 text-stone-900" strokeWidth={1.5} />
             <h3 className="text-xl font-normal text-stone-900">
               {status || week ? "No plans match these filters" : "No weekly plans yet"}

@@ -51,7 +51,7 @@ function TagChips({ tags }: { tags: string }) {
         if (!t) return null;
         const hot = t.toLowerCase() === "vip";
         return (
-          <span key={tag} className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] whitespace-nowrap ${hot ? "bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-600"}`}>
+          <span key={tag} className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] whitespace-nowrap ${hot ? "bg-sand-200 text-stone-900" : "bg-sand-200 text-stone-600"}`}>
             {t}
           </span>
         );
@@ -281,7 +281,7 @@ export default function AdminGuestsPage() {
   const composingFor = compose?.mode === "single" ? compose.guestId : undefined;
 
   const editPanel = (
-    <div className="grid gap-3 rounded-[18px] bg-stone-50 p-3.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] md:items-end">
+    <div className="grid gap-3 rounded-[18px] bg-sand-100 p-3.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] md:items-end">
       <label className="block">
         <span className={label}>Tags (comma-separated)</span>
         <input
@@ -289,7 +289,7 @@ export default function AdminGuestsPage() {
           value={editTags}
           onChange={(e) => setEditTags(e.target.value)}
           placeholder="VIP, regular, birthday"
-          className={`${field} !h-10 !bg-white`}
+          className={`${field} !h-10 !bg-sand-50`}
         />
       </label>
       <label className="block">
@@ -299,7 +299,7 @@ export default function AdminGuestsPage() {
           onChange={(e) => setEditNotes(e.target.value)}
           rows={1}
           placeholder="Allergies, preferences..."
-          className={`${fieldArea} min-h-[40px] resize-y !bg-white !py-2.5`}
+          className={`${fieldArea} min-h-[40px] resize-y !bg-sand-50 !py-2.5`}
         />
       </label>
       <div className="flex gap-1.5">
@@ -388,7 +388,7 @@ export default function AdminGuestsPage() {
               {/* Phones: one card per guest */}
               <ul className="md:hidden">
                 {guests.map((g) => (
-                  <li key={g.id} className={`border-t border-stone-100 px-4 py-3.5 ${composingFor === g.id ? "bg-stone-100" : ""}`}>
+                  <li key={g.id} className={`border-t border-sand-200 px-4 py-3.5 ${composingFor === g.id ? "bg-sand-200" : ""}`}>
                     <div className="flex items-start gap-3">
                       <Avatar name={g.name} />
                       <div className="min-w-0 flex-1">
@@ -472,7 +472,7 @@ export default function AdminGuestsPage() {
 
         {/* Send email: a side sheet on computers and iPad landscape, a pop-up below that */}
         {compose && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center lg:static lg:z-auto lg:block lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm sm:items-center lg:static lg:z-auto lg:block lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
             <Sheet label="Send email" className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-y-auto p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:max-w-none">
               <div className="mb-4 flex items-center gap-2.5">
                 <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">Send email</h2>
@@ -480,18 +480,18 @@ export default function AdminGuestsPage() {
                   onClick={() => setCompose(null)}
                   disabled={compose.sending}
                   aria-label="Close"
-                  className="ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:text-stone-900 disabled:opacity-50"
+                  className="ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-sand-200 text-stone-600 hover:text-stone-900 disabled:opacity-50"
                 >
                   <X className="h-4 w-4" strokeWidth={1.75} />
                 </button>
               </div>
 
               <span className={label}>To</span>
-              <div className="mb-3.5 flex h-11 items-center gap-2 rounded-full border border-stone-200 bg-white px-2 pr-4 text-sm text-stone-600">
+              <div className="mb-3.5 flex h-11 items-center gap-2 rounded-full border border-sand-300 bg-sand-50 px-2 pr-4 text-sm text-stone-600">
                 {compose.mode === "single" && compose.toName ? (
                   <Avatar name={compose.toName} />
                 ) : (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-900">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sand-200 text-stone-900">
                     <Users className="h-4 w-4" strokeWidth={1.75} />
                   </span>
                 )}
@@ -519,8 +519,8 @@ export default function AdminGuestsPage() {
                 className={`${fieldArea} resize-none`}
               />
               <p className="mx-1 mb-3.5 mt-2 text-xs font-light leading-relaxed text-stone-500">
-                Type <code className="rounded-md bg-stone-100 px-1.5 py-px font-outfit text-stone-900">{"{name}"}</code> for their first name and{" "}
-                <code className="rounded-md bg-stone-100 px-1.5 py-px font-outfit text-stone-900">{"{feast}"}</code> for a link to the Sunday Feast page. Links are
+                Type <code className="rounded-md bg-sand-200 px-1.5 py-px font-outfit text-stone-900">{"{name}"}</code> for their first name and{" "}
+                <code className="rounded-md bg-sand-200 px-1.5 py-px font-outfit text-stone-900">{"{feast}"}</code> for a link to the Sunday Feast page. Links are
                 tracked, see who clicked in Link Clicks.
               </p>
 
@@ -580,7 +580,7 @@ function MailButton({ on, name, onClick }: { on: boolean; name: string; onClick:
       title="Email this guest"
       aria-label={`Email ${name}`}
       className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
-        on ? "border-stone-200 bg-honey-300 text-ink-900" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
+        on ? "border-sand-300 bg-honey-300 text-ink-900" : "border-sand-300 bg-sand-50 text-stone-600 hover:border-stone-300 hover:text-stone-900"
       }`}
     >
       <Mail className="h-4 w-4" strokeWidth={1.75} />
@@ -593,7 +593,7 @@ function GuestRows({
 }: { g: GuestRow; on: boolean; editing: boolean; editPanel: React.ReactNode; onMail: () => void; onEdit: () => void }) {
   return (
     <>
-      <tr className={on ? "bg-ember-50" : "hover:bg-stone-50"}>
+      <tr className={on ? "bg-ember-50" : "hover:bg-sand-100"}>
         <td className="!pl-5">
           <div className="flex items-center gap-3">
             <Avatar name={g.name} />

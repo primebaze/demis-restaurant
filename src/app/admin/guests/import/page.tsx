@@ -168,13 +168,13 @@ export default function GuestImportPage() {
           <div
             role="button"
             tabIndex={0}
-            className="flex cursor-pointer flex-col items-center rounded-[18px] border border-stone-200 bg-stone-50 px-6 py-12 text-center transition hover:border-stone-300 hover:bg-white focus-visible:border-stone-500 focus-visible:outline-none"
+            className="flex cursor-pointer flex-col items-center rounded-[18px] border border-sand-300 bg-sand-100 px-6 py-12 text-center transition hover:border-stone-300 hover:bg-sand-50 focus-visible:border-stone-500 focus-visible:outline-none"
             onClick={() => fileRef.current?.click()}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileRef.current?.click(); } }}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
           >
-            <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 text-stone-900">
+            <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-sand-200 text-stone-900">
               <FileUp className="h-6 w-6" strokeWidth={1.5} />
             </span>
             <p className="font-outfit text-xl font-normal text-stone-900">Drop a CSV or PDF here</p>
@@ -216,10 +216,10 @@ export default function GuestImportPage() {
           {/* Phones: one card per row */}
           <ul className="md:hidden">
             {rows.map((r, i) => (
-              <li key={i} className={`border-t border-stone-100 px-4 py-3 ${!hasEmail(r) ? "bg-red-50" : ""}`}>
+              <li key={i} className={`border-t border-sand-200 px-4 py-3 ${!hasEmail(r) ? "bg-red-50" : ""}`}>
                 <div className="mb-2 flex items-center">
                   <span className="text-xs font-light text-stone-500">Row {i + 1}{!hasEmail(r) ? " · needs a valid email" : ""}</span>
-                  <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="ml-auto flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-white hover:text-red-700">
+                  <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="ml-auto flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-sand-50 hover:text-red-700">
                     <X className="h-4 w-4" strokeWidth={1.75} />
                   </button>
                 </div>
@@ -256,7 +256,7 @@ export default function GuestImportPage() {
                       <input value={r.phone} onChange={(e) => updateRow(i, "phone", e.target.value)} className={inputCls} placeholder="Phone" aria-label="Phone" />
                     </td>
                     <td className="!py-2 !pr-5 text-center">
-                      <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-stone-100 hover:text-red-700">
+                      <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-sand-200 hover:text-red-700">
                         <X className="h-4 w-4" strokeWidth={1.75} />
                       </button>
                     </td>

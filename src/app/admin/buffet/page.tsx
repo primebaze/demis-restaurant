@@ -124,7 +124,7 @@ export default function AdminBuffetPage() {
 
   const labelCls = "mb-1.5 block px-1 text-xs font-light text-stone-500";
   const iconBtn =
-    "flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-stone-300 disabled:opacity-40";
+    "flex h-9 w-9 items-center justify-center rounded-full border border-sand-300 bg-sand-50 text-stone-600 transition hover:border-stone-300 disabled:opacity-40";
   const isNew = (b: BuffetBooking) => Boolean(success) && success.includes(b.bookingCode);
   const statusName = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -153,7 +153,7 @@ export default function AdminBuffetPage() {
               key={v || "all"}
               onClick={() => { setFilterStatus(v); setPage(1); }}
               aria-pressed={filterStatus === v}
-              className={`inline-flex h-9 items-center rounded-full px-4 text-sm whitespace-nowrap transition ${filterStatus === v ? "bg-white text-stone-900" : "text-white/90 hover:text-white"}`}
+              className={`inline-flex h-9 items-center rounded-full px-4 text-sm whitespace-nowrap transition ${filterStatus === v ? "bg-sand-50 text-stone-900" : "text-white/90 hover:text-white"}`}
             >
               {l}
             </button>
@@ -202,7 +202,7 @@ export default function AdminBuffetPage() {
                     {bookings.map((b) => {
                       const off = b.status === "cancelled";
                       return (
-                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-ember-50" : "hover:bg-stone-50"} ${off ? "text-stone-500" : ""}`}>
+                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-ember-50" : "hover:bg-sand-100"} ${off ? "text-stone-500" : ""}`}>
                           <td className={`whitespace-nowrap font-mono text-xs ${isNew(b) ? "text-stone-900" : "text-stone-500"}`}>{b.bookingCode}</td>
                           <td>
                             <div>{b.name}</div>
@@ -252,7 +252,7 @@ export default function AdminBuffetPage() {
                 {bookings.map((b) => {
                   const off = b.status === "cancelled";
                   return (
-                    <article key={b.id} className={`rounded-[18px] p-3.5 ${isNew(b) ? "bg-stone-100" : "bg-stone-50"} ${off ? "text-stone-500" : ""}`}>
+                    <article key={b.id} className={`rounded-[18px] p-3.5 ${isNew(b) ? "bg-sand-200" : "bg-sand-100"} ${off ? "text-stone-500" : ""}`}>
                       <div className="flex items-start gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-[15px]">{b.name}</div>
@@ -318,7 +318,7 @@ export default function AdminBuffetPage() {
                 <button
                   onClick={() => { setShowForm(false); setFormError(""); }}
                   aria-label="Close"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-600 hover:text-stone-900"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-sand-300 text-stone-600 hover:text-stone-900"
                 >
                   <X className="h-4 w-4" strokeWidth={1.75} />
                 </button>

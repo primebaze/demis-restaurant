@@ -45,6 +45,13 @@ const config: Config = {
           600: '#c4441a',
           700: '#a8391a',
         },
+        // Admin panels: warm ivory instead of pure white, so screens don't glare. Admin only. See docs/COLOURS.md, "Admin".
+        sand: {
+          50: '#f8f5f1',
+          100: '#f2ede7',
+          200: '#ebe4dc',
+          300: '#e0d7cc',
+        },
         // The admin's gold: brighter and cleaner than gold-300 on white. Admin only. See docs/COLOURS.md, "Admin".
         honey: {
           100: '#fdf5dc',

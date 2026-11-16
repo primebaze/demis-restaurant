@@ -22,7 +22,7 @@ const gseg = "inline-flex h-[46px] items-center gap-0.5 rounded-full border bord
 const gsegBtn = "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-light whitespace-nowrap transition disabled:opacity-40";
 /** Small round icon button on a white sheet. */
 const ibtn =
-  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-stone-300 hover:text-stone-900 disabled:opacity-40";
+  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-sand-300 bg-sand-50 text-stone-600 transition hover:border-stone-300 hover:text-stone-900 disabled:opacity-40";
 
 /** "2026-11-22" to "22 Nov", or "Sun 22 Nov" with the weekday. */
 function shortDate(iso: string, weekday = false) {
@@ -371,7 +371,7 @@ export default function AdminSaturdayBrunchPage() {
                 aria-label="Sunday Feast bookings"
                 className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors disabled:opacity-50 ${bookingsOpen ? "bg-honey-300" : "bg-white/25"}`}
               >
-                <span className={`absolute left-[3px] top-[3px] h-6 w-6 rounded-full bg-white shadow transition-transform ${bookingsOpen ? "translate-x-[22px]" : ""}`} />
+                <span className={`absolute left-[3px] top-[3px] h-6 w-6 rounded-full bg-sand-50 shadow transition-transform ${bookingsOpen ? "translate-x-[22px]" : ""}`} />
               </button>
             </div>
             <div className={gseg} role="group" aria-label="Choose a Sunday">
@@ -382,7 +382,7 @@ export default function AdminSaturdayBrunchPage() {
                 onClick={() => setDate("")}
                 aria-pressed={isThisSunday}
                 title={isThisSunday ? undefined : "Back to this Sunday"}
-                className={`${gsegBtn} ${isThisSunday ? "bg-white font-normal text-stone-900" : "text-white hover:bg-white/10"}`}
+                className={`${gsegBtn} ${isThisSunday ? "bg-sand-50 font-normal text-stone-900" : "text-white hover:bg-white/10"}`}
               >
                 <CalendarDays className="h-4 w-4" strokeWidth={1.75} />
                 {isThisSunday || !resolvedDate
@@ -436,7 +436,7 @@ export default function AdminSaturdayBrunchPage() {
               </button>
             </div>
             {confirmNote && (
-              <p className="mt-3 flex items-center gap-2 rounded-xl bg-stone-100 px-3 py-2 text-[13px] text-stone-900" role="status">
+              <p className="mt-3 flex items-center gap-2 rounded-xl bg-sand-200 px-3 py-2 text-[13px] text-stone-900" role="status">
                 <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 {confirmNote}
               </p>
@@ -451,7 +451,7 @@ export default function AdminSaturdayBrunchPage() {
             ) : (
               <>
                 {/* Phones: one card per booking */}
-                <ul className="divide-y divide-stone-100 border-t border-stone-100 md:hidden">
+                <ul className="divide-y divide-sand-200 border-t border-sand-200 md:hidden">
                   {bookings.map((b) => (
                     <li key={b.id} className={`px-4 py-3.5 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                       <div className="flex items-start gap-3">
@@ -506,7 +506,7 @@ export default function AdminSaturdayBrunchPage() {
                     </thead>
                     <tbody>
                       {bookings.map((b) => (
-                        <tr key={b.id} className={`hover:bg-stone-50 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
+                        <tr key={b.id} className={`hover:bg-sand-100 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                           <td className="whitespace-nowrap">
                             <div>{b.name}</div>
                             <div className="text-xs text-stone-500">{b.email || "No email"}</div>
@@ -528,7 +528,7 @@ export default function AdminSaturdayBrunchPage() {
                           </td>
                           <td className="whitespace-nowrap text-[13px]">
                             {b.heardFrom || <span className="text-stone-500">Not said</span>}
-                            {b.fromPopup && <span className="ml-1.5 inline-flex h-5 items-center rounded-full bg-stone-100 px-2 text-[11px] text-stone-600">Pop-up</span>}
+                            {b.fromPopup && <span className="ml-1.5 inline-flex h-5 items-center rounded-full bg-sand-200 px-2 text-[11px] text-stone-600">Pop-up</span>}
                           </td>
                           <td><StatusBits b={b} /></td>
                           <td className="text-right">
@@ -564,19 +564,19 @@ export default function AdminSaturdayBrunchPage() {
               >
                 Email everyone
               </SheetTitle>
-              <div className="mt-3 inline-flex flex-wrap gap-0.5 self-start rounded-[18px] bg-stone-100 p-1" role="group" aria-label="Who gets it">
+              <div className="mt-3 inline-flex flex-wrap gap-0.5 self-start rounded-[18px] bg-sand-200 p-1" role="group" aria-label="Who gets it">
                 <button
                   onClick={() => setMailScope("day")}
                   disabled={withEmail === 0}
                   aria-pressed={mailScope === "day"}
-                  className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition disabled:cursor-not-allowed disabled:opacity-40 ${mailScope === "day" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+                  className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition disabled:cursor-not-allowed disabled:opacity-40 ${mailScope === "day" ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
                 >
                   Booked for {dayLabel || prettyDate} ({withEmail})
                 </button>
                 <button
                   onClick={() => setMailScope("all")}
                   aria-pressed={mailScope === "all"}
-                  className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${mailScope === "all" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+                  className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${mailScope === "all" ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
                 >
                   All past guests ({allCount ?? "…"})
                 </button>
@@ -598,7 +598,7 @@ export default function AdminSaturdayBrunchPage() {
                   <button
                     key={t.key}
                     onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
-                    className="inline-flex h-7 items-center rounded-full bg-stone-100 px-3 text-xs text-stone-700 transition hover:bg-stone-200"
+                    className="inline-flex h-7 items-center rounded-full bg-sand-200 px-3 text-xs text-stone-700 transition hover:bg-sand-300"
                   >
                     {t.name}
                   </button>
@@ -606,7 +606,7 @@ export default function AdminSaturdayBrunchPage() {
                 <button
                   onClick={saveMailTemplate}
                   disabled={!mailSubject.trim() || !mailMessage.trim()}
-                  className="inline-flex h-7 items-center gap-1 rounded-full border border-stone-300 bg-white px-3 text-xs text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:text-stone-500"
+                  className="inline-flex h-7 items-center gap-1 rounded-full border border-stone-300 bg-sand-50 px-3 text-xs text-stone-900 transition hover:bg-sand-100 disabled:cursor-not-allowed disabled:text-stone-500"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                   Save current
@@ -644,7 +644,7 @@ export default function AdminSaturdayBrunchPage() {
                     return (
                       <div key={h.label} className="grid h-[26px] grid-cols-[96px_1fr_64px] items-center gap-2.5 text-[13px]">
                         <span className="truncate text-stone-500">{h.label}</span>
-                        <div className="h-2 overflow-hidden rounded-full bg-stone-100">
+                        <div className="h-2 overflow-hidden rounded-full bg-sand-200">
                           <div className="h-full rounded-full bg-honey-300" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="text-right tabular-nums">
@@ -655,7 +655,7 @@ export default function AdminSaturdayBrunchPage() {
                   })}
                 </div>
                 <p className="mt-1.5 text-xs text-stone-500">Counted per booking. The question is optional on the booking form.</p>
-                <p className="mt-2.5 rounded-[14px] bg-stone-100 px-3.5 py-2.5 text-xs">
+                <p className="mt-2.5 rounded-[14px] bg-sand-200 px-3.5 py-2.5 text-xs">
                   Booked through the website pop-up: <b className="font-medium tabular-nums">{summary.fromPopup ?? 0}</b>{" "}
                   <span className="text-stone-500">of {summary.reservations}</span>
                 </p>
@@ -669,7 +669,7 @@ export default function AdminSaturdayBrunchPage() {
                 <p className="py-3 text-xs text-stone-500">Loading dates…</p>
               ) : (
                 dateRows.map((d) => (
-                  <div key={d.date} className="border-t border-stone-100 py-3 text-[13px]">
+                  <div key={d.date} className="border-t border-sand-200 py-3 text-[13px]">
                     <div className={`flex items-center gap-2 ${d.hidden ? "opacity-60" : ""}`}>
                       <span className="whitespace-nowrap text-[15px]" title={d.prettyDate}>{shortDate(d.date, true)}</span>
                       {d.hidden ? <Tag tone="off">Hidden</Tag> : d.soldOut ? <Tag tone="bad">Sold out</Tag> : <Tag tone="ok">Open</Tag>}
@@ -678,7 +678,7 @@ export default function AdminSaturdayBrunchPage() {
                       </span>
                     </div>
                     <div className="mt-2.5 flex items-center gap-2">
-                      <label className="flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 pl-3 pr-1 text-xs text-stone-500 focus-within:border-stone-500 focus-within:bg-white">
+                      <label className="flex h-9 items-center gap-1.5 rounded-full border border-sand-300 bg-sand-100 pl-3 pr-1 text-xs text-stone-500 focus-within:border-stone-500 focus-within:bg-sand-50">
                         Max
                         <input
                           type="number"
@@ -699,7 +699,7 @@ export default function AdminSaturdayBrunchPage() {
                         onClick={() => saveDate(d.date, { blocked: !d.blocked })}
                         disabled={savingDate === d.date}
                         aria-label={`${d.blocked ? "Reopen" : "Mark sold out"} ${d.prettyDate}`}
-                        className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs transition disabled:opacity-50 ${d.blocked ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100" : "border-stone-200 bg-white text-stone-800 hover:border-red-200 hover:text-red-700"}`}
+                        className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs transition disabled:opacity-50 ${d.blocked ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100" : "border-sand-300 bg-sand-50 text-stone-800 hover:border-red-200 hover:text-red-700"}`}
                       >
                         {savingDate === d.date ? <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.75} /> : d.blocked ? <CalendarCheck className="h-3.5 w-3.5" strokeWidth={1.75} /> : <Ban className="h-3.5 w-3.5" strokeWidth={1.75} />}
                         {d.blocked ? "Reopen" : "Sold out"}
@@ -708,7 +708,7 @@ export default function AdminSaturdayBrunchPage() {
                         onClick={() => saveDate(d.date, { hidden: !d.hidden })}
                         disabled={savingDate === d.date}
                         aria-label={`${d.hidden ? "Show" : "Hide"} ${d.prettyDate}`}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 text-xs text-stone-800 transition hover:border-stone-300 disabled:opacity-50"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-sand-300 bg-sand-50 px-3 text-xs text-stone-800 transition hover:border-stone-300 disabled:opacity-50"
                       >
                         {d.hidden ? <Eye className="h-3.5 w-3.5" strokeWidth={1.75} /> : <EyeOff className="h-3.5 w-3.5" strokeWidth={1.75} />}
                         {d.hidden ? "Show" : "Hide"}
