@@ -47,10 +47,10 @@ const config: Config = {
         },
         // The admin's gold: brighter and cleaner than gold-300 on white. Admin only. See docs/COLOURS.md, "Admin".
         honey: {
-          100: '#fbefd0',
-          200: '#f5d98f',
-          300: '#edc25e',
-          400: '#e2ad3b',
+          100: '#fdf5dc',
+          200: '#f9e6ae',
+          300: '#f4d47f',
+          400: '#e8bd4f',
         },
         gold: {
           DEFAULT: '#e8cc9c',

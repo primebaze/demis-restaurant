@@ -63,8 +63,8 @@ const TONES = {
   wait: "bg-amber-100 text-amber-900",
   bad: "bg-red-100 text-red-800",
   off: "bg-stone-100 text-stone-700",
-  hot: "bg-honey-300 text-ink-900",
-  gold: "bg-honey-300 text-ink-900",
+  hot: "bg-stone-100 text-stone-800",
+  gold: "bg-stone-100 text-stone-800",
 } as const;
 export type Tone = keyof typeof TONES;
 

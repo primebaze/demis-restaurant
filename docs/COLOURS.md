@@ -89,7 +89,7 @@ still apply to the guest site, the door kiosks and the blog.
   class `admin-bg` in `src/app/admin/admin.css`). Nothing else goes behind pages.
 - **On the photo:** white text, frosted panels (`glass`) and dark glass buttons.
 - **Content:** white sheets (`bg-white`, rounded 22px) with `stone` text.
-- **Accent: honey gold** (`honey-300`, #edc25e, with `text-ink-900`). The
+- **Accent: honey gold** (`honey-300`, #f4d47f, with `text-ink-900`). The
   website's `gold-300` looked muddy on white, so the admin uses this brighter
   gold instead: main buttons, the
   active day, the arrow buttons, and the one number that matters most in a group.
