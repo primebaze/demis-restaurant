@@ -33,8 +33,8 @@ export async function listDevices(): Promise<{ pending: DeviceRow[]; approved: D
     createdAt: d.createdAt.toISOString(),
   });
   return {
-    // A pending phone that has signed out or timed out isn't waiting any more.
-    pending: rows.filter((d) => d.status === "pending" && d.sessionUntil && d.sessionUntil > now).map(map),
+    // Waiting until a manager decides (whatever the phone does meanwhile); very old ones drop off after 14 days.
+    pending: rows.filter((d) => d.status === "pending" && now.getTime() - d.createdAt.getTime() < 14 * 24 * 60 * 60_000).map(map),
     approved: rows.filter((d) => d.status === "approved").map(map),
   };
 }
