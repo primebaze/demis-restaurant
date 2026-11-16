@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Icon, IconFont, personColour, initial, firstName, BRANCH, ago } from "./ui";
 
 /*
  * Demi's Meetings, staff phone screens. Built to the design canvas
@@ -19,18 +20,6 @@ const C = {
   line: "#1f1f1f",
 };
 
-// Person colours from the design, picked by staff id so each person keeps theirs.
-const PERSON = [
-  { bg: "#1e3a8a", fg: "#bfdbfe" },
-  { bg: "#134e4a", fg: "#99f6e4" },
-  { bg: "#4c1d95", fg: "#ddd6fe" },
-  { bg: "#7c2d12", fg: "#fed7aa" },
-  { bg: "#831843", fg: "#fbcfe8" },
-];
-const personColour = (id: number) => PERSON[Math.abs(id) % PERSON.length];
-const initial = (name: string) => (name.trim()[0] || "?").toUpperCase();
-const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
-
 type Me =
   | { state: "loading" }
   | { state: "error" }
@@ -42,21 +31,9 @@ type Me =
       person: { id: number; name: string; role: string };
       manager: boolean;
       branch: string;
+      notifyChoice: string;
       clockedInSince: string | null;
     };
-
-/** Google's Material Symbols, the design's icon set. */
-function Icon({ name, size = 24, fill = false, style }: { name: string; size?: number; fill?: boolean; style?: CSSProperties }) {
-  return (
-    <span
-      className="material-symbols-rounded"
-      aria-hidden="true"
-      style={{ fontSize: size, lineHeight: 1, fontVariationSettings: `"FILL" ${fill ? 1 : 0}, "wght" 350, "GRAD" 0, "opsz" 24`, userSelect: "none", ...style }}
-    >
-      {name}
-    </span>
-  );
-}
 
 export default function MeetApp() {
   const [me, setMe] = useState<Me>({ state: "loading" });
@@ -103,15 +80,11 @@ export default function MeetApp() {
     );
   else if (me.state === "signed_out") screen = <SignIn onDone={load} />;
   else if (me.state === "pending" || me.state === "declined") screen = <Waiting me={me} onSignOut={signOut} />;
-  else screen = <Approved me={me} onSignOut={signOut} />;
+  else screen = <Approved me={me} onSignOut={signOut} reload={load} />;
 
   return (
     <>
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add_box,backspace,badge,calendar_month,campaign,check,check_circle,chevron_right,face,home,hourglass_top,info,ios_share,lock,logout,person,south,touch_app&display=block"
-      />
+      <IconFont />
       <div style={{ minHeight: "100dvh", background: C.bg, color: "#fff", fontSize: 14 }}>{screen}</div>
     </>
   );
@@ -353,12 +326,23 @@ function useDevice() {
   return info;
 }
 
-function Approved({ me, onSignOut }: { me: ApprovedMe; onSignOut: () => void }) {
+const pushSupported = () =>
+  typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+
+function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
   const device = useDevice();
   const [tab, setTab] = useState<"home" | "me">("home");
+
+  // Keep the service worker registered so notifications arrive.
+  useEffect(() => {
+    if (pushSupported()) navigator.serviceWorker.register("/meet/sw.js", { scope: "/meet" }).catch(() => {});
+  }, []);
+
   if (!device) return null;
   // On iPhone the app only works from the home screen (notifications and staying signed in need it).
   if (device.ios && device.phone && !device.standalone) return <InstallGuide />;
+  // Ask once, straight after installing.
+  if (me.notifyChoice === "" && pushSupported()) return <AllowNotifications onDone={reload} />;
   return (
     <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
       {tab === "home" ? <Home me={me} /> : <MeScreen me={me} onSignOut={onSignOut} />}
@@ -414,6 +398,84 @@ function InstallGuide() {
   );
 }
 
+/* ─── 26 · Turn on notifications ─── */
+
+function urlBase64ToUint8Array(base64: string) {
+  const pad = "=".repeat((4 - (base64.length % 4)) % 4);
+  const raw = atob((base64 + pad).replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+}
+
+function AllowNotifications({ onDone }: { onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function saveChoiceOff() {
+    await fetch("/api/meet/push", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ choice: "off" }) }).catch(() => {});
+  }
+
+  async function turnOn() {
+    setBusy(true);
+    setError("");
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        await saveChoiceOff();
+        return onDone();
+      }
+      const { publicKey } = await (await fetch("/api/meet/push", { cache: "no-store" })).json();
+      if (!publicKey) throw new Error("Notifications aren't switched on yet. Try again later.");
+      const reg = await navigator.serviceWorker.register("/meet/sw.js", { scope: "/meet" });
+      await navigator.serviceWorker.ready;
+      const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) }));
+      const res = await fetch("/api/meet/push", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subscription: sub.toJSON() }) });
+      if (!res.ok) throw new Error("Couldn't save that. Try again.");
+      onDone();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const rows: [string, string][] = [
+    ["view_timeline", "New rota and shift changes"],
+    ["videocam", "Meetings starting"],
+    ["task_alt", "New tasks and reminders"],
+    ["schedule", "Hours fixes approved"],
+  ];
+  return (
+    <Phone>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: 40, textAlign: "center" }}>
+        <span style={{ width: 84, height: 84, borderRadius: 26, background: "linear-gradient(140deg, #ff7a45, #e0502f)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="notifications_active" size={42} fill />
+        </span>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em" }}>Never miss a shift</h1>
+          <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.5, color: C.muted }}>Turn on notifications and we&rsquo;ll tell you the moment something changes.</p>
+        </div>
+      </div>
+
+      <div style={{ borderRadius: 22, background: C.card, padding: "6px 16px" }}>
+        {rows.map(([icon, text], i) => (
+          <div key={icon} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 52, borderTop: i ? "1px solid #262626" : undefined }}>
+            <Icon name={icon} size={22} style={{ color: "#ffad8c" }} />
+            <span style={{ fontSize: 15 }}>{text}</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
+        {error && <p role="status" style={{ margin: 0, textAlign: "center", fontSize: 13, color: "#fca5a5" }}>{error}</p>}
+        <button onClick={turnOn} disabled={busy} style={{ height: 56, border: 0, borderRadius: 28, background: "#ffffff", color: C.bg, fontSize: 16, fontWeight: 600, fontFamily: "inherit", opacity: busy ? 0.7 : 1 }}>
+          {busy ? "Turning on…" : "Turn on notifications"}
+        </button>
+        <p style={{ margin: 0, textAlign: "center", fontSize: 12, lineHeight: 1.5, color: C.muted }}>Then tap Allow. We&rsquo;ll email you as well, so you won&rsquo;t miss anything.</p>
+      </div>
+    </Phone>
+  );
+}
+
 /* ─── 9 · Home ─── */
 
 function greeting() {
@@ -421,7 +483,6 @@ function greeting() {
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
 const londonTime = (iso: string) => new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }).format(new Date(iso));
-const BRANCH: Record<string, string> = { cricklewood: "Cricklewood", streatham: "Streatham", both: "Both branches" };
 
 function Home({ me }: { me: ApprovedMe }) {
   const col = personColour(me.person.id);
@@ -451,6 +512,14 @@ function Home({ me }: { me: ApprovedMe }) {
       </div>
 
       {me.manager && <PhoneApprovals />}
+
+      {me.manager && (
+        <a href="/meet/staff" style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 54, padding: "0 14px", borderRadius: 22, background: C.card, color: "#fff", textDecoration: "none" }}>
+          <Icon name="groups" size={21} />
+          <span style={{ flex: 1, fontSize: 15 }}>Staff and phones</span>
+          <Icon name="chevron_right" size={20} style={{ color: C.faint }} />
+        </a>
+      )}
     </main>
   );
 }
@@ -510,14 +579,6 @@ function TabBar({ tab, onTab }: { tab: "home" | "me"; onTab: (t: "home" | "me") 
 /* ─── 30 · Manager: approve new phones ─── */
 
 type Device = { id: string; clockinId: number; staffName: string; label: string; createdAt: string };
-
-function ago(iso: string) {
-  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
-  const h = Math.round(mins / 60);
-  return h < 24 ? `${h}h ago` : `${Math.round(h / 24)}d ago`;
-}
 
 function PhoneApprovals() {
   const [pending, setPending] = useState<Device[] | null>(null);

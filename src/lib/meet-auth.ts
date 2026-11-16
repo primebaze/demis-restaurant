@@ -57,7 +57,7 @@ export async function cookieDeviceId(): Promise<string | null> {
 export type MeetState =
   | { state: "signed_out"; lastName?: string }
   | { state: "pending" | "declined"; name: string }
-  | { state: "approved"; deviceId: string; person: ClockinStaff; manager: boolean; branch: string };
+  | { state: "approved"; deviceId: string; person: ClockinStaff; manager: boolean; branch: string; notifyChoice: string };
 
 /** Where this phone stands right now. */
 export async function currentMeetState(): Promise<MeetState> {
@@ -76,7 +76,7 @@ export async function currentMeetState(): Promise<MeetState> {
     await prisma.meetDevice.update({ where: { id }, data: { lastSeenAt: new Date() } }).catch(() => {});
   }
   const extra = await prisma.meetStaff.findUnique({ where: { clockinId: person.id } });
-  return { state: "approved", deviceId: id, person, manager: isManagerRole(person.role), branch: extra?.branch || "" };
+  return { state: "approved", deviceId: id, person, manager: isManagerRole(person.role), branch: extra?.branch || "", notifyChoice: device.notifyChoice };
 }
 
 /** For API routes: the signed-in person, or null. `managerOnly` also requires the manager role. */

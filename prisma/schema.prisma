@@ -639,6 +639,7 @@ model MeetDevice {
   decidedBy    String    @default("") // who approved/declined/revoked it
   decidedAt    DateTime?
   sessionUntil DateTime? // signed in until; null = signed out (PIN needed again)
+  notifyChoice String    @default("") // "" = not asked yet, "on", "off" (said no: gets emails)
   lastSeenAt   DateTime  @default(now())
   createdAt    DateTime  @default(now())
 
@@ -652,4 +653,19 @@ model MeetPinLock {
   failures    Int       @default(0)
   lockedUntil DateTime?
   updatedAt   DateTime  @updatedAt
+}
+
+/// A phone's notification subscription (Web Push). One per phone and browser.
+model MeetPushSub {
+  id        String    @id @default(cuid())
+  clockinId Int
+  deviceId  String
+  endpoint  String    @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime  @default(now())
+  lastOkAt  DateTime?
+
+  @@index([clockinId])
+  @@index([deviceId])
 }

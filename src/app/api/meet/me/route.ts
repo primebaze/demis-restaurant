@@ -18,6 +18,7 @@ export async function GET() {
       person: { id: s.person.id, name: s.person.name, role: s.person.role },
       manager: s.manager,
       branch: s.branch,
+      notifyChoice: s.notifyChoice,
       clockedInSince: since,
     },
     { headers },

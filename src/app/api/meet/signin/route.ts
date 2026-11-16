@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getClockinPerson, verifyClockinPin } from "@/lib/clockin";
 import { cookieDeviceId, deviceCookieValue, deviceCookieOptions, deviceLabel, MEET_COOKIE, SESSION_DAYS } from "@/lib/meet-auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { notifyPeople, managerIds } from "@/lib/meet-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,14 @@ export async function POST(req: Request) {
     device = await prisma.meetDevice.create({
       data: { clockinId: staffId, staffName: person.name, label: deviceLabel(ua), status: "pending", sessionUntil },
     });
+    // Tell the managers a phone is waiting (their phones, or email if notifications are off).
+    const managers = (await managerIds()).filter((id) => id !== staffId);
+    await notifyPeople(managers, {
+      title: "New phone to approve",
+      body: `${person.name} signed in on a new phone (${device.label}).`,
+      url: "/meet",
+      tag: `phone-${device.id}`,
+    }).catch(() => {});
   }
 
   const res = NextResponse.json({ state: device.status === "approved" ? "approved" : "pending" });
