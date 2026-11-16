@@ -3,11 +3,11 @@
 import { useEffect, useState, useCallback, type ReactNode } from "react";
 import EmailEveryonePanel from "@/components/admin/EmailEveryonePanel";
 import {
-  CalendarDays, CalendarX2, Check, ChevronLeft, ChevronRight, CircleCheck, Clock, Forward, ListX, Loader2, Mail, MailPlus,
+  CalendarDays, CalendarX2, Check, ChevronLeft, ChevronRight, CircleCheck, Clock, Forward, Loader2, Mail, MailPlus,
   Trash2, Undo2, UserCheck, Users,
 } from "lucide-react";
 import {
-  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, table, tableWrap, type Tone, useTypedConfirm } from "@/components/admin/ui";
+  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, table, tableWrap, type Tone } from "@/components/admin/ui";
 
 type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
 type Summary = { reservations: number; people: number; confirmed: number; cancelled: number };
@@ -130,7 +130,6 @@ function fmt(s: string) {
 }
 
 export default function AdminSundayBuffetPage() {
-  const [askToType, typeDialog] = useTypedConfirm();
   const [date, setDate] = useState("");
   const [resolvedDate, setResolvedDate] = useState("");
   const [prettyDate, setPrettyDate] = useState("");
@@ -288,14 +287,6 @@ export default function AdminSundayBuffetPage() {
     }
   }
 
-  async function resetDay() {
-    if (!(await askToType({ title: "Clear all reservations?", message: <>Deletes every Sunday Buffet reservation for {prettyDate}.</>, action: "Clear all" }))) return;
-    await fetch("/api/admin/sunday-buffet", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "reset", date: resolvedDate }),
-    });
-    fetchData();
-  }
 
   const isThisSunday = date === "";
   const dayLabel = shortDate(resolvedDate);
@@ -340,13 +331,7 @@ export default function AdminSundayBuffetPage() {
       <div className={`grid items-start gap-3 ${mailOpen ? "lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_372px]" : ""}`}>
         <Sheet label="Reservations" className="min-w-0 pt-[18px]">
           <div className="px-4 md:px-5">
-            <SheetTitle
-              aside={
-                <button onClick={resetDay} title="Clear all for this Sunday" aria-label="Clear all for this Sunday" className={`${ibtn} h-10 w-10 hover:text-red-700`}>
-                  <ListX className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                </button>
-              }
-            >
+            <SheetTitle>
               Reservations
             </SheetTitle>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -489,7 +474,6 @@ export default function AdminSundayBuffetPage() {
           />
         )}
       </div>
-      {typeDialog}
     </OwnLayout>
   );
 }
