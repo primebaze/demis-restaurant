@@ -77,7 +77,7 @@ function ukTodayStr() {
 function dayTag(date: string): { label: string; cls: string } {
   const ukToday = ukTodayStr();
   if (date > ukToday) return { label: "Upcoming", cls: "bg-emerald-50 text-emerald-700" };
-  if (date === ukToday) return { label: "Today", cls: "bg-gold-100 text-gold-800" };
+  if (date === ukToday) return { label: "Today", cls: "bg-stone-100 text-stone-900" };
   return { label: "Past", cls: "bg-stone-100 text-stone-500" };
 }
 
@@ -382,7 +382,7 @@ export default function AdminBookingsPage() {
 
   function notesLine(b: BookingRow) {
     return (
-      <span className={`mt-0.5 flex items-center gap-1.5 text-xs font-light ${b.notes ? "text-gold-700" : "text-stone-400"}`}>
+      <span className={`mt-0.5 flex items-center gap-1.5 text-[13px] ${b.notes ? "text-ember-700" : "font-light text-stone-400"}`}>
         <StickyNote className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
         <span className="truncate">{b.notes || "No requirements"}</span>
       </span>
@@ -530,7 +530,7 @@ export default function AdminBookingsPage() {
             <button
               onClick={saveMailTemplate}
               disabled={!mailSubject.trim() || !mailMessage.trim()}
-              className="inline-flex h-8 items-center rounded-full border border-dashed border-stone-300 px-3 text-[13px] text-gold-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-8 items-center rounded-full border border-dashed border-stone-300 px-3 text-[13px] text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               + Save current
             </button>
@@ -615,7 +615,7 @@ export default function AdminBookingsPage() {
               <ul className="mt-1">
                 {comingUp.map((e) => (
                   <li key={e.date}>
-                    <button onClick={() => pickDay(e.date)} className="flex w-full items-center border-t border-stone-100 py-2.5 text-left text-[13px] hover:text-gold-700">
+                    <button onClick={() => pickDay(e.date)} className="flex w-full items-center border-t border-stone-100 py-2.5 text-left text-[13px] hover:text-stone-900">
                       <span>{dayLabel(e.date)}</span>
                       <span className="ml-auto text-xs font-light text-stone-500">
                         {plural(e.count, "booking", "bookings")} · {plural(e.totalCovers, "cover", "covers")}
@@ -741,7 +741,7 @@ export default function AdminBookingsPage() {
                       return (
                         <Fragment key={b.id}>
                           <tr
-                            className={`cursor-pointer transition-colors ${open ? "bg-gold-50" : "hover:bg-stone-50"}`}
+                            className={`cursor-pointer transition-colors ${open ? "bg-stone-100" : "hover:bg-stone-50"}`}
                             onClick={() => setExpanded(open ? null : b.id)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") setExpanded(open ? null : b.id);
@@ -786,7 +786,7 @@ export default function AdminBookingsPage() {
 
                           {/* Expanded detail */}
                           {open && (
-                            <tr className="bg-gold-50">
+                            <tr className="bg-stone-100">
                               <td colSpan={cols} className="!border-t-0 !pt-0">
                                 <div className="rounded-[18px] bg-white px-4 py-3.5">
                                   <div className="flex flex-wrap items-center gap-x-8 gap-y-3">

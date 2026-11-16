@@ -162,12 +162,12 @@ export default function ShootPlanList() {
                     href={`/admin/shoot-plans/${plan.id}`}
                     key={plan.id}
                     className={`group flex min-w-0 flex-col rounded-[20px] p-4 text-stone-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300 md:px-[18px] ${
-                      hot ? "border-[1.5px] border-gold-300 bg-gold-50" : "border border-stone-200 bg-white hover:border-gold-300"
+                      hot ? "border-[1.5px] border-stone-200 bg-stone-100" : "border border-stone-200 bg-white hover:border-stone-300"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <Tag tone={STATUS_TONE[plan.status]}>{SHOOT_STATUSES[plan.status]}</Tag>
-                      <ArrowRight size={18} aria-hidden="true" className="text-stone-400 transition group-hover:translate-x-0.5 group-hover:text-gold-700" />
+                      <ArrowRight size={18} aria-hidden="true" className="text-stone-400 transition group-hover:translate-x-0.5 group-hover:text-stone-900" />
                     </div>
                     <h3 className="mt-3 break-words text-[17px] font-normal text-stone-900">{plan.title}</h3>
                     <div className="mt-2 flex flex-col gap-1 text-[13px] text-stone-500">
@@ -186,7 +186,7 @@ export default function ShootPlanList() {
                     <div className="mt-auto pt-3 text-[13px] text-stone-500">
                       {!!plan.activities?.length ? (
                         <>
-                          <p className="truncate text-xs text-gold-700">
+                          <p className="truncate text-xs text-stone-900">
                             {Array.from(new Set(plan.activities.map((item) => WORK_TYPES[item.type]))).join(" · ")}
                           </p>
                           <p className="mt-1">
@@ -229,7 +229,7 @@ export default function ShootPlanList() {
           </>
         ) : (
           <div className="mx-4 mb-5 rounded-[20px] border border-dashed border-stone-200 px-6 py-14 text-center md:mx-5">
-            <Camera size={32} aria-hidden="true" className="mx-auto mb-5 text-gold-700" strokeWidth={1.5} />
+            <Camera size={32} aria-hidden="true" className="mx-auto mb-5 text-stone-900" strokeWidth={1.5} />
             <h3 className="text-xl font-normal text-stone-900">
               {status || week ? "No plans match these filters" : "No weekly plans yet"}
             </h3>

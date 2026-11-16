@@ -168,13 +168,13 @@ export default function GuestImportPage() {
           <div
             role="button"
             tabIndex={0}
-            className="flex cursor-pointer flex-col items-center rounded-[18px] border border-stone-200 bg-stone-50 px-6 py-12 text-center transition hover:border-gold-400 hover:bg-white focus-visible:border-gold-400 focus-visible:outline-none"
+            className="flex cursor-pointer flex-col items-center rounded-[18px] border border-stone-200 bg-stone-50 px-6 py-12 text-center transition hover:border-stone-300 hover:bg-white focus-visible:border-gold-400 focus-visible:outline-none"
             onClick={() => fileRef.current?.click()}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileRef.current?.click(); } }}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
           >
-            <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gold-100 text-gold-800">
+            <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 text-stone-900">
               <FileUp className="h-6 w-6" strokeWidth={1.5} />
             </span>
             <p className="font-outfit text-xl font-normal text-stone-900">Drop a CSV or PDF here</p>

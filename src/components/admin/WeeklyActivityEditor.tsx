@@ -102,7 +102,7 @@ export default function WeeklyActivityEditor({
             className="min-w-0 space-y-5 rounded-2xl border border-stone-100 bg-white p-5 sm:p-7"
           >
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-sm font-semibold text-gold-700">
+              <h3 className="text-sm font-semibold text-stone-900">
                 Activity {index + 1}
               </h3>
               <Action

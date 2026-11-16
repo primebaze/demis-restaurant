@@ -93,8 +93,11 @@ still apply to the guest site, the door kiosks and the blog.
   active day, the arrow buttons, and the one number that matters most in a group.
   On white, gold text is `gold-700`. Solid fills only: no dots, stripes or
   patterns.
-- **Calendar dots:** booking dots on the admin calendars are `ember-400` (and the
-  count next to them `ember-600`). That's the only place ember is used.
+- **Ember (rust), admin only:** booking dots on the calendars (`ember-400`),
+  guest requirements on bookings (`text-ember-700`) and the initials circles
+  (`bg-ember-100 text-ember-700`). Nowhere else.
+- **Text on white is never gold.** Use `stone-900` for main text and `stone-500`
+  for hints. Gold is only a solid fill (`bg-gold-300` with `text-ink-900`).
 - **Status:** the same three meanings, light versions on white: `emerald-50/700`
   (done), `amber-50/800` (waiting), `red-50/700` (cancelled, failed). Modified is
   `gold-100/800`.

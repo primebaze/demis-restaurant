@@ -38,7 +38,7 @@ function StatusBits({ b }: { b: Booking }) {
       <Tag tone={s.tone}>{s.label}</Tag>
       {b.status !== "cancelled" &&
         (b.confirmedAt ? (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs text-gold-700" title={`Confirmed ${fmt(b.confirmedAt)}`}>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs text-stone-900" title={`Confirmed ${fmt(b.confirmedAt)}`}>
             <Check className="h-3.5 w-3.5" strokeWidth={2} />
             confirmed
           </span>
@@ -356,7 +356,7 @@ export default function AdminSundayBuffetPage() {
               </button>
             </div>
             {confirmNote && (
-              <p className="mt-3 flex items-center gap-2 rounded-xl bg-gold-100 px-3 py-2 text-[13px] text-gold-800" role="status">
+              <p className="mt-3 flex items-center gap-2 rounded-xl bg-stone-100 px-3 py-2 text-[13px] text-stone-900" role="status">
                 <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 {confirmNote}
               </p>
@@ -509,7 +509,7 @@ export default function AdminSundayBuffetPage() {
               <button
                 onClick={saveMailTemplate}
                 disabled={!mailSubject.trim() || !mailMessage.trim()}
-                className="inline-flex h-7 items-center gap-1 rounded-full border border-dashed border-stone-300 px-3 text-xs text-gold-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-7 items-center gap-1 rounded-full border border-dashed border-stone-300 px-3 text-xs text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                 Save current

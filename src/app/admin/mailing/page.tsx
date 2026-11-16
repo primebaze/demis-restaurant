@@ -230,7 +230,7 @@ export default function MailingPage() {
     setSendResult(null); setPendingLimit(limit); setConfirming(true);
   };
   const box = "h-[18px] w-[18px] shrink-0 cursor-pointer rounded accent-gold-300 align-middle disabled:cursor-not-allowed disabled:opacity-30";
-  const codeCls = "rounded-md bg-gold-50 px-1.5 py-px font-outfit text-gold-700";
+  const codeCls = "rounded-md bg-stone-100 px-1.5 py-px font-outfit text-stone-900";
 
   return (
     <OwnLayout>
@@ -329,7 +329,7 @@ export default function MailingPage() {
 
           <p className="mt-2.5 px-4 pb-3 text-xs font-light text-stone-500 md:px-5">
             Tick contacts to send to just them (e.g. a warm-up batch). Leave everything unticked to send to all subscribers.
-            {selected.size > 0 && <span className="text-gold-700"> · {selected.size} selected</span>}
+            {selected.size > 0 && <span className="text-stone-900"> · {selected.size} selected</span>}
           </p>
 
           {loading ? (
@@ -346,7 +346,7 @@ export default function MailingPage() {
                 </label>
                 <ul>
                   {contacts.map((c) => (
-                    <li key={c.id} className={`flex items-center gap-3 border-t border-stone-100 px-4 py-3 ${selected.has(c.id) ? "bg-gold-50" : ""}`}>
+                    <li key={c.id} className={`flex items-center gap-3 border-t border-stone-100 px-4 py-3 ${selected.has(c.id) ? "bg-stone-100" : ""}`}>
                       <input
                         type="checkbox"
                         aria-label={`Select ${c.email}`}
@@ -388,7 +388,7 @@ export default function MailingPage() {
                   </thead>
                   <tbody>
                     {contacts.map((c) => (
-                      <tr key={c.id} className={selected.has(c.id) ? "bg-gold-50" : "hover:bg-stone-50"}>
+                      <tr key={c.id} className={selected.has(c.id) ? "bg-stone-100" : "hover:bg-stone-50"}>
                         <td className="!pl-5">
                           <input
                             type="checkbox"
@@ -444,7 +444,7 @@ export default function MailingPage() {
             <button
               onClick={saveTemplate}
               disabled={!subject.trim() || !body.trim()}
-              className="ml-auto inline-flex h-8 items-center gap-1 rounded-full border border-gold-200 bg-white px-3 text-[13px] text-gold-700 transition hover:bg-gold-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="ml-auto inline-flex h-8 items-center gap-1 rounded-full border border-stone-200 bg-white px-3 text-[13px] text-stone-900 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Plus className="h-4 w-4" strokeWidth={1.75} />
               Save current
@@ -519,7 +519,7 @@ export default function MailingPage() {
           <div className="mt-4 border-t border-stone-100 pt-4">
             {selected.size > 0 && (
               <p className="mb-2 text-center text-xs text-stone-500">
-                Sending to <span className="font-medium text-gold-700">{selected.size} selected</span> ·{" "}
+                Sending to <span className="font-medium text-stone-900">{selected.size} selected</span> ·{" "}
                 <button onClick={() => setSelected(new Set())} className="underline hover:text-stone-900">clear</button>
               </p>
             )}
@@ -552,10 +552,10 @@ export default function MailingPage() {
               <div className="space-y-3 rounded-[18px] bg-stone-50 p-4">
                 <p className="text-center text-sm text-stone-900">
                   {pendingLimit != null
-                    ? <>Send to the next <span className="font-medium text-gold-700">{pendingLimit}</span> who haven&apos;t received this yet? This can&apos;t be undone.</>
+                    ? <>Send to the next <span className="font-medium text-stone-900">{pendingLimit}</span> who haven&apos;t received this yet? This can&apos;t be undone.</>
                     : selected.size > 0
-                    ? <>Send this to the <span className="font-medium text-gold-700">{selected.size} selected</span> {selected.size === 1 ? "contact" : "contacts"}? Anyone who already got it is skipped. This can&apos;t be undone.</>
-                    : <>Send this to all <span className="font-medium text-gold-700">{summary.subscribed}</span> subscribers? Anyone who already got it is skipped. This can&apos;t be undone.</>}
+                    ? <>Send this to the <span className="font-medium text-stone-900">{selected.size} selected</span> {selected.size === 1 ? "contact" : "contacts"}? Anyone who already got it is skipped. This can&apos;t be undone.</>
+                    : <>Send this to all <span className="font-medium text-stone-900">{summary.subscribed}</span> subscribers? Anyone who already got it is skipped. This can&apos;t be undone.</>}
                 </p>
                 <div className="flex gap-2">
                   <button onClick={() => setConfirming(false)} disabled={sending} className={`${btn.light} !h-11 flex-1 justify-center`}>

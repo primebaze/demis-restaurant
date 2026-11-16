@@ -22,7 +22,7 @@ function Stars({ n, onChange }: { n: number; onChange?: (v: number) => void }) {
           key={i}
           type="button"
           onClick={() => onChange?.(i)}
-          className={`${i <= n ? "text-gold-700" : "text-stone-300"} ${onChange ? "cursor-pointer text-xl leading-none" : "cursor-default"}`}
+          className={`${i <= n ? "text-stone-900" : "text-stone-300"} ${onChange ? "cursor-pointer text-xl leading-none" : "cursor-default"}`}
           aria-label={`${i} star`}
         >
           ★

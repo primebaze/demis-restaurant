@@ -228,7 +228,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                             <span className="text-[15px] font-medium tabular-nums">{v.tableNo ? `Table ${v.tableNo}` : isDining ? "No table" : "Takeaway"}</span>
                             <span className={v.hasDetails ? "text-stone-900" : "text-stone-500"}>{v.label}</span>
-                            {v.isBooking && <span className="text-[11px] text-gold-700">booked</span>}
+                            {v.isBooking && <span className="text-[11px] text-stone-900">booked</span>}
                           </div>
                           <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-stone-500">
                             <TypeTag dining={isDining} />
@@ -275,7 +275,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                           <td className="!pl-5 font-medium tabular-nums">{v.tableNo || <Blank />}</td>
                           <td className={`whitespace-nowrap ${v.hasDetails ? "text-stone-900" : "text-stone-500"}`}>
                             {v.label}
-                            {v.isBooking && <span className="ml-1.5 text-[11px] text-gold-700">booked</span>}
+                            {v.isBooking && <span className="ml-1.5 text-[11px] text-stone-900">booked</span>}
                           </td>
                           <td><TypeTag dining={isDining} /></td>
                           <td className="text-right tabular-nums">{isDining ? v.partySize : <Blank />}</td>

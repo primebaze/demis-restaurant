@@ -352,7 +352,7 @@ export default function ShootPlanEditor({
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap items-center gap-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gold-700">
+              <p className="text-xs font-semibold uppercase tracking-widest text-stone-900">
                 {collaboration
                   ? "Collaborator access"
                   : "Demi’s weekly planner"}
@@ -460,7 +460,7 @@ export default function ShootPlanEditor({
                   href={collaboration?.unlockPath || "/admin/login"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gold-700 underline"
+                  className="text-stone-900 underline"
                 >
                   {collaboration
                     ? "Unlock in a new tab"
@@ -583,7 +583,7 @@ export default function ShootPlanEditor({
                     : undefined
                 }
               >
-                <summary className="cursor-pointer py-2 font-semibold text-gold-700">
+                <summary className="cursor-pointer py-2 font-semibold text-stone-900">
                   Shoot details
                 </summary>
                 <div className="mt-5 space-y-5">
@@ -883,7 +883,7 @@ export default function ShootPlanEditor({
                         : undefined
                     }
                   >
-                    <summary className="cursor-pointer py-3 font-semibold text-gold-700 focus-visible:outline">
+                    <summary className="cursor-pointer py-3 font-semibold text-stone-900 focus-visible:outline">
                       On-screen text
                     </summary>
                     <div className="mt-3 grid gap-5 sm:grid-cols-2">

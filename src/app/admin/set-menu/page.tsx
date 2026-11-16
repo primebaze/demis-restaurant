@@ -400,7 +400,7 @@ export default function AdminSetMenuPage() {
           {newGroupResult ? (
             <div className="mt-5">
               <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-100 text-gold-800">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-stone-900">
                   <Check className="h-5 w-5" strokeWidth={2} />
                 </span>
                 <div>
@@ -508,13 +508,13 @@ export default function AdminSetMenuPage() {
                     return (
                       <Fragment key={g.id}>
                         <tr
-                          className={`cursor-pointer transition-colors ${isExpanded ? "bg-gold-50" : "hover:bg-stone-50"}`}
+                          className={`cursor-pointer transition-colors ${isExpanded ? "bg-stone-100" : "hover:bg-stone-50"}`}
                           onClick={() => setExpanded(isExpanded ? null : g.id)}
                           onKeyDown={(e) => { if (e.key === "Enter") setExpanded(isExpanded ? null : g.id); }}
                           tabIndex={0}
                           aria-expanded={isExpanded}
                         >
-                          <td className="whitespace-nowrap font-mono text-[13px] text-gold-700">{g.groupCode}</td>
+                          <td className="whitespace-nowrap font-mono text-[13px] text-stone-900">{g.groupCode}</td>
                           <td>
                             <div>{g.organizerName}</div>
                             {g.organizerPhone && <div className="text-xs font-light text-stone-500">{g.organizerPhone}</div>}
@@ -528,7 +528,7 @@ export default function AdminSetMenuPage() {
                         </tr>
 
                         {isExpanded && (
-                          <tr className="bg-gold-50">
+                          <tr className="bg-stone-100">
                             <td colSpan={8} className="!border-t-0 !pb-4 !pt-0">
                               {groupDetail(g)}
                             </td>
@@ -547,13 +547,13 @@ export default function AdminSetMenuPage() {
                 const guestUrl = `${SITE_URL}/set-menu/${g.groupCode}`;
                 const isExpanded = expanded === g.id;
                 return (
-                  <article key={g.id} className={`rounded-[18px] p-3.5 ${isExpanded ? "bg-gold-50" : "bg-stone-50"}`}>
+                  <article key={g.id} className={`rounded-[18px] p-3.5 ${isExpanded ? "bg-stone-100" : "bg-stone-50"}`}>
                     <button type="button" onClick={() => setExpanded(isExpanded ? null : g.id)} aria-expanded={isExpanded} className="block w-full text-left">
                       <div className="flex items-start gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-[15px]">{g.organizerName}</div>
                           <div className="text-xs font-light text-stone-500">
-                            <span className="font-mono text-gold-700">{g.groupCode}</span> · {formatDate(g.date)} · {LOCATIONS[g.locationSlug] || g.locationSlug}
+                            <span className="font-mono text-stone-900">{g.groupCode}</span> · {formatDate(g.date)} · {LOCATIONS[g.locationSlug] || g.locationSlug}
                           </div>
                         </div>
                         <Tag tone={g.status === "active" ? "ok" : "off"}>{g.status === "active" ? "Active" : "Inactive"}</Tag>

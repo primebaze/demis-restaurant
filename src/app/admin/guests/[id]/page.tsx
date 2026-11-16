@@ -116,7 +116,7 @@ export default function GuestProfilePage() {
                 <dt className="text-xs font-light text-stone-500">Phone</dt>
                 <dd className="mt-0.5">
                   {guest.phone ? (
-                    <a href={`tel:${guest.phone.replace(/\s+/g, "")}`} className="hover:text-gold-700">
+                    <a href={`tel:${guest.phone.replace(/\s+/g, "")}`} className="hover:text-stone-900">
                       {guest.phone}
                     </a>
                   ) : (
@@ -160,7 +160,7 @@ export default function GuestProfilePage() {
                       <p className="text-sm text-stone-900">{v.visitDate}</p>
                       {v.notes && <p className="mt-0.5 text-xs font-light text-stone-500">{v.notes}</p>}
                     </div>
-                    <span className="shrink-0 text-sm tabular-nums text-gold-700">£{(v.spendPence / 100).toFixed(2)}</span>
+                    <span className="shrink-0 text-sm tabular-nums text-stone-900">£{(v.spendPence / 100).toFixed(2)}</span>
                   </li>
                 ))}
               </ul>
@@ -180,7 +180,7 @@ export default function GuestProfilePage() {
               {guest.bookings.map((b) => (
                 <li key={b.id} className="border-t border-stone-100 px-4 py-3.5 md:px-5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-sm text-gold-700">{b.confirmationCode}</span>
+                    <span className="font-mono text-sm text-stone-900">{b.confirmationCode}</span>
                     <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
                     <span className="ml-auto text-xs text-stone-500">{b.source}</span>
                   </div>

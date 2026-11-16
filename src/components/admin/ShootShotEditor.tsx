@@ -148,7 +148,7 @@ export default function ShootShotEditor({
                 : undefined
             }
           >
-            <summary className="cursor-pointer py-2 text-sm text-gold-700 focus-visible:outline">
+            <summary className="cursor-pointer py-2 text-sm text-stone-900 focus-visible:outline">
               Shot details
             </summary>
             <div className="mt-4 space-y-4">

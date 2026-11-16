@@ -202,8 +202,8 @@ export default function AdminBuffetPage() {
                     {bookings.map((b) => {
                       const off = b.status === "cancelled";
                       return (
-                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-gold-50" : "hover:bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
-                          <td className={`whitespace-nowrap font-mono text-xs ${isNew(b) ? "text-gold-700" : "text-stone-500"}`}>{b.bookingCode}</td>
+                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-stone-100" : "hover:bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
+                          <td className={`whitespace-nowrap font-mono text-xs ${isNew(b) ? "text-stone-900" : "text-stone-500"}`}>{b.bookingCode}</td>
                           <td>
                             <div>{b.name}</div>
                             {(b.phone || b.email) && <div className="text-xs font-light text-stone-500">{b.phone || b.email}</div>}
@@ -252,7 +252,7 @@ export default function AdminBuffetPage() {
                 {bookings.map((b) => {
                   const off = b.status === "cancelled";
                   return (
-                    <article key={b.id} className={`rounded-[18px] p-3.5 ${isNew(b) ? "bg-gold-50" : "bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
+                    <article key={b.id} className={`rounded-[18px] p-3.5 ${isNew(b) ? "bg-stone-100" : "bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
                       <div className="flex items-start gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-[15px]">{b.name}</div>

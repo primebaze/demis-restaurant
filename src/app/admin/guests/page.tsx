@@ -51,7 +51,7 @@ function TagChips({ tags }: { tags: string }) {
         if (!t) return null;
         const hot = t.toLowerCase() === "vip";
         return (
-          <span key={tag} className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] whitespace-nowrap ${hot ? "bg-gold-100 text-gold-800" : "bg-stone-100 text-stone-600"}`}>
+          <span key={tag} className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] whitespace-nowrap ${hot ? "bg-stone-100 text-stone-900" : "bg-stone-100 text-stone-600"}`}>
             {t}
           </span>
         );
@@ -388,12 +388,12 @@ export default function AdminGuestsPage() {
               {/* Phones: one card per guest */}
               <ul className="md:hidden">
                 {guests.map((g) => (
-                  <li key={g.id} className={`border-t border-stone-100 px-4 py-3.5 ${composingFor === g.id ? "bg-gold-50" : ""}`}>
+                  <li key={g.id} className={`border-t border-stone-100 px-4 py-3.5 ${composingFor === g.id ? "bg-stone-100" : ""}`}>
                     <div className="flex items-start gap-3">
                       <Avatar name={g.name} />
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <Link href={`/admin/guests/${g.id}`} className="text-[15px] text-stone-900 hover:text-gold-700">
+                          <Link href={`/admin/guests/${g.id}`} className="text-[15px] text-stone-900 hover:text-stone-900">
                             {g.name}
                           </Link>
                           <TagChips tags={g.tags} />
@@ -491,7 +491,7 @@ export default function AdminGuestsPage() {
                 {compose.mode === "single" && compose.toName ? (
                   <Avatar name={compose.toName} />
                 ) : (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-800">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-900">
                     <Users className="h-4 w-4" strokeWidth={1.75} />
                   </span>
                 )}
@@ -519,8 +519,8 @@ export default function AdminGuestsPage() {
                 className={`${fieldArea} resize-none`}
               />
               <p className="mx-1 mb-3.5 mt-2 text-xs font-light leading-relaxed text-stone-500">
-                Type <code className="rounded-md bg-gold-50 px-1.5 py-px font-outfit text-gold-700">{"{name}"}</code> for their first name and{" "}
-                <code className="rounded-md bg-gold-50 px-1.5 py-px font-outfit text-gold-700">{"{feast}"}</code> for a link to the Sunday Feast page. Links are
+                Type <code className="rounded-md bg-stone-100 px-1.5 py-px font-outfit text-stone-900">{"{name}"}</code> for their first name and{" "}
+                <code className="rounded-md bg-stone-100 px-1.5 py-px font-outfit text-stone-900">{"{feast}"}</code> for a link to the Sunday Feast page. Links are
                 tracked, see who clicked in Link Clicks.
               </p>
 
@@ -580,7 +580,7 @@ function MailButton({ on, name, onClick }: { on: boolean; name: string; onClick:
       title="Email this guest"
       aria-label={`Email ${name}`}
       className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
-        on ? "border-gold-300 bg-gold-300 text-ink-900" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
+        on ? "border-stone-200 bg-gold-300 text-ink-900" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
       }`}
     >
       <Mail className="h-4 w-4" strokeWidth={1.75} />
@@ -593,13 +593,13 @@ function GuestRows({
 }: { g: GuestRow; on: boolean; editing: boolean; editPanel: React.ReactNode; onMail: () => void; onEdit: () => void }) {
   return (
     <>
-      <tr className={on ? "bg-gold-50" : "hover:bg-stone-50"}>
+      <tr className={on ? "bg-stone-100" : "hover:bg-stone-50"}>
         <td className="!pl-5">
           <div className="flex items-center gap-3">
             <Avatar name={g.name} />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-1.5">
-                <Link href={`/admin/guests/${g.id}`} className="text-stone-900 transition hover:text-gold-700">
+                <Link href={`/admin/guests/${g.id}`} className="text-stone-900 transition hover:text-stone-900">
                   {g.name}
                 </Link>
                 <TagChips tags={g.tags} />

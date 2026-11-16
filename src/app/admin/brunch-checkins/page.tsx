@@ -99,7 +99,7 @@ export default function AdminBrunchCheckinsPage() {
   const mix = (c: CheckIn) =>
     c.withDrinks > 0 ? (
       <span>
-        {c.foodOnly} food · <span className="text-gold-700">{c.withDrinks} drinks</span>
+        {c.foodOnly} food · <span className="text-stone-900">{c.withDrinks} drinks</span>
       </span>
     ) : (
       <span>Sunday Feast</span>
@@ -228,7 +228,7 @@ export default function AdminBrunchCheckinsPage() {
             rel="noopener noreferrer"
             className="mt-3 flex items-center gap-2.5 rounded-2xl bg-stone-100 px-3.5 py-3 text-sm transition hover:bg-stone-200"
           >
-            <Tablet className="h-5 w-5 shrink-0 text-gold-700" strokeWidth={1.5} />
+            <Tablet className="h-5 w-5 shrink-0 text-stone-900" strokeWidth={1.5} />
             <span>
               Guests check in at <b className="font-medium">/brunch-checkin</b>
             </span>
@@ -236,7 +236,7 @@ export default function AdminBrunchCheckinsPage() {
           </a>
           <p className="mt-2 text-xs font-light leading-relaxed text-stone-500">
             It uses the same kiosk PIN as the buffet. Change it on the{" "}
-            <a href="/admin/checkins" className="text-gold-700 underline-offset-2 hover:underline">Sunday Buffet</a> tab.
+            <a href="/admin/checkins" className="text-stone-900 underline-offset-2 hover:underline">Sunday Buffet</a> tab.
           </p>
 
           <h2 className="mt-5 font-outfit text-[17px] font-normal tracking-tight">Clear the day</h2>

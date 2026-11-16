@@ -59,12 +59,12 @@ export function SheetTitle({ children, aside }: { children: ReactNode; aside?: R
 }
 
 const TONES = {
-  ok: "bg-emerald-50 text-emerald-700",
-  wait: "bg-amber-50 text-amber-800",
-  bad: "bg-red-50 text-red-700",
-  off: "bg-stone-100 text-stone-500",
-  hot: "bg-gold-100 text-gold-800",
-  gold: "bg-gold-100 text-gold-800",
+  ok: "bg-emerald-100 text-emerald-800",
+  wait: "bg-amber-100 text-amber-900",
+  bad: "bg-red-100 text-red-800",
+  off: "bg-stone-100 text-stone-700",
+  hot: "bg-gold-300 text-ink-900",
+  gold: "bg-gold-300 text-ink-900",
 } as const;
 export type Tone = keyof typeof TONES;
 
@@ -106,7 +106,7 @@ export const btn = {
 export function Avatar({ name }: { name: string }) {
   const ini = name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() || "").join("") || "?";
   return (
-    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-100 text-[13px] font-medium text-gold-800">
+    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ember-100 text-[13px] font-medium text-ember-700">
       {ini}
     </span>
   );

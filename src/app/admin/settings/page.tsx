@@ -227,9 +227,9 @@ function PoliciesPanel({
       {policies.map((p) => {
         const editing = editId === p.id;
         return (
-          <div key={p.id} className={editing ? "rounded-[20px] border-[1.5px] border-gold-300 bg-gold-50 p-4 md:p-5" : card}>
+          <div key={p.id} className={editing ? "rounded-[20px] border-[1.5px] border-stone-200 bg-stone-100 p-4 md:p-5" : card}>
             <div className="mb-3.5 flex items-center gap-2.5">
-              <Store className={`h-5 w-5 ${editing ? "text-gold-700" : "text-stone-500"}`} strokeWidth={1.5} />
+              <Store className={`h-5 w-5 ${editing ? "text-stone-900" : "text-stone-500"}`} strokeWidth={1.5} />
               <h3 className="text-base font-normal text-stone-900">{p.locationName}</h3>
               {editing ? (
                 <Tag tone="gold">Editing</Tag>
@@ -437,7 +437,7 @@ function AddOnsPanel({
                     {a.description && <p className="text-xs text-stone-500">{a.description}</p>}
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="mr-1 text-sm tabular-nums text-gold-700">£{(a.pricePence / 100).toFixed(2)}</span>
+                    <span className="mr-1 text-sm tabular-nums text-stone-900">£{(a.pricePence / 100).toFixed(2)}</span>
                     <button type="button" onClick={() => startEdit(a)} className={btn.small}>
                       <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                       Edit

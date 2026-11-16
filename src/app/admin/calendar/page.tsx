@@ -149,7 +149,7 @@ export default function CalendarPage() {
                           <span className="ml-auto text-stone-400">#{b.code}</span>
                         </div>
                         {b.notes && (
-                          <p className="mt-1.5 flex items-start gap-1.5 text-xs text-gold-700">
+                          <p className="mt-1.5 flex items-start gap-1.5 text-[13px] text-ember-700">
                             <StickyNote className="mt-px h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
                             {b.notes}
                           </p>

@@ -75,8 +75,8 @@ export function Feedback({
 }
 export function StatusBadge({ status }: { status: ShootStatus }) {
   const colours = {
-    planned: "bg-gold-100 text-gold-700",
-    in_progress: "bg-gold-100 text-gold-700",
+    planned: "bg-stone-100 text-stone-900",
+    in_progress: "bg-stone-100 text-stone-900",
     completed: "bg-emerald-50 text-emerald-700",
     cancelled: "bg-stone-400/10 text-stone-700",
   };

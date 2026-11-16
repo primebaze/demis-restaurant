@@ -21,7 +21,7 @@ const STATUS_TONE: Record<string, Tone> = { sent: "ok", queued: "wait", failed: 
 
 const TYPE_COLORS: Record<string, string> = {
   transactional: "bg-stone-100 text-stone-700",
-  direct: "bg-gold-100 text-gold-800",
+  direct: "bg-stone-100 text-stone-900",
   bulk: "bg-stone-100 text-stone-500",
   admin: "bg-stone-100 text-stone-700",
 };
@@ -158,7 +158,7 @@ export default function EmailLogsPage() {
           onClick={() => resend(l.id)}
           disabled={resending === l.id}
           title="Send this email again now"
-          className="inline-flex h-8 items-center rounded-full border border-gold-200 bg-gold-50 px-3 text-[13px] text-gold-800 transition hover:bg-gold-100 disabled:opacity-50"
+          className="inline-flex h-8 items-center rounded-full border border-stone-200 bg-stone-100 px-3 text-[13px] text-stone-900 transition hover:bg-stone-100 disabled:opacity-50"
         >
           {resending === l.id ? "…" : "Resend"}
         </button>
@@ -225,7 +225,7 @@ export default function EmailLogsPage() {
               </label>
               <ul>
                 {logs.map((l) => (
-                  <li key={l.id} className={`flex gap-3 border-t border-stone-100 px-4 py-3 ${selected.has(l.id) ? "bg-gold-50" : ""}`}>
+                  <li key={l.id} className={`flex gap-3 border-t border-stone-100 px-4 py-3 ${selected.has(l.id) ? "bg-stone-100" : ""}`}>
                     <input
                       type="checkbox"
                       aria-label={`Select email to ${l.recipient}`}
@@ -272,7 +272,7 @@ export default function EmailLogsPage() {
                 </thead>
                 <tbody>
                   {logs.map((l) => (
-                    <tr key={l.id} className={selected.has(l.id) ? "bg-gold-50" : "hover:bg-stone-50"}>
+                    <tr key={l.id} className={selected.has(l.id) ? "bg-stone-100" : "hover:bg-stone-50"}>
                       <td className="!pl-5">
                         <input
                           type="checkbox"

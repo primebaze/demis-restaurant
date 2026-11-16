@@ -334,7 +334,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-baseline justify-between border-t border-stone-100 py-3">
                   <span className="text-[15px]">People</span>
-                  <span className="text-[40px] font-light leading-none tracking-tight text-gold-700">{ev.people}</span>
+                  <span className="text-[40px] font-light leading-none tracking-tight text-stone-900">{ev.people}</span>
                 </div>
               </>
             ) : (

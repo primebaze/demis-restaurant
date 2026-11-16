@@ -238,7 +238,7 @@ export default function AdminCheckinsPage() {
             rel="noopener noreferrer"
             className="mt-3 flex items-center gap-2.5 rounded-2xl bg-stone-100 px-3.5 py-3 text-sm transition hover:bg-stone-200"
           >
-            <Tablet className="h-5 w-5 shrink-0 text-gold-700" strokeWidth={1.5} />
+            <Tablet className="h-5 w-5 shrink-0 text-stone-900" strokeWidth={1.5} />
             <span>
               Guests check in at <b className="font-medium">/checkin</b>
             </span>

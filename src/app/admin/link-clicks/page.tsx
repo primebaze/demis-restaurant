@@ -154,7 +154,7 @@ export default function LinkClicksPage() {
         <Sheet label="No clicks yet" className="px-5 py-12 text-center">
           <p className="text-sm text-stone-500">No clicks tracked yet.</p>
           <p className="mt-2 text-xs text-stone-400">
-            Links in an email blast are tracked automatically. Put <code className="text-gold-700">{"{vote}"}</code>{" "}
+            Links in an email blast are tracked automatically. Put <code className="text-stone-900">{"{vote}"}</code>{" "}
             in the message to insert the voting link.
           </p>
         </Sheet>
@@ -191,7 +191,7 @@ export default function LinkClicksPage() {
                         >
                           <span className="relative flex h-[170px] items-end">
                             <span
-                              className={`relative w-full rounded-t-[12px] rounded-b-[4px] transition-colors ${on ? "bg-gold-300" : "bg-gold-100 group-hover:bg-gold-200"}`}
+                              className={`relative w-full rounded-t-[12px] rounded-b-[4px] transition-colors ${on ? "bg-gold-300" : "bg-stone-100 group-hover:bg-gold-200"}`}
                               style={{ height: `${h}%` }}
                             >
                               <span
