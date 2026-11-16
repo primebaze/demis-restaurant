@@ -741,7 +741,7 @@ export default function AdminBookingsPage() {
                       return (
                         <Fragment key={b.id}>
                           <tr
-                            className={`cursor-pointer transition-colors ${open ? "bg-stone-100" : "hover:bg-stone-50"}`}
+                            className={`cursor-pointer transition-colors ${open ? "bg-ember-50" : "hover:bg-stone-50"}`}
                             onClick={() => setExpanded(open ? null : b.id)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") setExpanded(open ? null : b.id);
@@ -786,7 +786,7 @@ export default function AdminBookingsPage() {
 
                           {/* Expanded detail */}
                           {open && (
-                            <tr className="bg-stone-100">
+                            <tr className="bg-ember-50">
                               <td colSpan={cols} className="!border-t-0 !pt-0">
                                 <div className="rounded-[18px] bg-white px-4 py-3.5">
                                   <div className="flex flex-wrap items-center gap-x-8 gap-y-3">

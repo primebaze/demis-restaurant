@@ -508,7 +508,7 @@ export default function AdminSetMenuPage() {
                     return (
                       <Fragment key={g.id}>
                         <tr
-                          className={`cursor-pointer transition-colors ${isExpanded ? "bg-stone-100" : "hover:bg-stone-50"}`}
+                          className={`cursor-pointer transition-colors ${isExpanded ? "bg-ember-50" : "hover:bg-stone-50"}`}
                           onClick={() => setExpanded(isExpanded ? null : g.id)}
                           onKeyDown={(e) => { if (e.key === "Enter") setExpanded(isExpanded ? null : g.id); }}
                           tabIndex={0}
@@ -528,7 +528,7 @@ export default function AdminSetMenuPage() {
                         </tr>
 
                         {isExpanded && (
-                          <tr className="bg-stone-100">
+                          <tr className="bg-ember-50">
                             <td colSpan={8} className="!border-t-0 !pb-4 !pt-0">
                               {groupDetail(g)}
                             </td>

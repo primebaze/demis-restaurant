@@ -272,7 +272,7 @@ export default function EmailLogsPage() {
                 </thead>
                 <tbody>
                   {logs.map((l) => (
-                    <tr key={l.id} className={selected.has(l.id) ? "bg-stone-100" : "hover:bg-stone-50"}>
+                    <tr key={l.id} className={selected.has(l.id) ? "bg-ember-50" : "hover:bg-stone-50"}>
                       <td className="!pl-5">
                         <input
                           type="checkbox"

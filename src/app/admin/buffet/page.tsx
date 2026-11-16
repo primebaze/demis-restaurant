@@ -202,7 +202,7 @@ export default function AdminBuffetPage() {
                     {bookings.map((b) => {
                       const off = b.status === "cancelled";
                       return (
-                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-stone-100" : "hover:bg-stone-50"} ${off ? "text-stone-500" : ""}`}>
+                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-ember-50" : "hover:bg-stone-50"} ${off ? "text-stone-500" : ""}`}>
                           <td className={`whitespace-nowrap font-mono text-xs ${isNew(b) ? "text-stone-900" : "text-stone-500"}`}>{b.bookingCode}</td>
                           <td>
                             <div>{b.name}</div>

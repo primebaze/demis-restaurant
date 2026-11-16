@@ -388,7 +388,7 @@ export default function MailingPage() {
                   </thead>
                   <tbody>
                     {contacts.map((c) => (
-                      <tr key={c.id} className={selected.has(c.id) ? "bg-stone-100" : "hover:bg-stone-50"}>
+                      <tr key={c.id} className={selected.has(c.id) ? "bg-ember-50" : "hover:bg-stone-50"}>
                         <td className="!pl-5">
                           <input
                             type="checkbox"

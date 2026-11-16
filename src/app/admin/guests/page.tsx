@@ -593,7 +593,7 @@ function GuestRows({
 }: { g: GuestRow; on: boolean; editing: boolean; editPanel: React.ReactNode; onMail: () => void; onEdit: () => void }) {
   return (
     <>
-      <tr className={on ? "bg-stone-100" : "hover:bg-stone-50"}>
+      <tr className={on ? "bg-ember-50" : "hover:bg-stone-50"}>
         <td className="!pl-5">
           <div className="flex items-center gap-3">
             <Avatar name={g.name} />
