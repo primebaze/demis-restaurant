@@ -1,7 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Delete, Loader2, LogOut, Search, Share, SquarePlus, Smartphone, Clock, Check, X, Hourglass } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+
+/*
+ * Demi's Meetings, staff phone screens. Built to the design canvas
+ * (claude.ai/artifact/NtYJeV3fySso3CRCF7iCMq): colours, sizes and icons are the
+ * design's own values, written inline. See docs/COLOURS.md, "Demi's Meetings".
+ */
+
+const C = {
+  bg: "#0f0f0f",
+  card: "#1c1c1c",
+  chip: "#1f1f1f",
+  muted: "#a3a3a3",
+  faint: "#737373",
+  ring: "#525252",
+  gold: "#e8cc9c",
+  line: "#1f1f1f",
+};
+
+// Person colours from the design, picked by staff id so each person keeps theirs.
+const PERSON = [
+  { bg: "#1e3a8a", fg: "#bfdbfe" },
+  { bg: "#134e4a", fg: "#99f6e4" },
+  { bg: "#4c1d95", fg: "#ddd6fe" },
+  { bg: "#7c2d12", fg: "#fed7aa" },
+  { bg: "#831843", fg: "#fbcfe8" },
+];
+const personColour = (id: number) => PERSON[Math.abs(id) % PERSON.length];
+const initial = (name: string) => (name.trim()[0] || "?").toUpperCase();
+const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
 
 type Me =
   | { state: "loading" }
@@ -17,7 +45,19 @@ type Me =
       clockedInSince: string | null;
     };
 
-/** Demi's Meetings: one page that shows sign-in, waiting for approval, the home-screen step, or Home. */
+/** Google's Material Symbols, the design's icon set. */
+function Icon({ name, size = 24, fill = false, style }: { name: string; size?: number; fill?: boolean; style?: CSSProperties }) {
+  return (
+    <span
+      className="material-symbols-rounded"
+      aria-hidden="true"
+      style={{ fontSize: size, lineHeight: 1, fontVariationSettings: `"FILL" ${fill ? 1 : 0}, "wght" 350, "GRAD" 0, "opsz" 24`, userSelect: "none", ...style }}
+    >
+      {name}
+    </span>
+  );
+}
+
 export default function MeetApp() {
   const [me, setMe] = useState<Me>({ state: "loading" });
 
@@ -50,48 +90,80 @@ export default function MeetApp() {
     setMe({ state: "signed_out" });
   }
 
-  if (me.state === "loading") return <Centered><Loader2 className="h-6 w-6 animate-spin text-white/60" strokeWidth={1.75} /></Centered>;
-  if (me.state === "error") {
-    return (
+  let screen: ReactNode;
+  if (me.state === "loading") screen = <Centered><Spinner /></Centered>;
+  else if (me.state === "error")
+    screen = (
       <Centered>
-        <p className="text-lg">Can&rsquo;t connect right now</p>
-        <button onClick={load} className="mt-4 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-ink-950">Try again</button>
+        <p style={{ fontSize: 18 }}>Can&rsquo;t connect right now</p>
+        <button onClick={load} style={{ marginTop: 16, height: 44, padding: "0 22px", border: 0, borderRadius: 22, background: "#fff", color: C.bg, fontSize: 15, fontWeight: 500, fontFamily: "inherit" }}>
+          Try again
+        </button>
       </Centered>
     );
-  }
-  if (me.state === "signed_out") return <SignIn onDone={load} />;
-  if (me.state === "pending" || me.state === "declined") return <Waiting me={me} onSignOut={signOut} />;
-  return <Approved me={me} onSignOut={signOut} reload={load} />;
-}
+  else if (me.state === "signed_out") screen = <SignIn onDone={load} />;
+  else if (me.state === "pending" || me.state === "declined") screen = <Waiting me={me} onSignOut={signOut} />;
+  else screen = <Approved me={me} onSignOut={signOut} />;
 
-/* ─── Layout bits ─── */
-
-function Centered({ children }: { children: React.ReactNode }) {
-  return <main className="flex min-h-dvh flex-col items-center justify-center px-6 text-center">{children}</main>;
-}
-
-function Brand() {
   return (
-    <div className="inline-flex h-11 items-center gap-3 self-center rounded-2xl bg-white/[0.06] px-4">
-      <img src="/logo.png" alt="Demi's" className="h-[14px] w-auto" />
-      <span aria-hidden="true" className="h-4 w-px bg-white/15" />
-      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-honey-300">Meetings</span>
+    <>
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add_box,backspace,badge,calendar_month,campaign,check,check_circle,chevron_right,face,home,hourglass_top,info,ios_share,lock,logout,person,south,touch_app&display=block"
+      />
+      <div style={{ minHeight: "100dvh", background: C.bg, color: "#fff", fontSize: 14 }}>{screen}</div>
+    </>
+  );
+}
+
+/* ─── Shared bits ─── */
+
+function Centered({ children }: { children: ReactNode }) {
+  return <main style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>{children}</main>;
+}
+
+function Spinner() {
+  return <span aria-label="Loading" className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white" />;
+}
+
+/** The design's phone column: 390 wide on a phone, centred on bigger screens. */
+function Phone({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <main
+      style={{
+        margin: "0 auto",
+        width: "100%",
+        maxWidth: 430,
+        minHeight: "100dvh",
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        padding: "max(24px, env(safe-area-inset-top)) 22px max(24px, env(safe-area-inset-bottom))",
+        gap: 22,
+        ...style,
+      }}
+    >
+      {children}
+    </main>
+  );
+}
+
+function Logo() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, paddingTop: 30 }}>
+      <img src="/logo.png" alt="Demi's" style={{ height: 24, width: "auto" }} />
+      <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: C.gold }}>Meetings</span>
     </div>
   );
 }
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] || "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
-}
-
-/* ─── Sign in ─── */
+/* ─── 12 · Sign in ─── */
 
 function SignIn({ onDone }: { onDone: () => void }) {
   const [people, setPeople] = useState<{ id: number; name: string }[] | null>(null);
   const [loadError, setLoadError] = useState("");
   const [picked, setPicked] = useState<number | null>(null);
-  const [query, setQuery] = useState("");
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -105,11 +177,6 @@ function SignIn({ onDone }: { onDone: () => void }) {
       })
       .catch((e) => setLoadError(e.message));
   }, []);
-
-  const shown = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (people || []).filter((p) => !q || p.name.toLowerCase().includes(q));
-  }, [people, query]);
 
   const submit = useCallback(
     async (full: string) => {
@@ -140,19 +207,20 @@ function SignIn({ onDone }: { onDone: () => void }) {
   );
 
   const press = (d: string) => {
-    if (busy || picked == null || pin.length >= 4) return;
+    if (busy) return;
+    if (picked == null) return setError("Tap your name first");
+    if (pin.length >= 4) return;
     setError("");
     const next = pin + d;
     setPin(next);
     if (next.length === 4) submit(next);
   };
 
-  // Typing on a keyboard works too.
+  // A computer keyboard works too.
   const pressRef = useRef(press);
   pressRef.current = press;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.tagName === "INPUT") return;
       if (/^\d$/.test(e.key)) pressRef.current(e.key);
       if (e.key === "Backspace") setPin((p) => p.slice(0, -1));
     };
@@ -160,125 +228,113 @@ function SignIn({ onDone }: { onDone: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const pickedName = people?.find((p) => p.id === picked)?.name;
+  const key: CSSProperties = { height: 64, border: 0, borderRadius: 32, background: C.card, color: "#fff", fontSize: 26, fontFamily: "inherit" };
+  const plain: CSSProperties = { ...key, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" };
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[440px] flex-col gap-6 px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(28px,env(safe-area-inset-top))]">
-      <Brand />
-      <div className="text-center">
-        <h1 className="text-[28px] font-medium tracking-tight">Who&rsquo;s signing in?</h1>
-        <p className="mt-1 text-[15px] text-white/60">Use the same PIN you clock in with</p>
+    <Phone>
+      <Logo />
+
+      <div style={{ textAlign: "center" }}>
+        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em" }}>Who&rsquo;s signing in?</h1>
+        <p style={{ margin: "6px 0 0", fontSize: 14, color: C.muted }}>Use the same PIN you clock in with</p>
       </div>
 
       {loadError ? (
-        <p className="rounded-2xl bg-white/[0.06] px-4 py-3 text-center text-sm text-white/80">{loadError}</p>
+        <p style={{ margin: 0, padding: "12px 14px", borderRadius: 16, background: C.card, textAlign: "center", color: C.muted }}>{loadError}</p>
       ) : !people ? (
-        <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-white/50" strokeWidth={1.75} /></div>
+        <div style={{ display: "flex", justifyContent: "center", height: 89, alignItems: "center" }}><Spinner /></div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {people.length > 8 && (
-            <label className="flex h-11 items-center gap-2 rounded-full bg-white/[0.06] px-4 text-white/60">
-              <Search className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Find your name"
-                aria-label="Find your name"
-                className="h-full flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/40"
-              />
-            </label>
-          )}
-          <div role="group" aria-label="Your name" className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
-            {shown.map((p) => {
-              const on = p.id === picked;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => { setPicked(p.id); setPin(""); setError(""); }}
-                  className="flex w-[72px] shrink-0 flex-col items-center gap-2"
+        <div role="group" aria-label="Your name" className="[scrollbar-width:none]" style={{ display: "flex", gap: 10, margin: "0 -22px", padding: "6px 22px", overflowX: "auto" }}>
+          {people.map((p) => {
+            const on = p.id === picked;
+            const col = personColour(p.id);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                aria-pressed={on}
+                onClick={() => { setPicked(p.id); setPin(""); setError(""); }}
+                style={{ flex: "none", width: 72, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, border: 0, padding: 0, background: "transparent", color: on ? "#fff" : C.muted, fontSize: 13, fontWeight: on ? 600 : 400, fontFamily: "inherit" }}
+              >
+                <span
+                  style={{
+                    width: 60, height: 60, borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 22, fontWeight: 600,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: on ? `0 0 0 3px ${C.bg}, 0 0 0 5px #ffffff` : "none",
+                  }}
                 >
-                  <span className={`flex h-16 w-16 items-center justify-center rounded-full text-lg font-medium transition ${on ? "bg-honey-300 text-ink-950 ring-2 ring-white ring-offset-2 ring-offset-ink-950" : "bg-white/[0.08] text-white"}`}>
-                    {initials(p.name)}
-                  </span>
-                  <span className={`w-full truncate text-center text-[13px] ${on ? "text-white" : "text-white/60"}`}>{p.name.split(" ")[0]}</span>
-                </button>
-              );
-            })}
-            {shown.length === 0 && <p className="py-4 text-sm text-white/50">No one by that name</p>}
-          </div>
+                  {initial(p.name)}
+                </span>
+                <span style={{ maxWidth: 72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{firstName(p.name)}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
-      <div className="flex flex-col items-center gap-3">
-        <p className="h-5 text-sm text-white/70">{pickedName ? `PIN for ${pickedName}` : people ? "Tap your name first" : ""}</p>
-        <div role="img" aria-label={`PIN, ${pin.length} of 4 digits entered`} className="flex gap-4">
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+        <div role="img" aria-label={`PIN, ${pin.length} of 4 digits entered`} style={{ display: "flex", justifyContent: "center", gap: 16 }}>
           {[0, 1, 2, 3].map((i) => (
-            <span key={i} className={`h-3.5 w-3.5 rounded-full transition ${i < pin.length ? "bg-white" : "bg-white/15"}`} />
+            <span
+              key={i}
+              style={i < pin.length
+                ? { width: 14, height: 14, borderRadius: "50%", background: "#fff" }
+                : { width: 14, height: 14, borderRadius: "50%", border: `1.5px solid ${C.ring}`, boxSizing: "border-box" }}
+            />
           ))}
         </div>
-        <p role="status" className="min-h-[20px] text-center text-sm text-red-300">{busy ? "" : error}</p>
+        {(error || busy) && (
+          <p role="status" style={{ margin: 0, minHeight: 18, fontSize: 13, color: busy ? C.muted : "#fca5a5", textAlign: "center" }}>{busy ? "Checking…" : error}</p>
+        )}
       </div>
 
-      <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-3">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, padding: "0 12px" }}>
         {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
-          <Key key={d} onClick={() => press(d)} disabled={busy || picked == null}>{d}</Key>
+          <button key={d} type="button" onClick={() => press(d)} style={key} className="active:brightness-150">{d}</button>
         ))}
+        {/* Face ID arrives with passkeys; until then this slot stays empty. */}
         <span />
-        <Key onClick={() => press("0")} disabled={busy || picked == null}>0</Key>
-        <Key onClick={() => setPin((p) => p.slice(0, -1))} disabled={busy || !pin} label="Delete digit">
-          {busy ? <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.75} /> : <Delete className="h-6 w-6" strokeWidth={1.5} />}
-        </Key>
+        <button type="button" onClick={() => press("0")} style={key} className="active:brightness-150">0</button>
+        <button type="button" aria-label="Delete digit" onClick={() => setPin((p) => p.slice(0, -1))} style={plain}>
+          <Icon name="backspace" size={26} />
+        </button>
       </div>
 
-      <p className="mt-auto text-center text-[13px] text-white/50">Forgot your PIN? Ask a manager to reset it in the clock-in app.</p>
-    </main>
+      <p style={{ margin: "auto 0 0", textAlign: "center", fontSize: 13, color: C.muted }}>Forgot your PIN? Ask a manager to reset it in the clock-in app.</p>
+    </Phone>
   );
 }
 
-function Key({ children, onClick, disabled, label }: { children: React.ReactNode; onClick: () => void; disabled?: boolean; label?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      className="flex h-[68px] items-center justify-center rounded-full bg-white/[0.07] text-[26px] font-light transition active:bg-white/20 disabled:text-white/30"
-    >
-      {children}
-    </button>
-  );
-}
-
-/* ─── Waiting for a manager ─── */
+/* ─── Waiting for a manager (new phone) ─── */
 
 function Waiting({ me, onSignOut }: { me: { state: "pending" | "declined"; name: string }; onSignOut: () => void }) {
   const declined = me.state === "declined";
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[440px] flex-col gap-6 px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(28px,env(safe-area-inset-top))]">
-      <Brand />
-      <div className="mt-6 flex flex-col items-center gap-4 text-center">
-        <span className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-white/[0.07]">
-          {declined ? <X className="h-9 w-9 text-red-300" strokeWidth={1.5} /> : <Hourglass className="h-9 w-9 text-honey-300" strokeWidth={1.5} />}
+    <Phone>
+      <Logo />
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, textAlign: "center", paddingTop: 12 }}>
+        <span style={{ width: 84, height: 84, borderRadius: 22, background: "#141414", boxShadow: "0 0 0 1px #2a2a2a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name={declined ? "lock" : "hourglass_top"} size={36} style={{ color: declined ? "#fca5a5" : C.gold }} />
         </span>
-        <h1 className="text-[26px] font-medium tracking-tight">{declined ? "This phone wasn't approved" : "Waiting for a manager"}</h1>
-        <p className="max-w-[320px] text-[15px] leading-relaxed text-white/65">
-          {declined
-            ? "A manager declined this phone. If that's a mistake, ask them, then sign in again."
-            : `Hi ${me.name.split(" ")[0]}. This is a new phone, so a manager needs to approve it once. This page will open by itself when they do.`}
-        </p>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em" }}>{declined ? "This phone wasn't approved" : "Waiting for a manager"}</h1>
+          <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.5, color: C.muted }}>
+            {declined
+              ? "A manager declined this phone. If that's a mistake, ask them, then sign in again."
+              : `Hi ${firstName(me.name)}. This is a new phone, so a manager needs to approve it.`}
+          </p>
+        </div>
       </div>
       {!declined && (
-        <div className="flex items-center gap-3 rounded-2xl bg-white/[0.06] px-4 py-3.5 text-sm text-white/75">
-          <Smartphone className="h-5 w-5 shrink-0 text-white/60" strokeWidth={1.5} />
-          After that, this phone stays signed in for 30 days.
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 16, background: "#1a1a1a", fontSize: 12, color: C.muted }}>
+          <Icon name="info" size={18} />After that, this phone stays signed in for 30 days.
         </div>
       )}
-      <button onClick={onSignOut} className="mt-auto h-12 rounded-full bg-white/[0.08] text-[15px]">
+      <button onClick={onSignOut} style={{ marginTop: "auto", height: 48, border: 0, borderRadius: 24, background: C.card, color: "#fff", fontSize: 15, fontFamily: "inherit" }}>
         {declined ? "Sign in again" : "Not you? Sign out"}
       </button>
-    </main>
+    </Phone>
   );
 }
 
@@ -286,116 +342,174 @@ function Waiting({ me, onSignOut }: { me: { state: "pending" | "declined"; name:
 
 type ApprovedMe = Extract<Me, { state: "approved" }>;
 
-function useStandalone() {
+function useDevice() {
   const [info, setInfo] = useState<{ ios: boolean; standalone: boolean; phone: boolean } | null>(null);
   useEffect(() => {
     const ua = navigator.userAgent;
     const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
-    const phone = /iPhone|iPod|Android.+Mobile/.test(ua);
-    setInfo({ ios, standalone, phone });
+    setInfo({ ios, standalone, phone: /iPhone|iPod|Android.+Mobile/.test(ua) });
   }, []);
   return info;
 }
 
-function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
-  const device = useStandalone();
+function Approved({ me, onSignOut }: { me: ApprovedMe; onSignOut: () => void }) {
+  const device = useDevice();
+  const [tab, setTab] = useState<"home" | "me">("home");
   if (!device) return null;
-  // On iPhone the app only works from the home screen (needed for notifications and to stay signed in).
+  // On iPhone the app only works from the home screen (notifications and staying signed in need it).
   if (device.ios && device.phone && !device.standalone) return <InstallGuide />;
-  return <Home me={me} onSignOut={onSignOut} reload={reload} />;
+  return (
+    <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+      {tab === "home" ? <Home me={me} /> : <MeScreen me={me} onSignOut={onSignOut} />}
+      <TabBar tab={tab} onTab={setTab} />
+    </div>
+  );
 }
 
+/* ─── 25 · Add to home screen (iPhone) ─── */
+
 function InstallGuide() {
-  const steps: { icon: React.ReactNode; text: React.ReactNode }[] = [
-    { icon: <Share className="h-5 w-5" strokeWidth={1.75} />, text: <>Tap the <strong className="font-medium">Share</strong> button in Safari&rsquo;s toolbar</> },
-    { icon: <SquarePlus className="h-5 w-5" strokeWidth={1.75} />, text: <>Choose <strong className="font-medium">Add to Home Screen</strong>, then Add</> },
-    { icon: <img src="/meet/apple-touch-icon.png" alt="" className="h-6 w-6 rounded-md" />, text: <>Open <strong className="font-medium">Demi&rsquo;s</strong> from your home screen</> },
+  const steps: [string, string, string?][] = [
+    ["Tap the Share button at the bottom of Safari", "ios_share", "#60a5fa"],
+    ["Choose “Add to Home Screen”, then tap Add", "add_box"],
+    ["Open Demi’s from your home screen and sign in", "touch_app"],
   ];
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[440px] flex-col gap-6 px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(28px,env(safe-area-inset-top))]">
-      <Brand />
-      <div className="mt-2 text-center">
-        <img src="/meet/apple-touch-icon.png" alt="" className="mx-auto h-20 w-20 rounded-[22px] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)]" />
-        <h1 className="mt-5 text-[26px] font-medium tracking-tight">Add Demi&rsquo;s to your home screen</h1>
-        <p className="mx-auto mt-2 max-w-[320px] text-[15px] leading-relaxed text-white/65">It works like a normal app from there, with notifications for your rota and tasks.</p>
+    <Phone style={{ gap: 20 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: 24, textAlign: "center" }}>
+        <span style={{ width: 84, height: 84, borderRadius: 22, background: "#141414", boxShadow: "0 0 0 1px #2a2a2a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <img src="/logo.png" alt="" style={{ height: 12, width: "auto" }} />
+          <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.18em", color: C.gold }}>MEETINGS</span>
+        </span>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em" }}>Put Demi&rsquo;s on your home screen</h1>
+          <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.5, color: C.muted }}>So you get your rota, tasks and meeting alerts on your lock screen, like a normal app.</p>
+        </div>
       </div>
-      <ol className="flex flex-col gap-2">
-        {steps.map((s, i) => (
-          <li key={i} className="flex items-center gap-4 rounded-2xl bg-white/[0.06] px-4 py-4">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-sm font-medium text-ink-950">{i + 1}</span>
-            <span className="flex-1 text-[15px] text-white/85">{s.text}</span>
-            <span className="text-white/70">{s.icon}</span>
+
+      <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+        {steps.map(([text, icon, colour], i) => (
+          <li key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, borderRadius: 20, background: C.card }}>
+            <span style={{ width: 32, height: 32, flex: "none", borderRadius: "50%", background: "#fff", color: C.bg, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
+            <span style={{ flex: 1, fontSize: 15 }}>{text}</span>
+            <Icon name={icon} size={26} style={colour ? { color: colour } : undefined} />
           </li>
         ))}
       </ol>
-      <p className="mt-auto text-center text-[13px] text-white/45">You&rsquo;re already signed in. It carries over to the home screen app.</p>
-    </main>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 16, background: "#1a1a1a", fontSize: 12, color: C.muted }}>
+        <Icon name="info" size={18} />Opened this from WhatsApp? Tap ⋯ and choose &ldquo;Open in Safari&rdquo; first.
+      </div>
+
+      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+        <div aria-hidden="true" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, color: "#60a5fa", fontSize: 12, fontWeight: 500 }}>
+          Share is down here<Icon name="south" size={24} />
+        </div>
+        <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, minHeight: 44, fontSize: 13, color: C.muted }}>
+          <Icon name="lock" size={17} />You need to do this once before you can carry on
+        </p>
+      </div>
+    </Phone>
   );
 }
+
+/* ─── 9 · Home ─── */
 
 function greeting() {
   const h = Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone: "Europe/London" }).format(new Date()));
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
+const londonTime = (iso: string) => new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }).format(new Date(iso));
+const BRANCH: Record<string, string> = { cricklewood: "Cricklewood", streatham: "Streatham", both: "Both branches" };
 
-function londonTime(iso: string) {
-  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }).format(new Date(iso));
-}
-
-const BRANCH: Record<string, string> = { cricklewood: "Cricklewood", streatham: "Streatham Hill", both: "Both branches" };
-
-function Home({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
-  const first = me.person.name.split(" ")[0];
-  const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/London" }).format(new Date());
-  const role = me.person.role ? me.person.role[0].toUpperCase() + me.person.role.slice(1) : "";
-
+function Home({ me }: { me: ApprovedMe }) {
+  const col = personColour(me.person.id);
+  const on = !!me.clockedInSince;
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col gap-4 px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(22px,env(safe-area-inset-top))]">
-      <header className="flex items-center gap-3">
-        <div className="flex-1">
-          <p className="text-sm text-white/55">{today}</p>
-          <h1 className="text-[26px] font-medium tracking-tight">{greeting()}, {first}</h1>
+    <main style={{ flex: 1, boxSizing: "border-box", padding: "max(18px, env(safe-area-inset-top)) 18px 18px", display: "flex", flexDirection: "column", gap: 18 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
+        <span style={{ width: 40, height: 40, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 600 }}>{initial(me.person.name)}</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontSize: 13, color: C.muted }}>{greeting()}</p>
+          <p style={{ margin: "1px 0 0", fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>{firstName(me.person.name)}</p>
         </div>
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.08] text-base font-medium" aria-hidden="true">{initials(me.person.name)}</span>
-      </header>
+      </div>
 
-      <section aria-label="Your shift" className="rounded-[22px] bg-white/[0.06] p-4">
-        <div className="flex items-center gap-3">
-          <span className={`flex h-10 w-10 items-center justify-center rounded-2xl ${me.clockedInSince ? "bg-emerald-400/15 text-emerald-300" : "bg-white/[0.06] text-white/60"}`}>
-            <Clock className="h-5 w-5" strokeWidth={1.75} />
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 56, padding: "8px 14px", boxSizing: "border-box", borderRadius: 18, background: on ? "#172e2a" : C.card }}
+      >
+        <Icon name="badge" size={22} style={{ color: on ? "#5eead4" : C.muted }} />
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", fontSize: 14, fontWeight: 500, color: on ? "#ccfbf1" : "#fff" }}>
+            {on ? `On shift · clocked in ${londonTime(me.clockedInSince!)}` : "Not clocked in"}
           </span>
-          <div className="flex-1">
-            <p className="text-[15px] font-medium">{me.clockedInSince ? "You're clocked in" : "Not clocked in"}</p>
-            <p className="text-[13px] text-white/55">
-              {me.clockedInSince ? `Since ${londonTime(me.clockedInSince)}` : "From the clock-in app"}
-              {role ? ` · ${role}` : ""}
-              {BRANCH[me.branch] ? ` · ${BRANCH[me.branch]}` : ""}
-            </p>
-          </div>
-        </div>
-      </section>
+          <span style={{ display: "block", fontSize: 12, color: on ? "#99f6e4" : C.muted }}>
+            {[BRANCH[me.branch], "from the clock-in app"].filter(Boolean).join(" · ")}
+          </span>
+        </span>
+      </div>
 
       {me.manager && <PhoneApprovals />}
-
-      <section className="rounded-[22px] bg-white/[0.04] p-4">
-        <p className="text-[15px] font-medium">Coming next</p>
-        <p className="mt-1 text-[13px] leading-relaxed text-white/55">Your rota, tasks, team news and meetings will appear here as they&rsquo;re switched on.</p>
-      </section>
-
-      <div className="mt-auto flex items-center justify-between pt-4">
-        <button onClick={reload} className="h-10 rounded-full px-3 text-sm text-white/55">Refresh</button>
-        <button onClick={onSignOut} className="inline-flex h-10 items-center gap-2 rounded-full bg-white/[0.06] px-4 text-sm text-white/80">
-          <LogOut className="h-4 w-4" strokeWidth={1.75} />Sign out
-        </button>
-      </div>
     </main>
   );
 }
 
-/* ─── Managers: approve new phones ─── */
+/* ─── 18 · Me (sign out for now) ─── */
 
-type Device = { id: string; staffName: string; label: string; createdAt: string };
+function MeScreen({ me, onSignOut }: { me: ApprovedMe; onSignOut: () => void }) {
+  const col = personColour(me.person.id);
+  const role = me.person.role ? me.person.role[0].toUpperCase() + me.person.role.slice(1) : "";
+  return (
+    <main style={{ flex: 1, boxSizing: "border-box", padding: "max(18px, env(safe-area-inset-top)) 18px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
+        <span style={{ width: 52, height: 52, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 600 }}>{initial(me.person.name)}</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontSize: 20, fontWeight: 500, letterSpacing: "-0.01em" }}>{me.person.name}</p>
+          <p style={{ margin: "2px 0 0", fontSize: 13, color: C.muted }}>{[role, BRANCH[me.branch]].filter(Boolean).join(" · ")}</p>
+        </div>
+      </div>
+      <button onClick={onSignOut} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: 0, borderRadius: 18, background: C.card, color: "#fff", fontSize: 15, fontFamily: "inherit", textAlign: "left" }}>
+        <Icon name="logout" size={22} />Sign out on this phone
+      </button>
+    </main>
+  );
+}
+
+/* ─── Bottom tabs (Calendar, Tasks and News switch on as they're built) ─── */
+
+function TabBar({ tab, onTab }: { tab: "home" | "me"; onTab: (t: "home" | "me") => void }) {
+  const item = (label: string, icon: string, key?: "home" | "me") => {
+    const current = key === tab;
+    const live = !!key;
+    return (
+      <button
+        key={label}
+        type="button"
+        onClick={live ? () => onTab(key!) : undefined}
+        disabled={!live}
+        aria-current={current ? "page" : undefined}
+        title={live ? undefined : "Coming soon"}
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, border: 0, background: "transparent", padding: 0, fontSize: 11, fontFamily: "inherit", color: current ? "#fff" : C.muted, opacity: live ? 1 : 0.4 }}
+      >
+        <Icon name={icon} size={24} fill={current} />{label}
+      </button>
+    );
+  };
+  return (
+    <nav aria-label="App" style={{ position: "sticky", bottom: 0, padding: "10px 22px max(26px, env(safe-area-inset-bottom))", background: C.bg, borderTop: `1px solid ${C.line}`, display: "flex", justifyContent: "space-between" }}>
+      {item("Home", "home", "home")}
+      {item("Calendar", "calendar_month")}
+      {item("Tasks", "check_circle")}
+      {item("News", "campaign")}
+      {item("Me", "person", "me")}
+    </nav>
+  );
+}
+
+/* ─── 30 · Manager: approve new phones ─── */
+
+type Device = { id: string; clockinId: number; staffName: string; label: string; createdAt: string };
 
 function ago(iso: string) {
   const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
@@ -432,35 +546,43 @@ function PhoneApprovals() {
     const data = await res?.json().catch(() => ({}));
     setBusyId("");
     if (!res?.ok) return setNote(data?.error || "Couldn't save that");
-    setNote(action === "approve" ? `${d.staffName.split(" ")[0]}'s phone is approved.` : `${d.staffName.split(" ")[0]}'s phone was declined.`);
+    setNote(action === "approve" ? `${firstName(d.staffName)}'s phone is approved.` : `${firstName(d.staffName)}'s phone was declined.`);
     load();
   }
 
   if (!pending || pending.length === 0) {
-    return note ? <p role="status" className="px-1 text-sm text-white/60">{note}</p> : null;
+    return note ? <p role="status" style={{ margin: 0, fontSize: 13, color: C.muted }}>{note}</p> : null;
   }
 
   return (
-    <section aria-labelledby="ph-h" className="flex flex-col gap-2 rounded-[22px] bg-white/[0.06] p-4">
-      <h2 id="ph-h" className="text-[15px] font-medium">Phones waiting for you <span className="ml-1 rounded-full bg-honey-300 px-2 py-0.5 text-xs font-medium text-ink-950">{pending.length}</span></h2>
-      {pending.map((d) => (
-        <article key={d.id} className="flex flex-col gap-3 rounded-2xl bg-white/[0.05] p-3">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.08] text-sm font-medium">{initials(d.staffName)}</span>
-            <span className="flex-1">
-              <span className="block text-[15px] font-medium">{d.staffName}</span>
-              <span className="block text-xs text-white/55">{d.label} · signed in {ago(d.createdAt)}</span>
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => decide(d, "approve")} disabled={!!busyId} className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-white text-sm font-medium text-ink-950 disabled:bg-white/30">
-              {busyId === d.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" strokeWidth={2} />}Approve
-            </button>
-            <button onClick={() => decide(d, "decline")} disabled={!!busyId} className="h-10 rounded-full bg-white/[0.08] px-4 text-sm disabled:text-white/40">Decline</button>
-          </div>
-        </article>
-      ))}
-      {note && <p role="status" className="text-sm text-white/60">{note}</p>}
+    <section aria-labelledby="ph-h" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "baseline" }}>
+        <h2 id="ph-h" style={{ margin: 0, fontSize: 20, fontWeight: 500, letterSpacing: "-0.01em" }}>Phones to approve</h2>
+        <span style={{ marginLeft: 8, fontSize: 13, color: C.muted }}>{pending.length} waiting</span>
+      </div>
+      {pending.map((d) => {
+        const col = personColour(d.clockinId);
+        return (
+          <article key={d.id} style={{ borderRadius: 22, background: C.card, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ width: 36, height: 36, flex: "none", borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(d.staffName)}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "block", fontSize: 12, color: C.muted }}>New phone · {ago(d.createdAt)}</span>
+                <span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{d.staffName} · {d.label.split(" · ")[0]}</span>
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => decide(d, "approve")} disabled={!!busyId} style={{ flex: 1, height: 40, border: 0, borderRadius: 20, background: "#fff", color: C.bg, fontSize: 14, fontWeight: 600, fontFamily: "inherit", opacity: busyId ? 0.6 : 1 }}>
+                {busyId === d.id ? "Saving…" : "Approve"}
+              </button>
+              <button onClick={() => decide(d, "decline")} disabled={!!busyId} style={{ height: 40, padding: "0 16px", border: 0, borderRadius: 20, background: "#2a2a2a", color: "#fff", fontSize: 14, fontFamily: "inherit" }}>
+                Decline
+              </button>
+            </div>
+          </article>
+        );
+      })}
+      {note && <p role="status" style={{ margin: 0, fontSize: 13, color: C.muted }}>{note}</p>}
     </section>
   );
 }

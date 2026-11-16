@@ -12,7 +12,7 @@ export const viewport: Viewport = {
   themeColor: "#1a1a1a",
 };
 
-const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-outfit", display: "swap" });
+const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500", "600"], variable: "--font-outfit", display: "swap" });
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
