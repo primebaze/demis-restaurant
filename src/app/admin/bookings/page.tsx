@@ -555,7 +555,7 @@ export default function AdminBookingsPage() {
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,330px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
         {/* Month calendar */}
-        <Sheet label="Booking calendar" className="p-4 md:p-5">
+        <Sheet label="Booking calendar" className="p-4 md:p-5 lg:sticky lg:top-[96px] lg:self-start">
           <div className="flex items-start gap-3">
             <div className="min-w-0">
               <h2 className="font-outfit text-xl font-normal tracking-tight">{MONTH_NAMES[calMonth]} {calYear}</h2>

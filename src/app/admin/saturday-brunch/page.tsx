@@ -552,7 +552,7 @@ export default function AdminSaturdayBrunchPage() {
           </div>
         </Sheet>
 
-        <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-3">
+        <div className="contents lg:sticky lg:top-[96px] lg:flex lg:min-w-0 lg:flex-col lg:gap-3 lg:self-start">
           {mailOpen && (
             <Sheet label="Email everyone" className="order-first flex flex-col p-[18px] lg:order-none">
               <SheetTitle
