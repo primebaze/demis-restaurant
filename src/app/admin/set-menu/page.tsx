@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState, useCallback } from "react";
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Download, Link as LinkIcon, ListFilter, Plus, TriangleAlert, X } from "lucide-react";
-import { Empty, OwnLayout, PageHead, Sheet, SheetFooter, SheetTitle, Tag, btn, field, fieldArea, table, tableWrap } from "@/components/admin/ui";
+import { Empty, OwnLayout, PageHead, Sheet, SheetFooter, SheetTitle, Tag, btn, field, fieldArea, table, tableWrap, DateField } from "@/components/admin/ui";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.demisrestaurant.co.uk";
 
@@ -436,7 +436,7 @@ export default function AdminSetMenuPage() {
                 </div>
                 <div>
                   <label className={labelCls}>Event date *</label>
-                  <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={field} />
+                  <DateField value={form.date} onChange={(v) => setForm(f => ({ ...f, date: v }))} />
                 </div>
                 <div>
                   <label className={labelCls}>Expected party size *</label>

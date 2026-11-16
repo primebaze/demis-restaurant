@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { CalendarDays, ExternalLink, ListX, Radio, Tablet, Users } from "lucide-react";
-import { OwnLayout, PageHead, PillSwitch, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, table, tableWrap } from "@/components/admin/ui";
+import { useEffect, useState, useCallback , useRef} from "react";
+import { ExternalLink, ListX, Radio, Tablet, Users } from "lucide-react";
+import { OwnLayout, PageHead, PillSwitch, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, table, tableWrap, useTypedConfirm, DateField } from "@/components/admin/ui";
 
 const SERVICES = [
   { href: "/admin/checkins", label: "Sunday Buffet" },
@@ -50,7 +50,21 @@ function remaining(endsAt: string, now: number): string {
 }
 
 export default function AdminBrunchCheckinsPage() {
+  const [askToType, typeDialog] = useTypedConfirm();
   const [date, setDate] = useState(() => ukToday());
+  const dateRef = useRef(date);
+  dateRef.current = date;
+  // Keep the chosen day in the address, so switching to the other page keeps it.
+  useEffect(() => {
+    const d = new URLSearchParams(window.location.search).get("date");
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) setDate(d);
+  }, []);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (date === ukToday()) url.searchParams.delete("date");
+    else url.searchParams.set("date", date);
+    window.history.replaceState(null, "", url.toString());
+  }, [date]);
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(() => Date.now());
@@ -58,7 +72,9 @@ export default function AdminBrunchCheckinsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const res = await fetch(`/api/admin/brunch-checkins?date=${date}`);
-    setData(await res.json());
+    const d = await res.json();
+    if (dateRef.current !== date) return; // a newer day was picked while this one loaded
+    setData(d);
     setLoading(false);
   }, [date]);
 
@@ -69,7 +85,7 @@ export default function AdminBrunchCheckinsPage() {
   }, []);
 
   async function resetDay() {
-    if (!confirm(`Clear ALL feast check-ins for ${date}? This cannot be undone.`)) return;
+    if (!(await askToType({ title: "Clear this day?", message: <>Clears all Sunday Feast check-ins for {date}.</>, action: "Clear all" }))) return;
     await fetch("/api/admin/brunch-checkins", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ date }),
     });
@@ -96,26 +112,8 @@ export default function AdminBrunchCheckinsPage() {
         subtitle="Who came through the door, numbered as they arrive"
         actions={
           <>
-            <PillSwitch items={SERVICES} current="/admin/brunch-checkins" label="Service" />
-            <div className="inline-flex h-[46px] items-center gap-1 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] p-1 pl-4 text-white backdrop-blur-xl">
-              <label className="inline-flex items-center gap-2 pr-1">
-                <CalendarDays className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-                <span className="sr-only">Day</span>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="bg-transparent text-[15px] font-light text-white outline-none [color-scheme:dark]"
-                />
-              </label>
-              <button
-                onClick={() => setDate(ukToday())}
-                aria-pressed={isToday}
-                className={`inline-flex h-9 items-center rounded-full px-3.5 text-sm transition ${isToday ? "bg-white text-stone-900" : "font-light text-white hover:bg-white/10"}`}
-              >
-                Today
-              </button>
-            </div>
+            <PillSwitch items={SERVICES.map((i) => ({ ...i, href: date === ukToday() ? i.href : `${i.href}?date=${date}` }))} current="/admin/brunch-checkins" label="Service" />
+            <DateField variant="glass" value={date} onChange={setDate} ariaLabel="Day" />
           </>
         }
       />
@@ -165,8 +163,8 @@ export default function AdminBrunchCheckinsPage() {
                           </div>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1">
-                          <Tag tone="gold">£{c.price}</Tag>
-                          <span className={`text-sm ${left === "over" ? "text-red-700" : "font-medium text-gold-700"}`}>{left}</span>
+                          <span className="font-medium tabular-nums text-stone-900">£{c.price}</span>
+                          {left === "over" ? <Tag tone="off">Time up</Tag> : <Tag tone="ok">{left} left</Tag>}
                         </div>
                       </li>
                     );
@@ -184,7 +182,7 @@ export default function AdminBrunchCheckinsPage() {
                         <th>Price</th>
                         <th>In</th>
                         <th>Finish by</th>
-                        <th>Left</th>
+                        <th>Time left</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -200,10 +198,10 @@ export default function AdminBrunchCheckinsPage() {
                               </span>
                             </td>
                             <td className="text-[13px] text-stone-500">{mix(c)}</td>
-                            <td><Tag tone="gold">£{c.price}</Tag></td>
+                            <td><span className="font-medium tabular-nums text-stone-900">£{c.price}</span></td>
                             <td className="tabular-nums text-stone-500">{fmt(c.checkedInAt)}</td>
                             <td className="tabular-nums">{fmt(c.endsAt)}</td>
-                            <td className={left === "over" ? "text-red-700" : "font-medium text-gold-700"}>{left}</td>
+                            <td>{left === "over" ? <Tag tone="off">Time up</Tag> : <Tag tone="ok">{left} left</Tag>}</td>
                           </tr>
                         );
                       })}
@@ -253,6 +251,7 @@ export default function AdminBrunchCheckinsPage() {
           </p>
         </Sheet>
       </div>
+      {typeDialog}
     </OwnLayout>
   );
 }

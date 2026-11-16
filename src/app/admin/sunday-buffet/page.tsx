@@ -6,8 +6,7 @@ import {
   Plus, Send, Trash2, Undo2, UserCheck, Users, X,
 } from "lucide-react";
 import {
-  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, fieldArea, table, tableWrap, type Tone,
-} from "@/components/admin/ui";
+  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, fieldArea, table, tableWrap, type Tone, useTypedConfirm } from "@/components/admin/ui";
 
 type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
 type Summary = { reservations: number; people: number; confirmed: number; cancelled: number };
@@ -130,6 +129,7 @@ function fmt(s: string) {
 }
 
 export default function AdminSundayBuffetPage() {
+  const [askToType, typeDialog] = useTypedConfirm();
   const [date, setDate] = useState("");
   const [resolvedDate, setResolvedDate] = useState("");
   const [prettyDate, setPrettyDate] = useState("");
@@ -288,7 +288,7 @@ export default function AdminSundayBuffetPage() {
   }
 
   async function resetDay() {
-    if (!confirm(`Clear ALL reservations for ${prettyDate}? This cannot be undone.`)) return;
+    if (!(await askToType({ title: "Clear all reservations?", message: <>Deletes every Sunday Buffet reservation for {prettyDate}.</>, action: "Clear all" }))) return;
     await fetch("/api/admin/sunday-buffet", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reset", date: resolvedDate }),
@@ -536,6 +536,7 @@ export default function AdminSundayBuffetPage() {
           </Sheet>
         )}
       </div>
+      {typeDialog}
     </OwnLayout>
   );
 }

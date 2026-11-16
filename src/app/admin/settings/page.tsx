@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { CalendarX, Check, ChevronRight, Clock, Info, Lock, Pencil, PlusCircle, ShieldCheck, Store, Trash2, type LucideIcon } from "lucide-react";
-import { OwnLayout, PageHead, Seg, Sheet, StatTile, Tag, btn, field } from "@/components/admin/ui";
+import { OwnLayout, PageHead, Seg, Sheet, StatTile, Tag, btn, field, DateField } from "@/components/admin/ui";
 
 interface AddOn {
   id: string;
@@ -586,7 +586,7 @@ function BlackoutsPanel({
         <form onSubmit={createBlackout} className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)_120px_120px] xl:items-end">
           <label className="block min-w-0">
             <span className={label}>Date</span>
-            <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} required className={field} />
+            <DateField value={newDate} onChange={setNewDate} />
           </label>
           <label className="block min-w-0">
             <span className={label}>Reason</span>

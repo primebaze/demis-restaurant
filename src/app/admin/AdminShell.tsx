@@ -31,7 +31,6 @@ const TOP: Item[] = [
 const SIDE: Item[] = [
   { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen },
   { href: "/admin/checkins", label: "Check-ins", icon: ClipboardCheck },
-  { href: "/admin/email-logs", label: "Email Logs", icon: MailCheck },
   { href: "/admin/shoot-plans", label: "Weekly Plans", icon: Clapperboard },
   { href: "https://meeting.demisrestaurant.co.uk", label: "Meetings", icon: Video, external: true },
 ];
@@ -250,6 +249,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </button>
             {userOpen && (
               <div className="absolute right-0 top-[calc(100%+10px)] w-52 rounded-2xl bg-white p-1.5 text-stone-900 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]">
+                <Link href="/admin/email-logs" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-stone-100">
+                  <MailCheck className="h-4 w-4 text-stone-500" strokeWidth={1.75} />
+                  Email Logs
+                </Link>
                 <Link href="/" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-stone-100">
                   <ArrowUpRight className="h-4 w-4 text-stone-500" strokeWidth={1.75} />
                   View website
@@ -368,7 +371,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 <X className="h-5 w-5" strokeWidth={1.75} />
               </button>
             </div>
-            {[...moreItems, { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen }]
+            {[...moreItems, { href: "/admin/email-logs", label: "Email Logs", icon: MailCheck }, { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen }]
               .filter((v, i, a) => a.findIndex((x) => x.href === v.href) === i)
               .map((item) => {
                 const Icon = item.icon;

@@ -14,6 +14,7 @@ import {
 } from "@/lib/shoot-plans";
 import { CaptureProgress, errorMessage, plannerRequest } from "./ShootPlanUI";
 import { Empty, OwnLayout, PageHead, Sheet, SheetFooter, Tag, btn, type Tone } from "./ui";
+import { DateField } from "@/components/admin/ui";
 type Data = {
   plans: ShootSummary[];
   total: number;
@@ -101,18 +102,14 @@ export default function ShootPlanList() {
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />
             </label>
-            <label htmlFor="week-filter" className={glassPill}>
-              <CalendarDays className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-              <span className="hidden whitespace-nowrap xl:inline">Week starting</span>
-              <span className="sr-only xl:hidden">Week starting</span>
-              <input
-                id="week-filter"
-                type="date"
-                value={week}
-                className="w-[132px] cursor-pointer bg-transparent text-sm outline-none [color-scheme:dark]"
-                onChange={(e) => navigate(status, 1, startOfWeek(e.target.value))}
-              />
-            </label>
+            <DateField
+              id="week-filter"
+              variant="glass"
+              value={week}
+              onChange={(v) => navigate(status, 1, v ? startOfWeek(v) : "")}
+              placeholder="Week starting"
+              ariaLabel="Week starting"
+            />
             {week && (
               <button type="button" onClick={() => navigate(status, 1, "")} className={btn.glass}>
                 <X className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { CalendarDays } from "lucide-react";
+import { useEffect, useState, useCallback , useRef} from "react";
 import { lineName, type OrderLine } from "@/lib/door-menu";
-import { OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, StatTile, Tag, PillSwitch, Empty, btn, table, tableWrap } from "@/components/admin/ui";
+import { OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, PillSwitch, Empty, btn, table, tableWrap, DateField } from "@/components/admin/ui";
 
 type Visit = {
   id: string; seq: number; label: string; hasDetails: boolean;
@@ -45,6 +44,19 @@ export default function DoorSummaryPage({ params }: { params: { location: string
   const { location } = params;
 
   const [date, setDate] = useState(() => ukToday());
+  const dateRef = useRef(date);
+  dateRef.current = date;
+  // Keep the chosen day in the address, so switching to the other page keeps it.
+  useEffect(() => {
+    const d = new URLSearchParams(window.location.search).get("date");
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) setDate(d);
+  }, []);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (date === ukToday()) url.searchParams.delete("date");
+    else url.searchParams.set("date", date);
+    window.history.replaceState(null, "", url.toString());
+  }, [date]);
   const [visits, setVisits] = useState<Visit[]>([]);
   const [totals, setTotals] = useState<Totals>(EMPTY);
   const [locationName, setLocationName] = useState("");
@@ -55,6 +67,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
   const load = useCallback(async () => {
     const res = await fetch(`/api/admin/door?location=${location}&date=${date}`);
     const d = await res.json();
+    if (dateRef.current !== date) return; // a newer day was picked while this one loaded
     setVisits(d.visits || []);
     setTotals(d.totals || EMPTY);
     setLocationName(d.locationName || "");
@@ -94,17 +107,8 @@ export default function DoorSummaryPage({ params }: { params: { location: string
         }
         actions={
           <>
-            <PillSwitch items={LOCATIONS} current={`/admin/door/${location}`} label="Location" />
-            <label className={`${btn.glass} cursor-pointer`}>
-              <CalendarDays className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-              <span className="sr-only">Day</span>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-[8.5rem] bg-transparent text-[15px] font-light text-white outline-none [color-scheme:dark]"
-              />
-            </label>
+            <PillSwitch items={LOCATIONS.map((i) => ({ ...i, href: date === ukToday() ? i.href : `${i.href}?date=${date}` }))} current={`/admin/door/${location}`} label="Location" />
+            <DateField variant="glass" value={date} onChange={setDate} ariaLabel="Day" />
             <button onClick={() => setDate(ukToday())} aria-pressed={isToday} className={btn.primary}>
               Today
             </button>
@@ -127,26 +131,26 @@ export default function DoorSummaryPage({ params }: { params: { location: string
           <div className="grid gap-x-6 md:grid-cols-2 lg:grid-cols-1">
             <div>
               <SheetTitle>Where the money came from</SheetTitle>
-              <div className="mt-3.5">
+              <div className="mt-2.5">
                 <Split label="Dining" pence={totals.diningTakingsPence} total={totals.takingsPence} tone="bg-gold-300" />
                 <Split label="Takeaway" pence={totals.takeawayTakingsPence} total={totals.takingsPence} tone="bg-stone-300" />
               </div>
-              <div className="mt-1 grid grid-cols-2 gap-2">
-                <StatTile label="Average per guest" value={money(perHead)} />
-                <StatTile label="Average per table" value={money(perTable)} />
+              <div className="mt-1 grid grid-cols-2 gap-1.5">
+                <Mini label="Per guest" value={money(perHead)} />
+                <Mini label="Per table" value={money(perTable)} />
               </div>
             </div>
 
-            <div className="mt-4 border-t border-stone-100 pt-4 md:mt-0 md:border-t-0 md:pt-0 lg:mt-4 lg:border-t lg:pt-4">
+            <div className="mt-3 border-t border-stone-100 pt-3 md:mt-0 md:border-t-0 md:pt-0 lg:mt-3 lg:border-t lg:pt-3">
               <SheetTitle>Where the day stands</SheetTitle>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <StatTile label="Still in the building" value={totals.stillIn} />
-                <StatTile label="Checked out" value={totals.visits - totals.stillIn} />
-                <StatTile label="Bills still missing" value={unbilled} hot={unbilled > 0} />
-                <StatTile label="Arrived with a booking" value={visits.filter((v) => v.isBooking).length} />
+              <div className="mt-2.5 grid grid-cols-2 gap-1.5">
+                <Mini label="Still in" value={totals.stillIn} />
+                <Mini label="Checked out" value={totals.visits - totals.stillIn} />
+                <Mini label="Bills missing" value={unbilled} hot={unbilled > 0} />
+                <Mini label="With a booking" value={visits.filter((v) => v.isBooking).length} />
               </div>
               {isToday && totals.visits === 0 && (
-                <p className="mt-3 text-xs font-light text-stone-500">
+                <p className="mt-2 text-xs font-light text-stone-500">
                   Nothing logged yet today. Staff check guests in on the door tablet at /door/{location}.
                 </p>
               )}
@@ -331,18 +335,28 @@ function OrderLines({ items }: { items: OrderLine[] }) {
   );
 }
 
+/** Small label-and-number row, so the summary card stays short. */
+function Mini({ label, value, hot = false }: { label: string; value: React.ReactNode; hot?: boolean }) {
+  return (
+    <div className={`flex items-baseline justify-between gap-2 rounded-xl px-3 py-2 ${hot ? "bg-gold-300 text-ink-900" : "bg-stone-50"}`}>
+      <span className={`truncate text-xs font-light ${hot ? "" : "text-stone-500"}`}>{label}</span>
+      <span className="text-[15px] tabular-nums">{value}</span>
+    </div>
+  );
+}
+
 function Split({ label, pence, total, tone }: { label: string; pence: number; total: number; tone: string }) {
   const pct = total > 0 ? Math.round((pence / total) * 100) : 0;
   return (
-    <div className="mb-3">
-      <div className="mb-1.5 flex items-baseline justify-between">
+    <div className="mb-2">
+      <div className="mb-1 flex items-baseline justify-between">
         <span className="text-[13px] font-light text-stone-500">{label}</span>
         <span className="text-[15px] tabular-nums text-stone-900">
           {money(pence)}
           <span className="ml-2 text-xs text-stone-500">{pct}%</span>
         </span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-stone-100">
+      <div className="h-1.5 overflow-hidden rounded-full bg-stone-100">
         <div className={`h-full rounded-full ${tone} transition-all`} style={{ width: `${pct}%` }} />
       </div>
     </div>

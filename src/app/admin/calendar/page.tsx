@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, StickyNote, Store, Users } from "lucide-react";
-import { Empty, OwnLayout, PageHead, Sheet, StatTile, Tag, btn, statusLabel, statusTone } from "@/components/admin/ui";
+import { BottomSheet, Empty, OwnLayout, PageHead, Sheet, StatTile, Tag, btn, statusLabel, statusTone } from "@/components/admin/ui";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -41,6 +41,7 @@ export default function CalendarPage() {
   const [dateMap, setDateMap] = useState<Record<string, DateEntry>>({});
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const [selectedDate, setSelectedDate] = useState<string | null>(todayStr);
+  const [daySheet, setDaySheet] = useState(false);
   const [loading, setLoading] = useState(true);
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [filterLoc, setFilterLoc] = useState("");
@@ -110,6 +111,58 @@ export default function CalendarPage() {
 
   const navBtn =
     "inline-flex h-9 items-center gap-1 rounded-full border border-stone-200 px-3 text-[13px] text-stone-900 transition hover:border-stone-300";
+
+  // The chosen day's bookings: in the side sheet, and in the slide-up panel on phones and iPad portrait.
+  const dayDetails = selectedDate ? (
+            <>
+              <div className="text-xs font-light text-stone-500">Selected day</div>
+              <h3 className="font-outfit text-[22px] font-normal tracking-tight">
+                {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-GB", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
+              </h3>
+              {selectedEntry ? (
+                <>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <StatTile hot label="Bookings" value={selectedEntry.count} />
+                    <StatTile label="Covers" value={selectedEntry.totalCovers} />
+                  </div>
+                  <div className="mt-3 space-y-2 lg:max-h-[calc(100vh-330px)] lg:overflow-y-auto">
+                    {selectedEntry.bookings.map((b) => (
+                      <div key={b.id} className="rounded-[18px] bg-stone-50 px-4 py-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-[15px] text-stone-900">{b.guest}</span>
+                          <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-600">
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                            {b.time}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                            {b.partySize} guest{b.partySize !== 1 ? "s" : ""}
+                          </span>
+                          <span>{b.location}</span>
+                          <span className="ml-auto text-stone-400">#{b.code}</span>
+                        </div>
+                        {b.notes && (
+                          <p className="mt-1.5 flex items-start gap-1.5 text-xs text-gold-700">
+                            <StickyNote className="mt-px h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                            {b.notes}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="mt-2 text-sm font-light text-stone-500">No bookings on this date.</p>
+              )}
+            </>
+  ) : null;
 
   return (
     <OwnLayout>
@@ -186,7 +239,10 @@ export default function CalendarPage() {
                 return (
                   <button
                     key={ds}
-                    onClick={() => setSelectedDate(ds)}
+                    onClick={() => {
+                      setSelectedDate(ds);
+                      if (window.matchMedia("(max-width: 1023px)").matches) setDaySheet(true);
+                    }}
                     aria-pressed={isSelected}
                     aria-label={`${day} ${MONTH_NAMES[month]}${hasBookings ? `, ${entry.count} booking${entry.count !== 1 ? "s" : ""}` : ""}`}
                     className={`relative flex h-14 flex-col items-center justify-between rounded-[14px] p-1.5 text-left transition md:h-[84px] md:items-start md:rounded-[18px] md:p-3 ${
@@ -228,54 +284,7 @@ export default function CalendarPage() {
         {/* Side panel: booking list for selected date */}
         <Sheet label="Selected day" className="p-4 md:p-5 lg:sticky lg:top-24">
           {selectedDate ? (
-            <>
-              <div className="text-xs font-light text-stone-500">Selected day</div>
-              <h3 className="font-outfit text-[22px] font-normal tracking-tight">
-                {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-GB", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })}
-              </h3>
-              {selectedEntry ? (
-                <>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <StatTile hot label="Bookings" value={selectedEntry.count} />
-                    <StatTile label="Covers" value={selectedEntry.totalCovers} />
-                  </div>
-                  <div className="mt-3 space-y-2 lg:max-h-[calc(100vh-330px)] lg:overflow-y-auto">
-                    {selectedEntry.bookings.map((b) => (
-                      <div key={b.id} className="rounded-[18px] bg-stone-50 px-4 py-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="truncate text-[15px] text-stone-900">{b.guest}</span>
-                          <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
-                        </div>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-600">
-                          <span className="inline-flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
-                            {b.time}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
-                            {b.partySize} guest{b.partySize !== 1 ? "s" : ""}
-                          </span>
-                          <span>{b.location}</span>
-                          <span className="ml-auto text-stone-400">#{b.code}</span>
-                        </div>
-                        {b.notes && (
-                          <p className="mt-1.5 flex items-start gap-1.5 text-xs text-gold-700">
-                            <StickyNote className="mt-px h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
-                            {b.notes}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <p className="mt-2 text-sm font-light text-stone-500">No bookings on this date.</p>
-              )}
-            </>
+            dayDetails
           ) : (
             <div className="py-12 text-center">
               <CalendarDays className="mx-auto mb-3 h-9 w-9 text-stone-300" strokeWidth={1.25} />
@@ -284,6 +293,10 @@ export default function CalendarPage() {
           )}
         </Sheet>
       </div>
+
+      <BottomSheet open={daySheet && !!selectedDate} onClose={() => setDaySheet(false)} title="Bookings">
+        {dayDetails}
+      </BottomSheet>
     </OwnLayout>
   );
 }

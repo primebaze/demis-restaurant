@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { CalendarDays, ExternalLink, Radio, RotateCcw, Tablet, Users } from "lucide-react";
-import { OwnLayout, PageHead, PillSwitch, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, table, tableWrap } from "@/components/admin/ui";
+import { useEffect, useState, useCallback , useRef} from "react";
+import { ExternalLink, Radio, RotateCcw, Tablet, Users } from "lucide-react";
+import { OwnLayout, PageHead, PillSwitch, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, table, tableWrap, useTypedConfirm, DateField } from "@/components/admin/ui";
 
 const SERVICES = [
   { href: "/admin/checkins", label: "Sunday Buffet" },
@@ -46,7 +46,21 @@ function remaining(endsAt: string, now: number): string {
 }
 
 export default function AdminCheckinsPage() {
+  const [askToType, typeDialog] = useTypedConfirm();
   const [date, setDate] = useState(() => ukToday());
+  const dateRef = useRef(date);
+  dateRef.current = date;
+  // Keep the chosen day in the address, so switching to the other page keeps it.
+  useEffect(() => {
+    const d = new URLSearchParams(window.location.search).get("date");
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) setDate(d);
+  }, []);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (date === ukToday()) url.searchParams.delete("date");
+    else url.searchParams.set("date", date);
+    window.history.replaceState(null, "", url.toString());
+  }, [date]);
   const [data, setData] = useState<{ total: number; tiers: { t20: number; t25: number; t30: number }; checkins: CheckIn[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(() => Date.now());
@@ -59,7 +73,9 @@ export default function AdminCheckinsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const res = await fetch(`/api/admin/checkins?date=${date}`);
-    setData(await res.json());
+    const d = await res.json();
+    if (dateRef.current !== date) return; // a newer day was picked while this one loaded
+    setData(d);
     setLoading(false);
   }, [date]);
 
@@ -73,7 +89,7 @@ export default function AdminCheckinsPage() {
   }, []);
 
   async function resetDay() {
-    if (!confirm(`Clear all check-ins for ${date}? Numbering starts again at 1.`)) return;
+    if (!(await askToType({ title: "Reset this day?", message: <>Clears all Sunday Buffet check-ins for {date}. Numbering starts again at 1.</>, action: "Reset day" }))) return;
     await fetch("/api/checkin/reset", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -106,17 +122,8 @@ export default function AdminCheckinsPage() {
         subtitle="Who came through the door, numbered as they arrive"
         actions={
           <>
-            <PillSwitch items={SERVICES} current="/admin/checkins" label="Service" />
-            <label className="inline-flex h-[46px] items-center gap-2 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] pl-4 pr-3 text-white backdrop-blur-xl">
-              <CalendarDays className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-              <span className="sr-only">Day</span>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="bg-transparent text-[15px] font-light text-white outline-none [color-scheme:dark]"
-              />
-            </label>
+            <PillSwitch items={SERVICES.map((i) => ({ ...i, href: date === ukToday() ? i.href : `${i.href}?date=${date}` }))} current="/admin/checkins" label="Service" />
+            <DateField variant="glass" value={date} onChange={setDate} ariaLabel="Day" />
           </>
         }
       />
@@ -166,8 +173,8 @@ export default function AdminCheckinsPage() {
                           </div>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1">
-                          <Tag tone="gold">£{c.price}</Tag>
-                          <span className={`text-sm ${left === "over" ? "text-red-700" : "font-medium text-gold-700"}`}>{left}</span>
+                          <span className="font-medium tabular-nums text-stone-900">£{c.price}</span>
+                          {left === "over" ? <Tag tone="off">Time up</Tag> : <Tag tone="ok">{left} left</Tag>}
                         </div>
                       </li>
                     );
@@ -185,7 +192,7 @@ export default function AdminCheckinsPage() {
                         <th>Price</th>
                         <th>In</th>
                         <th>Finish by</th>
-                        <th>Left</th>
+                        <th>Time left</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -201,10 +208,10 @@ export default function AdminCheckinsPage() {
                                 {c.partySize}
                               </span>
                             </td>
-                            <td><Tag tone="gold">£{c.price}</Tag></td>
+                            <td><span className="font-medium tabular-nums text-stone-900">£{c.price}</span></td>
                             <td className="tabular-nums text-stone-500">{fmt(c.checkedInAt)}</td>
                             <td className="tabular-nums">{fmt(c.endsAt)}</td>
-                            <td className={left === "over" ? "text-red-700" : "font-medium text-gold-700"}>{left}</td>
+                            <td>{left === "over" ? <Tag tone="off">Time up</Tag> : <Tag tone="ok">{left} left</Tag>}</td>
                           </tr>
                         );
                       })}
@@ -271,6 +278,7 @@ export default function AdminCheckinsPage() {
           </p>
         </Sheet>
       </div>
+      {typeDialog}
     </OwnLayout>
   );
 }

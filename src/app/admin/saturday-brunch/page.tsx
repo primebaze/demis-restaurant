@@ -6,8 +6,7 @@ import {
   Loader2, Mail, MailPlus, Plus, Send, Trash2, Undo2, UserCheck, Users, X,
 } from "lucide-react";
 import {
-  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, fieldArea, table, tableWrap, type Tone,
-} from "@/components/admin/ui";
+  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, fieldArea, table, tableWrap, type Tone, useTypedConfirm } from "@/components/admin/ui";
 
 type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; package: string; packageLabel: string; pricePerHead: number; heardFrom: string; fromPopup?: boolean; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
 type Summary = { reservations: number; people: number; drinkers: number; confirmed: number; cancelled: number; revenue: number; fromPopup?: number };
@@ -129,6 +128,7 @@ type DateRow = { date: string; prettyDate: string; blocked: boolean; hidden: boo
 const EMPTY: Summary = { reservations: 0, people: 0, drinkers: 0, confirmed: 0, cancelled: 0, revenue: 0 };
 
 export default function AdminSaturdayBrunchPage() {
+  const [askToType, typeDialog] = useTypedConfirm();
   const [date, setDate] = useState("");
   const [resolvedDate, setResolvedDate] = useState("");
   const [prettyDate, setPrettyDate] = useState("");
@@ -340,7 +340,7 @@ export default function AdminSaturdayBrunchPage() {
   }
 
   async function resetDay() {
-    if (!confirm(`Clear ALL reservations for ${prettyDate}? This cannot be undone.`)) return;
+    if (!(await askToType({ title: "Clear all reservations?", message: <>Deletes every Sunday Feast reservation for {prettyDate}.</>, action: "Clear all" }))) return;
     await fetch("/api/admin/saturday-brunch", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reset", date: resolvedDate }),
@@ -718,6 +718,7 @@ export default function AdminSaturdayBrunchPage() {
           </Sheet>
         </div>
       </div>
+      {typeDialog}
     </OwnLayout>
   );
 }

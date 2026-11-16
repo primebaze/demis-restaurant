@@ -47,6 +47,7 @@ import ShootShotEditor from "./ShootShotEditor";
 import ShootReferenceEditor from "./ShootReferenceEditor";
 import { PlanSelect, PlanText } from "./ShootPlanFields";
 import WeeklyActivityEditor from "./WeeklyActivityEditor";
+import { DateField } from "@/components/admin/ui";
 type Mode =
   "activities" | "overview" | "videos" | "preview" | "day" | "sharing";
 function asDraft(plan: ShootDraft): ShootDraft {
@@ -514,21 +515,7 @@ export default function ShootPlanEditor({
                     label="Week starting"
                     error={errorField === "weekStart" ? error : undefined}
                   >
-                    <input
-                      id="weekStart"
-                      type="date"
-                      value={draft.weekStart}
-                      onChange={(e) =>
-                        update("weekStart", startOfWeek(e.target.value))
-                      }
-                      className={fieldClass}
-                      aria-invalid={errorField === "weekStart" || undefined}
-                      aria-describedby={
-                        errorField === "weekStart"
-                          ? "weekStart-error"
-                          : undefined
-                      }
-                    />
+                    <DateField id="weekStart" value={draft.weekStart} onChange={(v) => update("weekStart", startOfWeek(v))} invalid={errorField === "weekStart"} ariaLabel="Week starting" />
                   </Field>
                   <Field id="location" label="Restaurant">
                     <select
@@ -606,17 +593,7 @@ export default function ShootPlanEditor({
                       label="Date"
                       error={errorField === "date" ? error : undefined}
                     >
-                      <input
-                        id="date"
-                        type="date"
-                        value={draft.date}
-                        onChange={(e) => update("date", e.target.value)}
-                        className={fieldClass}
-                        aria-invalid={errorField === "date" || undefined}
-                        aria-describedby={
-                          errorField === "date" ? "date-error" : undefined
-                        }
-                      />
+                      <DateField id="date" value={draft.date} onChange={(v) => update("date", v)} invalid={errorField === "date"} ariaLabel="Date" />
                     </Field>
                     <Field
                       id="time"

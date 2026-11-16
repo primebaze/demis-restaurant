@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { CalendarX, Check, ChevronLeft, ChevronRight, CircleCheck, MapPin, Plus, Trash2, Undo2, Users, X } from "lucide-react";
-import { Empty, OwnLayout, PageHead, Sheet, SheetFooter, SheetTitle, Tag, btn, field, fieldArea, statusLabel, statusTone, table, tableWrap } from "@/components/admin/ui";
+import { Empty, OwnLayout, PageHead, Sheet, SheetFooter, SheetTitle, Tag, btn, field, fieldArea, statusLabel, statusTone, table, tableWrap, DateField } from "@/components/admin/ui";
 
 type BuffetBooking = {
   id: string;
@@ -354,7 +354,7 @@ export default function AdminBuffetPage() {
               </div>
               <div>
                 <label className={labelCls}>Date *</label>
-                <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={field} />
+                <DateField value={form.date} onChange={(v) => setForm(f => ({ ...f, date: v }))} />
               </div>
               <div>
                 <label className={labelCls}>Time *</label>

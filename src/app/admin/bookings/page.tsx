@@ -18,8 +18,7 @@ import {
   statusLabel,
   statusTone,
   table,
-  tableWrap,
-} from "@/components/admin/ui";
+  tableWrap, BottomSheet, DateField } from "@/components/admin/ui";
 
 interface BookingRow {
   id: string;
@@ -119,6 +118,8 @@ export default function AdminBookingsPage() {
   const today = useMemo(() => ukTodayStr(), []);
   const [mode, setMode] = useState<"day" | "all">("day");
   const [selectedDay, setSelectedDay] = useState(today);
+  // Phones and iPad portrait: tapping a day slides its bookings up from the bottom.
+  const [daySheet, setDaySheet] = useState(false);
 
   // Calendar month (0-indexed month)
   const [calYear, setCalYear] = useState(() => Number(today.slice(0, 4)));
@@ -284,6 +285,7 @@ export default function AdminBookingsPage() {
     setMode("day");
     setPage(1);
     setExpanded(null);
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) setDaySheet(true);
   }
 
   function shiftMonth(n: number) {
@@ -385,6 +387,65 @@ export default function AdminBookingsPage() {
         <span className="truncate">{b.notes || "No requirements"}</span>
       </span>
     );
+  }
+
+  // One booking card (phones and iPad portrait, and the slide-up day panel).
+  function renderCard(b: BookingRow) {
+      const open = expanded === b.id;
+      return (
+        <article key={b.id} className="min-w-0 rounded-[22px] bg-white p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)]">
+          <button
+            type="button"
+            onClick={() => setExpanded(open ? null : b.id)}
+            aria-expanded={open}
+            className="block w-full text-left"
+          >
+            <div className="flex items-start gap-3">
+              <Avatar name={b.guest.name} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[17px]">{b.guest.name}</div>
+                <div className="text-xs font-light text-stone-500">
+                  {b.date === today ? "Today" : dayLabel(b.date)} · {b.time}
+                </div>
+              </div>
+              <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+              <span className="inline-flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                {b.partySize}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                {b.location}
+              </span>
+              {mode === "all" && (() => {
+                const t = dayTag(b.date);
+                return <span className={`rounded-full px-2 py-0.5 text-[10px] ${t.cls}`}>{t.label}</span>;
+              })()}
+            </div>
+            <div className="mt-1.5">{notesLine(b)}</div>
+          </button>
+
+          {open && (
+            <div className="mt-3 border-t border-stone-100 pt-3">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">{detailItems(b)}</div>
+              {(b.notes || b.addOns.length > 0) && <div className="mt-3">{extras(b)}</div>}
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {b.guest.phone ? (
+                  <a href={`tel:${b.guest.phone.replace(/\s+/g, "")}`} className={`${callBtnBase} h-11`}>
+                    <Phone className="h-4 w-4" strokeWidth={1.75} />
+                    Call
+                  </a>
+                ) : (
+                  <span className="flex h-11 items-center justify-center rounded-full bg-stone-100 text-[13px] text-stone-400">No phone</span>
+                )}
+                {statusSelect(b, "h-11 w-full text-center")}
+              </div>
+            </div>
+          )}
+        </article>
+      );
   }
 
   const listTitle = mode === "day" ? (selectedDay === today ? `Today, ${dayLabel(selectedDay)}` : dayLabel(selectedDay)) : "All bookings";
@@ -622,15 +683,15 @@ export default function AdminBookingsPage() {
                       { value: "past", label: "Past" },
                     ]}
                   />
-                  <input
-                    type="date"
-                    aria-label="Date"
+                  <DateField
                     value={filterDate}
-                    onChange={(e) => {
-                      setFilterDate(e.target.value);
+                    onChange={(v) => {
+                      setFilterDate(v);
                       setPage(1);
                     }}
-                    className="h-9 rounded-full border border-stone-200 bg-white px-3.5 text-[13px] text-stone-900 outline-none transition focus:border-gold-400 [color-scheme:light]"
+                    placeholder="Any date"
+                    allowClear
+                    className="!w-auto"
                   />
                 </>
               )}
@@ -751,63 +812,7 @@ export default function AdminBookingsPage() {
 
               {/* Cards: phones and iPad portrait */}
               <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-3 md:grid-cols-2 lg:hidden">
-                {bookings.map((b) => {
-                  const open = expanded === b.id;
-                  return (
-                    <article key={b.id} className="min-w-0 rounded-[22px] bg-white p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)]">
-                      <button
-                        type="button"
-                        onClick={() => setExpanded(open ? null : b.id)}
-                        aria-expanded={open}
-                        className="block w-full text-left"
-                      >
-                        <div className="flex items-start gap-3">
-                          <Avatar name={b.guest.name} />
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-[17px]">{b.guest.name}</div>
-                            <div className="text-xs font-light text-stone-500">
-                              {b.date === today ? "Today" : dayLabel(b.date)} · {b.time}
-                            </div>
-                          </div>
-                          <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
-                        </div>
-                        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-                          <span className="inline-flex items-center gap-1.5">
-                            <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
-                            {b.partySize}
-                          </span>
-                          <span className="inline-flex items-center gap-1.5">
-                            <MapPin className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
-                            {b.location}
-                          </span>
-                          {mode === "all" && (() => {
-                            const t = dayTag(b.date);
-                            return <span className={`rounded-full px-2 py-0.5 text-[10px] ${t.cls}`}>{t.label}</span>;
-                          })()}
-                        </div>
-                        <div className="mt-1.5">{notesLine(b)}</div>
-                      </button>
-
-                      {open && (
-                        <div className="mt-3 border-t border-stone-100 pt-3">
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-3">{detailItems(b)}</div>
-                          {(b.notes || b.addOns.length > 0) && <div className="mt-3">{extras(b)}</div>}
-                          <div className="mt-4 grid grid-cols-2 gap-2">
-                            {b.guest.phone ? (
-                              <a href={`tel:${b.guest.phone.replace(/\s+/g, "")}`} className={`${callBtnBase} h-11`}>
-                                <Phone className="h-4 w-4" strokeWidth={1.75} />
-                                Call
-                              </a>
-                            ) : (
-                              <span className="flex h-11 items-center justify-center rounded-full bg-stone-100 text-[13px] text-stone-400">No phone</span>
-                            )}
-                            {statusSelect(b, "h-11 w-full text-center")}
-                          </div>
-                        </div>
-                      )}
-                    </article>
-                  );
-                })}
+                {bookings.map((b) => renderCard(b))}
               </div>
             </>
           )}
@@ -841,6 +846,32 @@ export default function AdminBookingsPage() {
           )}
         </section>
       </div>
+
+      <BottomSheet
+        open={daySheet}
+        onClose={() => setDaySheet(false)}
+        title={selectedDay === today ? `Today, ${dayLabel(selectedDay)}` : dayLabel(selectedDay)}
+        subtitle={loading ? "Loading…" : `${plural(total, "booking", "bookings")}${dayEntry ? ` · ${plural(dayEntry.totalCovers, "cover", "covers")}` : ""}`}
+      >
+        {loading ? (
+          <p className="py-10 text-center text-sm font-light text-stone-500">Loading…</p>
+        ) : bookings.length === 0 ? (
+          <p className="py-10 text-center text-sm font-light text-stone-500">No bookings on this day</p>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">{bookings.map((b) => renderCard(b))}</div>
+        )}
+        {totalPages > 1 && (
+          <div className="mt-3 flex items-center justify-center gap-2 text-[13px]">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className={btn.small}>
+              Previous
+            </button>
+            <span className="text-stone-500">Page {page} of {totalPages}</span>
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className={btn.small}>
+              Next
+            </button>
+          </div>
+        )}
+      </BottomSheet>
     </OwnLayout>
   );
 }

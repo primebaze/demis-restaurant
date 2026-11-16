@@ -3,7 +3,10 @@
  * over the dining room photo, a frosted stat strip, and white "sheets" for the
  * content. See docs/COLOURS.md, "Admin".
  */
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export function PageHead({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
@@ -119,7 +122,7 @@ export function PillSwitch({ items, current, label = "Switch" }: { items: { href
   return (
     <div className="inline-flex rounded-full border border-white/15 bg-[rgba(58,52,48,0.48)] p-1 backdrop-blur-xl" role="group" aria-label={label}>
       {items.map((s) => {
-        const on = current === s.href;
+        const on = current === s.href.split("?")[0];
         return (
           <a
             key={s.href}
@@ -183,3 +186,242 @@ export function Empty({ children }: { children: ReactNode }) {
 /** Table look shared by every list. Wrap the <table> in <div className={tableWrap}> so it scrolls on small screens. */
 export const tableWrap = "overflow-x-auto";
 export const table = "w-full border-collapse text-sm [&_th]:whitespace-nowrap [&_th]:px-3.5 [&_th]:pb-2.5 [&_th]:pt-1 [&_th]:text-left [&_th]:text-xs [&_th]:font-normal [&_th]:text-stone-400 [&_td]:border-t [&_td]:border-stone-100 [&_td]:px-3.5 [&_td]:py-3 [&_td]:align-middle";
+
+/**
+ * Panel that slides up from the bottom on phones and iPad portrait (hidden from lg up).
+ * Closes on the backdrop, the X, Escape, or a swipe down on the handle area.
+ */
+export function BottomSheet({ open, onClose, title, subtitle, children }: { open: boolean; onClose: () => void; title: ReactNode; subtitle?: ReactNode; children: ReactNode }) {
+  return open ? <BottomSheetInner onClose={onClose} title={title} subtitle={subtitle}>{children}</BottomSheetInner> : null;
+}
+
+function BottomSheetInner({ onClose, title, subtitle, children }: { onClose: () => void; title: ReactNode; subtitle?: ReactNode; children: ReactNode }) {
+  const [drag, setDrag] = useState(0);
+  const start = useRef<number | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  return (
+    <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : "Details"}>
+      <div className="sheet-fade absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={onClose} />
+      <div
+        className="sheet-up absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-[28px] bg-stone-50 text-stone-900 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]"
+        style={drag ? { transform: `translateY(${drag}px)`, transition: "none" } : undefined}
+      >
+        <div
+          className="shrink-0 touch-none px-5 pb-3 pt-2.5"
+          onTouchStart={(e) => (start.current = e.touches[0].clientY)}
+          onTouchMove={(e) => start.current !== null && setDrag(Math.max(0, e.touches[0].clientY - start.current))}
+          onTouchEnd={() => {
+            if (drag > 90) onClose();
+            setDrag(0);
+            start.current = null;
+          }}
+        >
+          <div className="mx-auto mb-3 h-1.5 w-11 rounded-full bg-stone-300" aria-hidden="true" />
+          <div className="flex items-start gap-3">
+            <div className="min-w-0">
+              <h2 className="font-outfit text-xl font-normal tracking-tight">{title}</h2>
+              {subtitle && <p className="mt-0.5 text-[13px] font-light text-stone-500">{subtitle}</p>}
+            </div>
+            <button type="button" onClick={onClose} aria-label="Close" className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-stone-600 shadow-sm">
+              <X className="h-5 w-5" strokeWidth={1.75} />
+            </button>
+          </div>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Guard for actions that wipe a lot at once (reset a day, clear all reservations).
+ * `const [askToType, typeDialog] = useTypedConfirm();` then
+ * `if (!(await askToType({ title, message }))) return;` and render `{typeDialog}` once in the page.
+ * The red button only works after typing the word (RESET by default).
+ */
+export function useTypedConfirm(): [(o: { title: string; message: ReactNode; word?: string; action?: string }) => Promise<boolean>, ReactNode] {
+  const [req, setReq] = useState<{ title: string; message: ReactNode; word: string; action: string; resolve: (ok: boolean) => void } | null>(null);
+  const [typed, setTyped] = useState("");
+
+  const ask = (o: { title: string; message: ReactNode; word?: string; action?: string }) =>
+    new Promise<boolean>((resolve) => {
+      setTyped("");
+      setReq({ title: o.title, message: o.message, word: o.word || "RESET", action: o.action || "Delete", resolve });
+    });
+
+  const close = (ok: boolean) => {
+    req?.resolve(ok);
+    setReq(null);
+  };
+
+  const dialog = req ? (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-3 backdrop-blur-[2px] sm:items-center" role="alertdialog" aria-modal="true" aria-label={req.title} onClick={() => close(false)}>
+      <div className="sheet-up w-full max-w-md rounded-[24px] bg-white p-6 text-stone-900" onClick={(e) => e.stopPropagation()}>
+        <h2 className="font-outfit text-xl font-normal">{req.title}</h2>
+        <div className="mt-2 text-sm font-light text-stone-600">{req.message}</div>
+        <p className="mt-2 text-sm font-light text-red-700">This can&apos;t be undone.</p>
+        <label className="mt-4 block text-[13px] text-stone-500">
+          Type <b className="font-medium text-stone-900">{req.word}</b> to confirm
+          <input
+            autoFocus
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && typed.trim().toUpperCase() === req.word) close(true);
+              if (e.key === "Escape") close(false);
+            }}
+            autoComplete="off"
+            autoCapitalize="characters"
+            className={`${field} mt-1.5`}
+          />
+        </label>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            disabled={typed.trim().toUpperCase() !== req.word}
+            onClick={() => close(true)}
+            className="inline-flex h-11 items-center rounded-full bg-red-600 px-5 text-sm text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {req.action}
+          </button>
+          <button type="button" onClick={() => close(false)} className={btn.light}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  return [ask, dialog];
+}
+
+/* ── Date picker ─────────────────────────────────────────────────────────── */
+
+const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+function isoDate(y: number, m: number, d: number) {
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+function londonToday() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+}
+function prettyDay(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short", year: "numeric" });
+}
+
+/**
+ * Date picker in the admin style, replacing the browser's own date box.
+ * `variant="glass"` sits on the photo (page headers); `variant="light"` sits on a white sheet (forms, filters).
+ * Value and onChange use YYYY-MM-DD strings, like <input type="date">.
+ */
+export function DateField({
+  value, onChange, variant = "light", placeholder = "Pick a date", ariaLabel = "Date", allowClear = false, id, className = "", invalid = false,
+}: {
+  value: string; onChange: (v: string) => void; variant?: "glass" | "light"; placeholder?: string; ariaLabel?: string; allowClear?: boolean; id?: string; className?: string; invalid?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const today = londonToday();
+  const base = value || today;
+  const [view, setView] = useState(() => ({ y: Number(base.slice(0, 4)), m: Number(base.slice(5, 7)) - 1 }));
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const b = value || londonToday();
+    setView({ y: Number(b.slice(0, 4)), m: Number(b.slice(5, 7)) - 1 });
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, value]);
+
+  const first = new Date(view.y, view.m, 1);
+  const lead = (first.getDay() + 6) % 7; // Monday first
+  const days = new Date(view.y, view.m + 1, 0).getDate();
+  const cells: (number | null)[] = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
+  while (cells.length % 7) cells.push(null);
+  const monthName = first.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  const shift = (n: number) => setView((v) => { const d = new Date(v.y, v.m + n, 1); return { y: d.getFullYear(), m: d.getMonth() }; });
+  const pick = (iso: string) => { onChange(iso); setOpen(false); };
+
+  const trigger =
+    variant === "glass"
+      ? "inline-flex h-11 items-center gap-2 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] px-4 text-[15px] font-light text-white backdrop-blur-xl hover:bg-[rgba(58,52,48,0.65)]"
+      : `inline-flex h-11 w-full items-center gap-2 rounded-full border bg-stone-50 px-4 text-sm text-stone-900 hover:border-stone-300 ${invalid ? "border-red-300" : "border-stone-200"}`;
+
+  return (
+    <div ref={ref} className={`relative ${variant === "light" ? "w-full" : "inline-block"} ${className}`}>
+      <button id={id} type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="dialog" aria-expanded={open} aria-label={`${ariaLabel}: ${value ? prettyDay(value) : "none"}`} className={trigger}>
+        <CalendarDays className="h-[18px] w-[18px] shrink-0 opacity-80" strokeWidth={1.6} />
+        <span className={`whitespace-nowrap ${value ? "" : variant === "glass" ? "text-white/70" : "text-stone-400"}`}>{value ? prettyDay(value) : placeholder}</span>
+        <ChevronDown className={`ml-auto h-4 w-4 shrink-0 opacity-70 transition ${open ? "rotate-180" : ""}`} strokeWidth={1.75} />
+      </button>
+
+      {open && (
+        <div role="dialog" aria-label={ariaLabel} className={`absolute ${variant === "glass" ? "right-0" : "left-0"} top-[calc(100%+8px)] z-[55] w-[300px] max-w-[calc(100vw-32px)] rounded-[22px] bg-white p-3.5 text-stone-900 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-stone-100`}>
+          <div className="mb-2 flex items-center gap-1">
+            <span className="pl-1.5 font-outfit text-[17px]">{monthName}</span>
+            <button type="button" onClick={() => shift(-1)} aria-label="Previous month" className="ml-auto flex h-9 w-9 items-center justify-center rounded-full hover:bg-stone-100">
+              <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+            </button>
+            <button type="button" onClick={() => shift(1)} aria-label="Next month" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-stone-100">
+              <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+            </button>
+          </div>
+          <div className="grid grid-cols-7 gap-1 text-center">
+            {WEEKDAYS.map((w) => (
+              <span key={w} className="pb-1 text-[11px] text-stone-400">{w}</span>
+            ))}
+            {cells.map((d, i) => {
+              if (d === null) return <span key={`e${i}`} />;
+              const iso = isoDate(view.y, view.m, d);
+              const sel = iso === value;
+              const isToday = iso === today;
+              return (
+                <button
+                  key={iso}
+                  type="button"
+                  onClick={() => pick(iso)}
+                  aria-pressed={sel}
+                  className={`flex h-9 items-center justify-center rounded-full text-sm transition ${
+                    sel ? "bg-gold-300 font-medium text-ink-900" : isToday ? "ring-1 ring-inset ring-stone-900 hover:bg-stone-100" : "hover:bg-stone-100"
+                  }`}
+                >
+                  {d}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-2.5 flex items-center gap-2 border-t border-stone-100 pt-2.5">
+            <button type="button" onClick={() => pick(today)} className={btn.small}>Today</button>
+            {allowClear && value && (
+              <button type="button" onClick={() => { onChange(""); setOpen(false); }} className="ml-auto h-8 rounded-full px-3 text-[13px] text-stone-500 hover:text-stone-900">
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
