@@ -253,8 +253,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* Plain numbers */}
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:mt-auto lg:pt-4 xl:grid-cols-4">
-        <section aria-label="Last 30 days" className="rounded-[22px] bg-white p-[18px] text-stone-900">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:-mb-12 lg:mt-auto lg:pt-4 xl:grid-cols-4">
+        <section aria-label="Last 30 days" className="rounded-[22px] bg-white p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
           <h2 className="text-[21px] font-normal tracking-tight whitespace-nowrap">Last 30 days</h2>
           <div className="mt-3.5 flex h-[50px] items-center rounded-full bg-stone-100 pl-4 pr-1.5">
             <span className="text-sm font-light text-stone-500">Bookings</span>
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        <section aria-label="Dine-in today, live" className="rounded-[22px] bg-white p-[18px] text-stone-900">
+        <section aria-label="Dine-in today, live" className="rounded-[22px] bg-white p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
           <div className="flex items-center gap-2">
             <h2 className="text-[21px] font-normal tracking-tight">Dine-in</h2>
             <span className="ml-auto inline-flex h-6 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 text-xs text-emerald-700">
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
             ["Sunday Buffet", "/admin/sunday-buffet", data.events?.buffet],
           ] as const
         ).map(([name, href, ev]) => (
-          <section key={name} aria-label={name} className="rounded-[22px] bg-white p-[18px] text-stone-900">
+          <section key={name} aria-label={name} className="rounded-[22px] bg-white p-[18px] text-stone-900 lg:rounded-b-none lg:pb-10">
             <div className="flex items-center">
               <h2 className="text-[21px] font-normal tracking-tight whitespace-nowrap">{name}</h2>
               <Link href={href} aria-label={`Open ${name}`} className="ml-auto text-stone-600 hover:text-stone-900">
