@@ -74,7 +74,7 @@ export default function ShootReferenceEditor({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="font-semibold">
           Reference frames{" "}
-          <span className="text-sm font-normal text-stone-400">
+          <span className="text-sm font-normal text-stone-500">
             {references.length}/{MAX_VIDEO_REFERENCES}
           </span>
         </h3>
@@ -105,7 +105,7 @@ export default function ShootReferenceEditor({
       </div>
       {uploading && (
         <div className="mb-4 flex flex-wrap items-center gap-3">
-          <p role="status" className="text-sm text-stone-400">
+          <p role="status" className="text-sm text-stone-500">
             Uploading {pending?.file.name}…
           </p>
           <Action
@@ -120,7 +120,7 @@ export default function ShootReferenceEditor({
       )}
       {error && (
         <div className="mb-4" role="alert">
-          <p className="text-sm text-red-300">{error}</p>
+          <p className="text-sm text-red-700">{error}</p>
           {pending && !uploading && (
             <Action className="mt-2" onClick={() => void upload(pending)}>
               Retry upload

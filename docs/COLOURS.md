@@ -80,6 +80,27 @@ Line icons from `lucide-react` at `strokeWidth={1.75}`, coloured `stone-500`,
 gold when active. No emoji in menus or headings. (The blog admin menu still
 has emoji; switch it to line icons next time it's changed.)
 
+## 6. Admin (redesigned Nov 2026)
+
+The admin (`/admin`) has its own look, approved in the redesign. Sections 1 to 5
+still apply to the guest site, the door kiosks and the blog.
+
+- **Background:** the Demi's dining room photo (`public/admin/dining-room.jpg`,
+  class `admin-bg` in `src/app/admin/admin.css`). Nothing else goes behind pages.
+- **On the photo:** white text, frosted panels (`glass`) and dark glass buttons.
+- **Content:** white sheets (`bg-white`, rounded 22px) with `stone` text.
+- **Accent: Demi's gold** (`gold-300` with `text-ink-900`): main buttons, the
+  active day, the arrow buttons, and the one number that matters most in a group.
+  On white, gold text is `gold-700`. Solid fills only: no dots, stripes or
+  patterns.
+- **Status:** the same three meanings, light versions on white: `emerald-50/700`
+  (done), `amber-50/800` (waiting), `red-50/700` (cancelled, failed). Modified is
+  `gold-100/800`.
+- **Font:** Outfit (`font-outfit`), light weights for big numbers and titles.
+- Pages not redrawn yet sit on a dark `ink-950` panel inside the new shell, so
+  their old ink and gold styles still read correctly. Add a page to
+  `REDESIGNED` in `src/app/admin/AdminShell.tsx` once it's redrawn.
+
 ## Allowed exceptions
 
 These are real brand colours, not ours, and the test lets them through:

@@ -61,7 +61,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
     return () => clearInterval(t);
   }, [load, isToday]);
 
-  const card = "bg-ink-900 border border-white/[0.06] rounded-2xl";
+  const card = "bg-white border border-stone-100 rounded-2xl";
   const heads = totals.diningCovers + totals.takeaway;
   const perHead = heads > 0 ? Math.round(totals.takingsPence / heads) : 0;
   const perTable = totals.diningParties > 0 ? Math.round(totals.diningTakingsPence / totals.diningParties) : 0;
@@ -78,18 +78,18 @@ export default function DoorSummaryPage({ params }: { params: { location: string
     <div className="max-w-7xl mx-auto">
       <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-gold-300/60 mb-1.5">Door summary</p>
-          <h1 className="text-3xl font-bold text-white leading-none">{locationName || "…"}</h1>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-gold-700 mb-1.5">Door summary</p>
+          <h2 className="text-2xl font-normal tracking-tight text-stone-900 leading-tight">{locationName || "…"}</h2>
           <a href={`/door/${location}`} target="_blank" rel="noopener"
-            className="inline-block mt-2 text-xs text-gold-300/80 hover:text-gold-300">
+            className="inline-block mt-2 text-xs text-gold-700 hover:text-gold-700">
             Open the door tablet → /door/{location}
           </a>
         </div>
         <div className="flex items-center gap-2">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 text-sm bg-ink-900 border border-white/[0.07] rounded-xl text-stone-300 focus:outline-none focus:border-gold-300/40" />
+            className="px-3 py-2 text-sm bg-white border border-stone-200 rounded-xl text-stone-700 focus:outline-none focus:border-gold-400" />
           <button onClick={() => setDate(ukToday())}
-            className={`px-4 py-2 text-sm rounded-xl border transition ${isToday ? "bg-gold-300/10 border-gold-300/40 text-gold-300" : "bg-ink-900 border-white/[0.07] text-stone-400 hover:text-white"}`}>
+            className={`px-4 py-2 text-sm rounded-xl border transition ${isToday ? "bg-gold-100 border-gold-400 text-gold-700" : "bg-white border-stone-200 text-stone-500 hover:text-stone-900"}`}>
             Today
           </button>
         </div>
@@ -97,30 +97,30 @@ export default function DoorSummaryPage({ params }: { params: { location: string
 
       {/* Headline numbers */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <Big label="Guests dining" value={totals.diningCovers} sub={`across ${totals.diningParties} ${totals.diningParties === 1 ? "table" : "tables"}`} tone="text-gold-300" />
-        <Big label="Takeaway orders" value={totals.takeaway} sub="collected at the door" tone="text-emerald-400" />
-        <Big label="Total through the door" value={heads} sub="dining guests plus takeaway" tone="text-white" />
-        <Big label="Takings" value={money(totals.takingsPence)} sub={`${totals.billsEntered} of ${totals.visits} bills entered`} tone="text-emerald-300" />
+        <Big label="Guests dining" value={totals.diningCovers} sub={`across ${totals.diningParties} ${totals.diningParties === 1 ? "table" : "tables"}`} tone="text-gold-700" />
+        <Big label="Takeaway orders" value={totals.takeaway} sub="collected at the door" tone="text-emerald-700" />
+        <Big label="Total through the door" value={heads} sub="dining guests plus takeaway" tone="text-stone-900" />
+        <Big label="Takings" value={money(totals.takingsPence)} sub={`${totals.billsEntered} of ${totals.visits} bills entered`} tone="text-emerald-700" />
       </div>
 
       {/* The detail behind the headline */}
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <section className={`${card} p-5`}>
-          <h2 className="text-sm font-semibold text-white mb-4">Where the money came from</h2>
+          <h2 className="text-sm font-semibold text-stone-900 mb-4">Where the money came from</h2>
           <Split label="Dining" pence={totals.diningTakingsPence} total={totals.takingsPence} tone="bg-gold-300" />
           <Split label="Takeaway" pence={totals.takeawayTakingsPence} total={totals.takingsPence} tone="bg-emerald-400" />
-          <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/[0.06]">
+          <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-stone-100">
             <Mini label="Average per guest" value={money(perHead)} />
             <Mini label="Average per table" value={money(perTable)} />
           </div>
         </section>
 
         <section className={`${card} p-5`}>
-          <h2 className="text-sm font-semibold text-white mb-4">Where the day stands</h2>
+          <h2 className="text-sm font-semibold text-stone-900 mb-4">Where the day stands</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Mini label="Still in the building" value={String(totals.stillIn)} tone={totals.stillIn > 0 ? "text-white" : "text-stone-500"} />
+            <Mini label="Still in the building" value={String(totals.stillIn)} tone={totals.stillIn > 0 ? "text-stone-900" : "text-stone-500"} />
             <Mini label="Checked out" value={String(totals.visits - totals.stillIn)} />
-            <Mini label="Bills still missing" value={String(unbilled)} tone={unbilled > 0 ? "text-amber-400" : "text-stone-500"} />
+            <Mini label="Bills still missing" value={String(unbilled)} tone={unbilled > 0 ? "text-amber-800" : "text-stone-500"} />
             <Mini label="Arrived with a booking" value={String(visits.filter((v) => v.isBooking).length)} />
           </div>
           {isToday && totals.visits === 0 && (
@@ -134,7 +134,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
       {/* What sold, from the orders staff took at the door */}
       <section className={`${card} p-5 mb-4`}>
         <div className="flex items-baseline justify-between mb-4">
-          <h2 className="text-sm font-semibold text-white">What sold</h2>
+          <h2 className="text-sm font-semibold text-stone-900">What sold</h2>
           <span className="text-xs text-stone-500">
             {soldFood.reduce((n, [, q]) => n + q, 0)} food · {soldDrinks.reduce((n, [, q]) => n + q, 0)} drinks
           </span>
@@ -150,14 +150,14 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                 <div key={title}>
                   <p className="text-[10px] uppercase tracking-[0.15em] text-stone-500 mb-2.5">{title}</p>
                   {top.length === 0 ? (
-                    <p className="text-xs text-stone-600">None</p>
+                    <p className="text-xs text-stone-400">None</p>
                   ) : (
                     <div className="space-y-2">
                       {top.map(([name, qty]) => (
                         <div key={name}>
                           <div className="flex items-baseline justify-between gap-3 mb-1">
-                            <span className="text-xs text-stone-300 truncate">{name}</span>
-                            <span className="text-sm font-bold text-white tabular-nums">{qty}</span>
+                            <span className="text-xs text-stone-700 truncate">{name}</span>
+                            <span className="text-sm font-bold text-stone-900 tabular-nums">{qty}</span>
                           </div>
                           <div className="h-1 bg-black/50 rounded-full overflow-hidden">
                             <div className={`h-full ${bar} rounded-full`} style={{ width: `${(qty / max) * 100}%` }} />
@@ -165,7 +165,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                         </div>
                       ))}
                       {list.length > top.length && (
-                        <p className="text-[11px] text-stone-600">+{list.length - top.length} more</p>
+                        <p className="text-[11px] text-stone-400">+{list.length - top.length} more</p>
                       )}
                     </div>
                   )}
@@ -178,8 +178,8 @@ export default function DoorSummaryPage({ params }: { params: { location: string
 
       {/* Read-only log */}
       <section className={`${card} overflow-hidden`}>
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
-          <h2 className="text-sm font-semibold text-white">{isToday ? "Today's log" : `Log for ${date}`}</h2>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100">
+          <h2 className="text-sm font-semibold text-stone-900">{isToday ? "Today's log" : `Log for ${date}`}</h2>
           <span className="text-xs text-stone-500">by table</span>
         </div>
 
@@ -191,7 +191,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-[10px] uppercase tracking-[0.12em] text-stone-500 border-b border-white/[0.06]">
+                <tr className="text-[10px] uppercase tracking-[0.12em] text-stone-500 border-b border-stone-100">
                   <th className="text-left font-medium px-5 py-2.5">Table</th>
                   <th className="text-left font-medium px-3 py-2.5">Guest</th>
                   <th className="text-left font-medium px-3 py-2.5">Type</th>
@@ -203,21 +203,21 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                   <th className="text-right font-medium px-5 py-2.5">Bill</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.05]">
+              <tbody className="divide-y divide-stone-100">
                 {visits.map((v) => {
                   const isDining = v.visitType === "dining";
                   return (
-                    <tr key={v.id} className={v.status === "active" ? "" : "bg-black/20"}>
-                      <td className="px-5 py-3 font-semibold text-white tabular-nums">{v.tableNo || <span className="text-stone-600">—</span>}</td>
-                      <td className={`px-3 py-3 ${v.hasDetails ? "text-white" : "text-stone-500"}`}>
+                    <tr key={v.id} className={v.status === "active" ? "" : "bg-stone-50"}>
+                      <td className="px-5 py-3 font-semibold text-stone-900 tabular-nums">{v.tableNo || <span className="text-stone-400">—</span>}</td>
+                      <td className={`px-3 py-3 ${v.hasDetails ? "text-stone-900" : "text-stone-500"}`}>
                         {v.label}
-                        {v.isBooking && <span className="ml-2 text-[10px] text-gold-300/80">booked</span>}
+                        {v.isBooking && <span className="ml-2 text-[10px] text-gold-700">booked</span>}
                       </td>
-                      <td className={`px-3 py-3 ${isDining ? "text-gold-300/80" : "text-emerald-400/80"}`}>
+                      <td className={`px-3 py-3 ${isDining ? "text-gold-700" : "text-emerald-700"}`}>
                         {isDining ? "Dining" : "Takeaway"}
                       </td>
-                      <td className="px-3 py-3 text-right text-stone-300 tabular-nums">{isDining ? v.partySize : "—"}</td>
-                      <td className="px-3 py-3 text-xs text-stone-400 max-w-[260px]">
+                      <td className="px-3 py-3 text-right text-stone-700 tabular-nums">{isDining ? v.partySize : "—"}</td>
+                      <td className="px-3 py-3 text-xs text-stone-500 max-w-[260px]">
                         {v.items?.length ? (
                           // one line per guest when the table ordered guest by guest
                           Array.from(new Set(v.items.map((l) => l.guest))).sort((a, b) => a - b).map((g, _, all) => (
@@ -226,28 +226,28 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                               {v.items.filter((l) => l.guest === g).map((l) => (l.qty > 1 ? `${l.qty}× ${lineName(l)}` : lineName(l))).join(", ")}
                             </div>
                           ))
-                        ) : <span className="text-stone-600">—</span>}
+                        ) : <span className="text-stone-400">—</span>}
                       </td>
-                      <td className="px-3 py-3 text-right text-stone-400 tabular-nums">{clock(v.checkedInAt)}</td>
-                      <td className="px-3 py-3 text-right text-stone-400 tabular-nums">
-                        {v.checkedOutAt ? clock(v.checkedOutAt) : <span className="text-amber-400/80">still in</span>}
+                      <td className="px-3 py-3 text-right text-stone-500 tabular-nums">{clock(v.checkedInAt)}</td>
+                      <td className="px-3 py-3 text-right text-stone-500 tabular-nums">
+                        {v.checkedOutAt ? clock(v.checkedOutAt) : <span className="text-amber-800">still in</span>}
                       </td>
-                      <td className="px-3 py-3 text-right text-stone-400 tabular-nums">{stayed(v.checkedInAt, v.checkedOutAt)}</td>
+                      <td className="px-3 py-3 text-right text-stone-500 tabular-nums">{stayed(v.checkedInAt, v.checkedOutAt)}</td>
                       <td className="px-5 py-3 text-right font-semibold tabular-nums">
                         {v.amountPence != null
-                          ? <span className="text-emerald-300">{money(v.amountPence)}</span>
-                          : <span className="text-stone-600">—</span>}
+                          ? <span className="text-emerald-700">{money(v.amountPence)}</span>
+                          : <span className="text-stone-400">—</span>}
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
               <tfoot>
-                <tr className="border-t border-white/[0.08] bg-black/30 text-sm font-bold">
-                  <td className="px-5 py-3 text-stone-400" colSpan={3}>Total</td>
-                  <td className="px-3 py-3 text-right text-white tabular-nums">{totals.diningCovers}</td>
+                <tr className="border-t border-stone-200 bg-stone-50 text-sm font-bold">
+                  <td className="px-5 py-3 text-stone-500" colSpan={3}>Total</td>
+                  <td className="px-3 py-3 text-right text-stone-900 tabular-nums">{totals.diningCovers}</td>
                   <td colSpan={4} />
-                  <td className="px-5 py-3 text-right text-emerald-300 tabular-nums">{money(totals.takingsPence)}</td>
+                  <td className="px-5 py-3 text-right text-emerald-700 tabular-nums">{money(totals.takingsPence)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -260,7 +260,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
 
 function Big({ label, value, sub, tone }: { label: string; value: number | string; sub: string; tone: string }) {
   return (
-    <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-5">
+    <div className="bg-white border border-stone-100 rounded-2xl p-5">
       <p className="text-[10px] uppercase tracking-[0.15em] text-stone-500">{label}</p>
       <p className={`mt-1.5 text-4xl font-bold tabular-nums leading-none ${tone}`}>{value}</p>
       <p className="mt-2 text-[11px] text-stone-500">{sub}</p>
@@ -268,7 +268,7 @@ function Big({ label, value, sub, tone }: { label: string; value: number | strin
   );
 }
 
-function Mini({ label, value, tone = "text-white" }: { label: string; value: string; tone?: string }) {
+function Mini({ label, value, tone = "text-stone-900" }: { label: string; value: string; tone?: string }) {
   return (
     <div>
       <p className="text-[10px] uppercase tracking-[0.15em] text-stone-500">{label}</p>
@@ -282,8 +282,8 @@ function Split({ label, pence, total, tone }: { label: string; pence: number; to
   return (
     <div className="mb-3.5 last:mb-0">
       <div className="flex items-baseline justify-between mb-1.5">
-        <span className="text-xs text-stone-400">{label}</span>
-        <span className="text-sm font-bold text-white tabular-nums">
+        <span className="text-xs text-stone-500">{label}</span>
+        <span className="text-sm font-bold text-stone-900 tabular-nums">
           {`£${(pence / 100).toFixed(2)}`}
           <span className="ml-2 text-[11px] font-normal text-stone-500">{pct}%</span>
         </span>

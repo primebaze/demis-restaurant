@@ -121,7 +121,7 @@ export default function ShootPlanSharing({
   return (
     <section
       aria-labelledby={`${prefix}-heading`}
-      className="mb-6 rounded-2xl border border-gold-300/20 bg-gold-300/5 p-5"
+      className="mb-6 rounded-2xl border border-gold-400 bg-gold-100 p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -134,7 +134,7 @@ export default function ShootPlanSharing({
           </h2>
           {/* Viewer links expose saved content read-only; collaborator links allow edits to this plan but never admin or sharing access. */}
         </div>
-        <span className="text-xs text-gold-300">
+        <span className="text-xs text-gold-700">
           {loading
             ? "Loading…"
             : share?.enabled
@@ -157,7 +157,7 @@ export default function ShootPlanSharing({
         </div>
       )}
       {message && (
-        <p role="status" className="mt-4 text-sm text-emerald-200">
+        <p role="status" className="mt-4 text-sm text-emerald-700">
           {message}
         </p>
       )}
@@ -186,7 +186,7 @@ export default function ShootPlanSharing({
                   href={`${publicPath}/${share.token}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center rounded-lg px-4 text-sm text-gold-300 hover:bg-white/5 focus-visible:outline focus-visible:outline-gold-300"
+                  className="inline-flex min-h-11 items-center rounded-lg px-4 text-sm text-gold-700 hover:bg-stone-50 focus-visible:outline focus-visible:outline-gold-300"
                 >
                   {editable
                     ? "Open collaborator page ↗"
@@ -210,7 +210,7 @@ export default function ShootPlanSharing({
           >
             <label
               htmlFor={`${prefix}-pin`}
-              className="mb-2 block text-sm font-medium text-stone-300"
+              className="mb-2 block text-sm font-medium text-stone-700"
             >
               {editable
                 ? share?.enabled
@@ -273,7 +273,7 @@ export default function ShootPlanSharing({
             {invalid && (
               <p
                 id={`${prefix}-pin-error`}
-                className="mt-2 text-sm text-red-300"
+                className="mt-2 text-sm text-red-700"
               >
                 Enter exactly six digits.
               </p>

@@ -253,19 +253,18 @@ export default function AdminGuestsPage() {
     }
   }
 
-  const inputCls = "w-full px-3 py-2.5 bg-ink-950 border border-white/10 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400";
+  const inputCls = "w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm placeholder-stone-400 focus:outline-none focus:border-gold-400";
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Guest CRM</h1>
           <p className="text-sm text-stone-500 mt-0.5">{total} guests</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/admin/guests/import"
-            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-white/10 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl transition"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
@@ -275,7 +274,7 @@ export default function AdminGuestsPage() {
           <button
             onClick={exportPdf}
             disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-white/10 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl disabled:opacity-50 transition"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -285,7 +284,7 @@ export default function AdminGuestsPage() {
           <button
             onClick={exportCsv}
             disabled={exportingCsv}
-            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-white/10 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl disabled:opacity-50 transition"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl disabled:opacity-50 transition"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -294,7 +293,7 @@ export default function AdminGuestsPage() {
           </button>
           <button
             onClick={openComposeAll}
-            className="flex items-center gap-2 px-4 py-2 bg-ink-900 border border-white/10 text-sm text-stone-300 hover:text-gold-300 hover:border-gold-300/40 rounded-xl transition"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl transition"
           >
             <EnvelopeIcon />
             Email All Guests
@@ -310,7 +309,7 @@ export default function AdminGuestsPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search by name, email, or phone..."
-            className="flex-1 px-4 py-2.5 bg-ink-900 border border-white/10 rounded-xl text-white text-sm placeholder-stone-500 focus:outline-none focus:border-gold-400"
+            className="flex-1 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-900 text-sm placeholder-stone-400 focus:outline-none focus:border-gold-400"
           />
           <button
             type="submit"
@@ -326,7 +325,7 @@ export default function AdminGuestsPage() {
                 setSearchInput("");
                 setPage(1);
               }}
-              className="px-3 py-2.5 text-sm text-stone-400 hover:text-white transition"
+              className="px-3 py-2.5 text-sm text-stone-500 hover:text-stone-900 transition"
             >
               Clear
             </button>
@@ -335,21 +334,21 @@ export default function AdminGuestsPage() {
       </form>
 
       {/* Guest list */}
-      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading guests...</div>
         ) : guests.length === 0 ? (
           <div className="p-8 text-center text-stone-500">No guests found</div>
         ) : (
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-stone-100">
             {guests.map((g) => (
-              <div key={g.id} className="p-4 hover:bg-white/[0.02]">
+              <div key={g.id} className="p-4 hover:bg-stone-50">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/guests/${g.id}`}
-                        className="text-white font-medium hover:text-gold-300 transition"
+                        className="text-stone-900 font-medium hover:text-gold-700 transition"
                       >
                         {g.name}
                       </Link>
@@ -358,7 +357,7 @@ export default function AdminGuestsPage() {
                           {g.tags.split(",").map((tag) => (
                             <span
                               key={tag}
-                              className="px-1.5 py-0.5 bg-gold-300/10 text-gold-300 rounded text-[10px]"
+                              className="px-1.5 py-0.5 bg-gold-100 text-gold-700 rounded text-[10px]"
                             >
                               {tag.trim()}
                             </span>
@@ -371,17 +370,17 @@ export default function AdminGuestsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs text-stone-400 shrink-0">
+                  <div className="flex items-center gap-4 text-xs text-stone-500 shrink-0">
                     <div className="text-center hidden sm:block">
-                      <p className="text-white font-medium text-sm">{g.totalBookings}</p>
+                      <p className="text-stone-900 font-medium text-sm">{g.totalBookings}</p>
                       <p>Bookings</p>
                     </div>
                     <div className="text-center hidden sm:block">
-                      <p className="text-white font-medium text-sm">{g.totalVisits}</p>
+                      <p className="text-stone-900 font-medium text-sm">{g.totalVisits}</p>
                       <p>Visits</p>
                     </div>
                     <div className="text-center hidden sm:block">
-                      <p className="text-white font-medium text-sm">
+                      <p className="text-stone-900 font-medium text-sm">
                         £{(g.totalSpendPence / 100).toFixed(0)}
                       </p>
                       <p>Spend</p>
@@ -390,14 +389,14 @@ export default function AdminGuestsPage() {
                       <button
                         onClick={() => openComposeSingle(g)}
                         title="Email this guest"
-                        className="px-2 py-1 text-xs text-stone-400 hover:text-gold-300 border border-white/10 hover:border-gold-300/40 rounded transition flex items-center gap-1"
+                        className="px-2 py-1 text-xs text-stone-500 hover:text-gold-700 border border-stone-200 hover:border-gold-400 rounded transition flex items-center gap-1"
                       >
                         <EnvelopeIcon />
                       </button>
                     )}
                     <button
                       onClick={() => startEdit(g)}
-                      className="px-2 py-1 text-xs text-stone-400 hover:text-gold-300 border border-white/10 rounded transition"
+                      className="px-2 py-1 text-xs text-stone-500 hover:text-gold-700 border border-stone-200 rounded transition"
                     >
                       Edit
                     </button>
@@ -405,14 +404,14 @@ export default function AdminGuestsPage() {
                 </div>
 
                 {g.lastBooking && (
-                  <p className="text-xs text-stone-600 mt-1">
+                  <p className="text-xs text-stone-400 mt-1">
                     Last booking: {g.lastBooking.date} ({g.lastBooking.status})
                   </p>
                 )}
 
                 {/* Inline edit */}
                 {editingId === g.id && (
-                  <div className="mt-3 p-3 bg-ink-950 rounded-xl space-y-2">
+                  <div className="mt-3 p-3 bg-stone-50 rounded-xl space-y-2">
                     <div>
                       <label className="text-xs text-stone-500">Tags (comma-separated)</label>
                       <input
@@ -420,7 +419,7 @@ export default function AdminGuestsPage() {
                         value={editTags}
                         onChange={(e) => setEditTags(e.target.value)}
                         placeholder="VIP, regular, birthday"
-                        className="w-full mt-1 px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+                        className="w-full mt-1 px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
                       />
                     </div>
                     <div>
@@ -430,7 +429,7 @@ export default function AdminGuestsPage() {
                         onChange={(e) => setEditNotes(e.target.value)}
                         rows={2}
                         placeholder="Allergies, preferences..."
-                        className="w-full mt-1 px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 resize-none"
+                        className="w-full mt-1 px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 resize-none"
                       />
                     </div>
                     <div className="flex gap-2">
@@ -442,7 +441,7 @@ export default function AdminGuestsPage() {
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-3 py-1.5 text-stone-400 text-xs hover:text-white transition"
+                        className="px-3 py-1.5 text-stone-500 text-xs hover:text-stone-900 transition"
                       >
                         Cancel
                       </button>
@@ -456,11 +455,11 @@ export default function AdminGuestsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition"
+              className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition"
             >
               ← Previous
             </button>
@@ -470,7 +469,7 @@ export default function AdminGuestsPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition"
+              className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition"
             >
               Next →
             </button>
@@ -481,13 +480,13 @@ export default function AdminGuestsPage() {
       {/* Compose modal */}
       {compose && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-6 w-full max-w-lg">
-            <h2 className="text-lg font-semibold text-white mb-5">Send Email</h2>
+          <div className="bg-white border border-stone-100 rounded-2xl p-6 w-full max-w-lg">
+            <h2 className="text-lg font-semibold text-stone-900 mb-5">Send Email</h2>
 
             <div className="space-y-4">
               <div>
                 <label className="text-xs text-stone-500 uppercase tracking-wider">To</label>
-                <p className="mt-1 px-3 py-2.5 bg-ink-950 border border-white/[0.06] rounded-xl text-sm text-stone-400 truncate">
+                <p className="mt-1 px-3 py-2.5 bg-stone-50 border border-stone-100 rounded-xl text-sm text-stone-500 truncate">
                   {compose.toLabel}
                 </p>
               </div>
@@ -523,14 +522,14 @@ export default function AdminGuestsPage() {
                   <button
                     type="button"
                     onClick={() => setCompose((c) => c && { ...c, provider: "smtp" })}
-                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "smtp" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-white/10 text-stone-400 hover:text-white"}`}
+                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "smtp" ? "bg-gold-100 border-gold-400 text-gold-700" : "bg-stone-50 border-stone-200 text-stone-500 hover:text-stone-900"}`}
                   >
                     SMTP <span className="text-xs opacity-70">{compose.mode === "all" ? "· 15/hour, queued" : "· inbox-friendly"}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setCompose((c) => c && { ...c, provider: "resend" })}
-                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "resend" ? "bg-gold-300/15 border-gold-300/40 text-gold-300" : "bg-ink-950 border-white/10 text-stone-400 hover:text-white"}`}
+                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "resend" ? "bg-gold-100 border-gold-400 text-gold-700" : "bg-stone-50 border-stone-200 text-stone-500 hover:text-stone-900"}`}
                   >
                     Resend <span className="text-xs opacity-70">· fast, no cap</span>
                   </button>
@@ -539,22 +538,22 @@ export default function AdminGuestsPage() {
             </div>
 
             {compose.error && (
-              <p className="mt-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <p className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {compose.error}
               </p>
             )}
             {compose.success && (
               <div className="mt-3">
-                <p className="text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
                   {compose.success}
                 </p>
                 {compose.failures.length > 0 && (
-                  <div className="mt-2 p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
-                    <p className="text-xs text-red-400 font-medium mb-2">Failed deliveries:</p>
+                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-xs text-red-700 font-medium mb-2">Failed deliveries:</p>
                     <ul className="space-y-1">
                       {compose.failures.map((f) => (
-                        <li key={f.email} className="text-xs text-stone-400">
-                          {f.name} — <span className="text-red-400">{f.email}</span>
+                        <li key={f.email} className="text-xs text-stone-500">
+                          {f.name} — <span className="text-red-700">{f.email}</span>
                         </li>
                       ))}
                     </ul>
@@ -574,7 +573,7 @@ export default function AdminGuestsPage() {
               <button
                 onClick={() => setCompose(null)}
                 disabled={compose.sending}
-                className="px-5 py-2.5 text-sm text-stone-400 hover:text-white border border-white/10 rounded-xl transition"
+                className="px-5 py-2.5 text-sm text-stone-500 hover:text-stone-900 border border-stone-200 rounded-xl transition"
               >
                 Cancel
               </button>

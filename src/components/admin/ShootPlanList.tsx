@@ -67,10 +67,10 @@ export default function ShootPlanList() {
     <div className="mx-auto max-w-6xl">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-300">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-700">
             Demi’s weekly planner
           </p>
-          <h1 className="text-2xl font-bold text-white">Weekly plans</h1>
+          <h1 className="text-2xl font-bold text-stone-900">Weekly plans</h1>
           {/* Plans organize the food, people and moments to capture. */}
         </div>
         <Link
@@ -85,7 +85,7 @@ export default function ShootPlanList() {
         <div>
           <label
             htmlFor="shoot-filter"
-            className="mb-2 block text-xs font-medium text-stone-400"
+            className="mb-2 block text-xs font-medium text-stone-500"
           >
             Status
           </label>
@@ -106,7 +106,7 @@ export default function ShootPlanList() {
         <div>
           <label
             htmlFor="week-filter"
-            className="mb-2 block text-xs font-medium text-stone-400"
+            className="mb-2 block text-xs font-medium text-stone-500"
           >
             Week starting
           </label>
@@ -121,7 +121,7 @@ export default function ShootPlanList() {
         {week && (
           <Action onClick={() => navigate(status, 1, "")}>All weeks</Action>
         )}
-        <p className="text-sm text-stone-400" role="status">
+        <p className="text-sm text-stone-500" role="status">
           {loading
             ? "Loading weekly plans…"
             : data && !error
@@ -146,7 +146,7 @@ export default function ShootPlanList() {
         </Feedback>
       ) : loading ? (
         <div
-          className="flex min-h-64 items-center justify-center rounded-2xl border border-white/[0.06] text-sm text-stone-400"
+          className="flex min-h-64 items-center justify-center rounded-2xl border border-stone-100 text-sm text-stone-500"
           role="status"
         >
           Loading weekly plans…
@@ -158,20 +158,20 @@ export default function ShootPlanList() {
               <Link
                 href={`/admin/shoot-plans/${plan.id}`}
                 key={plan.id}
-                className="group flex min-w-0 flex-col rounded-2xl border border-white/[0.06] bg-ink-900 p-5 transition-colors hover:border-gold-300/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300"
+                className="group flex min-w-0 flex-col rounded-2xl border border-stone-100 bg-white p-5 transition-colors hover:border-gold-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300"
               >
                 <div className="flex items-center justify-between gap-3">
                   <StatusBadge status={plan.status} />
                   <ArrowRight
                     size={17}
                     aria-hidden="true"
-                    className="text-stone-500 group-hover:text-gold-300"
+                    className="text-stone-500 group-hover:text-gold-700"
                   />
                 </div>
-                <h2 className="mb-4 mt-5 break-words text-lg font-semibold text-white">
+                <h2 className="mb-4 mt-5 break-words text-lg font-semibold text-stone-900">
                   {plan.title}
                 </h2>
-                <div className="space-y-2 text-sm text-stone-400">
+                <div className="space-y-2 text-sm text-stone-500">
                   <p className="flex items-start gap-2">
                     <CalendarDays
                       size={16}
@@ -188,14 +188,14 @@ export default function ShootPlanList() {
                   </p>
                 </div>
                 {plan.objective && (
-                  <p className="mt-4 line-clamp-2 break-words text-sm leading-relaxed text-stone-400">
+                  <p className="mt-4 line-clamp-2 break-words text-sm leading-relaxed text-stone-500">
                     {plan.objective}
                   </p>
                 )}
-                <div className="mt-auto space-y-3 pt-6 text-sm text-stone-400">
+                <div className="mt-auto space-y-3 pt-6 text-sm text-stone-500">
                   {!!plan.activities?.length ? (
                     <>
-                      <p className="text-xs text-gold-300">
+                      <p className="text-xs text-gold-700">
                         {Array.from(
                           new Set(
                             plan.activities.map(
@@ -233,7 +233,7 @@ export default function ShootPlanList() {
             >
               Previous
             </Action>
-            <p className="text-sm text-stone-400">
+            <p className="text-sm text-stone-500">
               Page {data.page} of {data.pages}
             </p>
             <Action
@@ -245,11 +245,11 @@ export default function ShootPlanList() {
           </nav>
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed border-white/10 px-6 py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-stone-200 px-6 py-16 text-center">
           <Camera
             size={32}
             aria-hidden="true"
-            className="mx-auto mb-5 text-gold-300"
+            className="mx-auto mb-5 text-gold-700"
           />
           <h2 className="text-xl font-semibold">
             {status || week
@@ -265,7 +265,7 @@ export default function ShootPlanList() {
             ) : (
               <Link
                 href="/admin/shoot-plans/new"
-                className={`${linkClass} border border-gold-300/40 text-gold-300`}
+                className={`${linkClass} border border-gold-400 text-gold-700`}
               >
                 Create your first weekly plan{" "}
                 <ArrowRight size={16} aria-hidden="true" />

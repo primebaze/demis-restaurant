@@ -66,7 +66,6 @@ export default function AdminBrunchCheckinsPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Feast Check-ins</h1>
           <p className="text-sm text-stone-500 mt-0.5">Door check-ins for the Sunday Feast.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -74,36 +73,36 @@ export default function AdminBrunchCheckinsPage() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 text-sm bg-ink-900 border border-white/10 rounded-lg text-stone-300"
+            className="px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg text-stone-700"
           />
-          <button onClick={() => setDate(ukToday())} className="px-3 py-2 text-sm bg-ink-900 border border-white/10 rounded-lg text-stone-300 hover:text-white">Today</button>
+          <button onClick={() => setDate(ukToday())} className="px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg text-stone-700 hover:text-stone-900">Today</button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 max-w-2xl">
-        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
+        <div className="rounded-xl p-4 border bg-white border-stone-100">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People in</p>
-          <p className="text-2xl font-bold text-gold-300">{data?.total ?? 0}</p>
+          <p className="text-2xl font-bold text-gold-700">{data?.total ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
+        <div className="rounded-xl p-4 border bg-white border-stone-100">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Groups</p>
-          <p className="text-2xl font-bold text-white">{data?.groups ?? 0}</p>
+          <p className="text-2xl font-bold text-stone-900">{data?.groups ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
+        <div className="rounded-xl p-4 border bg-white border-stone-100">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Takings</p>
-          <p className="text-2xl font-bold text-emerald-300">£{data?.takings ?? 0}</p>
+          <p className="text-2xl font-bold text-emerald-700">£{data?.takings ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]">
+        <div className="rounded-xl p-4 border bg-white border-stone-100">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Per person</p>
-          <p className="text-2xl font-bold text-white">£{data?.pricePerHead ?? 0}</p>
+          <p className="text-2xl font-bold text-stone-900">£{data?.pricePerHead ?? 0}</p>
         </div>
       </div>
 
       <div className="flex justify-end mb-4">
-        <button onClick={resetDay} className="px-3 py-2 text-xs text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition">Clear all for this day</button>
+        <button onClick={resetDay} className="px-3 py-2 text-xs text-red-700 border border-red-200 rounded-xl hover:bg-red-50 transition">Clear all for this day</button>
       </div>
 
-      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
         {loading ? (
           <p className="p-8 text-center text-stone-500">Loading…</p>
         ) : !data || data.checkins.length === 0 ? (
@@ -112,7 +111,7 @@ export default function AdminBrunchCheckinsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
                   <th className="px-4 py-3">No.</th>
                   <th className="px-4 py-3">Party</th>
                   <th className="px-4 py-3">Mix</th>
@@ -126,21 +125,21 @@ export default function AdminBrunchCheckinsPage() {
                 {data.checkins.map((c) => {
                   const left = remaining(c.endsAt, now);
                   return (
-                    <tr key={c.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                      <td className="px-4 py-3 text-sm font-semibold text-white tabular-nums">
+                    <tr key={c.id} className="border-b border-stone-100 hover:bg-stone-50">
+                      <td className="px-4 py-3 text-sm font-semibold text-stone-900 tabular-nums">
                         {c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gold-300 font-semibold">{c.partySize}</td>
-                      <td className="px-4 py-3 text-xs text-stone-400">
+                      <td className="px-4 py-3 text-sm text-gold-700 font-semibold">{c.partySize}</td>
+                      <td className="px-4 py-3 text-xs text-stone-500">
                         {/* Old brunch check-ins split food / drinks; feast check-ins are one price. */}
                         {c.withDrinks > 0
-                          ? <span>{c.foodOnly} food · <span className="text-gold-300/80">{c.withDrinks} drinks</span></span>
+                          ? <span>{c.foodOnly} food · <span className="text-gold-700">{c.withDrinks} drinks</span></span>
                           : <span>Sunday Feast</span>}
                       </td>
-                      <td className="px-4 py-3 text-sm text-emerald-300 font-semibold">£{c.price}</td>
-                      <td className="px-4 py-3 text-xs text-stone-400 tabular-nums">{fmt(c.checkedInAt)}</td>
-                      <td className="px-4 py-3 text-xs text-stone-400 tabular-nums">{fmt(c.endsAt)}</td>
-                      <td className={`px-4 py-3 text-xs font-medium ${left === "over" ? "text-red-400" : "text-stone-300"}`}>{left}</td>
+                      <td className="px-4 py-3 text-sm text-emerald-700 font-semibold">£{c.price}</td>
+                      <td className="px-4 py-3 text-xs text-stone-500 tabular-nums">{fmt(c.checkedInAt)}</td>
+                      <td className="px-4 py-3 text-xs text-stone-500 tabular-nums">{fmt(c.endsAt)}</td>
+                      <td className={`px-4 py-3 text-xs font-medium ${left === "over" ? "text-red-700" : "text-stone-700"}`}>{left}</td>
                     </tr>
                   );
                 })}

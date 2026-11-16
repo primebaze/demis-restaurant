@@ -86,19 +86,18 @@ export default function AdminCheckinsPage() {
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Buffet Check-ins</h1>
-          <p className="text-sm text-stone-500 mt-0.5">Door kiosk at <span className="text-gold-300">/checkin</span></p>
+          <p className="text-sm text-stone-500 mt-0.5">Door kiosk at <span className="text-gold-700">/checkin</span></p>
         </div>
         <div className="flex items-center gap-2">
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm [color-scheme:dark] focus:outline-none focus:border-gold-400"
+            className="px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm [color-scheme:light] focus:outline-none focus:border-gold-400"
           />
           <button
             onClick={resetDay}
-            className="px-3 py-2 text-sm bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition"
+            className="px-3 py-2 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-50 transition"
           >
             Reset day
           </button>
@@ -106,10 +105,10 @@ export default function AdminCheckinsPage() {
       </div>
 
       {/* PIN management */}
-      <div className="mb-6 p-4 bg-ink-950 border border-white/[0.06] rounded-2xl">
+      <div className="mb-6 p-4 bg-stone-50 border border-stone-100 rounded-2xl">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <p className="text-sm font-semibold text-white">Kiosk PIN</p>
+            <p className="text-sm font-semibold text-stone-900">Kiosk PIN</p>
             <p className="text-xs text-stone-500">
               {pinConfigured === null ? "…" : pinConfigured ? "A PIN is set. Enter a new one to rotate it." : "No PIN set yet — set one to enable the kiosk."}
             </p>
@@ -122,29 +121,29 @@ export default function AdminCheckinsPage() {
               value={newPin}
               onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="4 digits"
-              className="w-32 px-3 py-2 bg-ink-950 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+              className="w-32 px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
             />
             <button onClick={savePin} disabled={!newPin} className="px-4 py-2 bg-gold-300 text-ink-900 rounded-lg text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
               Save
             </button>
-            {pinMsg && <span className="text-xs text-stone-400">{pinMsg}</span>}
+            {pinMsg && <span className="text-xs text-stone-500">{pinMsg}</span>}
           </div>
         </div>
       </div>
 
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="rounded-xl p-4 border bg-gold-300/5 border-gold-300/20">
+        <div className="rounded-xl p-4 border bg-gold-100 border-gold-400">
           <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People in {isToday ? "today" : ""}</p>
-          <p className="text-2xl font-bold text-gold-300">{data?.total ?? 0}</p>
+          <p className="text-2xl font-bold text-gold-700">{data?.total ?? 0}</p>
         </div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£20 (1–20)</p><p className="text-2xl font-bold text-emerald-300">{data?.tiers.t20 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£25 (21–45)</p><p className="text-2xl font-bold text-amber-300">{data?.tiers.t25 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-ink-900 border-white/[0.06]"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£30 (46+)</p><p className="text-2xl font-bold text-red-300">{data?.tiers.t30 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-white border-stone-100"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£20 (1–20)</p><p className="text-2xl font-bold text-emerald-700">{data?.tiers.t20 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-white border-stone-100"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£25 (21–45)</p><p className="text-2xl font-bold text-amber-800">{data?.tiers.t25 ?? 0}</p></div>
+        <div className="rounded-xl p-4 border bg-white border-stone-100"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£30 (46+)</p><p className="text-2xl font-bold text-red-700">{data?.tiers.t30 ?? 0}</p></div>
       </div>
 
       {/* Table */}
-      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading…</div>
         ) : !data || data.checkins.length === 0 ? (
@@ -153,7 +152,7 @@ export default function AdminCheckinsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
                   <th className="px-4 py-3">No.</th>
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Party</th>
@@ -167,16 +166,16 @@ export default function AdminCheckinsPage() {
                 {data.checkins.map((c) => {
                   const left = remaining(c.endsAt, now);
                   return (
-                    <tr key={c.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                      <td className="px-4 py-3 text-sm font-bold text-white">{c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}</td>
-                      <td className="px-4 py-3 text-sm text-stone-300">{c.name || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-stone-300">{c.partySize}</td>
+                    <tr key={c.id} className="border-b border-stone-100 hover:bg-stone-50">
+                      <td className="px-4 py-3 text-sm font-bold text-stone-900">{c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}</td>
+                      <td className="px-4 py-3 text-sm text-stone-700">{c.name || "—"}</td>
+                      <td className="px-4 py-3 text-sm text-stone-700">{c.partySize}</td>
                       <td className="px-4 py-3">
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300">£{c.price}</span>
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">£{c.price}</span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-stone-400">{fmt(c.checkedInAt)}</td>
-                      <td className="px-4 py-3 text-sm text-stone-300">{fmt(c.endsAt)}</td>
-                      <td className={`px-4 py-3 text-sm font-medium ${left === "over" ? "text-red-400" : "text-emerald-400"}`}>{left}</td>
+                      <td className="px-4 py-3 text-sm text-stone-500">{fmt(c.checkedInAt)}</td>
+                      <td className="px-4 py-3 text-sm text-stone-700">{fmt(c.endsAt)}</td>
+                      <td className={`px-4 py-3 text-sm font-medium ${left === "over" ? "text-red-700" : "text-emerald-700"}`}>{left}</td>
                     </tr>
                   );
                 })}

@@ -43,12 +43,12 @@ interface GuestDetail {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  confirmed: "bg-emerald-500/20 text-emerald-400",
-  modified: "bg-gold-300/15 text-gold-300",
-  pending_payment: "bg-amber-500/20 text-amber-400",
-  cancelled: "bg-red-500/20 text-red-400",
-  no_show: "bg-red-600/20 text-red-500",
-  completed: "bg-white/[0.06] text-stone-400",
+  confirmed: "bg-emerald-50 text-emerald-700",
+  modified: "bg-gold-100 text-gold-700",
+  pending_payment: "bg-amber-50 text-amber-800",
+  cancelled: "bg-red-50 text-red-700",
+  no_show: "bg-red-50 text-red-700",
+  completed: "bg-stone-100 text-stone-500",
 };
 
 export default function GuestProfilePage() {
@@ -66,7 +66,7 @@ export default function GuestProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-stone-400">Loading guest profile...</div>
+        <div className="text-stone-500">Loading guest profile...</div>
       </div>
     );
   }
@@ -74,8 +74,8 @@ export default function GuestProfilePage() {
   if (!guest) {
     return (
       <div className="text-center py-12">
-        <p className="text-stone-400 mb-4">Guest not found</p>
-        <Link href="/admin/guests" className="text-gold-300 hover:text-gold-400 text-sm">
+        <p className="text-stone-500 mb-4">Guest not found</p>
+        <Link href="/admin/guests" className="text-gold-700 hover:text-gold-700 text-sm">
           ← Back to Guests
         </Link>
       </div>
@@ -86,17 +86,17 @@ export default function GuestProfilePage() {
     <div>
       <Link
         href="/admin/guests"
-        className="text-sm text-stone-500 hover:text-gold-300 transition mb-4 block"
+        className="text-sm text-stone-500 hover:text-gold-700 transition mb-4 block"
       >
         ← Back to Guests
       </Link>
 
       {/* Guest header */}
-      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl p-6 mb-6">
+      <div className="bg-white border border-stone-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">{guest.name}</h1>
-            <p className="text-stone-400 mt-1">
+            <h2 className="text-2xl font-normal tracking-tight text-stone-900 leading-tight">{guest.name}</h2>
+            <p className="text-stone-500 mt-1">
               {guest.email} {guest.phone && `· ${guest.phone}`}
             </p>
             {guest.tags && (
@@ -104,7 +104,7 @@ export default function GuestProfilePage() {
                 {guest.tags.split(",").map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-0.5 bg-gold-300/10 text-gold-300 rounded-full text-xs"
+                    className="px-2 py-0.5 bg-gold-100 text-gold-700 rounded-full text-xs"
                   >
                     {tag.trim()}
                   </span>
@@ -121,30 +121,30 @@ export default function GuestProfilePage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-white/[0.06]">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-stone-100">
           <div>
             <p className="text-xs text-stone-500 uppercase">Bookings</p>
-            <p className="text-xl font-bold text-white">{guest.totalBookings}</p>
+            <p className="text-xl font-bold text-stone-900">{guest.totalBookings}</p>
           </div>
           <div>
             <p className="text-xs text-stone-500 uppercase">Visits</p>
-            <p className="text-xl font-bold text-white">{guest.totalVisits}</p>
+            <p className="text-xl font-bold text-stone-900">{guest.totalVisits}</p>
           </div>
           <div>
             <p className="text-xs text-stone-500 uppercase">Total Spend</p>
-            <p className="text-xl font-bold text-white">
+            <p className="text-xl font-bold text-stone-900">
               £{(guest.totalSpendPence / 100).toFixed(0)}
             </p>
           </div>
           <div>
             <p className="text-xs text-stone-500 uppercase">No-Shows</p>
-            <p className={`text-xl font-bold ${guest.noShows > 0 ? "text-red-400" : "text-white"}`}>
+            <p className={`text-xl font-bold ${guest.noShows > 0 ? "text-red-700" : "text-stone-900"}`}>
               {guest.noShows}
             </p>
           </div>
           <div>
             <p className="text-xs text-stone-500 uppercase">Avg Spend</p>
-            <p className="text-xl font-bold text-white">
+            <p className="text-xl font-bold text-stone-900">
               £{guest.totalVisits > 0 ? (guest.totalSpendPence / 100 / guest.totalVisits).toFixed(0) : "0"}
             </p>
           </div>
@@ -152,23 +152,23 @@ export default function GuestProfilePage() {
       </div>
 
       {/* Booking history */}
-      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-white/[0.06]">
-          <h2 className="text-lg font-semibold text-white">Booking History</h2>
+      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-stone-100">
+          <h2 className="text-lg font-semibold text-stone-900">Booking History</h2>
         </div>
 
         {guest.bookings.length === 0 ? (
           <div className="p-6 text-center text-stone-500">No bookings yet</div>
         ) : (
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-stone-100">
             {guest.bookings.map((b) => (
               <div key={b.id} className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm text-gold-300">{b.confirmationCode}</span>
+                    <span className="font-mono text-sm text-gold-700">{b.confirmationCode}</span>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        STATUS_COLORS[b.status] || "bg-white/10 text-stone-300"
+                        STATUS_COLORS[b.status] || "bg-stone-100 text-stone-700"
                       }`}
                     >
                       {b.status.replace("_", " ")}
@@ -176,7 +176,7 @@ export default function GuestProfilePage() {
                   </div>
                   <span className="text-xs text-stone-500">{b.source}</span>
                 </div>
-                <div className="flex flex-wrap gap-4 mt-2 text-sm text-stone-400">
+                <div className="flex flex-wrap gap-4 mt-2 text-sm text-stone-500">
                   <span>{b.date}</span>
                   <span>{b.slot}</span>
                   <span>{b.location}</span>
@@ -188,18 +188,18 @@ export default function GuestProfilePage() {
                 {b.addOns.length > 0 && (
                   <div className="flex gap-2 mt-2">
                     {b.addOns.map((a, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-gold-300/10 text-gold-300 rounded-full text-xs">
+                      <span key={i} className="px-2 py-0.5 bg-gold-100 text-gold-700 rounded-full text-xs">
                         {a.name}
                       </span>
                     ))}
                   </div>
                 )}
                 {b.changes.length > 0 && (
-                  <div className="mt-2 pl-3 border-l border-white/[0.06]">
+                  <div className="mt-2 pl-3 border-l border-stone-100">
                     {b.changes.map((c, i) => (
-                      <p key={i} className="text-xs text-stone-600">
+                      <p key={i} className="text-xs text-stone-400">
                         {c.fieldChanged}: {c.oldValue} → {c.newValue}{" "}
-                        <span className="text-stone-700">
+                        <span className="text-stone-300">
                           ({new Date(c.createdAt).toLocaleDateString("en-GB")})
                         </span>
                       </p>
@@ -213,22 +213,22 @@ export default function GuestProfilePage() {
       </div>
 
       {/* Visit history */}
-      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/[0.06]">
-          <h2 className="text-lg font-semibold text-white">Visit History</h2>
+      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-stone-100">
+          <h2 className="text-lg font-semibold text-stone-900">Visit History</h2>
         </div>
 
         {guest.visits.length === 0 ? (
           <div className="p-6 text-center text-stone-500">No visits recorded yet</div>
         ) : (
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-stone-100">
             {guest.visits.map((v) => (
               <div key={v.id} className="px-6 py-3 flex items-center justify-between">
                 <div>
-                  <span className="text-sm text-white">{v.visitDate}</span>
+                  <span className="text-sm text-stone-900">{v.visitDate}</span>
                   {v.notes && <span className="text-sm text-stone-500 ml-2">— {v.notes}</span>}
                 </div>
-                <span className="text-sm text-gold-300">
+                <span className="text-sm text-gold-700">
                   £{(v.spendPence / 100).toFixed(2)}
                 </span>
               </div>

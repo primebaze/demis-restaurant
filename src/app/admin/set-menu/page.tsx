@@ -32,14 +32,14 @@ type Group = {
 };
 
 const APPETISER_COLORS: Record<string, string> = {
-  "Puff Puff": "bg-gold-300/15 text-gold-300",
-  Samosa: "bg-white/[0.06] text-stone-200",
-  "Spring Rolls": "bg-white/[0.06] text-stone-400",
+  "Puff Puff": "bg-gold-100 text-gold-700",
+  Samosa: "bg-stone-100 text-stone-800",
+  "Spring Rolls": "bg-stone-100 text-stone-500",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  active: "bg-emerald-500/20 text-emerald-400",
-  inactive: "bg-red-500/20 text-red-400",
+  active: "bg-emerald-50 text-emerald-700",
+  inactive: "bg-red-50 text-red-700",
 };
 
 const LOCATIONS: Record<string, string> = {
@@ -196,14 +196,13 @@ export default function AdminSetMenuPage() {
     }
   }
 
-  const inputCls = "w-full px-3 py-2 bg-ink-950 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 placeholder-stone-600";
-  const labelCls = "block text-xs text-stone-400 mb-1.5";
+  const inputCls = "w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 placeholder-stone-400";
+  const labelCls = "block text-xs text-stone-500 mb-1.5";
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Set Menu Groups</h1>
           <p className="text-sm text-stone-500 mt-0.5">{total} group{total !== 1 ? "s" : ""}</p>
         </div>
         <button
@@ -216,37 +215,37 @@ export default function AdminSetMenuPage() {
 
       {/* New group form */}
       {showForm && (
-        <div className="mb-8 bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-white/[0.06]">
-            <h2 className="text-base font-semibold text-white">Create Set Menu Group</h2>
+        <div className="mb-8 bg-white border border-stone-100 rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-stone-100">
+            <h2 className="text-base font-semibold text-stone-900">Create Set Menu Group</h2>
             <p className="text-xs text-stone-500 mt-0.5">A shareable guest selection link will be generated automatically.</p>
           </div>
 
           {newGroupResult ? (
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gold-300/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 rounded-xl bg-gold-100 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gold-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Group {newGroupResult.groupCode} created</p>
+                  <p className="text-sm font-semibold text-stone-900">Group {newGroupResult.groupCode} created</p>
                   <p className="text-xs text-stone-500">Share the link below with the organiser</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 bg-ink-950 border border-white/10 rounded-xl px-4 py-3">
-                <span className="text-sm text-stone-300 flex-1 truncate font-mono">{newGroupResult.guestSelectionUrl}</span>
+              <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-4 py-3">
+                <span className="text-sm text-stone-700 flex-1 truncate font-mono">{newGroupResult.guestSelectionUrl}</span>
                 <button
                   onClick={() => copyLink(newGroupResult.guestSelectionUrl, newGroupResult.groupCode)}
-                  className="text-xs px-3 py-1.5 bg-gold-300/10 text-gold-300 rounded-lg hover:bg-gold-300/20 transition shrink-0"
+                  className="text-xs px-3 py-1.5 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-100 transition shrink-0"
                 >
                   {copied === newGroupResult.groupCode ? "Copied!" : "Copy"}
                 </button>
               </div>
               <button
                 onClick={() => { setShowForm(false); setNewGroupResult(null); }}
-                className="mt-4 text-sm text-stone-500 hover:text-white transition"
+                className="mt-4 text-sm text-stone-500 hover:text-stone-900 transition"
               >
                 Close
               </button>
@@ -268,7 +267,7 @@ export default function AdminSetMenuPage() {
                 </div>
                 <div>
                   <label className={labelCls}>Event Date *</label>
-                  <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={inputCls + " [color-scheme:dark]"} />
+                  <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={inputCls + " [color-scheme:light]"} />
                 </div>
                 <div>
                   <label className={labelCls}>Expected Party Size *</label>
@@ -288,14 +287,14 @@ export default function AdminSetMenuPage() {
               </div>
 
               {formError && (
-                <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 mb-4">{formError}</p>
+                <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{formError}</p>
               )}
 
               <div className="flex gap-3">
                 <button onClick={createGroup} disabled={creating} className="px-5 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
                   {creating ? "Creating…" : "Create Group & Generate Link"}
                 </button>
-                <button onClick={() => { setShowForm(false); setFormError(""); }} className="px-4 py-2 text-sm text-stone-400 hover:text-white transition">
+                <button onClick={() => { setShowForm(false); setFormError(""); }} className="px-4 py-2 text-sm text-stone-500 hover:text-stone-900 transition">
                   Cancel
                 </button>
               </div>
@@ -309,21 +308,21 @@ export default function AdminSetMenuPage() {
         <select
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-ink-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400"
+          className="px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
         >
           <option value="">All Statuses</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
         {filterStatus && (
-          <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-stone-400 hover:text-white transition">
+          <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-stone-500 hover:text-stone-900 transition">
             Clear
           </button>
         )}
       </div>
 
       {/* Groups table */}
-      <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
+      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-stone-500">Loading groups…</div>
         ) : groups.length === 0 ? (
@@ -332,7 +331,7 @@ export default function AdminSetMenuPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
                   <th className="px-4 py-3">Group ID</th>
                   <th className="px-4 py-3">Organiser</th>
                   <th className="px-4 py-3">Date</th>
@@ -351,30 +350,30 @@ export default function AdminSetMenuPage() {
                     <>
                       <tr
                         key={g.id}
-                        className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer"
+                        className="border-b border-stone-100 hover:bg-stone-50 cursor-pointer"
                         onClick={() => setExpanded(isExpanded ? null : g.id)}
                       >
-                        <td className="px-4 py-3 text-sm font-mono text-gold-300 font-semibold">{g.groupCode}</td>
+                        <td className="px-4 py-3 text-sm font-mono text-gold-700 font-semibold">{g.groupCode}</td>
                         <td className="px-4 py-3">
-                          <p className="text-sm text-white">{g.organizerName}</p>
+                          <p className="text-sm text-stone-900">{g.organizerName}</p>
                           {g.organizerPhone && <p className="text-xs text-stone-500">{g.organizerPhone}</p>}
                         </td>
-                        <td className="px-4 py-3 text-sm text-stone-300">{formatDate(g.date)}</td>
-                        <td className="px-4 py-3 text-sm text-stone-400">{LOCATIONS[g.locationSlug] || g.locationSlug}</td>
+                        <td className="px-4 py-3 text-sm text-stone-700">{formatDate(g.date)}</td>
+                        <td className="px-4 py-3 text-sm text-stone-500">{LOCATIONS[g.locationSlug] || g.locationSlug}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-white font-semibold">{g.selections.length}</span>
+                            <span className="text-sm text-stone-900 font-semibold">{g.selections.length}</span>
                             <span className="text-xs text-stone-500">/ {g.partySize}</span>
-                            <div className="w-16 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                            <div className="w-16 h-1.5 bg-stone-100 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gold-300/60 rounded-full"
+                                className="h-full bg-gold-100 rounded-full"
                                 style={{ width: `${Math.min(100, (g.selections.length / g.partySize) * 100)}%` }}
                               />
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[g.status] || "bg-white/10 text-stone-300"}`}>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[g.status] || "bg-stone-100 text-stone-700"}`}>
                             {g.status}
                           </span>
                         </td>
@@ -384,8 +383,8 @@ export default function AdminSetMenuPage() {
                             disabled={toggling === g.id}
                             className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 ${
                               g.status === "active"
-                                ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
-                                : "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                                ? "bg-red-50 text-red-700 hover:bg-red-50"
+                                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
                             }`}
                           >
                             {toggling === g.id ? "…" : g.status === "active" ? "Deactivate" : "Activate"}
@@ -394,7 +393,7 @@ export default function AdminSetMenuPage() {
                         <td className="px-4 py-3">
                           <button
                             onClick={(e) => { e.stopPropagation(); copyLink(guestUrl, g.groupCode); }}
-                            className="text-xs px-3 py-1.5 bg-gold-300/10 text-gold-300 rounded-lg hover:bg-gold-300/20 transition"
+                            className="text-xs px-3 py-1.5 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-100 transition"
                           >
                             {copied === g.groupCode ? "Copied!" : "Copy Link"}
                           </button>
@@ -402,26 +401,26 @@ export default function AdminSetMenuPage() {
                       </tr>
 
                       {isExpanded && (
-                        <tr key={`${g.id}-detail`} className="bg-ink-950">
+                        <tr key={`${g.id}-detail`} className="bg-stone-50">
                           <td colSpan={7} className="px-6 py-5">
                             {/* Organiser details */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-5 pb-5 border-b border-white/[0.06]">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-5 pb-5 border-b border-stone-100">
                               <div>
                                 <span className="text-stone-500 block text-xs mb-0.5">Email</span>
-                                <span className="text-white">{g.organizerEmail || "—"}</span>
+                                <span className="text-stone-900">{g.organizerEmail || "—"}</span>
                               </div>
                               <div>
                                 <span className="text-stone-500 block text-xs mb-0.5">Phone</span>
-                                <span className="text-white">{g.organizerPhone || "—"}</span>
+                                <span className="text-stone-900">{g.organizerPhone || "—"}</span>
                               </div>
                               <div>
                                 <span className="text-stone-500 block text-xs mb-0.5">Created</span>
-                                <span className="text-white">{new Date(g.createdAt).toLocaleDateString("en-GB")}</span>
+                                <span className="text-stone-900">{new Date(g.createdAt).toLocaleDateString("en-GB")}</span>
                               </div>
                               {g.notes && (
                                 <div className="col-span-2 md:col-span-1">
                                   <span className="text-stone-500 block text-xs mb-0.5">Notes</span>
-                                  <span className="text-white">{g.notes}</span>
+                                  <span className="text-stone-900">{g.notes}</span>
                                 </div>
                               )}
                             </div>
@@ -433,7 +432,7 @@ export default function AdminSetMenuPage() {
                                 <button
                                   onClick={(e) => { e.stopPropagation(); exportGroupPdf(g); }}
                                   disabled={exporting === g.id}
-                                  className="text-xs px-3 py-1.5 bg-gold-300/10 text-gold-300 rounded-lg hover:bg-gold-300/20 transition disabled:opacity-50 flex items-center gap-1.5"
+                                  className="text-xs px-3 py-1.5 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-100 transition disabled:opacity-50 flex items-center gap-1.5"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -443,26 +442,26 @@ export default function AdminSetMenuPage() {
                               )}
                             </div>
                             {g.selections.length === 0 ? (
-                              <p className="text-sm text-stone-600">No selections yet</p>
+                              <p className="text-sm text-stone-400">No selections yet</p>
                             ) : (
                               <div className="space-y-2">
                                 {g.selections.map((s, i) => (
-                                  <div key={s.id} className="bg-ink-900 border border-white/[0.06] rounded-xl px-4 py-3">
+                                  <div key={s.id} className="bg-white border border-stone-100 rounded-xl px-4 py-3">
                                     <div className="flex items-center justify-between mb-2">
                                       <div className="flex items-center gap-3">
-                                        <span className="text-xs text-stone-600 w-5 text-right">{i + 1}.</span>
-                                        <span className="text-sm font-semibold text-white">{s.guestName}</span>
+                                        <span className="text-xs text-stone-400 w-5 text-right">{i + 1}.</span>
+                                        <span className="text-sm font-semibold text-stone-900">{s.guestName}</span>
                                       </div>
-                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPETISER_COLORS[s.appetiser] || "bg-white/10 text-stone-300"}`}>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPETISER_COLORS[s.appetiser] || "bg-stone-100 text-stone-700"}`}>
                                         {s.appetiser}
                                       </span>
                                     </div>
                                     <div className="flex flex-wrap gap-x-4 gap-y-1 ml-8 text-xs text-stone-500">
-                                      <span>Starter: <span className="text-stone-300">{s.starter}</span></span>
-                                      <span>Main: <span className="text-stone-300">{s.main}</span></span>
-                                      <span>Protein: <span className="text-stone-300">{s.protein}</span></span>
-                                      <span>Dessert: <span className="text-stone-300">{s.dessert}</span></span>
-                                      {s.allergies && <span className="text-amber-400">⚠ {s.allergies}</span>}
+                                      <span>Starter: <span className="text-stone-700">{s.starter}</span></span>
+                                      <span>Main: <span className="text-stone-700">{s.main}</span></span>
+                                      <span>Protein: <span className="text-stone-700">{s.protein}</span></span>
+                                      <span>Dessert: <span className="text-stone-700">{s.dessert}</span></span>
+                                      {s.allergies && <span className="text-amber-800">⚠ {s.allergies}</span>}
                                     </div>
                                   </div>
                                 ))}
@@ -471,13 +470,13 @@ export default function AdminSetMenuPage() {
 
                             {/* Appetiser summary */}
                             {g.selections.length > 0 && (
-                              <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-wrap gap-4">
+                              <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap gap-4">
                                 {["Puff Puff", "Samosa", "Spring Rolls"].map((a) => {
                                   const count = g.selections.filter((s) => s.appetiser.includes(a)).length;
                                   return (
                                     <div key={a} className="text-sm">
                                       <span className="text-stone-500">{a}: </span>
-                                      <span className="text-white font-semibold">{count}</span>
+                                      <span className="text-stone-900 font-semibold">{count}</span>
                                     </div>
                                   );
                                 })}
@@ -495,12 +494,12 @@ export default function AdminSetMenuPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
               ← Previous
             </button>
             <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-stone-400 hover:text-white disabled:opacity-30 transition">
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
               Next →
             </button>
           </div>

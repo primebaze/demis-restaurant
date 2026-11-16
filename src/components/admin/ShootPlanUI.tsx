@@ -11,9 +11,9 @@ import { useRouter } from "next/navigation";
 import { SHOOT_STATUSES, type ShootStatus } from "@/lib/shoot-plans";
 
 export const fieldClass =
-  "w-full min-h-11 rounded-lg border border-white/10 bg-ink-950 px-3 py-2.5 text-sm text-white placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-gold-300/70 disabled:opacity-60 [color-scheme:dark]";
+  "w-full min-h-11 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-gold-300 disabled:opacity-60 [color-scheme:light]";
 export const linkClass =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-300 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300";
 export function Action({
   primary = false,
   className = "",
@@ -25,7 +25,7 @@ export function Action({
       type="button"
       onClick={onClick}
       {...props}
-      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-gold-300 text-ink-900 hover:bg-gold-200" : "border border-white/10 text-stone-200 hover:bg-white/5"} ${className}`}
+      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors active:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 disabled:cursor-not-allowed disabled:opacity-40 ${primary ? "bg-gold-300 text-ink-900 hover:bg-gold-200" : "border border-stone-200 text-stone-800 hover:bg-stone-50"} ${className}`}
     />
   );
 }
@@ -44,13 +44,13 @@ export function Field({
     <div className="min-w-0">
       <label
         htmlFor={id}
-        className="mb-2 block text-sm font-medium text-stone-300"
+        className="mb-2 block text-sm font-medium text-stone-700"
       >
         {label}
       </label>
       {children}
       {error && (
-        <p id={`${id}-error`} className="mt-2 text-sm text-red-300">
+        <p id={`${id}-error`} className="mt-2 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -67,7 +67,7 @@ export function Feedback({
   return (
     <div
       role={error ? "alert" : "status"}
-      className={`rounded-xl border p-4 text-sm ${error ? "border-red-400/30 bg-red-400/5 text-red-200" : "border-emerald-400/30 bg-emerald-400/5 text-emerald-200"}`}
+      className={`rounded-xl border p-4 text-sm ${error ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}
     >
       {children}
     </div>
@@ -75,10 +75,10 @@ export function Feedback({
 }
 export function StatusBadge({ status }: { status: ShootStatus }) {
   const colours = {
-    planned: "bg-gold-300/10 text-gold-300",
-    in_progress: "bg-gold-300/10 text-gold-200",
-    completed: "bg-emerald-400/10 text-emerald-200",
-    cancelled: "bg-stone-400/10 text-stone-300",
+    planned: "bg-gold-100 text-gold-700",
+    in_progress: "bg-gold-100 text-gold-700",
+    completed: "bg-emerald-50 text-emerald-700",
+    cancelled: "bg-stone-400/10 text-stone-700",
   };
   return (
     <span
@@ -97,7 +97,7 @@ export function CaptureProgress({
 }) {
   return (
     <div>
-      <div className="mb-2 flex justify-between gap-3 text-xs text-stone-400">
+      <div className="mb-2 flex justify-between gap-3 text-xs text-stone-500">
         <span>Shot list</span>
         <span>
           {captured} / {total} captured
@@ -109,7 +109,7 @@ export function CaptureProgress({
         aria-valuenow={captured}
         aria-valuemin={0}
         aria-valuemax={total || 1}
-        className="h-1.5 overflow-hidden rounded-full bg-white/10"
+        className="h-1.5 overflow-hidden rounded-full bg-stone-100"
       >
         <div
           className="h-full rounded-full bg-gold-300"
@@ -208,14 +208,14 @@ export function UnsavedGuard({ dirty }: { dirty: boolean }) {
     <dialog
       ref={dialog}
       onCancel={close}
-      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-white/10 bg-ink-900 p-6 text-white backdrop:bg-black/70"
+      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-stone-200 bg-white p-6 text-stone-900 backdrop:bg-black/70"
       aria-labelledby="leave-title"
       aria-describedby="leave-description"
     >
       <h2 id="leave-title" className="text-xl font-bold">
         Leave without saving?
       </h2>
-      <p id="leave-description" className="mt-3 text-sm text-stone-300">
+      <p id="leave-description" className="mt-3 text-sm text-stone-700">
         Your latest changes to this plan haven’t been saved.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
@@ -268,14 +268,14 @@ export function ConfirmDelete({
         event.preventDefault();
         if (!busy) onCancel();
       }}
-      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-ink-900 p-6 text-white backdrop:bg-black/70"
+      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 text-stone-900 backdrop:bg-black/70"
     >
       <h2 id="delete-plan-title" className="text-xl font-bold">
         Delete plan?
       </h2>
       <p
         id="delete-plan-description"
-        className="mt-3 break-words text-sm text-stone-300"
+        className="mt-3 break-words text-sm text-stone-700"
       >
         “{title}” and its activities, shots, reference images and sharing links
         will be permanently removed.
@@ -287,7 +287,7 @@ export function ConfirmDelete({
         <Action
           disabled={busy}
           onClick={onConfirm}
-          className="border-red-400/40 text-red-300"
+          className="border-red-200 text-red-700"
         >
           {busy ? "Deleting…" : "Delete permanently"}
         </Action>

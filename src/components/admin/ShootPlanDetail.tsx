@@ -54,7 +54,7 @@ export default function ShootPlanDetail({ id }: { id: string }) {
     );
   if (!plan)
     return (
-      <p role="status" className="py-16 text-center text-stone-400">
+      <p role="status" className="py-16 text-center text-stone-500">
         Loading shoot plan…
       </p>
     );

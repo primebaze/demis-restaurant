@@ -106,7 +106,6 @@ export default function CalendarPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Booking Calendar</h1>
       </div>
 
       {/* Location filter */}
@@ -115,7 +114,7 @@ export default function CalendarPage() {
           <button
             onClick={() => setFilterLoc("")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              !filterLoc ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-white/[0.06] hover:text-white"
+              !filterLoc ? "bg-gold-100 text-gold-700 border border-gold-400" : "text-stone-500 border border-stone-100 hover:text-stone-900"
             }`}
           >
             All Locations
@@ -125,7 +124,7 @@ export default function CalendarPage() {
               key={l.id}
               onClick={() => setFilterLoc(l.slug)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                filterLoc === l.slug ? "bg-gold-300/10 text-gold-300 border border-gold-300/30" : "text-stone-400 border border-white/[0.06] hover:text-white"
+                filterLoc === l.slug ? "bg-gold-100 text-gold-700 border border-gold-400" : "text-stone-500 border border-stone-100 hover:text-stone-900"
               }`}
             >
               {l.name}
@@ -136,16 +135,16 @@ export default function CalendarPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
-        <div className="lg:col-span-2 bg-ink-950 border border-white/[0.06] rounded-2xl p-6">
+        <div className="lg:col-span-2 bg-stone-50 border border-stone-100 rounded-2xl p-6">
           {/* Month navigation */}
           <div className="flex items-center justify-between mb-6">
-            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-400 hover:text-white hover:bg-white/5 transition text-lg">
+            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition text-lg">
               ‹
             </button>
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-stone-900">
               {MONTH_NAMES[month]} {year}
             </h2>
-            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-400 hover:text-white hover:bg-white/5 transition text-lg">
+            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition text-lg">
               ›
             </button>
           </div>
@@ -180,13 +179,13 @@ export default function CalendarPage() {
                     onClick={() => setSelectedDate(ds)}
                     className={`aspect-square rounded-xl flex flex-col items-center justify-center gap-1 text-sm transition relative ${
                       isSelected
-                        ? "bg-gold-300/20 text-gold-300 border border-gold-300/40"
+                        ? "bg-gold-100 text-gold-700 border border-gold-400"
                         : isToday
-                        ? "bg-white/5 text-white border border-white/10"
-                        : "text-stone-300 hover:bg-white/5"
+                        ? "bg-stone-50 text-stone-900 border border-stone-200"
+                        : "text-stone-700 hover:bg-stone-50"
                     }`}
                   >
-                    <span className={`font-medium ${isToday && !isSelected ? "text-gold-300" : ""}`}>
+                    <span className={`font-medium ${isToday && !isSelected ? "text-gold-700" : ""}`}>
                       {day}
                     </span>
                     {hasBookings && (
@@ -199,7 +198,7 @@ export default function CalendarPage() {
                           <>
                             <span className="w-1.5 h-1.5 rounded-full bg-gold-300" />
                             <span className="w-1.5 h-1.5 rounded-full bg-gold-300" />
-                            <span className="text-[10px] text-gold-300 leading-none ml-0.5">{entry.count}</span>
+                            <span className="text-[10px] text-gold-700 leading-none ml-0.5">{entry.count}</span>
                           </>
                         )}
                       </div>
@@ -212,10 +211,10 @@ export default function CalendarPage() {
         </div>
 
         {/* Side panel — booking list for selected date */}
-        <div className="bg-ink-950 border border-white/[0.06] rounded-2xl p-6">
+        <div className="bg-stone-50 border border-stone-100 rounded-2xl p-6">
           {selectedDate ? (
             <>
-              <h3 className="text-white font-semibold mb-1">
+              <h3 className="text-stone-900 font-semibold mb-1">
                 {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-GB", {
                   weekday: "long",
                   day: "numeric",
@@ -231,16 +230,16 @@ export default function CalendarPage() {
                     {selectedEntry.bookings.map((b) => (
                       <div
                         key={b.id}
-                        className="bg-ink-900 border border-white/[0.06] rounded-xl p-4"
+                        className="bg-white border border-stone-100 rounded-xl p-4"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-white font-medium text-sm">{b.guest}</span>
+                          <span className="text-stone-900 font-medium text-sm">{b.guest}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full ${
                             b.status === "confirmed"
-                              ? "bg-emerald-400/10 text-emerald-400"
+                              ? "bg-emerald-50 text-emerald-700"
                               : b.status === "pending_payment"
-                              ? "bg-amber-400/10 text-amber-400"
-                              : "bg-stone-400/10 text-stone-400"
+                              ? "bg-amber-50 text-amber-800"
+                              : "bg-stone-400/10 text-stone-500"
                           }`}>
                             {b.status.replace(/_/g, " ")}
                           </span>
@@ -248,7 +247,7 @@ export default function CalendarPage() {
                         <div className="text-xs text-stone-500 space-y-0.5">
                           <p>{b.time} · {b.partySize} guest{b.partySize !== 1 ? "s" : ""}</p>
                           <p>{b.location} · #{b.code}</p>
-                          {b.notes && <p className="text-amber-400/80">📝 {b.notes}</p>}
+                          {b.notes && <p className="text-amber-800">📝 {b.notes}</p>}
                         </div>
                       </div>
                     ))}

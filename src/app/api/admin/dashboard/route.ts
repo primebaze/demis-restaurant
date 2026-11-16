@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
+import { DOOR_LOCATIONS } from "@/lib/door";
+import { listDay } from "@/lib/door-service";
+import { upcomingSunday, BUFFET_LOCATION, BUFFET_START, BUFFET_END } from "@/lib/sunday-buffet";
+import { upcomingFeastDate, BRUNCH_LOCATION, BRUNCH_START, BRUNCH_END } from "@/lib/saturday-brunch";
 export const dynamic = "force-dynamic";
 
 
@@ -23,6 +27,9 @@ function shiftDate(dateStr: string, n: number): string {
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // The admin shell only needs to know the session is valid.
+  if (new URL(req.url).searchParams.get("check") === "1") return NextResponse.json({ ok: true });
 
   const today = ukToday();
 
@@ -173,6 +180,31 @@ export async function GET(req: Request) {
   // Total guests
   const totalGuests = await prisma.guest.count();
 
+  // Dine-in today: guests dining per branch, logged on the door tablets.
+  const dineIn = await Promise.all(
+    DOOR_LOCATIONS.map(async (l) => {
+      const day = await listDay(l.slug, null);
+      return { slug: l.slug, name: l.name, covers: day.totals.diningCovers, tables: day.totals.diningParties };
+    })
+  );
+
+  // This Sunday's experiences: bookings and people, cancelled left out.
+  const feastDate = upcomingFeastDate();
+  const buffetDate = upcomingSunday();
+  const [feastRows, buffetRows] = await Promise.all([
+    prisma.saturdayBrunchBooking
+      .findMany({ where: { date: feastDate, status: { not: "cancelled" } }, select: { partySize: true } })
+      .catch(() => []),
+    prisma.sundayBuffetBooking
+      .findMany({ where: { date: buffetDate, status: { not: "cancelled" } }, select: { partySize: true } })
+      .catch(() => []),
+  ]);
+  const people = (rows: { partySize: number }[]) => rows.reduce((s, r) => s + r.partySize, 0);
+  const events = {
+    feast: { date: feastDate, location: BRUNCH_LOCATION, hours: `${BRUNCH_START} to ${BRUNCH_END}`, bookings: feastRows.length, people: people(feastRows) },
+    buffet: { date: buffetDate, location: BUFFET_LOCATION, hours: `${BUFFET_START} to ${BUFFET_END}`, bookings: buffetRows.length, people: people(buffetRows) },
+  };
+
   return NextResponse.json({
     today: {
       date: targetDate,
@@ -206,5 +238,8 @@ export async function GET(req: Request) {
       upcomingNext7Days: upcomingCount,
       totalGuests,
     },
+    serviceDate: today,
+    dineIn,
+    events,
   });
 }

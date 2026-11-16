@@ -31,7 +31,7 @@ export default function GuestImportPage() {
   const [importError, setImportError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const inputCls = "px-3 py-1.5 bg-ink-950 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-gold-400 w-full";
+  const inputCls = "px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 w-full";
 
   function updateRow(idx: number, field: keyof ImportRow, value: string) {
     setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)));
@@ -121,35 +121,34 @@ export default function GuestImportPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/guests" className="text-stone-500 hover:text-white transition text-sm">← Guests</Link>
-        <span className="text-stone-700">/</span>
-        <h1 className="text-2xl font-bold text-white">Import Guests</h1>
+        <Link href="/admin/guests" className="text-stone-500 hover:text-stone-900 transition text-sm">← Guests</Link>
+        <span className="text-stone-300">/</span>
       </div>
 
       {/* Result banner */}
       {result && (
-        <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-          <p className="text-emerald-400 font-medium">Import complete</p>
-          <p className="text-sm text-stone-400 mt-1">
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+          <p className="text-emerald-700 font-medium">Import complete</p>
+          <p className="text-sm text-stone-500 mt-1">
             {result.added} guest{result.added !== 1 ? "s" : ""} added · {result.skipped} already in the CRM
             {result.noEmail ? ` · ${result.noEmail} left out (no valid email)` : ""}
           </p>
-          <Link href="/admin/guests" className="inline-block mt-3 text-sm text-gold-300 hover:underline">View Guest CRM →</Link>
+          <Link href="/admin/guests" className="inline-block mt-3 text-sm text-gold-700 hover:underline">View Guest CRM →</Link>
         </div>
       )}
 
       {/* Upload zone */}
       {rows.length === 0 && !result && (
         <div
-          className="bg-ink-900 border-2 border-dashed border-white/10 hover:border-gold-300/40 rounded-2xl p-12 text-center cursor-pointer transition"
+          className="bg-white border-2 border-dashed border-stone-200 hover:border-gold-400 rounded-2xl p-12 text-center cursor-pointer transition"
           onClick={() => fileRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
         >
           <div className="text-4xl mb-4">📂</div>
-          <p className="text-white font-medium mb-1">Drop a CSV or PDF here</p>
+          <p className="text-stone-900 font-medium mb-1">Drop a CSV or PDF here</p>
           <p className="text-sm text-stone-500 mb-4">Or click to browse</p>
-          <p className="text-xs text-stone-600">CSV: an email column, plus name and phone if you have them (any order)<br />PDF: email addresses extracted automatically</p>
+          <p className="text-xs text-stone-400">CSV: an email column, plus name and phone if you have them (any order)<br />PDF: email addresses extracted automatically</p>
           <input
             ref={fileRef}
             type="file"
@@ -161,20 +160,20 @@ export default function GuestImportPage() {
       )}
 
       {parseError && (
-        <p className="mt-4 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{parseError}</p>
+        <p className="mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{parseError}</p>
       )}
 
       {/* Preview table */}
       {rows.length > 0 && (
-        <div className="bg-ink-900 border border-white/[0.06] rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+        <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
             <div>
-              <p className="text-white font-medium">{fileName}</p>
+              <p className="text-stone-900 font-medium">{fileName}</p>
               <p className="text-xs text-stone-500 mt-0.5">{rows.length} rows found — review and edit before importing</p>
             </div>
             <button
               onClick={() => { setRows([]); setFileName(""); setParseError(""); }}
-              className="text-sm text-stone-500 hover:text-white transition"
+              className="text-sm text-stone-500 hover:text-stone-900 transition"
             >
               Change file
             </button>
@@ -183,16 +182,16 @@ export default function GuestImportPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-white/[0.06]">
+                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Email *</th>
                   <th className="px-4 py-3">Phone</th>
                   <th className="px-4 py-3 w-10"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.06]">
+              <tbody className="divide-y divide-stone-100">
                 {rows.map((r, i) => (
-                  <tr key={i} className={`${!hasEmail(r) ? "bg-red-500/5" : ""}`}>
+                  <tr key={i} className={`${!hasEmail(r) ? "bg-red-50" : ""}`}>
                     <td className="px-4 py-2">
                       <input value={r.name} onChange={(e) => updateRow(i, "name", e.target.value)} className={inputCls} placeholder="—" />
                     </td>
@@ -203,7 +202,7 @@ export default function GuestImportPage() {
                       <input value={r.phone} onChange={(e) => updateRow(i, "phone", e.target.value)} className={inputCls} placeholder="—" />
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <button onClick={() => removeRow(i)} className="text-stone-600 hover:text-red-400 transition text-lg leading-none">×</button>
+                      <button onClick={() => removeRow(i)} className="text-stone-400 hover:text-red-700 transition text-lg leading-none">×</button>
                     </td>
                   </tr>
                 ))}
@@ -212,10 +211,10 @@ export default function GuestImportPage() {
           </div>
 
           {importError && (
-            <p className="mx-6 my-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{importError}</p>
+            <p className="mx-6 my-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{importError}</p>
           )}
 
-          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100">
             <p className="text-sm text-stone-500">
               {validCount} of {rows.length} rows ready to import
               {validCount < rows.length ? " · rows in red need a valid email" : ""}
