@@ -716,7 +716,7 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
     byDay[d].push(s);
   }
 
-  const small = "h-9 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm text-stone-900 outline-none focus:border-gold-400 focus:bg-white [color-scheme:light]";
+  const small = "h-9 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm text-stone-900 outline-none focus:border-stone-500 focus:bg-white [color-scheme:light]";
 
   return (
     <div className="space-y-3.5">

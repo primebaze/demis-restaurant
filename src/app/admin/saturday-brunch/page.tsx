@@ -381,10 +381,13 @@ export default function AdminSaturdayBrunchPage() {
               <button
                 onClick={() => setDate("")}
                 aria-pressed={isThisSunday}
+                title={isThisSunday ? undefined : "Back to this Sunday"}
                 className={`${gsegBtn} ${isThisSunday ? "bg-white font-normal text-stone-900" : "text-white hover:bg-white/10"}`}
               >
                 <CalendarDays className="h-4 w-4" strokeWidth={1.75} />
-                This Sunday
+                {isThisSunday || !resolvedDate
+                  ? "This Sunday"
+                  : new Date(resolvedDate + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
               </button>
               <button onClick={() => setDate(shiftWeeks(resolvedDate, 1))} disabled={!resolvedDate} aria-label="Next Sunday" className={`${gsegBtn} w-9 justify-center px-0 text-white hover:bg-white/10`}>
                 <ChevronRight className="h-5 w-5" strokeWidth={1.75} />
@@ -603,7 +606,7 @@ export default function AdminSaturdayBrunchPage() {
                 <button
                   onClick={saveMailTemplate}
                   disabled={!mailSubject.trim() || !mailMessage.trim()}
-                  className="inline-flex h-7 items-center gap-1 rounded-full border border-dashed border-stone-300 px-3 text-xs text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex h-7 items-center gap-1 rounded-full border border-stone-300 bg-white px-3 text-xs text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:text-stone-500"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                   Save current
@@ -691,7 +694,7 @@ export default function AdminSaturdayBrunchPage() {
                         const next = raw === "" ? null : parseInt(raw);
                         if (next !== d.capacity) saveDate(d.date, { capacity: next });
                       }}
-                      className="h-8 w-[60px] shrink-0 rounded-full border border-stone-200 bg-stone-50 px-2.5 text-center text-xs text-stone-900 outline-none transition focus:border-gold-400 focus:bg-white"
+                      className="h-8 w-[60px] shrink-0 rounded-full border border-stone-200 bg-stone-50 px-2.5 text-center text-xs text-stone-900 outline-none transition focus:border-stone-500 focus:bg-white"
                     />
                     <button
                       onClick={() => saveDate(d.date, { blocked: !d.blocked })}

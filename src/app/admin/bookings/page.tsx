@@ -92,9 +92,9 @@ function plural(n: number, one: string, many: string) {
 }
 
 const updSelBase =
-  "rounded-full border border-stone-200 bg-white pl-3.5 pr-2 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-gold-400 disabled:opacity-50";
+  "rounded-full border border-stone-200 bg-white pl-3.5 pr-2 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-stone-500 disabled:opacity-50";
 const smallSel =
-  "h-9 rounded-full border border-stone-200 bg-white px-3.5 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-gold-400";
+  "h-9 rounded-full border border-stone-200 bg-white px-3.5 text-[13px] text-stone-900 outline-none transition hover:border-stone-300 focus:border-stone-500";
 const callBtnBase =
   "inline-flex items-center justify-center gap-1.5 px-4 rounded-full text-sm font-medium text-ink-900 bg-gold-300 hover:bg-gold-200 transition";
 
@@ -530,7 +530,7 @@ export default function AdminBookingsPage() {
             <button
               onClick={saveMailTemplate}
               disabled={!mailSubject.trim() || !mailMessage.trim()}
-              className="inline-flex h-8 items-center rounded-full border border-dashed border-stone-300 px-3 text-[13px] text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-8 items-center rounded-full border border-stone-300 bg-white px-3 text-[13px] text-stone-900 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:text-stone-500"
             >
               + Save current
             </button>

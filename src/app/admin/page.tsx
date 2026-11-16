@@ -358,7 +358,7 @@ export default function AdminDashboard() {
                 value={email.subject}
                 onChange={(e) => setEmail((s) => s && { ...s, subject: e.target.value })}
                 placeholder="Subject"
-                className="h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-sm outline-none focus:border-gold-400"
+                className="h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-sm outline-none focus:border-stone-500"
                 autoFocus
               />
               <textarea
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
                 onChange={(e) => setEmail((s) => s && { ...s, message: e.target.value })}
                 rows={6}
                 placeholder="Write your message…"
-                className="w-full resize-none rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none focus:border-gold-400"
+                className="w-full resize-none rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none focus:border-stone-500"
               />
               <div className="inline-flex rounded-full bg-stone-100 p-1" role="group" aria-label="Send with">
                 {(["smtp", "resend"] as const).map((p) => (

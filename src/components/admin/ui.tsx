@@ -159,9 +159,9 @@ export function Seg<T extends string>({ options, value, onChange, label }: { opt
 
 /** Inputs on white sheets. */
 export const field =
-  "h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition focus:border-gold-400 focus:bg-white [color-scheme:light]";
+  "h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition focus:border-stone-500 focus:bg-white [color-scheme:light]";
 export const fieldArea =
-  "w-full rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition focus:border-gold-400 focus:bg-white";
+  "w-full rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-500 outline-none transition focus:border-stone-500 focus:bg-white";
 
 /** Small grey stat tile inside a white sheet. `hot` = the one number that matters most (solid gold). */
 export function StatTile({ label, value, hot = false }: { label: string; value: ReactNode; hot?: boolean }) {

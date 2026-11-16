@@ -168,7 +168,7 @@ export default function GuestImportPage() {
           <div
             role="button"
             tabIndex={0}
-            className="flex cursor-pointer flex-col items-center rounded-[18px] border border-stone-200 bg-stone-50 px-6 py-12 text-center transition hover:border-stone-300 hover:bg-white focus-visible:border-gold-400 focus-visible:outline-none"
+            className="flex cursor-pointer flex-col items-center rounded-[18px] border border-stone-200 bg-stone-50 px-6 py-12 text-center transition hover:border-stone-300 hover:bg-white focus-visible:border-stone-500 focus-visible:outline-none"
             onClick={() => fileRef.current?.click()}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileRef.current?.click(); } }}
             onDragOver={(e) => e.preventDefault()}

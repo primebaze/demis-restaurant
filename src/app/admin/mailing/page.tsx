@@ -444,7 +444,7 @@ export default function MailingPage() {
             <button
               onClick={saveTemplate}
               disabled={!subject.trim() || !body.trim()}
-              className="ml-auto inline-flex h-8 items-center gap-1 rounded-full border border-stone-200 bg-white px-3 text-[13px] text-stone-900 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
+              className="ml-auto inline-flex h-8 items-center gap-1 rounded-full border border-stone-200 bg-white px-3 text-[13px] text-stone-900 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-500"
             >
               <Plus className="h-4 w-4" strokeWidth={1.75} />
               Save current
@@ -540,7 +540,7 @@ export default function MailingPage() {
                       value={batchSize}
                       onChange={(e) => setBatchSize(Math.max(1, parseInt(e.target.value) || 1))}
                       aria-label="How many to send next"
-                      className="h-8 w-16 rounded-full border border-stone-200 bg-stone-50 px-2 text-center text-[13px] text-stone-900 outline-none focus:border-gold-400"
+                      className="h-8 w-16 rounded-full border border-stone-200 bg-stone-50 px-2 text-center text-[13px] text-stone-900 outline-none focus:border-stone-500"
                     />
                     <button onClick={() => startConfirm(batchSize)} disabled={sending} className={btn.small}>
                       Send next {batchSize} not yet emailed

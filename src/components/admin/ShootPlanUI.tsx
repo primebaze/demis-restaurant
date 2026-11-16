@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { SHOOT_STATUSES, type ShootStatus } from "@/lib/shoot-plans";
 
 export const fieldClass =
-  "w-full min-h-11 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-gold-300 disabled:opacity-60 [color-scheme:light]";
+  "w-full min-h-11 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-300 disabled:opacity-60 [color-scheme:light]";
 export const linkClass =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-300";
 export function Action({
