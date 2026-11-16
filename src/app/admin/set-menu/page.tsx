@@ -195,10 +195,10 @@ export default function AdminSetMenuPage() {
     return (
       <div className="flex items-center gap-2">
         <span className="text-[15px] text-stone-900">{g.selections.length}</span>
-        <span className="text-xs text-stone-400">/ {g.partySize}</span>
+        <span className="text-xs text-stone-500">/ {g.partySize}</span>
         <div className="h-1.5 w-16 overflow-hidden rounded-full bg-stone-100">
           <div
-            className={`h-full rounded-full ${g.status === "active" ? "bg-honey-400" : "bg-stone-400"}`}
+            className={`h-full rounded-full ${g.status === "active" ? "bg-ember-400" : "bg-stone-400"}`}
             style={{ width: `${Math.min(100, (g.selections.length / g.partySize) * 100)}%` }}
           />
         </div>
@@ -234,7 +234,7 @@ export default function AdminSetMenuPage() {
         {a}
       </Tag>
     ) : (
-      <span className="text-stone-400">None</span>
+      <span className="text-stone-500">None</span>
     );
   }
 
@@ -278,7 +278,7 @@ export default function AdminSetMenuPage() {
           )}
         </div>
         {g.selections.length === 0 ? (
-          <p className="py-4 text-sm font-light text-stone-400">No selections yet</p>
+          <p className="py-4 text-sm font-light text-stone-500">No selections yet</p>
         ) : (
           <>
             <div className={`mt-2 hidden md:block ${tableWrap}`}>
@@ -298,7 +298,7 @@ export default function AdminSetMenuPage() {
                 <tbody>
                   {g.selections.map((s, i) => (
                     <tr key={s.id}>
-                      <td className="text-stone-400">{i + 1}.</td>
+                      <td className="text-stone-500">{i + 1}.</td>
                       <td>{s.guestName}</td>
                       <td><Tag tone="gold">{s.appetiser}</Tag></td>
                       <td>{s.starter}</td>
@@ -315,7 +315,7 @@ export default function AdminSetMenuPage() {
               {g.selections.map((s, i) => (
                 <li key={s.id} className="rounded-[16px] bg-stone-50 px-3.5 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-stone-400">{i + 1}.</span>
+                    <span className="text-xs text-stone-500">{i + 1}.</span>
                     <span className="text-sm">{s.guestName}</span>
                     <span className="ml-auto"><Tag tone="gold">{s.appetiser}</Tag></span>
                   </div>
@@ -560,7 +560,7 @@ export default function AdminSetMenuPage() {
                       </div>
                       <div className="mt-2.5 flex items-center gap-2">
                         {progress(g)}
-                        <ChevronDown className={`ml-auto h-4 w-4 text-stone-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} strokeWidth={1.75} />
+                        <ChevronDown className={`ml-auto h-4 w-4 text-stone-500 transition-transform ${isExpanded ? "rotate-180" : ""}`} strokeWidth={1.75} />
                       </div>
                     </button>
                     <div className="mt-3 flex flex-wrap gap-2">

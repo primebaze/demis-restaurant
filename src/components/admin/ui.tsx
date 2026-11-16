@@ -185,7 +185,7 @@ export function Empty({ children }: { children: ReactNode }) {
 
 /** Table look shared by every list. Wrap the <table> in <div className={tableWrap}> so it scrolls on small screens. */
 export const tableWrap = "overflow-x-auto";
-export const table = "w-full border-collapse text-sm [&_th]:whitespace-nowrap [&_th]:px-3.5 [&_th]:pb-2.5 [&_th]:pt-1 [&_th]:text-left [&_th]:text-xs [&_th]:font-normal [&_th]:text-stone-400 [&_td]:border-t [&_td]:border-stone-100 [&_td]:px-3.5 [&_td]:py-3 [&_td]:align-middle";
+export const table = "w-full border-collapse text-sm [&_th]:whitespace-nowrap [&_th]:px-3.5 [&_th]:pb-2.5 [&_th]:pt-1 [&_th]:text-left [&_th]:text-xs [&_th]:font-normal [&_th]:text-stone-500 [&_td]:border-t [&_td]:border-stone-100 [&_td]:px-3.5 [&_td]:py-3 [&_td]:align-middle";
 
 /**
  * Panel that slides up from the bottom on phones and iPad portrait (hidden from lg up).
@@ -394,7 +394,7 @@ export function DateField({
     <div ref={ref} className={`relative ${variant === "light" ? "w-full" : "inline-block"} ${className}`}>
       <button id={id} type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="dialog" aria-expanded={open} aria-label={`${ariaLabel}: ${value ? prettyDay(value) : "none"}`} className={trigger}>
         <CalendarDays className="h-[18px] w-[18px] shrink-0 opacity-80" strokeWidth={1.6} />
-        <span className={`whitespace-nowrap ${value ? "" : variant === "glass" ? "text-white/70" : "text-stone-400"}`}>{value ? prettyDay(value) : placeholder}</span>
+        <span className={`whitespace-nowrap ${value ? "" : variant === "glass" ? "text-white/70" : "text-stone-500"}`}>{value ? prettyDay(value) : placeholder}</span>
         <ChevronDown className={`ml-auto h-4 w-4 shrink-0 opacity-70 transition ${open ? "rotate-180" : ""}`} strokeWidth={1.75} />
       </button>
 
@@ -411,7 +411,7 @@ export function DateField({
           </div>
           <div className="grid grid-cols-7 gap-1 text-center">
             {WEEKDAYS.map((w) => (
-              <span key={w} className="pb-1 text-[11px] text-stone-400">{w}</span>
+              <span key={w} className="pb-1 text-[11px] text-stone-500">{w}</span>
             ))}
             {cells.map((d, i) => {
               if (d === null) return <span key={`e${i}`} />;

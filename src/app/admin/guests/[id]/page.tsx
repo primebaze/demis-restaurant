@@ -110,7 +110,7 @@ export default function GuestProfilePage() {
             <dl className="mt-4 space-y-3 border-t border-stone-100 pt-4 text-sm">
               <div>
                 <dt className="text-xs font-light text-stone-500">Email</dt>
-                <dd className="mt-0.5 break-all">{guest.email || <span className="text-stone-400">Not given</span>}</dd>
+                <dd className="mt-0.5 break-all">{guest.email || <span className="text-stone-500">Not given</span>}</dd>
               </div>
               <div>
                 <dt className="text-xs font-light text-stone-500">Phone</dt>
@@ -120,7 +120,7 @@ export default function GuestProfilePage() {
                       {guest.phone}
                     </a>
                   ) : (
-                    <span className="text-stone-400">Not given</span>
+                    <span className="text-stone-500">Not given</span>
                   )}
                 </dd>
               </div>
@@ -212,7 +212,7 @@ export default function GuestProfilePage() {
                       {b.changes.map((c, i) => (
                         <p key={i} className="text-xs text-stone-500">
                           {c.fieldChanged}: {c.oldValue} → {c.newValue}{" "}
-                          <span className="text-stone-400">({new Date(c.createdAt).toLocaleDateString("en-GB")})</span>
+                          <span className="text-stone-500">({new Date(c.createdAt).toLocaleDateString("en-GB")})</span>
                         </p>
                       ))}
                     </div>

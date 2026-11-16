@@ -138,15 +138,15 @@ export default function CalendarPage() {
                         </div>
                         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-600">
                           <span className="inline-flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                            <Clock className="h-3.5 w-3.5 text-stone-500" strokeWidth={1.5} />
                             {b.time}
                           </span>
                           <span className="inline-flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                            <Users className="h-3.5 w-3.5 text-stone-500" strokeWidth={1.5} />
                             {b.partySize} guest{b.partySize !== 1 ? "s" : ""}
                           </span>
                           <span>{b.location}</span>
-                          <span className="ml-auto text-stone-400">#{b.code}</span>
+                          <span className="ml-auto text-stone-500">#{b.code}</span>
                         </div>
                         {b.notes && (
                           <p className="mt-1.5 flex items-start gap-1.5 text-[13px] text-ember-700">
@@ -250,7 +250,7 @@ export default function CalendarPage() {
                         ? "bg-stone-900 text-white"
                         : isToday
                         ? "bg-white text-stone-900 ring-1 ring-inset ring-stone-900"
-                        : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-400" : "text-stone-900"}`
+                        : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-500" : "text-stone-900"}`
                     }`}
                   >
                     <span className="text-sm md:text-[17px] leading-none">{day}</span>

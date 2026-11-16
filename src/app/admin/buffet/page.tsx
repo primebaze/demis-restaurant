@@ -202,7 +202,7 @@ export default function AdminBuffetPage() {
                     {bookings.map((b) => {
                       const off = b.status === "cancelled";
                       return (
-                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-stone-100" : "hover:bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
+                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-stone-100" : "hover:bg-stone-50"} ${off ? "text-stone-500" : ""}`}>
                           <td className={`whitespace-nowrap font-mono text-xs ${isNew(b) ? "text-stone-900" : "text-stone-500"}`}>{b.bookingCode}</td>
                           <td>
                             <div>{b.name}</div>
@@ -213,7 +213,7 @@ export default function AdminBuffetPage() {
                           <td className="whitespace-nowrap">{LOCATIONS[b.locationSlug] || b.locationSlug}</td>
                           <td className="whitespace-nowrap">
                             <span className="inline-flex items-center gap-1.5">
-                              <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                              <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                               {b.partySize}
                             </span>
                           </td>
@@ -252,7 +252,7 @@ export default function AdminBuffetPage() {
                 {bookings.map((b) => {
                   const off = b.status === "cancelled";
                   return (
-                    <article key={b.id} className={`rounded-[18px] p-3.5 ${isNew(b) ? "bg-stone-100" : "bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
+                    <article key={b.id} className={`rounded-[18px] p-3.5 ${isNew(b) ? "bg-stone-100" : "bg-stone-50"} ${off ? "text-stone-500" : ""}`}>
                       <div className="flex items-start gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-[15px]">{b.name}</div>
@@ -266,11 +266,11 @@ export default function AdminBuffetPage() {
                       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
                         <span>{formatDate(b.date)} · {b.time}</span>
                         <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                          <MapPin className="h-3.5 w-3.5 text-stone-500" strokeWidth={1.5} />
                           {LOCATIONS[b.locationSlug] || b.locationSlug}
                         </span>
                         <span className="inline-flex items-center gap-1">
-                          <Users className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                          <Users className="h-3.5 w-3.5 text-stone-500" strokeWidth={1.5} />
                           {b.partySize}
                         </span>
                       </div>

@@ -162,9 +162,9 @@ export default function AdminCheckinsPage() {
                         <div className="w-[76px] shrink-0 font-medium tabular-nums">{covers(c)}</div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className={`truncate ${c.name ? "" : "text-stone-400"}`}>{c.name || "No name"}</span>
+                            <span className={`truncate ${c.name ? "" : "text-stone-500"}`}>{c.name || "No name"}</span>
                             <span className="inline-flex shrink-0 items-center gap-1 text-sm">
-                              <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                              <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                               {c.partySize}
                             </span>
                           </div>
@@ -201,10 +201,10 @@ export default function AdminCheckinsPage() {
                         return (
                           <tr key={c.id} className="hover:bg-stone-50">
                             <td className="whitespace-nowrap font-medium tabular-nums">{covers(c)}</td>
-                            <td>{c.name || <span className="text-stone-400">No name</span>}</td>
+                            <td>{c.name || <span className="text-stone-500">No name</span>}</td>
                             <td>
                               <span className="inline-flex items-center gap-1">
-                                <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                                <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                                 {c.partySize}
                               </span>
                             </td>

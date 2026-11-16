@@ -565,7 +565,7 @@ function BlackoutsPanel({
                   <Tag tone="off">Whole day</Tag>
                 )}
                 <span className="text-sm text-stone-600">{b.reason}</span>
-                {b.location && <span className="text-xs text-stone-400">({b.location.name})</span>}
+                {b.location && <span className="text-xs text-stone-500">({b.location.name})</span>}
                 {!b.locationId && <Tag tone="wait">All locations</Tag>}
               </div>
               <button type="button" onClick={() => deleteBlackout(b.id)} className={`${btn.small} !text-red-700 hover:!border-red-200 hover:bg-red-50`}>
@@ -740,7 +740,7 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
                   </span>
                 </div>
                 {daySlots.length === 0 ? (
-                  <div className="py-1.5 text-sm font-light text-stone-400">No slots</div>
+                  <div className="py-1.5 text-sm font-light text-stone-500">No slots</div>
                 ) : (
                   <div className="divide-y divide-stone-100">
                     {daySlots.map((s) => (
@@ -781,7 +781,7 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
                         ) : (
                           <>
                             <div className="flex min-w-0 flex-1 items-baseline gap-3">
-                              <span className={`text-sm tabular-nums ${s.isActive ? "text-stone-900" : "text-stone-400 line-through"}`}>
+                              <span className={`text-sm tabular-nums ${s.isActive ? "text-stone-900" : "text-stone-500 line-through"}`}>
                                 {s.startTime} to {s.endTime}
                               </span>
                               <span className="text-xs text-stone-500">{s.maxCovers} covers</span>

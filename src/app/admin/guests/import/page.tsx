@@ -219,7 +219,7 @@ export default function GuestImportPage() {
               <li key={i} className={`border-t border-stone-100 px-4 py-3 ${!hasEmail(r) ? "bg-red-50" : ""}`}>
                 <div className="mb-2 flex items-center">
                   <span className="text-xs font-light text-stone-500">Row {i + 1}{!hasEmail(r) ? " · needs a valid email" : ""}</span>
-                  <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="ml-auto flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition hover:bg-white hover:text-red-700">
+                  <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="ml-auto flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-white hover:text-red-700">
                     <X className="h-4 w-4" strokeWidth={1.75} />
                   </button>
                 </div>
@@ -256,7 +256,7 @@ export default function GuestImportPage() {
                       <input value={r.phone} onChange={(e) => updateRow(i, "phone", e.target.value)} className={inputCls} placeholder="Phone" aria-label="Phone" />
                     </td>
                     <td className="!py-2 !pr-5 text-center">
-                      <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-red-700">
+                      <button onClick={() => removeRow(i)} aria-label={`Remove row ${i + 1}`} className="flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-stone-100 hover:text-red-700">
                         <X className="h-4 w-4" strokeWidth={1.75} />
                       </button>
                     </td>

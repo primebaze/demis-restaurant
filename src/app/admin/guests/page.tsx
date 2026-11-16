@@ -350,7 +350,7 @@ export default function AdminGuestsPage() {
             </div>
             <form onSubmit={handleSearch} className="flex gap-2 md:ml-auto md:w-[380px]">
               <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-stone-400" strokeWidth={1.75} />
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-stone-500" strokeWidth={1.75} />
                 <input
                   type="text"
                   value={searchInput}

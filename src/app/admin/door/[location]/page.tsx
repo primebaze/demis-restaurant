@@ -179,7 +179,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                     <div key={title}>
                       <p className="mb-2 text-xs font-light text-stone-500">{title}</p>
                       {top.length === 0 ? (
-                        <p className="text-xs text-stone-400">None</p>
+                        <p className="text-xs text-stone-500">None</p>
                       ) : (
                         <div className="space-y-2">
                           {top.map(([name, qty]) => (
@@ -193,7 +193,7 @@ export default function DoorSummaryPage({ params }: { params: { location: string
                               </div>
                             </div>
                           ))}
-                          {list.length > top.length && <p className="text-[11px] text-stone-400">+{list.length - top.length} more</p>}
+                          {list.length > top.length && <p className="text-[11px] text-stone-500">+{list.length - top.length} more</p>}
                         </div>
                       )}
                     </div>

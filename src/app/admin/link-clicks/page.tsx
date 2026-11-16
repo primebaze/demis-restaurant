@@ -153,7 +153,7 @@ export default function LinkClicksPage() {
       {empty ? (
         <Sheet label="No clicks yet" className="px-5 py-12 text-center">
           <p className="text-sm text-stone-500">No clicks tracked yet.</p>
-          <p className="mt-2 text-xs text-stone-400">
+          <p className="mt-2 text-xs text-stone-500">
             Links in an email blast are tracked automatically. Put <code className="text-stone-900">{"{vote}"}</code>{" "}
             in the message to insert the voting link.
           </p>
@@ -216,7 +216,7 @@ export default function LinkClicksPage() {
                 <ul>
                   {stats.byUrl.map((u) => (
                     <li key={u.url} className="flex items-center gap-3 border-t border-stone-100 py-2.5 text-sm">
-                      <Link2 className="h-[18px] w-[18px] shrink-0 text-stone-400" strokeWidth={1.5} />
+                      <Link2 className="h-[18px] w-[18px] shrink-0 text-stone-500" strokeWidth={1.5} />
                       <span className="min-w-0 flex-1 truncate text-stone-600" title={u.url}>
                         {u.url}
                       </span>
@@ -225,7 +225,7 @@ export default function LinkClicksPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="border-t border-stone-100 py-3 text-sm text-stone-400">No clicks yet.</p>
+                <p className="border-t border-stone-100 py-3 text-sm text-stone-500">No clicks yet.</p>
               )}
 
               <div className="min-h-4 flex-1" />

@@ -167,7 +167,7 @@ export default function ShootPlanList() {
                   >
                     <div className="flex items-center justify-between gap-3">
                       <Tag tone={STATUS_TONE[plan.status]}>{SHOOT_STATUSES[plan.status]}</Tag>
-                      <ArrowRight size={18} aria-hidden="true" className="text-stone-400 transition group-hover:translate-x-0.5 group-hover:text-stone-900" />
+                      <ArrowRight size={18} aria-hidden="true" className="text-stone-500 transition group-hover:translate-x-0.5 group-hover:text-stone-900" />
                     </div>
                     <h3 className="mt-3 break-words text-[17px] font-normal text-stone-900">{plan.title}</h3>
                     <div className="mt-2 flex flex-col gap-1 text-[13px] text-stone-500">

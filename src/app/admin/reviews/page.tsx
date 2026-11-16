@@ -118,7 +118,7 @@ export default function AdminReviewsPage() {
             </div>
             <div>
               <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} rows={5} placeholder="The review…" aria-label="Review text" className={`${fieldArea} resize-y`} />
-              <p className="mr-1 mt-1 text-right text-[11px] text-stone-400">{text.length}/1000</p>
+              <p className="mr-1 mt-1 text-right text-[11px] text-stone-500">{text.length}/1000</p>
             </div>
             {error && <p className="rounded-2xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{error}</p>}
             <button type="button" onClick={create} disabled={saving} className={`${btn.primary} w-full justify-center`}>
@@ -150,7 +150,7 @@ export default function AdminReviewsPage() {
                       <Stars n={r.rating} />
                       {r.location && <span className="text-xs text-stone-500">· {r.location}</span>}
                     </div>
-                    <p className={`mt-1 whitespace-pre-wrap break-words text-sm ${r.active ? "text-stone-600" : "text-stone-400"}`}>{r.body}</p>
+                    <p className={`mt-1 whitespace-pre-wrap break-words text-sm ${r.active ? "text-stone-600" : "text-stone-500"}`}>{r.body}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1.5">
                     <button

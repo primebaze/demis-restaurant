@@ -370,7 +370,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                         <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                       </span>
                       {item.label}
-                      {item.external && <ArrowUpRight className="ml-auto h-4 w-4 text-stone-400" strokeWidth={1.75} />}
+                      {item.external && <ArrowUpRight className="ml-auto h-4 w-4 text-stone-500" strokeWidth={1.75} />}
                     </Link>
                   );
                 })}

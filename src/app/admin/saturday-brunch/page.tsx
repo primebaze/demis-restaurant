@@ -453,7 +453,7 @@ export default function AdminSaturdayBrunchPage() {
                 {/* Phones: one card per booking */}
                 <ul className="divide-y divide-stone-100 border-t border-stone-100 md:hidden">
                   {bookings.map((b) => (
-                    <li key={b.id} className={`px-4 py-3.5 ${b.status === "cancelled" ? "text-stone-400" : ""}`}>
+                    <li key={b.id} className={`px-4 py-3.5 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                       <div className="flex items-start gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-[15px]">{b.name}</div>
@@ -467,7 +467,7 @@ export default function AdminSaturdayBrunchPage() {
                         <div className="shrink-0 text-right">
                           <div className="font-medium tabular-nums">{b.arrivalTime}</div>
                           <div className="mt-0.5 inline-flex items-center gap-1 text-sm">
-                            <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                            <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                             {b.partySize}
                           </div>
                         </div>
@@ -506,7 +506,7 @@ export default function AdminSaturdayBrunchPage() {
                     </thead>
                     <tbody>
                       {bookings.map((b) => (
-                        <tr key={b.id} className={`hover:bg-stone-50 ${b.status === "cancelled" ? "text-stone-400" : ""}`}>
+                        <tr key={b.id} className={`hover:bg-stone-50 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                           <td className="whitespace-nowrap">
                             <div>{b.name}</div>
                             <div className="text-xs text-stone-500">{b.email || "No email"}</div>
@@ -518,7 +518,7 @@ export default function AdminSaturdayBrunchPage() {
                           </td>
                           <td>
                             <span className="inline-flex items-center gap-1">
-                              <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                              <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                               {b.partySize}
                             </span>
                           </td>
@@ -669,7 +669,7 @@ export default function AdminSaturdayBrunchPage() {
             </p>
             <div className="mt-2">
               {dateRows.length === 0 ? (
-                <p className="py-3 text-xs text-stone-400">Loading dates…</p>
+                <p className="py-3 text-xs text-stone-500">Loading dates…</p>
               ) : (
                 dateRows.map((d) => (
                   <div key={d.date} className={`flex items-center gap-2 border-t border-stone-100 py-2 text-[13px] ${d.hidden ? "opacity-60" : ""}`}>

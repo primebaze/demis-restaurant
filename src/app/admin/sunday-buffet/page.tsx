@@ -376,7 +376,7 @@ export default function AdminSundayBuffetPage() {
                 {/* Phones: one card per booking */}
                 <ul className="divide-y divide-stone-100 border-t border-stone-100 md:hidden">
                   {bookings.map((b) => (
-                    <li key={b.id} className={`px-4 py-3.5 ${b.status === "cancelled" ? "text-stone-400" : ""}`}>
+                    <li key={b.id} className={`px-4 py-3.5 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                       <div className="flex items-start gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-[15px]">{b.name}</div>
@@ -390,7 +390,7 @@ export default function AdminSundayBuffetPage() {
                         <div className="shrink-0 text-right">
                           <div className="font-medium tabular-nums">{b.arrivalTime}</div>
                           <div className="mt-0.5 inline-flex items-center gap-1 text-sm">
-                            <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                            <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                             {b.partySize}
                           </div>
                         </div>
@@ -421,7 +421,7 @@ export default function AdminSundayBuffetPage() {
                     </thead>
                     <tbody>
                       {bookings.map((b) => (
-                        <tr key={b.id} className={`hover:bg-stone-50 ${b.status === "cancelled" ? "text-stone-400" : ""}`}>
+                        <tr key={b.id} className={`hover:bg-stone-50 ${b.status === "cancelled" ? "text-stone-500" : ""}`}>
                           <td className="whitespace-nowrap">
                             <div>
                               {b.name}
@@ -432,7 +432,7 @@ export default function AdminSundayBuffetPage() {
                           <td className="font-medium tabular-nums">{b.arrivalTime}</td>
                           <td>
                             <span className="inline-flex items-center gap-1">
-                              <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                              <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                               {b.partySize}
                             </span>
                           </td>

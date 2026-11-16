@@ -382,7 +382,7 @@ export default function AdminBookingsPage() {
 
   function notesLine(b: BookingRow) {
     return (
-      <span className={`mt-0.5 flex items-center gap-1.5 text-[13px] ${b.notes ? "text-ember-700" : "font-light text-stone-400"}`}>
+      <span className={`mt-0.5 flex items-center gap-1.5 text-[13px] ${b.notes ? "text-ember-700" : "font-light text-stone-500"}`}>
         <StickyNote className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
         <span className="truncate">{b.notes || "No requirements"}</span>
       </span>
@@ -412,11 +412,11 @@ export default function AdminBookingsPage() {
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
               <span className="inline-flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                 {b.partySize}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                <MapPin className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                 {b.location}
               </span>
               {mode === "all" && (() => {
@@ -438,7 +438,7 @@ export default function AdminBookingsPage() {
                     Call
                   </a>
                 ) : (
-                  <span className="flex h-11 items-center justify-center rounded-full bg-stone-100 text-[13px] text-stone-400">No phone</span>
+                  <span className="flex h-11 items-center justify-center rounded-full bg-stone-100 text-[13px] text-stone-500">No phone</span>
                 )}
                 {statusSelect(b, "h-11 w-full text-center")}
               </div>
@@ -575,7 +575,7 @@ export default function AdminBookingsPage() {
 
           <div className="mt-3 grid grid-cols-7 gap-1 md:gap-1.5">
             {DAY_LETTERS.map((d, i) => (
-              <div key={i} className="pb-1 text-center text-[11px] font-light text-stone-400">{d}</div>
+              <div key={i} className="pb-1 text-center text-[11px] font-light text-stone-500">{d}</div>
             ))}
             {cells.map((ds, i) => {
               if (!ds) return <div key={`e${i}`} />;
@@ -595,7 +595,7 @@ export default function AdminBookingsPage() {
                       ? "bg-stone-900 text-white"
                       : isToday
                       ? "bg-white text-stone-900 ring-1 ring-inset ring-stone-900"
-                      : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-400" : "text-stone-900"}`
+                      : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-500" : "text-stone-900"}`
                   }`}
                 >
                   <span className="leading-none">{Number(ds.slice(8))}</span>
@@ -765,7 +765,7 @@ export default function AdminBookingsPage() {
                                 <div className="min-w-0">
                                   <div className="flex items-baseline gap-2">
                                     <span className="truncate">{b.guest.name}</span>
-                                    <span className="shrink-0 text-[11px] text-stone-400">{b.confirmationCode}</span>
+                                    <span className="shrink-0 text-[11px] text-stone-500">{b.confirmationCode}</span>
                                   </div>
                                   {notesLine(b)}
                                 </div>
@@ -774,7 +774,7 @@ export default function AdminBookingsPage() {
                             <td className="whitespace-nowrap">{b.location}</td>
                             <td className="whitespace-nowrap">
                               <span className="inline-flex items-center gap-1.5">
-                                <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                                <Users className="h-4 w-4 text-stone-500" strokeWidth={1.5} />
                                 {b.partySize}
                               </span>
                             </td>

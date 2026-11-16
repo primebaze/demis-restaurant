@@ -290,7 +290,7 @@ export default function MailingPage() {
               <span className="text-[13px] font-light text-stone-500">{total.toLocaleString("en-GB")}</span>
             </div>
             <div className="relative md:ml-auto md:w-60">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-stone-400" strokeWidth={1.75} />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-stone-500" strokeWidth={1.75} />
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -454,7 +454,7 @@ export default function MailingPage() {
           {/* Saved emails: one click fills the form, you still press Send. */}
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             <span className="mr-1 text-xs font-light text-stone-500">Saved emails</span>
-            {templates.length === 0 && <span className="text-xs text-stone-400">None yet</span>}
+            {templates.length === 0 && <span className="text-xs text-stone-500">None yet</span>}
             {templates.map((t) => (
               <span key={t.key} className="inline-flex h-8 items-center overflow-hidden rounded-full border border-stone-200 bg-white">
                 <button onClick={() => loadTemplate(t)} title="Load this into the form" className="h-full pl-3 pr-2 text-[13px] text-stone-800 transition hover:bg-stone-50">
@@ -464,7 +464,7 @@ export default function MailingPage() {
                   onClick={() => deleteTemplate(t)}
                   title={`Delete "${t.name}"`}
                   aria-label={`Delete saved email ${t.name}`}
-                  className="flex h-full items-center border-l border-stone-100 px-2 text-stone-400 transition hover:bg-stone-50 hover:text-red-700"
+                  className="flex h-full items-center border-l border-stone-100 px-2 text-stone-500 transition hover:bg-stone-50 hover:text-red-700"
                 >
                   <X className="h-3.5 w-3.5" strokeWidth={1.75} />
                 </button>
