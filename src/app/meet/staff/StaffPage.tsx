@@ -81,8 +81,9 @@ export default function StaffPage() {
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap" }} onClick={() => setMenu(null)}>
       <IconFont />
       <Sidebar waiting={counts.waiting} />
+      <TopBar />
 
-      <main style={{ flex: "999 1 560px", minWidth: 0, boxSizing: "border-box", padding: "18px 24px 24px 8px", display: "flex", flexDirection: "column", gap: 14 }}>
+      <main className="px-4 pb-6 pt-[18px] md:pl-2 md:pr-6" style={{ flex: "999 1 560px", minWidth: 0, boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 14 }}>
         <header style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, padding: "4px 4px 0" }}>
           <div style={{ flex: "1 1 220px" }}>
             <p style={{ margin: 0, fontSize: 13, color: C.sub }}>From the clock-in app</p>
@@ -174,7 +175,18 @@ export default function StaffPage() {
                     ))}
                   </div>
                 </div>
-                <div style={{ overflowX: "auto" }}>
+                {/* Phones: one card per person */}
+                <div className="md:hidden" style={{ padding: "0 4px 4px" }}>
+                  {shown.map((p) => (
+                    <PersonCard key={p.id} p={p} busy={busy}
+                      onBranch={(b) => post("/api/meet/team", { action: "branch", id: p.id, branch: b }, `b${p.id}`, `${p.name}: ${BRANCH[b] || "no branch"}.`)}
+                      onSignOut={() => { if (confirm(`Sign ${p.name} out of every phone? They'd need a manager to approve their phone again.`)) post("/api/meet/team", { action: "signout_all", id: p.id }, `s${p.id}`, `${p.name} is signed out of all phones.`); }}
+                    />
+                  ))}
+                  {shown.length === 0 && <p style={{ margin: 0, padding: "16px 8px", color: C.sub }}>No one here.</p>}
+                </div>
+                {/* Computers: the table from the design */}
+                <div className="hidden md:block" style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", fontSize: 13 }}>
                     <thead>
                       <tr style={{ color: C.sub, textAlign: "left" }}>
@@ -302,7 +314,7 @@ function Sidebar({ waiting }: { waiting: number }) {
     ["Reports", "flag", null],
   ];
   return (
-    <nav aria-label="Main" style={{ flex: "1 1 220px", maxWidth: 244, boxSizing: "border-box", padding: "18px 14px", display: "flex", flexDirection: "column", gap: 18 }}>
+    <nav aria-label="Main" className="hidden md:flex" style={{ flex: "1 1 220px", maxWidth: 244, boxSizing: "border-box", padding: "18px 14px", flexDirection: "column", gap: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, height: 48, padding: "0 16px", borderRadius: 16, background: C.ink }}>
         <img src="/logo.png" alt="Demi's" style={{ height: 15, width: "auto" }} />
         <span aria-hidden="true" style={{ width: 1, height: 18, background: "#3a3632" }} />
@@ -330,5 +342,59 @@ function Sidebar({ waiting }: { waiting: number }) {
         })}
       </div>
     </nav>
+  );
+}
+
+/* Phones: a slim bar instead of the sidebar. */
+function TopBar() {
+  return (
+    <div className="md:hidden" style={{ width: "100%", boxSizing: "border-box", padding: "max(14px, env(safe-area-inset-top)) 16px 0", display: "flex", alignItems: "center", gap: 10 }}>
+      <a href="/meet" aria-label="Back to the app" style={{ width: 40, height: 40, borderRadius: 20, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)", color: C.ink }}>
+        <Icon name="arrow_back" size={20} />
+      </a>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, height: 40, padding: "0 14px", borderRadius: 14, background: C.ink }}>
+        <img src="/logo.png" alt="Demi's" style={{ height: 12, width: "auto" }} />
+        <span aria-hidden="true" style={{ width: 1, height: 14, background: "#3a3632" }} />
+        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#e8cc9c" }}>Meetings</span>
+      </div>
+    </div>
+  );
+}
+
+/* Phones: one person as a card (same details as a table row). */
+function PersonCard({ p, busy, onBranch, onSignOut }: { p: Person; busy: string; onBranch: (b: string) => void; onSignOut: () => void }) {
+  const col = p.active ? personColourLight(p.id) : { bg: C.line, fg: C.sub };
+  const dim = !p.active;
+  const status =
+    dim ? "Off in clock-in"
+    : p.waiting > 0 ? `${p.waiting} phone waiting`
+    : p.notifications === "on" ? "Notifications on"
+    : p.notifications === "off" ? "Notifications off · email only"
+    : p.phones.length ? "Not asked yet" : "Not set up";
+  const statusColour = dim ? C.sub : p.waiting > 0 ? C.coral : p.notifications === "on" ? "#047857" : p.notifications === "off" ? "#b45309" : C.sub;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 6px", borderTop: `1px solid ${C.line}`, color: dim ? C.sub : C.ink }}>
+      <Avatar size={36} bg={col.bg} fg={col.fg}>{initial(p.name)}</Avatar>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ margin: 0, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</p>
+        <p style={{ margin: "2px 0 0", fontSize: 12, color: statusColour }}>{status}{p.lastSeen ? <span style={{ color: C.sub }}> · {ago(p.lastSeen)}</span> : null}</p>
+      </div>
+      {dim ? null : (
+        <label style={{ position: "relative", height: 34, padding: "0 10px", borderRadius: 17, background: C.page, display: "inline-flex", alignItems: "center", gap: 2, fontSize: 13, color: p.branch ? C.ink : "#b45309", whiteSpace: "nowrap" }}>
+          {p.branch ? (p.branch === "both" ? "Both" : BRANCH[p.branch]) : "Branch"}<Icon name="expand_more" size={16} style={{ color: C.sub }} />
+          <select aria-label={`Branch for ${p.name}`} value={p.branch} disabled={busy === `b${p.id}`} onChange={(e) => onBranch(e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, fontSize: 16 }}>
+            <option value="">Not set</option>
+            <option value="cricklewood">Cricklewood</option>
+            <option value="streatham">Streatham</option>
+            <option value="both">Both branches</option>
+          </select>
+        </label>
+      )}
+      {!dim && p.phones.length > 0 && (
+        <button aria-label={`Sign ${p.name} out of all phones`} onClick={onSignOut} style={{ width: 34, height: 34, border: 0, borderRadius: 17, background: C.page, color: C.ink, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="logout" size={17} />
+        </button>
+      )}
+    </div>
   );
 }
