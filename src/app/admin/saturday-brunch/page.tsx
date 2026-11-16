@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback, type ReactNode } from "react";
+import EmailEveryonePanel from "@/components/admin/EmailEveryonePanel";
 import {
   Ban, CalendarCheck, CalendarDays, CalendarX2, Check, ChevronLeft, ChevronRight, CircleCheck, Clock, Eye, EyeOff, Forward, ListX,
-  Loader2, Mail, MailPlus, Plus, Send, Trash2, Undo2, UserCheck, Users, X,
+  Loader2, Mail, MailPlus, Trash2, Undo2, UserCheck, Users,
 } from "lucide-react";
 import {
-  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, fieldArea, table, tableWrap, type Tone, useTypedConfirm } from "@/components/admin/ui";
+  OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, table, tableWrap, type Tone, useTypedConfirm } from "@/components/admin/ui";
 
 type Booking = { id: string; name: string; email: string; phone: string; partySize: number; arrivalTime: string; package: string; packageLabel: string; pricePerHead: number; heardFrom: string; fromPopup?: boolean; status: string; confirmSentAt: string | null; confirmedAt: string | null; createdAt: string };
 type Summary = { reservations: number; people: number; drinkers: number; confirmed: number; cancelled: number; revenue: number; fromPopup?: number };
@@ -554,83 +555,32 @@ export default function AdminSaturdayBrunchPage() {
 
         <div className="contents lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:flex lg:min-w-0 lg:flex-col lg:gap-3 lg:self-start">
           {mailOpen && (
-            <Sheet label="Email everyone" className="order-first flex flex-col p-[18px] lg:order-none">
-              <SheetTitle
-                aside={
-                  <button onClick={() => { setMailOpen(false); setMailNote(""); }} aria-label="Close" className={ibtn}>
-                    <X className="h-4 w-4" strokeWidth={1.75} />
-                  </button>
-                }
-              >
-                Email everyone
-              </SheetTitle>
-              <div className="mt-3 inline-flex flex-wrap gap-0.5 self-start rounded-[18px] bg-sand-200 p-1" role="group" aria-label="Who gets it">
-                <button
-                  onClick={() => setMailScope("day")}
-                  disabled={withEmail === 0}
-                  aria-pressed={mailScope === "day"}
-                  className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition disabled:cursor-not-allowed disabled:opacity-40 ${mailScope === "day" ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
-                >
-                  Booked for {dayLabel || prettyDate} ({withEmail})
-                </button>
-                <button
-                  onClick={() => setMailScope("all")}
-                  aria-pressed={mailScope === "all"}
-                  className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${mailScope === "all" ? "bg-sand-50 text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
-                >
-                  All past guests ({allCount ?? "…"})
-                </button>
-              </div>
-              {mailScope === "day" ? (
-                <>
-                  <p className="mt-3 text-sm">Email everyone booked for {prettyDate}</p>
-                  <p className="mt-0.5 text-xs font-light leading-relaxed text-stone-500">Goes to the {withEmail} guest{withEmail === 1 ? "" : "s"} with an email (cancelled excluded). Sent from your normal bookings address.</p>
-                </>
-              ) : (
-                <>
-                  <p className="mt-3 text-sm">Email everyone who has been to the Sunday Feast</p>
-                  <p className="mt-0.5 text-xs font-light leading-relaxed text-stone-500">Goes to {allCount ?? "…"} {allCount === 1 ? "person" : "people"} booked for a Sunday that has already happened, one email each even if they came more than once. Upcoming and cancelled bookings are left out. Sent from your normal bookings address.</p>
-                </>
-              )}
-              {/* Saved emails for this screen. One click fills the form; you still press Send. */}
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {mailTemplates.map((t) => (
-                  <button
-                    key={t.key}
-                    onClick={() => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
-                    className="inline-flex h-7 items-center rounded-full bg-sand-200 px-3 text-xs text-stone-700 transition hover:bg-sand-300"
-                  >
-                    {t.name}
-                  </button>
-                ))}
-                <button
-                  onClick={saveMailTemplate}
-                  disabled={!mailSubject.trim() || !mailMessage.trim()}
-                  className="inline-flex h-7 items-center gap-1 rounded-full border border-stone-300 bg-sand-50 px-3 text-xs text-stone-900 transition hover:bg-sand-100 disabled:cursor-not-allowed disabled:text-stone-500"
-                >
-                  <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  Save current
-                </button>
-              </div>
-              <input value={mailSubject} onChange={(e) => setMailSubject(e.target.value)} placeholder="Subject" aria-label="Subject" className={`${field} mt-3`} />
-              <textarea
-                value={mailMessage}
-                onChange={(e) => setMailMessage(e.target.value)}
-                rows={8}
-                aria-label="Message"
-                placeholder="Your message. Line breaks are kept. Type {feast} for a link to book."
-                className={`${fieldArea} mt-2 resize-y leading-relaxed`}
-              />
-              <p className="ml-1 mt-1.5 text-xs text-stone-500">Each guest is greeted by name automatically. Type {"{feast}"} for a link to book.</p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <button onClick={sendMailAll} disabled={mailing} className={btn.primary}>
-                  {mailing ? <Loader2 className="h-[18px] w-[18px] animate-spin" strokeWidth={1.75} /> : <Send className="h-[18px] w-[18px]" strokeWidth={1.5} />}
-                  {mailing ? "Sending…" : `Send to ${mailScope === "all" ? (allCount ?? "…") : withEmail}`}
-                </button>
-                <button onClick={() => { setMailOpen(false); setMailNote(""); }} className={btn.light}>Cancel</button>
-              </div>
-              {mailNote && <p className="mt-2.5 text-xs text-stone-600" role="status">{mailNote}</p>}
-            </Sheet>
+            <EmailEveryonePanel
+              className="order-first lg:order-none"
+              dayLabel={dayLabel || prettyDate}
+              withEmail={withEmail}
+              allCount={allCount}
+              scope={mailScope}
+              onScope={setMailScope}
+              scopeHelp={
+                mailScope === "day"
+                  ? `Goes to the ${withEmail} guest${withEmail === 1 ? "" : "s"} booked for ${prettyDate} with an email. Cancelled bookings are left out.`
+                  : `One email each to everyone who has been to the Sunday Feast, even if they came more than once. Upcoming and cancelled bookings are left out.`
+              }
+              templates={mailTemplates}
+              onLoadTemplate={(t) => { setMailSubject(t.subject); setMailMessage(t.body); setMailNote(`Loaded "${t.name}".`); }}
+              onSaveTemplate={saveMailTemplate}
+              subject={mailSubject}
+              onSubject={setMailSubject}
+              message={mailMessage}
+              onMessage={setMailMessage}
+              messagePlaceholder="Your message. Line breaks are kept."
+              messageHint={<>Type {"{feast}"} for a link to book.</>}
+              sending={mailing}
+              onSend={sendMailAll}
+              onClose={() => { setMailOpen(false); setMailNote(""); }}
+              note={mailNote}
+            />
           )}
 
           <Sheet label={summary.reservations > 0 ? "Heard about us and availability" : "Availability"} className="p-[18px]">

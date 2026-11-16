@@ -295,7 +295,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         ) : (
           <>
             {head && (
-              <div className="shell-head">
+              <div className="shell-head admin-on-photo">
                 <PageHead title={head.title} subtitle={head.subtitle} />
               </div>
             )}

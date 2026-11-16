@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Download, FileText, Mail, Search, Send, Upload, Users, X } from "lucide-react";
+import EmailSuggestions from "@/components/admin/EmailSuggestions";
 import {
   OwnLayout, PageHead, Sheet, SheetFooter, Tag, Avatar, Seg, Empty, btn, field, fieldArea, table, tableWrap, statusTone, statusLabel,
 } from "@/components/admin/ui";
@@ -497,6 +498,14 @@ export default function AdminGuestsPage() {
                 )}
                 <span className="truncate">{compose.toLabel}</span>
               </div>
+
+              <EmailSuggestions
+                scope="guest"
+                subject={compose.subject}
+                message={compose.message}
+                onPick={(t) => setCompose((c) => c && { ...c, subject: t.subject, message: t.body, error: "" })}
+                className="mb-3.5"
+              />
 
               <label className={label} htmlFor="compose-subject">Subject</label>
               <input

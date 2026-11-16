@@ -199,6 +199,164 @@ Hope to see you soon.
 Warmly,
 The team at Demi's`,
   },
+
+  // ── Sunday Feast screen. No greeting or sign-off: the feast route wraps these in
+  // "Hi <name>," and "Thanks, Demi's Restaurant, Cricklewood". {feast} becomes a
+  // tracked link to the booking page.
+  {
+    key: "feast-see-you-sunday",
+    name: "See you Sunday",
+    scope: "feast",
+    sortOrder: 1,
+    subject: "See you on Sunday",
+    body: `Just a quick note to say we're looking forward to having you at the Sunday Feast this weekend.
+
+We serve from 1:30pm at Cricklewood. Everything comes to the table to share, so come hungry.
+
+If your plans change or you need to move your table, just reply to this email and we'll sort it out.`,
+  },
+  {
+    key: "feast-thank-you",
+    name: "Thank you",
+    scope: "feast",
+    sortOrder: 2,
+    subject: "Thank you for coming on Sunday",
+    body: `Thank you for joining us for the Sunday Feast. It was really good to have you with us.
+
+We're still shaping the menu, so if there was a dish you loved, or anything you think we could do differently, just reply and let us know. Every reply comes straight to us and we read them all.`,
+  },
+  {
+    key: "feast-miss-you",
+    name: "It's been a while",
+    scope: "feast",
+    sortOrder: 3,
+    subject: "It's been a little while",
+    body: `It's been a little while since you came to the Sunday Feast, so we thought we'd say hello.
+
+It's still on every Sunday at Cricklewood from 1:30pm to 6pm: puff puff and meat pie to start, pepper soup and moi moi, then a whole rotisserie chicken and grilled fish with party jollof and plantain, all to share.
+
+If you fancy coming back, you can book a table here: {feast}
+
+It would be lovely to see you again.`,
+  },
+  {
+    key: "feast-this-weekend",
+    name: "This weekend",
+    scope: "feast",
+    sortOrder: 4,
+    subject: "Are you free on Sunday?",
+    body: `Just a note before the weekend: the Sunday Feast is on again this Sunday at Cricklewood, from 1:30pm to 6pm.
+
+It's for two or more, and everything is shared, so it's a good one to bring someone along to. Booking ahead means we can keep a table for you: {feast}
+
+Hope to see you there.`,
+  },
+  {
+    key: "feast-bring-the-group",
+    name: "Bring the group",
+    scope: "feast",
+    sortOrder: 5,
+    subject: "Planning something with friends or family?",
+    body: `If you've got a birthday, a catch-up or a family get-together coming up, the Sunday Feast is an easy way to do it. The whole table shares everything, and nobody has to agree on one dish.
+
+Tell us how many of you there are when you book and we'll keep a table that fits: {feast}
+
+If it's a bigger group, reply to this email and we'll help you sort it out.`,
+  },
+
+  // ── Single-guest emails (dashboard "Email guest" and the Guests page). The
+  // guest route sends the text exactly as written, so these carry their own
+  // greeting and sign-off.
+  {
+    key: "guest-see-you-today",
+    name: "See you today",
+    scope: "guest",
+    sortOrder: 1,
+    subject: "Looking forward to seeing you today",
+    body: `Hi {name},
+
+Just a quick note to say your table is booked and we're looking forward to seeing you today.
+
+If you're running late or your plans change, just reply to this email and we'll keep things flexible for you.
+
+Warmly,
+The team at Demi's`,
+  },
+  {
+    key: "guest-running-late",
+    name: "Are you on your way?",
+    scope: "guest",
+    sortOrder: 2,
+    subject: "Your table at Demi's",
+    body: `Hi {name},
+
+We've got your table ready and just wanted to check you're still coming. If you're running a little late, no problem, just reply and let us know roughly when you'll be here so we can hold it for you.
+
+Thanks,
+The team at Demi's`,
+  },
+  {
+    key: "guest-requirements",
+    name: "About your request",
+    scope: "guest",
+    sortOrder: 3,
+    subject: "About your booking request",
+    body: `Hi {name},
+
+Thank you for your booking. We saw the note you left with it and wanted to let you know we've passed it on to the team, so everything will be ready when you arrive.
+
+If there's anything else we should know, just reply to this email.
+
+Warmly,
+The team at Demi's`,
+  },
+  {
+    key: "guest-thank-you",
+    name: "Thank you",
+    scope: "guest",
+    sortOrder: 4,
+    subject: "Thank you for dining with us",
+    body: `Hi {name},
+
+Thank you for coming to eat with us at Demi's. We really hope you enjoyed it.
+
+If you have a moment, we'd love to hear how it went. Just reply to this email with anything you liked, or anything we could do better. It all comes straight to us.
+
+Warmly,
+The team at Demi's`,
+  },
+  {
+    key: "guest-miss-you",
+    name: "It's been a while",
+    scope: "guest",
+    sortOrder: 5,
+    subject: "It's been a little while",
+    body: `Hi {name},
+
+It's been a little while since you came to Demi's, so we wanted to say hello.
+
+We're open every day from 12pm at both Cricklewood and Streatham Hill. On Sundays there's the all you can eat buffet at Streatham Hill ({buffet}) and the Sunday Feast at Cricklewood ({feast}).
+
+It would be really good to see you again.
+
+Warmly,
+The team at Demi's`,
+  },
+  {
+    key: "guest-celebrations",
+    name: "Celebrations",
+    scope: "guest",
+    sortOrder: 6,
+    subject: "Got something to celebrate?",
+    body: `Hi {name},
+
+If you've got a birthday, an anniversary or a get-together coming up, we'd love to host it.
+
+We can look after bigger groups, and for larger occasions we also do private hire. Just reply to this email with the date and roughly how many people, and we'll take it from there.
+
+Warmly,
+The team at Demi's`,
+  },
 ];
 
 const SEEDED_KEY = "email_templates_seeded";
@@ -227,7 +385,7 @@ async function ensureSeeded() {
   });
 }
 
-/** GET ?scope=blast|buffet|bookings|feast — saved templates for one screen. */
+/** GET ?scope=blast|buffet|bookings|feast|guest — saved templates for one screen. */
 export async function GET(req: Request) {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -251,7 +409,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Name, subject and message are all required" }, { status: 400 });
   }
 
-  const where = scope === "buffet" || scope === "bookings" || scope === "feast" ? scope : "blast";
+  const where = scope === "buffet" || scope === "bookings" || scope === "feast" || scope === "guest" ? scope : "blast";
   const slug =
     String(name)
       .toLowerCase()

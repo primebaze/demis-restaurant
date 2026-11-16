@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowUpRight, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, DoorOpen, Mail, Phone, StickyNote, Users } from "lucide-react";
 import { PageHead, Tag, btn, statusLabel, statusTone } from "@/components/admin/ui";
+import EmailSuggestions from "@/components/admin/EmailSuggestions";
 
 interface TodayBooking {
   id: string;
@@ -352,6 +353,13 @@ export default function AdminDashboard() {
             <p className="mb-4 mt-1 text-xs text-stone-500">
               To: {email.name} &lt;{email.to}&gt;
             </p>
+            <EmailSuggestions
+              scope="guest"
+              subject={email.subject}
+              message={email.message}
+              onPick={(t) => setEmail((s) => s && { ...s, subject: t.subject, message: t.body, error: "" })}
+              className="mb-3"
+            />
             <div className="space-y-2.5">
               <input
                 type="text"
@@ -364,7 +372,7 @@ export default function AdminDashboard() {
               <textarea
                 value={email.message}
                 onChange={(e) => setEmail((s) => s && { ...s, message: e.target.value })}
-                rows={6}
+                rows={8}
                 placeholder="Write your message…"
                 className="w-full resize-none rounded-[18px] border border-sand-300 bg-sand-100 px-4 py-3 text-sm outline-none focus:border-stone-500"
               />

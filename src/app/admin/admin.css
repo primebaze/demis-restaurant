@@ -153,6 +153,10 @@ main:has(.own-layout) .shell-sheet { background: transparent; padding: 0; box-sh
 .admin-root .bg-sand-50 ::selection,
 .admin-root .bg-sand-50::selection { background: rgba(196, 68, 26, 0.22); color: #1c1917; }
 
+/* Titles and subtitles that sit on the photo: always white when selected. */
+.admin-root .admin-on-photo ::selection,
+.admin-root .admin-on-photo::selection { background: rgba(255, 255, 255, 0.3); color: #fff; }
+
 /* Popups are dark frosted panels with white text; the pages stay light.
    Put "popup-dark" on a popup's outer panel ("popup-dark-mobile" = only below iPad landscape).
    These rules remap the light classes used inside it. */

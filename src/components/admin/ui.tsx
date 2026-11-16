@@ -10,7 +10,7 @@ import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-
 
 export function PageHead({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-5 md:mb-6">
+    <div className="admin-on-photo flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-5 md:mb-6">
       <div className="min-w-0">
         <h1 className="font-outfit text-4xl md:text-5xl lg:text-[56px] font-light tracking-tight leading-[1.05] text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.3)]">
           {title}
