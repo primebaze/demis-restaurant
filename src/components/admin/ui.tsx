@@ -235,7 +235,7 @@ function BottomSheetInner({ onClose, title, subtitle, children, closing }: { onC
     <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : "Details"}>
       <div className={`${closing ? "sheet-fade-out" : "sheet-fade"} absolute inset-0 bg-black/65 backdrop-blur-[2px]`} onClick={onClose} />
       <div
-        className={`${closing ? "sheet-down" : "sheet-up"} absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-[28px] bg-sand-100 text-stone-900 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]`}
+        className={`${closing ? "sheet-down" : "sheet-up"} popup-dark absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-[28px] bg-sand-100 text-stone-900 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]`}
         style={drag ? { transform: `translateY(${drag}px)`, transition: "none" } : undefined}
       >
         <div
@@ -288,7 +288,7 @@ export function useTypedConfirm(): [(o: { title: string; message: ReactNode; wor
 
   const dialog = req ? (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/65 p-3 backdrop-blur-[2px] sm:items-center" role="alertdialog" aria-modal="true" aria-label={req.title} onClick={() => close(false)}>
-      <div className="sheet-up w-full max-w-md rounded-[24px] bg-sand-50 p-6 text-stone-900" onClick={(e) => e.stopPropagation()}>
+      <div className="popup-dark sheet-up w-full max-w-md rounded-[24px] bg-sand-50 p-6 text-stone-900" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-outfit text-xl font-normal">{req.title}</h2>
         <div className="mt-2 text-sm font-light text-stone-600">{req.message}</div>
         <p className="mt-2 text-sm font-light text-red-700">This can&apos;t be undone.</p>
@@ -399,7 +399,7 @@ export function DateField({
       </button>
 
       {open && (
-        <div role="dialog" aria-label={ariaLabel} className={`absolute ${variant === "glass" ? "right-0" : "left-0"} top-[calc(100%+8px)] z-[55] w-[300px] max-w-[calc(100vw-32px)] rounded-[22px] bg-sand-50 p-3.5 text-stone-900 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-stone-100`}>
+        <div role="dialog" aria-label={ariaLabel} className={`popup-dark absolute ${variant === "glass" ? "right-0" : "left-0"} top-[calc(100%+8px)] z-[55] w-[300px] max-w-[calc(100vw-32px)] rounded-[22px] bg-sand-50 p-3.5 text-stone-900 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-stone-100`}>
           <div className="mb-2 flex items-center gap-1">
             <span className="pl-1.5 font-outfit text-[17px]">{monthName}</span>
             <button type="button" onClick={() => shift(-1)} aria-label="Previous month" className="ml-auto flex h-9 w-9 items-center justify-center rounded-full hover:bg-sand-200">

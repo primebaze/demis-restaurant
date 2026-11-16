@@ -473,7 +473,7 @@ export default function AdminGuestsPage() {
         {/* Send email: a side sheet on computers and iPad landscape, a pop-up below that */}
         {compose && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm sm:items-center lg:static lg:z-auto lg:block lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
-            <Sheet label="Send email" className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-y-auto p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:max-w-none">
+            <Sheet label="Send email" className="popup-dark-mobile flex max-h-[92vh] w-full max-w-lg flex-col overflow-y-auto p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:max-w-none">
               <div className="mb-4 flex items-center gap-2.5">
                 <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">Send email</h2>
                 <button

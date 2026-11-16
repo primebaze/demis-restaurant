@@ -347,7 +347,7 @@ export default function AdminDashboard() {
       {/* Email a guest */}
       {email && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm" onClick={() => setEmail(null)}>
-          <div className="w-full max-w-lg rounded-[24px] bg-sand-50 p-6 text-stone-900" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Email guest">
+          <div className="popup-dark w-full max-w-lg rounded-[24px] bg-sand-50 p-6 text-stone-900" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Email guest">
             <h2 className="text-xl font-normal">Email guest</h2>
             <p className="mb-4 mt-1 text-xs text-stone-500">
               To: {email.name} &lt;{email.to}&gt;

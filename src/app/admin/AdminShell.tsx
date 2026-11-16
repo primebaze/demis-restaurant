@@ -248,7 +248,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               D
             </button>
             {userOpen && (
-              <div className="absolute right-0 top-[calc(100%+10px)] w-52 rounded-2xl bg-sand-50 p-1.5 text-stone-900 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]">
+              <div className="popup-dark absolute right-0 top-[calc(100%+10px)] w-52 rounded-2xl bg-sand-50 p-1.5 text-stone-900 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]">
                 <Link href="/admin/email-logs" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-sand-200">
                   <MailCheck className="h-4 w-4 text-stone-500" strokeWidth={1.75} />
                   Email Logs

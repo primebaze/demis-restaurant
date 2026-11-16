@@ -208,7 +208,7 @@ export function UnsavedGuard({ dirty }: { dirty: boolean }) {
     <dialog
       ref={dialog}
       onCancel={close}
-      className="w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-sand-300 bg-sand-50 p-6 text-stone-900 backdrop:bg-black/70"
+      className="popup-dark w-[calc(100%_-_2rem)] max-w-md rounded-2xl border border-sand-300 bg-sand-50 p-6 text-stone-900 backdrop:bg-black/70"
       aria-labelledby="leave-title"
       aria-describedby="leave-description"
     >
@@ -268,7 +268,7 @@ export function ConfirmDelete({
         event.preventDefault();
         if (!busy) onCancel();
       }}
-      className="max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-sand-300 bg-sand-50 p-6 text-stone-900 backdrop:bg-black/70"
+      className="popup-dark max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border border-sand-300 bg-sand-50 p-6 text-stone-900 backdrop:bg-black/70"
     >
       <h2 id="delete-plan-title" className="text-xl font-bold">
         Delete plan?

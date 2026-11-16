@@ -152,3 +152,50 @@ main:has(.own-layout) .shell-sheet { background: transparent; padding: 0; box-sh
 /* White panels inside white-text areas go back to dark text. */
 .admin-root .bg-sand-50 ::selection,
 .admin-root .bg-sand-50::selection { background: rgba(196, 68, 26, 0.22); color: #1c1917; }
+
+/* Popups are dark frosted panels with white text; the pages stay light.
+   Put "popup-dark" on a popup's outer panel ("popup-dark-mobile" = only below iPad landscape).
+   These rules remap the light classes used inside it. */
+.popup-dark.popup-dark { background: rgba(24, 20, 17, 0.94); color: #fff; border-color: rgba(255, 255, 255, 0.12); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
+.popup-dark .text-stone-900, .popup-dark .text-stone-800 { color: #fff; }
+.popup-dark .text-stone-700 { color: rgba(255, 255, 255, 0.82); }
+.popup-dark .text-stone-600 { color: rgba(255, 255, 255, 0.72); }
+.popup-dark .text-stone-500 { color: rgba(255, 255, 255, 0.6); }
+.popup-dark ::placeholder { color: rgba(255, 255, 255, 0.45); }
+.popup-dark .bg-sand-50 { background-color: rgba(255, 255, 255, 0.06); }
+.popup-dark .bg-sand-100 { background-color: rgba(255, 255, 255, 0.07); }
+.popup-dark .bg-sand-200 { background-color: rgba(255, 255, 255, 0.1); }
+.popup-dark .bg-sand-300 { background-color: rgba(255, 255, 255, 0.14); }
+.popup-dark .hover\:bg-sand-100:hover, .popup-dark .hover\:bg-sand-200:hover { background-color: rgba(255, 255, 255, 0.12); }
+.popup-dark .border-sand-200 { border-color: rgba(255, 255, 255, 0.1); }
+.popup-dark .border-sand-300, .popup-dark .border-stone-300 { border-color: rgba(255, 255, 255, 0.16); }
+.popup-dark .focus\:border-stone-500:focus { border-color: rgba(255, 255, 255, 0.5); }
+.popup-dark .bg-stone-900 { background-color: #fff; color: #1c1917; }
+.popup-dark .ring-stone-900 { --tw-ring-color: rgba(255, 255, 255, 0.7); }
+.popup-dark [aria-pressed="true"]:not(.bg-honey-300) { background-color: #fff; color: #1c1917; }
+.popup-dark .bg-red-50, .popup-dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.16); }
+.popup-dark .text-red-700, .popup-dark .text-red-800 { color: #fca5a5; }
+.popup-dark .bg-emerald-50, .popup-dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.16); }
+.popup-dark .text-emerald-700, .popup-dark .text-emerald-800 { color: #6ee7b7; }
+.popup-dark .hover\:bg-red-50:hover { background-color: rgba(239, 68, 68, 0.16); }
+.popup-dark .accent-stone-900 { accent-color: #f4d47f; }
+.popup-dark ::selection { background: rgba(244, 212, 127, 0.32); color: #fff; }
+@media (max-width: 1023px) {
+  .popup-dark-mobile.popup-dark-mobile { background: rgba(24, 20, 17, 0.94); color: #fff; }
+  .popup-dark-mobile .text-stone-900, .popup-dark-mobile .text-stone-800 { color: #fff; }
+  .popup-dark-mobile .text-stone-700, .popup-dark-mobile .text-stone-600 { color: rgba(255, 255, 255, 0.78); }
+  .popup-dark-mobile .text-stone-500 { color: rgba(255, 255, 255, 0.6); }
+  .popup-dark-mobile ::placeholder { color: rgba(255, 255, 255, 0.45); }
+  .popup-dark-mobile .bg-sand-50, .popup-dark-mobile .bg-sand-100 { background-color: rgba(255, 255, 255, 0.07); }
+  .popup-dark-mobile .bg-sand-200 { background-color: rgba(255, 255, 255, 0.1); }
+  .popup-dark-mobile .border-sand-200 { border-color: rgba(255, 255, 255, 0.1); }
+  .popup-dark-mobile .border-sand-300 { border-color: rgba(255, 255, 255, 0.16); }
+  .popup-dark-mobile [aria-pressed="true"]:not(.bg-honey-300) { background-color: #fff; color: #1c1917; }
+}
+.popup-dark .bg-ember-50 { background-color: rgba(238, 106, 53, 0.14); }
+.popup-dark .bg-ember-100 { background-color: rgba(238, 106, 53, 0.24); }
+.popup-dark .text-ember-700 { color: #f6ad8e; }
+.popup-dark .ring-ember-100 { --tw-ring-color: rgba(238, 106, 53, 0.35); }
+.popup-dark .bg-amber-50, .popup-dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.16); }
+.popup-dark .text-amber-800, .popup-dark .text-amber-900 { color: #fcd34d; }
+.popup-dark .shadow-\[0_20px_50px_-30px_rgba\(0\,0\,0\,0\.6\)\] { box-shadow: none; }

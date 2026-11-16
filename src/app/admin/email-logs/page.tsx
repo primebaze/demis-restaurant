@@ -330,7 +330,7 @@ export default function EmailLogsPage() {
           <div
             role="dialog"
             aria-label="Email preview"
-            className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] bg-sand-50 text-stone-900"
+            className="popup-dark flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] bg-sand-50 text-stone-900"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3 border-b border-sand-200 px-5 py-4">
