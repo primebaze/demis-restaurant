@@ -117,7 +117,7 @@ function Phone({ children, style }: { children: ReactNode; style?: CSSProperties
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        padding: "calc(env(safe-area-inset-top) + 24px) 22px calc(env(safe-area-inset-bottom) + 24px)",
+        padding: "calc(env(safe-area-inset-top) + 40px) 22px calc(env(safe-area-inset-bottom) + 24px)",
         gap: 22,
         ...style,
       }}
@@ -489,7 +489,7 @@ function Home({ me }: { me: ApprovedMe }) {
   const col = personColour(me.person.id);
   const on = !!me.clockedInSince;
   return (
-    <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 18px) 18px 18px", display: "flex", flexDirection: "column", gap: 18 }}>
+    <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 40px) 18px 18px", display: "flex", flexDirection: "column", gap: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
         <span style={{ width: 40, height: 40, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 600 }}>{initial(me.person.name)}</span>
         <div style={{ flex: 1 }}>
@@ -531,7 +531,7 @@ function MeScreen({ me, onSignOut }: { me: ApprovedMe; onSignOut: () => void }) 
   const col = personColour(me.person.id);
   const role = me.person.role ? me.person.role[0].toUpperCase() + me.person.role.slice(1) : "";
   return (
-    <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 18px) 18px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+    <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 40px) 18px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
         <span style={{ width: 52, height: 52, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 600 }}>{initial(me.person.name)}</span>
         <div style={{ flex: 1 }}>

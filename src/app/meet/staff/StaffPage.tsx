@@ -349,7 +349,7 @@ function Sidebar({ waiting }: { waiting: number }) {
 /* Phones: a slim bar instead of the sidebar. */
 function TopBar() {
   return (
-    <div className="flex md:hidden" style={{ width: "100%", boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 14px) 16px 0", alignItems: "center", gap: 10 }}>
+    <div className="flex md:hidden" style={{ width: "100%", boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 30px) 16px 0", alignItems: "center", gap: 10 }}>
       <a href="/meet" aria-label="Back to the app" style={{ width: 40, height: 40, borderRadius: 20, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)", color: C.ink }}>
         <Icon name="arrow_back" size={20} />
       </a>
