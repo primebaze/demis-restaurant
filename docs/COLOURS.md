@@ -88,10 +88,9 @@ still apply to the guest site, the door kiosks and the blog.
 - **Background:** the Demi's dining room photo (`public/admin/dining-room.jpg`,
   class `admin-bg` in `src/app/admin/admin.css`). Nothing else goes behind pages.
 - **On the photo:** white text, frosted panels (`glass`) and dark glass buttons.
-- **Content:** warm ivory sheets (`bg-sand-50`, rounded 22px) with `stone` text.
+- **Content:** white sheets (`bg-sand-50`, #ffffff, rounded 22px) with `stone` text.
   Inside them: `sand-100` for inputs, `sand-200` for tiles and tracks, `sand-300`
-  for strong lines. No pure white panels (they glare on big screens).
-- **Popups** are dark frosted panels with white text (add `popup-dark` to the
+  for strong lines. - **Popups** are dark frosted panels with white text (add `popup-dark` to the
   popup's outer panel; `admin.css` remaps the light classes inside it). The page
   behind dims with `bg-black/65`. Pages themselves stay ivory.
 - **Accent: honey gold** (`honey-300`, #f4d47f, with `text-ink-900`). The
