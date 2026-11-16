@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarCheck, CalendarDays, ChefHat, ClipboardCheck, Clapperboard, Clock, DoorOpen, Drumstick, LayoutGrid,
-  LogOut, Menu, MailCheck, Megaphone, MousePointerClick, Settings2, Soup, Users, UtensilsCrossed, Video, ArrowUpRight,
+  LogOut, Menu, MailCheck, Megaphone, MousePointerClick, Settings2, Soup, Users, UtensilsCrossed, ArrowUpRight,
   type LucideIcon,
 } from "lucide-react";
 import { BottomSheet, PageHead } from "@/components/admin/ui";
@@ -32,7 +32,7 @@ const SIDE: Item[] = [
   { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen },
   { href: "/admin/checkins", label: "Check-ins", icon: ClipboardCheck },
   { href: "/admin/shoot-plans", label: "Weekly Plans", icon: Clapperboard },
-  { href: "https://meeting.demisrestaurant.co.uk", label: "Meetings", icon: Video, external: true },
+  // Meetings link (https://meeting.demisrestaurant.co.uk, icon Video, external: true) is left out until the meetings app is finished.
 ];
 
 // Bottom bar on iPad portrait and phones.
