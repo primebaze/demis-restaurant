@@ -203,3 +203,11 @@ main:has(.own-layout) .shell-sheet { background: transparent; padding: 0; box-sh
 .popup-dark .bg-amber-50, .popup-dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.16); }
 .popup-dark .text-amber-800, .popup-dark .text-amber-900 { color: #fcd34d; }
 .popup-dark .shadow-\[0_20px_50px_-30px_rgba\(0\,0\,0\,0\.6\)\] { box-shadow: none; }
+
+/* Phones: typing boxes at 16px so iOS never zooms in on tap, and nothing can push the page sideways. */
+.admin-root { overflow-x: clip; }
+@media (max-width: 767px) {
+  .admin-root input:not([type="checkbox"]):not([type="radio"]),
+  .admin-root textarea,
+  .admin-root select { font-size: 16px; }
+}
