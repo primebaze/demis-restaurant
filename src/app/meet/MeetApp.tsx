@@ -37,6 +37,7 @@ type Me =
 
 export default function MeetApp() {
   const [me, setMe] = useState<Me>({ state: "loading" });
+  const device = useDevice();
 
   const load = useCallback(async () => {
     try {
@@ -68,7 +69,10 @@ export default function MeetApp() {
   }
 
   let screen: ReactNode;
-  if (me.state === "loading") screen = <Centered><Spinner /></Centered>;
+  // iPhone: the home-screen app keeps its own sign-in, separate from Safari, so it must be
+  // installed BEFORE signing in (design 25). Otherwise the Safari copy gets approved, not the app.
+  if (!device || me.state === "loading") screen = <Centered><Spinner /></Centered>;
+  else if (device.ios && device.phone && !device.standalone) screen = <InstallGuide />;
   else if (me.state === "error")
     screen = (
       <Centered>
@@ -330,7 +334,6 @@ const pushSupported = () =>
   typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 
 function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
-  const device = useDevice();
   const [tab, setTab] = useState<"home" | "me">("home");
 
   // Keep the service worker registered so notifications arrive.
@@ -338,9 +341,6 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
     if (pushSupported()) navigator.serviceWorker.register("/meet/sw.js", { scope: "/meet" }).catch(() => {});
   }, []);
 
-  if (!device) return null;
-  // On iPhone the app only works from the home screen (notifications and staying signed in need it).
-  if (device.ios && device.phone && !device.standalone) return <InstallGuide />;
   // Ask once, straight after installing.
   if (me.notifyChoice === "" && pushSupported()) return <AllowNotifications onDone={reload} />;
   return (
