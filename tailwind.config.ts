@@ -37,6 +37,11 @@ const config: Config = {
           500: '#d4733c',
           600: '#b85e2c',
         },
+        // Booking dots on the admin calendars only. See docs/COLOURS.md, "Admin".
+        ember: {
+          400: '#ee6a35',
+          600: '#c4441a',
+        },
         gold: {
           DEFAULT: '#e8cc9c',
           50: '#fdf8f0',

@@ -538,9 +538,9 @@ export default function AdminBookingsPage() {
                   }`}
                 >
                   <span className="leading-none">{Number(ds.slice(8))}</span>
-                  <span className="flex h-1.5 items-center gap-[3px]">
+                  <span className="flex h-2 items-center gap-[3px]">
                     {Array.from({ length: Math.min(n, 4) }).map((_, j) => (
-                      <i key={j} className={`h-1 w-1 rounded-full ${isSel ? "bg-ink-900" : "bg-gold-600"}`} />
+                      <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSel ? "bg-ink-900" : "bg-ember-400"}`} />
                     ))}
                   </span>
                 </button>

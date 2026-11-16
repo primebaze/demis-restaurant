@@ -93,6 +93,8 @@ still apply to the guest site, the door kiosks and the blog.
   active day, the arrow buttons, and the one number that matters most in a group.
   On white, gold text is `gold-700`. Solid fills only: no dots, stripes or
   patterns.
+- **Calendar dots:** booking dots on the admin calendars are `ember-400` (and the
+  count next to them `ember-600`). That's the only place ember is used.
 - **Status:** the same three meanings, light versions on white: `emerald-50/700`
   (done), `amber-50/800` (waiting), `red-50/700` (cancelled, failed). Modified is
   `gold-100/800`.

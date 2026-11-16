@@ -205,13 +205,13 @@ export default function CalendarPage() {
                       <span className="flex items-center gap-[3px]">
                         {entry.count <= 3 ? (
                           Array.from({ length: entry.count }).map((_, j) => (
-                            <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-gold-600"}`} />
+                            <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-ember-400"}`} />
                           ))
                         ) : (
                           <>
-                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-gold-600"}`} />
-                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-gold-600"}`} />
-                            <span className={`ml-0.5 text-[10px] leading-none ${isSelected ? "text-ink-900" : "text-gold-700"}`}>{entry.count}</span>
+                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-ember-400"}`} />
+                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-ember-400"}`} />
+                            <span className={`ml-0.5 text-[10px] leading-none ${isSelected ? "text-ink-900" : "text-ember-600"}`}>{entry.count}</span>
                           </>
                         )}
                       </span>
