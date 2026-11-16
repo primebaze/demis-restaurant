@@ -230,7 +230,7 @@ export default function AdminCheckinsPage() {
           </div>
         </Sheet>
 
-        <Sheet label="Door kiosk" className="flex flex-col p-[18px] lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:self-start">
+        <Sheet label="Door kiosk" className="flex flex-col p-[18px] lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:self-start">
           <SheetTitle>Door kiosk</SheetTitle>
           <a
             href="/checkin"

@@ -164,7 +164,7 @@ export default function LinkClicksPage() {
 
           <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2 lg:items-stretch">
             {/* Per campaign and per link */}
-            <Sheet label="Links" className="flex flex-col p-4 md:p-5 lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:self-start">
+            <Sheet label="Links" className="flex flex-col p-4 md:p-5 lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:self-start">
               <SheetTitle>
                 Links <span className="ml-1.5 text-[13px] font-light text-stone-500">Clicks by campaign</span>
               </SheetTitle>

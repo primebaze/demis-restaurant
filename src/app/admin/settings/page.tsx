@@ -116,7 +116,7 @@ export default function AdminSettingsPage() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
           {/* Section list: a sheet on desktop, a switch or a menu on smaller screens */}
-          <Sheet label="Settings sections" className="hidden px-2.5 pb-2.5 pt-4 lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:block">
+          <Sheet label="Settings sections" className="hidden px-2.5 pb-2.5 pt-4 lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:block">
             <nav aria-label="Settings sections">
               <div className="px-3 pb-2.5 text-xs text-stone-500">Sections</div>
               <div className="flex flex-col gap-1">

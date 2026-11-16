@@ -462,7 +462,7 @@ export default function AdminSundayBuffetPage() {
 
         {mailOpen && (
           <EmailEveryonePanel
-            className="order-first lg:order-none lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:self-start"
+            className="order-first lg:order-none lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:self-start"
             dayLabel={dayLabel || prettyDate}
             withEmail={withEmail}
             allCount={allCount}

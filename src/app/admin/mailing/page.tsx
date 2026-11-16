@@ -438,7 +438,7 @@ export default function MailingPage() {
         </Sheet>
 
         {/* Compose */}
-        <Sheet label="Compose" className="p-4 md:p-5 lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:overscroll-contain lg:self-start">
+        <Sheet label="Compose" className="p-4 md:p-5 lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto lg:self-start">
           <div className="flex items-center gap-3">
             <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">Compose</h2>
             <button
