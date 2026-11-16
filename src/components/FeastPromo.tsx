@@ -24,7 +24,7 @@ const DELAY_MS = 8000;
 const SCROLL_SHARE = 1 / 3;
 
 // Pages where it would get in the way: the feast page itself, booking, staff screens.
-const HIDDEN_ON = ["/sunday-feast", "/booking", "/admin", "/blog/admin", "/door", "/checkin", "/brunch-checkin", "/shoot-plans", "/vote"];
+const HIDDEN_ON = ["/sunday-feast", "/booking", "/admin", "/blog/admin", "/door", "/checkin", "/brunch-checkin", "/shoot-plans", "/vote", "/meet"];
 
 type Avail = { bookingsOpen?: boolean; allSoldOut?: boolean; date?: string };
 

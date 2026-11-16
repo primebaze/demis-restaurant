@@ -615,3 +615,41 @@ model EmailTemplate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ─── DEMI'S MEETINGS (meeting.demisrestaurant.co.uk) ───
+// Staff, PINs, roles and clock-ins live in the clock-in app (staff.demisrestaurant.com)
+// and are read through its private bridge (src/lib/clockin.ts). Only what the
+// clock-in app doesn't have is stored here.
+
+/// Meetings-only details for one clock-in staff member.
+model MeetStaff {
+  clockinId Int      @id // staff.id in the clock-in app
+  branch    String   @default("") // cricklewood, streatham, both; "" = not set yet
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A phone or computer someone signed in on. New ones wait for a manager.
+model MeetDevice {
+  id           String    @id @default(cuid())
+  clockinId    Int // who signed in on it
+  staffName    String    @default("") // name at sign-in, for approval lists
+  label        String    @default("") // e.g. "iPhone · Safari"
+  status       String    @default("pending") // pending, approved, declined, revoked
+  decidedBy    String    @default("") // who approved/declined/revoked it
+  decidedAt    DateTime?
+  sessionUntil DateTime? // signed in until; null = signed out (PIN needed again)
+  lastSeenAt   DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+
+  @@index([clockinId])
+  @@index([status])
+}
+
+/// Wrong-PIN counter per person; several in a row locks that name for a while.
+model MeetPinLock {
+  clockinId   Int       @id
+  failures    Int       @default(0)
+  lockedUntil DateTime?
+  updatedAt   DateTime  @updatedAt
+}

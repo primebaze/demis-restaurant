@@ -73,7 +73,7 @@ test("no decorative accent colours (gold is the only accent)", () => {
 });
 
 test("every guest page uses the same page background", () => {
-  const PUBLIC_PAGE = /^src\/app\/(?!admin|blog\/admin|door|brunch-checkin|checkin|shoot-plans)[^]*page\.tsx$/;
+  const PUBLIC_PAGE = /^src\/app\/(?!admin|blog\/admin|door|brunch-checkin|checkin|shoot-plans|meet)[^]*page\.tsx$/;
   const bad: string[] = [];
   for (const { file, src } of FILES) {
     if (!PUBLIC_PAGE.test(file)) continue;

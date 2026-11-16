@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, type ReactNode } from "react";
-import { CalendarX, Check, ChevronRight, Clock, Info, Lock, Pencil, PlusCircle, ShieldCheck, Store, Trash2, type LucideIcon } from "lucide-react";
+import { CalendarX, Check, ChevronRight, Clock, Info, Lock, Pencil, PlusCircle, ShieldCheck, Smartphone, Store, Trash2, type LucideIcon } from "lucide-react";
 import { OwnLayout, PageHead, Seg, Sheet, StatTile, Tag, btn, field, DateField } from "@/components/admin/ui";
 
 interface AddOn {
@@ -40,13 +40,14 @@ interface Location {
   slug: string;
 }
 
-type Tab = "policies" | "addons" | "blackouts" | "timeslots" | "password";
+type Tab = "policies" | "addons" | "blackouts" | "timeslots" | "phones" | "password";
 
 const TABS: { key: Tab; label: string; sub: string; intro: string; icon: LucideIcon }[] = [
   { key: "policies", label: "Booking policies", sub: "Party size, deposits, cancel window", intro: "One set of rules for each location", icon: ShieldCheck },
   { key: "timeslots", label: "Time slots", sub: "When each location takes bookings", intro: "When each location takes bookings, day by day", icon: Clock },
   { key: "addons", label: "Add-ons", sub: "Extras guests can add to a booking", intro: "Extras guests can add to a booking", icon: PlusCircle },
   { key: "blackouts", label: "Blackout dates", sub: "Days or hours closed to bookings", intro: "Days or hours closed to bookings", icon: CalendarX },
+  { key: "phones", label: "Meetings phones", sub: "Approve phones for Demi's Meetings", intro: "Staff phones signing in to meeting.demisrestaurant.co.uk", icon: Smartphone },
   { key: "password", label: "Password", sub: "Change the admin password", intro: "Change the admin password", icon: Lock },
 ];
 
@@ -109,7 +110,7 @@ export default function AdminSettingsPage() {
 
   return (
     <OwnLayout>
-      <PageHead title="Settings" subtitle="Booking rules, time slots, add-ons, blackout dates and your password" />
+      <PageHead title="Settings" subtitle="Booking rules, time slots, add-ons, blackout dates, meetings phones and your password" />
 
       {loading ? (
         <div className="flex h-64 items-center justify-center font-light text-white/85">Loading settings...</div>
@@ -176,6 +177,7 @@ export default function AdminSettingsPage() {
             {tab === "timeslots" && <TimeSlotsPanel locations={locations} />}
             {tab === "addons" && <AddOnsPanel addOns={addOns} onRefresh={fetchSettings} />}
             {tab === "blackouts" && <BlackoutsPanel blackoutDates={blackoutDates} locations={locations} onRefresh={fetchSettings} />}
+            {tab === "phones" && <PhonesPanel />}
             {tab === "password" && <PasswordPanel />}
           </Sheet>
         </div>
@@ -924,6 +926,94 @@ function PasswordPanel() {
           {saving ? "Updating..." : "Update password"}
         </button>
       </form>
+    </div>
+  );
+}
+
+/* ──── Demi's Meetings phones ──── */
+type MeetPhone = { id: string; staffName: string; label: string; signedIn: boolean; lastSeenAt: string; createdAt: string };
+
+function PhonesPanel() {
+  const [data, setData] = useState<{ pending: MeetPhone[]; approved: MeetPhone[] } | null>(null);
+  const [busy, setBusy] = useState("");
+  const [note, setNote] = useState("");
+
+  const load = useCallback(async () => {
+    const res = await fetch("/api/admin/meet-devices", { cache: "no-store" });
+    if (res.ok) setData(await res.json());
+    else setNote("Couldn't load phones. The database may need updating first.");
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function decide(p: MeetPhone, action: "approve" | "decline" | "revoke") {
+    if (action === "revoke" && !confirm(`Sign ${p.staffName} out on this phone? They'd need a manager to approve it again.`)) return;
+    setBusy(p.id);
+    setNote("");
+    const res = await fetch("/api/admin/meet-devices", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: p.id, action }),
+    });
+    const d = await res.json().catch(() => ({}));
+    setBusy("");
+    if (!res.ok) return setNote(d.error || "Couldn't save that.");
+    load();
+  }
+
+  const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
+
+  if (!data) return <p className="text-sm text-stone-500">{note || "Loading..."}</p>;
+
+  return (
+    <div className="space-y-4">
+      <p className="max-w-xl text-sm text-stone-600">
+        Staff sign in to Demi&rsquo;s Meetings with their name and clock-in PIN. A phone they haven&rsquo;t used before waits here until it&rsquo;s approved. Managers can also approve phones inside the meetings app once their own phone is approved.
+      </p>
+      {note && <p className="rounded-2xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{note}</p>}
+
+      <div className={card}>
+        <CardTitle>Waiting for approval</CardTitle>
+        {data.pending.length === 0 ? (
+          <p className="text-sm text-stone-500">No phones waiting.</p>
+        ) : (
+          <ul className="divide-y divide-sand-200">
+            {data.pending.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-3 py-3">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm text-stone-900">{p.staffName}</span>
+                  <span className="block text-xs text-stone-500">{p.label} · signed in {when(p.createdAt)}</span>
+                </span>
+                <button type="button" disabled={!!busy} onClick={() => decide(p, "approve")} className={smallPrimary}>
+                  <Check className="h-3.5 w-3.5" strokeWidth={2} />Approve
+                </button>
+                <button type="button" disabled={!!busy} onClick={() => decide(p, "decline")} className={btn.small}>Decline</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className={card}>
+        <CardTitle>Approved phones</CardTitle>
+        {data.approved.length === 0 ? (
+          <p className="text-sm text-stone-500">None yet.</p>
+        ) : (
+          <ul className="divide-y divide-sand-200">
+            {data.approved.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-3 py-3">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm text-stone-900">{p.staffName}</span>
+                  <span className="block text-xs text-stone-500">{p.label} · {p.signedIn ? "signed in" : "signed out"} · last seen {when(p.lastSeenAt)}</span>
+                </span>
+                <button type="button" disabled={!!busy} onClick={() => decide(p, "revoke")} className={btn.small}>Sign out</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
