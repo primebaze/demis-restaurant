@@ -129,3 +129,13 @@ These are real brand colours, not ours, and the test lets them through:
 
 To allow another one, add the file and a reason to `ALLOWED` in
 `tests/colours.test.ts`.
+
+## 7. Demi's Meetings (meeting.demisrestaurant.co.uk, `src/app/meet`)
+
+The staff meetings app follows its own approved design canvas
+(https://claude.ai/artifact/NtYJeV3fySso3CRCF7iCMq), not the website palette.
+Its screens use the design's exact values, written as inline styles in
+`src/app/meet/MeetApp.tsx` (the `C` and `PERSON` constants): near-black `#0f0f0f`,
+cards `#1c1c1c`, grey text `#a3a3a3`, gold `#e8cc9c` for the "Meetings" label, and
+one colour pair per person (blue, teal, purple, rust, plum) so staff are easy to tell
+apart. Match the canvas exactly when adding screens here.
