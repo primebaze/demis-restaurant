@@ -39,7 +39,7 @@ const config: Config = {
         },
         // Admin only: booking dots, guest requirements, initials circles. See docs/COLOURS.md, "Admin".
         ember: {
-          50: '#f5e0d3',
+          50: '#fdf1ea',
           100: '#fde6dc',
           400: '#ee6a35',
           600: '#c4441a',
@@ -47,10 +47,10 @@ const config: Config = {
         },
         // Admin panels: warm ivory instead of pure white, so screens don't glare. Admin only. See docs/COLOURS.md, "Admin".
         sand: {
-          50: '#fbf1eb',
-          100: '#f6e9e0',
-          200: '#f0e0d5',
-          300: '#e6d3c5',
+          50: '#f8f5f1',
+          100: '#f2ede7',
+          200: '#ebe4dc',
+          300: '#e0d7cc',
         },
         // The admin's gold: brighter and cleaner than gold-300 on white. Admin only. See docs/COLOURS.md, "Admin".
         honey: {

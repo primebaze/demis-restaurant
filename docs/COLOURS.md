@@ -88,7 +88,7 @@ still apply to the guest site, the door kiosks and the blog.
 - **Background:** the Demi's dining room photo (`public/admin/dining-room.jpg`,
   class `admin-bg` in `src/app/admin/admin.css`). Nothing else goes behind pages.
 - **On the photo:** white text, frosted panels (`glass`) and dark glass buttons.
-- **Content:** blush cream sheets (`bg-sand-50`, #fbf1eb, rounded 22px) with `stone` text.
+- **Content:** warm ivory sheets (`bg-sand-50`, rounded 22px) with `stone` text.
   Inside them: `sand-100` for inputs, `sand-200` for tiles and tracks, `sand-300`
   for strong lines. No pure white panels (they glare on big screens).
 - **Popups** are dark frosted panels with white text (add `popup-dark` to the
