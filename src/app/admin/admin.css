@@ -103,15 +103,16 @@
   .live-dot { animation: none; }
 }
 
-/* Browser autofill paints inputs pale yellow; keep the frosted look on the sign-in page. */
+/* Browser autofill paints inputs a solid colour; hold it off so filled boxes stay frosted like empty ones. */
 .glass input:-webkit-autofill,
 .glass input:-webkit-autofill:hover,
 .glass input:-webkit-autofill:focus {
   -webkit-text-fill-color: #fff;
   caret-color: #fff;
-  -webkit-box-shadow: 0 0 0 1000px rgba(74, 62, 54, 0.92) inset;
-  box-shadow: 0 0 0 1000px rgba(74, 62, 54, 0.92) inset;
-  transition: background-color 9999s ease-out 0s;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: background-color 600000s ease-in-out 0s, color 600000s ease-in-out 0s;
+  box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.14);
 }
 
 /* Pages that draw their own layout (title, glass strip, sheets) put "own-layout" on
