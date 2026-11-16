@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { CalendarX, Check, ChevronLeft, ChevronRight, CircleCheck, MapPin, Plus, Trash2, Undo2, Users, X } from "lucide-react";
+import { Empty, OwnLayout, PageHead, Sheet, SheetFooter, SheetTitle, Tag, btn, field, fieldArea, statusLabel, statusTone, table, tableWrap } from "@/components/admin/ui";
 
 type BuffetBooking = {
   id: string;
@@ -15,11 +17,6 @@ type BuffetBooking = {
   notes: string;
   status: string;
   createdAt: string;
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  confirmed: "bg-emerald-50 text-emerald-700",
-  cancelled: "bg-red-50 text-red-700",
 };
 
 const LOCATIONS: Record<string, string> = {
@@ -125,186 +122,266 @@ export default function AdminBuffetPage() {
     fetchBookings();
   }
 
-  const inputCls = "w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 placeholder-stone-400";
-  const labelCls = "block text-xs text-stone-500 mb-1.5";
+  const labelCls = "mb-1.5 block px-1 text-xs font-light text-stone-500";
+  const iconBtn =
+    "flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-stone-300 disabled:opacity-40";
+  const isNew = (b: BuffetBooking) => Boolean(success) && success.includes(b.bookingCode);
+  const statusName = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <OwnLayout>
+      <PageHead
+        title="Buffet bookings"
+        subtitle="Group buffets at Cricklewood and Streatham Hill"
+        actions={
+          <button onClick={() => { setShowForm((s) => !s); setFormError(""); }} className={showForm ? btn.glass : btn.primary} aria-expanded={showForm}>
+            {showForm ? <X className="h-[18px] w-[18px]" strokeWidth={1.75} /> : <Plus className="h-[18px] w-[18px]" strokeWidth={1.75} />}
+            {showForm ? "Close" : "New booking"}
+          </button>
+        }
+      />
+
+      {/* Glass strip: count, status filter and the latest message */}
+      <section aria-label="Bookings summary" className="glass mb-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-[22px] px-5 py-3.5 text-white">
         <div>
-          <p className="text-sm text-stone-500 mt-0.5">{total} booking{total !== 1 ? "s" : ""}</p>
+          <div className="text-[13px] font-light text-white/85">Bookings</div>
+          <div className="mt-0.5 text-2xl font-light md:text-[26px]">{total}</div>
         </div>
-        <button
-          onClick={() => { setShowForm((s) => !s); setFormError(""); }}
-          className="px-4 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition"
-        >
-          {showForm ? "Close" : "+ New Booking"}
-        </button>
-      </div>
-
-      {success && (
-        <div className="mb-6 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">{success}</div>
-      )}
-
-      {/* New booking form */}
-      {showForm && (
-        <div className="mb-8 bg-white border border-stone-100 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-stone-100">
-            <h2 className="text-base font-semibold text-stone-900">New Buffet Booking</h2>
-            <p className="text-xs text-stone-500 mt-0.5">Enter booking details taken by phone or in person.</p>
+        <div className="inline-flex rounded-full border border-white/15 bg-[rgba(58,52,48,0.48)] p-1 backdrop-blur-xl" role="group" aria-label="Status">
+          {([["", "All statuses"], ["confirmed", "Confirmed"], ["cancelled", "Cancelled"]] as const).map(([v, l]) => (
+            <button
+              key={v || "all"}
+              onClick={() => { setFilterStatus(v); setPage(1); }}
+              aria-pressed={filterStatus === v}
+              className={`inline-flex h-9 items-center rounded-full px-4 text-sm whitespace-nowrap transition ${filterStatus === v ? "bg-white text-stone-900" : "text-white/90 hover:text-white"}`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+        {success && (
+          <div role="status" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm text-stone-900 md:ml-auto">
+            <CircleCheck className="h-4 w-4 shrink-0 text-emerald-700" strokeWidth={1.75} />
+            {success}
           </div>
-          <div className="p-6">
-            <div className="grid sm:grid-cols-2 gap-4 mb-4">
-              <div>
+        )}
+      </section>
+
+      <div className={`grid items-start gap-4 ${showForm ? "lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_360px]" : ""}`}>
+        {/* Bookings list */}
+        <Sheet label="Buffet bookings" className="overflow-hidden">
+          <div className="flex flex-wrap items-baseline gap-x-3 px-4 pb-3 pt-4 md:px-5 md:pt-5">
+            <h2 className="font-outfit text-[22px] font-normal tracking-tight">
+              {filterStatus ? `${statusName(filterStatus)} buffet bookings` : "All buffet bookings"}
+            </h2>
+            <span className="text-[13px] font-light text-stone-500">{total} booking{total !== 1 ? "s" : ""}</span>
+          </div>
+
+          {loading ? (
+            <Empty>Loading bookings…</Empty>
+          ) : bookings.length === 0 ? (
+            <Empty>No buffet bookings yet</Empty>
+          ) : (
+            <>
+              {/* Table: iPad and desktop */}
+              <div className={`hidden md:block ${tableWrap}`}>
+                <table className={`${table} [&_td:first-child]:pl-5 [&_th:first-child]:pl-5 [&_td:last-child]:pr-5 [&_th:last-child]:pr-5`}>
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Guest</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Location</th>
+                      <th>Party</th>
+                      <th>Status</th>
+                      <th><span className="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bookings.map((b) => {
+                      const off = b.status === "cancelled";
+                      return (
+                        <tr key={b.id} className={`transition-colors ${isNew(b) ? "bg-gold-50" : "hover:bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
+                          <td className={`whitespace-nowrap font-mono text-xs ${isNew(b) ? "text-gold-700" : "text-stone-500"}`}>{b.bookingCode}</td>
+                          <td>
+                            <div>{b.name}</div>
+                            {(b.phone || b.email) && <div className="text-xs font-light text-stone-500">{b.phone || b.email}</div>}
+                          </td>
+                          <td className="whitespace-nowrap">{formatDate(b.date)}</td>
+                          <td className="whitespace-nowrap">{b.time}</td>
+                          <td className="whitespace-nowrap">{LOCATIONS[b.locationSlug] || b.locationSlug}</td>
+                          <td className="whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1.5">
+                              <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                              {b.partySize}
+                            </span>
+                          </td>
+                          <td><Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag></td>
+                          <td>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => cancelBooking(b.id, b.status)}
+                                disabled={updating === b.id}
+                                aria-label={b.status === "confirmed" ? `Cancel ${b.bookingCode}` : `Restore ${b.bookingCode}`}
+                                title={b.status === "confirmed" ? "Cancel" : "Restore"}
+                                className={`${iconBtn} ${b.status === "confirmed" ? "hover:text-red-700" : "hover:text-emerald-700"}`}
+                              >
+                                {b.status === "confirmed" ? <CalendarX className="h-4 w-4" strokeWidth={1.5} /> : <Undo2 className="h-4 w-4" strokeWidth={1.5} />}
+                              </button>
+                              <button
+                                onClick={() => deleteBooking(b.id)}
+                                disabled={updating === b.id}
+                                aria-label={`Delete ${b.bookingCode}`}
+                                title="Delete"
+                                className={`${iconBtn} hover:text-red-700`}
+                              >
+                                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Cards: phones */}
+              <div className="space-y-2 px-3 pb-3 md:hidden">
+                {bookings.map((b) => {
+                  const off = b.status === "cancelled";
+                  return (
+                    <article key={b.id} className={`rounded-[18px] p-3.5 ${isNew(b) ? "bg-gold-50" : "bg-stone-50"} ${off ? "text-stone-400" : ""}`}>
+                      <div className="flex items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[15px]">{b.name}</div>
+                          <div className="text-xs font-light text-stone-500">
+                            <span className="font-mono">{b.bookingCode}</span>
+                            {(b.phone || b.email) && <> · {b.phone || b.email}</>}
+                          </div>
+                        </div>
+                        <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
+                        <span>{formatDate(b.date)} · {b.time}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                          {LOCATIONS[b.locationSlug] || b.locationSlug}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Users className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                          {b.partySize}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <button onClick={() => cancelBooking(b.id, b.status)} disabled={updating === b.id} className={btn.small}>
+                          {b.status === "confirmed" ? <CalendarX className="h-3.5 w-3.5" strokeWidth={1.5} /> : <Undo2 className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                          {updating === b.id ? "…" : b.status === "confirmed" ? "Cancel" : "Restore"}
+                        </button>
+                        <button onClick={() => deleteBooking(b.id)} disabled={updating === b.id} className={`${btn.small} hover:text-red-700`}>
+                          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          Delete
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {totalPages > 1 && (
+            <SheetFooter>
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className={btn.small}>
+                <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                Previous
+              </button>
+              <span className="mx-auto text-stone-500">Page {page} of {totalPages}</span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="inline-flex h-8 items-center gap-1 rounded-full bg-stone-900 px-3 text-[13px] text-white transition hover:bg-black disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+              </button>
+            </SheetFooter>
+          )}
+        </Sheet>
+
+        {/* New booking form */}
+        {showForm && (
+          <Sheet label="New buffet booking" className="order-first p-5 lg:order-none">
+            <SheetTitle
+              aside={
+                <button
+                  onClick={() => { setShowForm(false); setFormError(""); }}
+                  aria-label="Close"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-600 hover:text-stone-900"
+                >
+                  <X className="h-4 w-4" strokeWidth={1.75} />
+                </button>
+              }
+            >
+              New buffet booking
+            </SheetTitle>
+            <p className="mt-0.5 text-[13px] font-light text-stone-500">Enter booking details taken by phone or in person.</p>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="col-span-2">
                 <label className={labelCls}>Name *</label>
-                <input type="text" value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Guest name" className={inputCls} />
+                <input type="text" value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Guest name" className={field} />
               </div>
-              <div>
+              <div className="col-span-2 sm:col-span-1 lg:col-span-2 xl:col-span-1">
                 <label className={labelCls}>Email</label>
-                <input type="email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" className={inputCls} />
+                <input type="email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@example.com" className={field} />
               </div>
-              <div>
+              <div className="col-span-2 sm:col-span-1 lg:col-span-2 xl:col-span-1">
                 <label className={labelCls}>Phone</label>
-                <input type="tel" value={form.phone} onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="07700 000000" className={inputCls} />
+                <input type="tel" value={form.phone} onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="07700 000000" className={field} />
               </div>
               <div>
-                <label className={labelCls}>Party Size *</label>
-                <input type="number" min="1" value={form.partySize} onChange={(e) => setForm(f => ({ ...f, partySize: e.target.value }))} placeholder="e.g. 20" className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Date *</label>
-                <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={inputCls + " [color-scheme:light]"} />
-              </div>
-              <div>
-                <label className={labelCls}>Time *</label>
-                <input type="time" value={form.time} onChange={(e) => setForm(f => ({ ...f, time: e.target.value }))} className={inputCls + " [color-scheme:light]"} />
+                <label className={labelCls}>Party size *</label>
+                <input type="number" min="1" value={form.partySize} onChange={(e) => setForm(f => ({ ...f, partySize: e.target.value }))} placeholder="e.g. 20" className={field} />
               </div>
               <div>
                 <label className={labelCls}>Location</label>
-                <select value={form.locationSlug} onChange={(e) => setForm(f => ({ ...f, locationSlug: e.target.value }))} className={inputCls}>
+                <select value={form.locationSlug} onChange={(e) => setForm(f => ({ ...f, locationSlug: e.target.value }))} className={field}>
                   <option value="cricklewood">Cricklewood</option>
                   <option value="streatham">Streatham Hill</option>
                 </select>
               </div>
-              <div className="sm:col-span-2">
+              <div>
+                <label className={labelCls}>Date *</label>
+                <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={field} />
+              </div>
+              <div>
+                <label className={labelCls}>Time *</label>
+                <input type="time" value={form.time} onChange={(e) => setForm(f => ({ ...f, time: e.target.value }))} className={field} />
+              </div>
+              <div className="col-span-2">
                 <label className={labelCls}>Notes</label>
-                <textarea value={form.notes} onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any notes…" rows={2} className={inputCls + " resize-none"} />
+                <textarea value={form.notes} onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any notes…" rows={2} className={`${fieldArea} resize-none`} />
               </div>
             </div>
 
             {formError && (
-              <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{formError}</p>
+              <p className="mt-3 rounded-2xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{formError}</p>
             )}
 
-            <div className="flex gap-3">
-              <button onClick={createBooking} disabled={creating} className="px-5 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
-                {creating ? "Saving…" : "Save Booking"}
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button onClick={createBooking} disabled={creating} className={btn.primary}>
+                <Check className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                {creating ? "Saving…" : "Save booking"}
               </button>
-              <button onClick={() => { setShowForm(false); setFormError(""); }} className="px-4 py-2 text-sm text-stone-500 hover:text-stone-900 transition">
+              <button onClick={() => { setShowForm(false); setFormError(""); }} className={btn.light}>
                 Cancel
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <select
-          value={filterStatus}
-          onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-        >
-          <option value="">All Statuses</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        {filterStatus && (
-          <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-stone-500 hover:text-stone-900 transition">
-            Clear
-          </button>
+          </Sheet>
         )}
       </div>
-
-      {/* Bookings table */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-stone-500">Loading bookings…</div>
-        ) : bookings.length === 0 ? (
-          <div className="p-8 text-center text-stone-500">No buffet bookings yet</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
-                  <th className="px-4 py-3">Code</th>
-                  <th className="px-4 py-3">Guest</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Time</th>
-                  <th className="px-4 py-3">Location</th>
-                  <th className="px-4 py-3">Party</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-stone-100 hover:bg-stone-50">
-                    <td className="px-4 py-3 text-sm font-mono text-gold-700 font-semibold">{b.bookingCode}</td>
-                    <td className="px-4 py-3">
-                      <p className="text-sm text-stone-900">{b.name}</p>
-                      {(b.phone || b.email) && <p className="text-xs text-stone-500">{b.phone || b.email}</p>}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-stone-700">{formatDate(b.date)}</td>
-                    <td className="px-4 py-3 text-sm text-stone-700">{b.time}</td>
-                    <td className="px-4 py-3 text-sm text-stone-500">{LOCATIONS[b.locationSlug] || b.locationSlug}</td>
-                    <td className="px-4 py-3 text-sm text-stone-900">{b.partySize}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status] || "bg-stone-100 text-stone-700"}`}>
-                        {b.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => cancelBooking(b.id, b.status)}
-                          disabled={updating === b.id}
-                          className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 ${
-                            b.status === "confirmed"
-                              ? "bg-red-50 text-red-700 hover:bg-red-50"
-                              : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
-                          }`}
-                        >
-                          {updating === b.id ? "…" : b.status === "confirmed" ? "Cancel" : "Restore"}
-                        </button>
-                        <button
-                          onClick={() => deleteBooking(b.id)}
-                          disabled={updating === b.id}
-                          className="text-xs px-2 py-1.5 text-stone-500 hover:text-red-700 transition disabled:opacity-50"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
-              ← Previous
-            </button>
-            <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
-              Next →
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    </OwnLayout>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
+import { OwnLayout, PageHead, GlassStats, Sheet, SheetFooter, Tag, Seg, Empty, btn, table, tableWrap, type Tone } from "@/components/admin/ui";
 
 type Log = {
   id: string;
@@ -15,21 +17,17 @@ type Log = {
   sentAt: string | null;
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  sent: "bg-emerald-50 text-emerald-700",
-  queued: "bg-amber-50 text-amber-800",
-  failed: "bg-red-50 text-red-700",
-};
+const STATUS_TONE: Record<string, Tone> = { sent: "ok", queued: "wait", failed: "bad" };
 
 const TYPE_COLORS: Record<string, string> = {
-  transactional: "bg-stone-100 text-stone-800",
-  direct: "bg-gold-100 text-gold-700",
+  transactional: "bg-stone-100 text-stone-700",
+  direct: "bg-gold-100 text-gold-800",
   bulk: "bg-stone-100 text-stone-500",
   admin: "bg-stone-100 text-stone-700",
 };
 
 function fmt(dateStr: string | null) {
-  if (!dateStr) return "—";
+  if (!dateStr) return "Not yet";
   return new Date(dateStr).toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
@@ -142,171 +140,223 @@ export default function EmailLogsPage() {
     { label: "Total logged", value: total },
   ];
 
-  return (
-    <div>
-      <div className="mb-6">
-        <p className="text-sm text-stone-500 mt-0.5">Every email sent, queued or failed — who received it and when.</p>
-      </div>
+  const box = "h-[18px] w-[18px] shrink-0 cursor-pointer rounded accent-gold-300 align-middle";
+  const allOn = logs.length > 0 && selected.size === logs.length;
 
-      {/* Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-xl p-4 border bg-white border-stone-100">
-            <p className="text-xs text-stone-500 uppercase tracking-wider mb-1 truncate">{s.label}</p>
-            <p className="text-2xl font-bold text-stone-900">{s.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <select
-          value={filterStatus}
-          onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
+  const typeTag = (t: string) => (
+    <span className={`inline-flex h-6 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${TYPE_COLORS[t] || "bg-stone-100 text-stone-700"}`}>{t}</span>
+  );
+  const statusTag = (l: Log) => (
+    <span title={l.error || undefined}>
+      <Tag tone={STATUS_TONE[l.status] || "off"}>{l.status.charAt(0).toUpperCase() + l.status.slice(1)}</Tag>
+    </span>
+  );
+  const actions = (l: Log) => (
+    <span className="inline-flex gap-1.5">
+      {l.type === "bulk" && (
+        <button
+          onClick={() => resend(l.id)}
+          disabled={resending === l.id}
+          title="Send this email again now"
+          className="inline-flex h-8 items-center rounded-full border border-gold-200 bg-gold-50 px-3 text-[13px] text-gold-800 transition hover:bg-gold-100 disabled:opacity-50"
         >
-          <option value="">All Statuses</option>
-          <option value="sent">Sent</option>
-          <option value="queued">Queued</option>
-          <option value="failed">Failed</option>
-        </select>
-        {filterStatus && (
-          <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-stone-500 hover:text-stone-900 transition">
-            Clear
-          </button>
-        )}
-        <div className="flex-1" />
-        {selected.size > 0 && (
-          <button onClick={deleteSelected} disabled={deleting} className="px-3 py-2 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-50 transition disabled:opacity-50">
-            Delete selected ({selected.size})
-          </button>
-        )}
-        {total > 0 && (
-          <button onClick={deleteAll} disabled={deleting} className="px-3 py-2 text-sm text-stone-500 hover:text-red-700 transition disabled:opacity-50">
-            Delete all
-          </button>
-        )}
-      </div>
+          {resending === l.id ? "…" : "Resend"}
+        </button>
+      )}
+      <button onClick={() => viewEmail(l.id)} title="View the full email" className={btn.small}>
+        View
+      </button>
+    </span>
+  );
 
-      {/* Table */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
+  return (
+    <OwnLayout>
+      <PageHead title="Email Logs" subtitle="Every email sent, queued or failed: who received it and when" />
+
+      <GlassStats items={stats.map((s) => ({ label: s.label, value: s.value.toLocaleString("en-GB") }))} />
+
+      <Sheet label="All emails" className="overflow-hidden">
+        <div className="flex flex-col gap-3 px-4 pb-3.5 pt-[18px] lg:flex-row lg:items-center md:px-5">
+          <div className="flex items-baseline gap-3">
+            <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">All emails</h2>
+            <span className="text-[13px] font-light text-stone-500">Bulk sends drain at 15 an hour</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
+            <Seg
+              label="Status"
+              value={filterStatus}
+              onChange={(v) => { setFilterStatus(v); setPage(1); }}
+              options={[
+                { value: "", label: "All" },
+                { value: "sent", label: "Sent" },
+                { value: "queued", label: "Queued" },
+                { value: "failed", label: "Failed" },
+              ]}
+            />
+            {selected.size > 0 && (
+              <button
+                onClick={deleteSelected}
+                disabled={deleting}
+                className="inline-flex h-10 items-center gap-1.5 rounded-full border border-red-100 bg-red-50 px-4 text-sm text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                Delete selected ({selected.size})
+              </button>
+            )}
+            {total > 0 && (
+              <button onClick={deleteAll} disabled={deleting} className={`${btn.light} hover:text-red-700`}>
+                Delete all
+              </button>
+            )}
+          </div>
+        </div>
+
         {loading ? (
-          <div className="p-8 text-center text-stone-500">Loading…</div>
+          <Empty>Loading…</Empty>
         ) : logs.length === 0 ? (
-          <div className="p-8 text-center text-stone-500">No email logs yet</div>
+          <Empty>No email logs yet</Empty>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
-                  <th className="px-4 py-3 w-10">
+          <>
+            {/* Phones: one card per email */}
+            <div className="md:hidden">
+              <label className="flex items-center gap-3 border-t border-stone-100 px-4 py-2.5 text-xs text-stone-500">
+                <input type="checkbox" aria-label="Select all" checked={allOn} onChange={toggleSelectAll} className={box} />
+                Select all on this page
+              </label>
+              <ul>
+                {logs.map((l) => (
+                  <li key={l.id} className={`flex gap-3 border-t border-stone-100 px-4 py-3 ${selected.has(l.id) ? "bg-gold-50" : ""}`}>
                     <input
                       type="checkbox"
-                      checked={logs.length > 0 && selected.size === logs.length}
-                      onChange={toggleSelectAll}
-                      className="accent-gold-300 w-4 h-4 align-middle"
+                      aria-label={`Select email to ${l.recipient}`}
+                      checked={selected.has(l.id)}
+                      onChange={() => toggleSelect(l.id)}
+                      className={`${box} mt-0.5`}
                     />
-                  </th>
-                  <th className="px-4 py-3">Recipient</th>
-                  <th className="px-4 py-3">Subject</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Via</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Created</th>
-                  <th className="px-4 py-3">Sent</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((l) => (
-                  <tr key={l.id} className="border-b border-stone-100 hover:bg-stone-50">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selected.has(l.id)}
-                        onChange={() => toggleSelect(l.id)}
-                        className="accent-gold-300 w-4 h-4 align-middle"
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-sm text-stone-900">{l.recipient}</td>
-                    <td className="px-4 py-3 text-sm text-stone-700 max-w-xs truncate" title={l.subject}>{l.subject}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLORS[l.type] || "bg-stone-100 text-stone-700"}`}>
-                        {l.type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-stone-500 uppercase">{l.provider}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[l.status] || "bg-stone-100 text-stone-700"}`} title={l.error || undefined}>
-                        {l.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-stone-500">{fmt(l.createdAt)}</td>
-                    <td className="px-4 py-3 text-sm text-stone-500">{fmt(l.sentAt)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => viewEmail(l.id)}
-                          className="text-xs px-3 py-1.5 bg-stone-50 border border-stone-200 text-stone-700 rounded-lg hover:bg-stone-100 transition"
-                          title="View the full email"
-                        >
-                          View
-                        </button>
-                        {l.type === "bulk" && (
-                          <button
-                            onClick={() => resend(l.id)}
-                            disabled={resending === l.id}
-                            className="text-xs px-3 py-1.5 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-100 transition disabled:opacity-50"
-                            title="Send this email again now"
-                          >
-                            {resending === l.id ? "…" : "Resend"}
-                          </button>
-                        )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm text-stone-900">{l.recipient}</p>
+                      <p className="mt-0.5 truncate text-xs text-stone-500">{l.subject}</p>
+                      {l.status === "failed" && l.error && <p className="mt-1 text-xs text-red-700">{l.error}</p>}
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-stone-500">
+                        {statusTag(l)}
+                        {typeTag(l.type)}
+                        <span className="text-[11px] uppercase tracking-wider">{l.provider}</span>
                       </div>
-                    </td>
-                  </tr>
+                      <p className="mt-1.5 text-xs text-stone-500">
+                        Created {fmt(l.createdAt)} · sent {l.sentAt ? fmt(l.sentAt) : "not yet"}
+                      </p>
+                      <div className="mt-2">{actions(l)}</div>
+                    </div>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+            </div>
+
+            {/* iPad and up: the table */}
+            <div className={`hidden md:block ${tableWrap}`}>
+              <table className={table}>
+                <thead>
+                  <tr>
+                    <th className="w-12 !pl-5">
+                      <input type="checkbox" aria-label="Select all" checked={allOn} onChange={toggleSelectAll} className={box} />
+                    </th>
+                    <th>Recipient</th>
+                    <th>Subject</th>
+                    <th>Type</th>
+                    <th>Via</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Sent</th>
+                    <th className="!pr-5"><span className="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((l) => (
+                    <tr key={l.id} className={selected.has(l.id) ? "bg-gold-50" : "hover:bg-stone-50"}>
+                      <td className="!pl-5">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select email to ${l.recipient}`}
+                          checked={selected.has(l.id)}
+                          onChange={() => toggleSelect(l.id)}
+                          className={box}
+                        />
+                      </td>
+                      <td className="max-w-[200px] truncate text-stone-900" title={l.recipient}>{l.recipient}</td>
+                      <td className="max-w-[260px] text-stone-500">
+                        <span className="block truncate" title={l.subject}>{l.subject}</span>
+                        {l.status === "failed" && l.error && (
+                          <span className="block truncate text-xs text-red-700" title={l.error}>{l.error}</span>
+                        )}
+                      </td>
+                      <td>{typeTag(l.type)}</td>
+                      <td className="text-[11px] uppercase tracking-wider text-stone-500">{l.provider}</td>
+                      <td>{statusTag(l)}</td>
+                      <td className="whitespace-nowrap text-stone-500">{fmt(l.createdAt)}</td>
+                      <td className="whitespace-nowrap text-stone-500">{fmt(l.sentAt)}</td>
+                      <td className="!pr-5 whitespace-nowrap text-right">{actions(l)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
-              ← Previous
-            </button>
-            <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
-              Next →
-            </button>
-          </div>
-        )}
-      </div>
+        <SheetFooter>
+          <span className="text-stone-500">{totalPages > 1 ? `Page ${page} of ${totalPages}` : `${total.toLocaleString("en-GB")} ${total === 1 ? "email" : "emails"}`}</span>
+          {totalPages > 1 && (
+            <>
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className={`${btn.small} ml-auto`}>
+                <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                Previous
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="inline-flex h-8 items-center gap-1 rounded-full bg-stone-900 px-3 text-[13px] text-white transition hover:bg-black disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+              </button>
+            </>
+          )}
+        </SheetFooter>
+      </Sheet>
 
-      {/* View email modal */}
+      {/* View email */}
       {viewing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setViewing(null)}>
-          <div className="w-full max-w-2xl bg-white border border-stone-100 rounded-2xl overflow-hidden flex flex-col max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-stone-100">
-              <p className="text-sm font-semibold text-stone-900 truncate">{viewing.subject || "…"}</p>
-              <p className="text-xs text-stone-500 truncate">To: {viewing.recipient}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" onClick={() => setViewing(null)}>
+          <div
+            role="dialog"
+            aria-label="Email preview"
+            className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] bg-white text-stone-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 border-b border-stone-100 px-5 py-4">
+              <div className="min-w-0">
+                <h2 className="truncate font-outfit text-lg font-normal">{viewing.subject || "…"}</h2>
+                <p className="truncate text-xs text-stone-500">To: {viewing.recipient}</p>
+              </div>
+              <button onClick={() => setViewing(null)} aria-label="Close" className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:text-stone-900">
+                <X className="h-4 w-4" strokeWidth={1.75} />
+              </button>
             </div>
             <div className="flex-1 overflow-auto bg-white">
               {viewLoading ? (
-                <div className="p-8 text-center text-stone-500">Loading…</div>
+                <Empty>Loading…</Empty>
               ) : viewing.bodyHtml ? (
-                <iframe title="Email preview" srcDoc={viewing.bodyHtml} className="w-full h-[60vh]" sandbox="" />
+                <iframe title="Email preview" srcDoc={viewing.bodyHtml} className="h-[60vh] w-full" sandbox="" />
               ) : (
-                <div className="p-8 text-center text-stone-500">No stored body for this email (logged before full-body capture).</div>
+                <Empty>No stored body for this email (logged before full-body capture).</Empty>
               )}
             </div>
-            <div className="px-5 py-3 border-t border-stone-100 text-right">
-              <button onClick={() => setViewing(null)} className="px-4 py-2 text-sm text-stone-500 hover:text-stone-900 transition">Close</button>
+            <div className="border-t border-stone-100 px-5 py-3 text-right">
+              <button onClick={() => setViewing(null)} className={btn.light}>Close</button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </OwnLayout>
   );
 }

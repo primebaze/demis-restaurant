@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { Trash2 } from "lucide-react";
+import { Avatar, Empty, GlassStats, OwnLayout, PageHead, Sheet, SheetTitle, btn, field, fieldArea } from "@/components/admin/ui";
 
 type Review = {
   id: string;
@@ -20,7 +22,7 @@ function Stars({ n, onChange }: { n: number; onChange?: (v: number) => void }) {
           key={i}
           type="button"
           onClick={() => onChange?.(i)}
-          className={`${i <= n ? "text-gold-700" : "text-stone-400"} ${onChange ? "cursor-pointer" : "cursor-default"}`}
+          className={`${i <= n ? "text-gold-700" : "text-stone-300"} ${onChange ? "cursor-pointer text-xl leading-none" : "cursor-default"}`}
           aria-label={`${i} star`}
         >
           ★
@@ -81,60 +83,103 @@ export default function AdminReviewsPage() {
     fetchReviews();
   }
 
+  const live = reviews.filter((r) => r.active).length;
+  const average = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "0";
+
   return (
-    <div>
-      <div className="mb-6">
-        <p className="text-sm text-stone-500 mt-0.5">Write reviews to show on the Sunday buffet page.</p>
-      </div>
+    <OwnLayout>
+      <PageHead title="Reviews" subtitle="Write reviews to show on the Sunday buffet page." />
 
-      {/* New review */}
-      <div className="bg-white border border-stone-100 rounded-2xl p-5 mb-8">
-        <h2 className="text-sm font-semibold text-stone-900 mb-4">New review</h2>
-        <div className="grid sm:grid-cols-2 gap-3 mb-3">
-          <input value={author} onChange={(e) => setAuthor(e.target.value)} maxLength={80} placeholder="Reviewer name" className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400" />
-          <input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={80} placeholder="Location (optional, e.g. Streatham Hill)" className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400" />
-        </div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs text-stone-500">Rating:</span>
-          <Stars n={rating} onChange={setRating} />
-        </div>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} rows={3} placeholder="The review…" className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 resize-y mb-1" />
-        <p className="text-[11px] text-stone-400 mb-3">{text.length}/1000</p>
-        {error && <p className="text-xs text-red-700 mb-3">{error}</p>}
-        <button onClick={create} disabled={saving} className="px-4 py-2 bg-gold-300 text-black font-semibold rounded-lg text-sm hover:bg-gold-400 transition disabled:opacity-40">
-          {saving ? "Saving…" : "Add review"}
-        </button>
-      </div>
+      <GlassStats
+        items={[
+          { label: "Reviews", value: loading ? "…" : reviews.length },
+          { label: "Live", value: loading ? "…" : live, hint: "shown on the page" },
+          { label: "Hidden", value: loading ? "…" : reviews.length - live },
+          { label: "Average rating", value: loading ? "…" : average, hint: "out of 5" },
+        ]}
+      />
 
-      {/* Existing */}
-      {loading ? (
-        <p className="text-stone-500 text-sm">Loading…</p>
-      ) : reviews.length === 0 ? (
-        <p className="text-stone-500 text-sm">No reviews yet.</p>
-      ) : (
-        <div className="space-y-3">
-          {reviews.map((r) => (
-            <div key={r.id} className="bg-white border border-stone-100 rounded-xl p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-stone-900">{r.author}</span>
-                    <Stars n={r.rating} />
-                    {r.location && <span className="text-xs text-stone-500">· {r.location}</span>}
-                  </div>
-                  <p className="text-sm text-stone-500 mt-1 whitespace-pre-wrap break-words">{r.body}</p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <button onClick={() => toggle(r)} className={`text-xs px-2.5 py-1 rounded-full font-medium ${r.active ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
-                    {r.active ? "Live" : "Hidden"}
-                  </button>
-                  <button onClick={() => remove(r)} className="text-xs text-red-700 hover:text-red-700">Delete</button>
-                </div>
-              </div>
+      <div className="grid gap-4 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+        {/* New review */}
+        <Sheet label="New review" className="p-4 md:p-5">
+          <SheetTitle>New review</SheetTitle>
+          <div className="mt-4 space-y-3">
+            <label className="block">
+              <span className="mb-1.5 ml-1 block text-xs text-stone-500">Reviewer name</span>
+              <input value={author} onChange={(e) => setAuthor(e.target.value)} maxLength={80} placeholder="Reviewer name" className={field} />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 ml-1 block text-xs text-stone-500">Location</span>
+              <input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={80} placeholder="Optional, e.g. Streatham Hill" className={field} />
+            </label>
+            <div className="flex items-center gap-3 rounded-full bg-stone-50 px-4 py-2">
+              <span className="text-xs text-stone-500">Rating</span>
+              <Stars n={rating} onChange={setRating} />
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+            <div>
+              <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} rows={5} placeholder="The review…" aria-label="Review text" className={`${fieldArea} resize-y`} />
+              <p className="mr-1 mt-1 text-right text-[11px] text-stone-400">{text.length}/1000</p>
+            </div>
+            {error && <p className="rounded-2xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{error}</p>}
+            <button type="button" onClick={create} disabled={saving} className={`${btn.primary} w-full justify-center`}>
+              {saving ? "Saving…" : "Add review"}
+            </button>
+          </div>
+        </Sheet>
+
+        {/* Existing */}
+        <Sheet label="All reviews" className="overflow-hidden">
+          <div className="px-4 pb-3 pt-4 md:px-5">
+            <SheetTitle>
+              All reviews
+              {!loading && <span className="ml-1.5 text-[13px] font-light text-stone-500">{reviews.length}</span>}
+            </SheetTitle>
+          </div>
+          {loading ? (
+            <Empty>Loading…</Empty>
+          ) : reviews.length === 0 ? (
+            <Empty>No reviews yet.</Empty>
+          ) : (
+            <ul>
+              {reviews.map((r) => (
+                <li key={r.id} className="flex items-start gap-3 border-t border-stone-100 px-4 py-3.5 md:px-5">
+                  <Avatar name={r.author} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <span className="text-[15px] text-stone-900">{r.author}</span>
+                      <Stars n={r.rating} />
+                      {r.location && <span className="text-xs text-stone-500">· {r.location}</span>}
+                    </div>
+                    <p className={`mt-1 whitespace-pre-wrap break-words text-sm ${r.active ? "text-stone-600" : "text-stone-400"}`}>{r.body}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => toggle(r)}
+                      aria-pressed={r.active}
+                      title={r.active ? "Shown on the page. Click to hide." : "Hidden. Click to show."}
+                      className={`inline-flex h-7 items-center rounded-full px-3 text-xs transition ${
+                        r.active ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+                      }`}
+                    >
+                      {r.active ? "Live" : "Hidden"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => remove(r)}
+                      aria-label={`Delete review by ${r.author}`}
+                      title="Delete"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-red-700 transition hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Sheet>
+      </div>
+    </OwnLayout>
   );
 }

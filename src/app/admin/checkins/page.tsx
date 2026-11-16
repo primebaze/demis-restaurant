@@ -1,6 +1,20 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { CalendarDays, ExternalLink, Radio, RotateCcw, Tablet, Users } from "lucide-react";
+import { OwnLayout, PageHead, PillSwitch, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, table, tableWrap } from "@/components/admin/ui";
+
+const SERVICES = [
+  { href: "/admin/checkins", label: "Sunday Buffet" },
+  { href: "/admin/brunch-checkins", label: "Sunday Feast" },
+];
+
+/** "2026-11-15" to "Sun 15 Nov". */
+function dayLabel(iso: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" });
+}
 
 type CheckIn = {
   id: string;
@@ -82,38 +96,153 @@ export default function AdminCheckinsPage() {
 
   const isToday = date === ukToday();
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-          <p className="text-sm text-stone-500 mt-0.5">Door kiosk at <span className="text-gold-700">/checkin</span></p>
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm [color-scheme:light] focus:outline-none focus:border-gold-400"
-          />
-          <button
-            onClick={resetDay}
-            className="px-3 py-2 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-50 transition"
-          >
-            Reset day
-          </button>
-        </div>
-      </div>
+  const covers = (c: CheckIn) => `${c.number}${c.partySize > 1 ? ` to ${c.endCover}` : ""}`;
+  const groups = data?.checkins.length ?? 0;
 
-      {/* PIN management */}
-      <div className="mb-6 p-4 bg-stone-50 border border-stone-100 rounded-2xl">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <p className="text-sm font-semibold text-stone-900">Kiosk PIN</p>
-            <p className="text-xs text-stone-500">
-              {pinConfigured === null ? "…" : pinConfigured ? "A PIN is set. Enter a new one to rotate it." : "No PIN set yet — set one to enable the kiosk."}
-            </p>
+  return (
+    <OwnLayout>
+      <PageHead
+        title="Check-ins"
+        subtitle="Who came through the door, numbered as they arrive"
+        actions={
+          <>
+            <PillSwitch items={SERVICES} current="/admin/checkins" label="Service" />
+            <label className="inline-flex h-[46px] items-center gap-2 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] pl-4 pr-3 text-white backdrop-blur-xl">
+              <CalendarDays className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+              <span className="sr-only">Day</span>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="bg-transparent text-[15px] font-light text-white outline-none [color-scheme:dark]"
+              />
+            </label>
+          </>
+        }
+      />
+
+      <GlassStats
+        items={[
+          { label: `People in${isToday ? " today" : ""}`, value: data?.total ?? 0 },
+          { label: "£20 · covers 1 to 20", value: data?.tiers.t20 ?? 0 },
+          { label: "£25 · covers 21 to 45", value: data?.tiers.t25 ?? 0 },
+          { label: "£30 · covers 46 and up", value: data?.tiers.t30 ?? 0 },
+        ]}
+      />
+
+      <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_310px] xl:grid-cols-[minmax(0,1fr)_330px]">
+        <Sheet label="Check-ins" className="min-w-0 pt-[18px]">
+          <div className="px-4 md:px-5">
+            <SheetTitle aside={isToday ? <Tag tone="ok"><Radio className="h-3.5 w-3.5" strokeWidth={1.75} />Live</Tag> : undefined}>
+              Buffet check-ins
+              <span className="ml-2.5 align-middle text-[13px] font-light text-stone-500">{groups} {groups === 1 ? "group" : "groups"}</span>
+            </SheetTitle>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className={`mt-3 transition-opacity ${loading && data?.checkins.length ? "opacity-50" : ""}`}>
+            {loading && !data?.checkins.length ? (
+              <Empty>Loading…</Empty>
+            ) : !data || data.checkins.length === 0 ? (
+              <Empty>No check-ins for this day</Empty>
+            ) : (
+              <>
+                {/* Phones: one card per group */}
+                <ul className="divide-y divide-stone-100 border-t border-stone-100 md:hidden">
+                  {data.checkins.map((c) => {
+                    const left = remaining(c.endsAt, now);
+                    return (
+                      <li key={c.id} className="flex items-center gap-3 px-4 py-3">
+                        <div className="w-[76px] shrink-0 font-medium tabular-nums">{covers(c)}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`truncate ${c.name ? "" : "text-stone-400"}`}>{c.name || "No name"}</span>
+                            <span className="inline-flex shrink-0 items-center gap-1 text-sm">
+                              <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                              {c.partySize}
+                            </span>
+                          </div>
+                          <div className="mt-0.5 text-xs text-stone-500">
+                            In {fmt(c.checkedInAt)} · finish by {fmt(c.endsAt)}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <Tag tone="gold">£{c.price}</Tag>
+                          <span className={`text-sm ${left === "over" ? "text-red-700" : "font-medium text-gold-700"}`}>{left}</span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {/* iPad and up: the table */}
+                <div className={`${tableWrap} hidden px-2 md:block`}>
+                  <table className={table}>
+                    <thead>
+                      <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Party</th>
+                        <th>Price</th>
+                        <th>In</th>
+                        <th>Finish by</th>
+                        <th>Left</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.checkins.map((c) => {
+                        const left = remaining(c.endsAt, now);
+                        return (
+                          <tr key={c.id} className="hover:bg-stone-50">
+                            <td className="whitespace-nowrap font-medium tabular-nums">{covers(c)}</td>
+                            <td>{c.name || <span className="text-stone-400">No name</span>}</td>
+                            <td>
+                              <span className="inline-flex items-center gap-1">
+                                <Users className="h-4 w-4 text-stone-400" strokeWidth={1.5} />
+                                {c.partySize}
+                              </span>
+                            </td>
+                            <td><Tag tone="gold">£{c.price}</Tag></td>
+                            <td className="tabular-nums text-stone-500">{fmt(c.checkedInAt)}</td>
+                            <td className="tabular-nums">{fmt(c.endsAt)}</td>
+                            <td className={left === "over" ? "text-red-700" : "font-medium text-gold-700"}>{left}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="mt-1">
+            <SheetFooter>
+              <span className="text-stone-500">
+                {groups} {groups === 1 ? "group" : "groups"}, {data?.total ?? 0} {(data?.total ?? 0) === 1 ? "person" : "people"} on {dayLabel(date)}
+              </span>
+            </SheetFooter>
+          </div>
+        </Sheet>
+
+        <Sheet label="Door kiosk" className="flex flex-col p-[18px]">
+          <SheetTitle>Door kiosk</SheetTitle>
+          <a
+            href="/checkin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 flex items-center gap-2.5 rounded-2xl bg-stone-100 px-3.5 py-3 text-sm transition hover:bg-stone-200"
+          >
+            <Tablet className="h-5 w-5 shrink-0 text-gold-700" strokeWidth={1.5} />
+            <span>
+              Guests check in at <b className="font-medium">/checkin</b>
+            </span>
+            <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-stone-500" strokeWidth={1.5} />
+          </a>
+
+          <h2 className="mt-5 font-outfit text-[17px] font-normal tracking-tight">Kiosk PIN</h2>
+          <p className="mt-1 text-[13px] font-light text-stone-500">
+            {pinConfigured === null ? "…" : pinConfigured ? "A PIN is set. Enter a new one to rotate it." : "No PIN set yet. Set one to turn the kiosk on."}
+          </p>
+          <div className="mt-3 flex gap-2">
             <input
               type="password"
               inputMode="numeric"
@@ -121,69 +250,27 @@ export default function AdminCheckinsPage() {
               value={newPin}
               onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="4 digits"
-              className="w-32 px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
+              aria-label="New kiosk PIN"
+              className={`${field} min-w-0 flex-1`}
             />
-            <button onClick={savePin} disabled={!newPin} className="px-4 py-2 bg-gold-300 text-ink-900 rounded-lg text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
+            <button onClick={savePin} disabled={!newPin} className={btn.primary}>
               Save
             </button>
-            {pinMsg && <span className="text-xs text-stone-500">{pinMsg}</span>}
           </div>
-        </div>
-      </div>
+          {pinMsg && <p className="ml-1 mt-2 text-xs text-stone-600" role="status">{pinMsg}</p>}
 
-      {/* Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="rounded-xl p-4 border bg-gold-100 border-gold-400">
-          <p className="text-xs text-stone-500 uppercase tracking-wider mb-1">People in {isToday ? "today" : ""}</p>
-          <p className="text-2xl font-bold text-gold-700">{data?.total ?? 0}</p>
-        </div>
-        <div className="rounded-xl p-4 border bg-white border-stone-100"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£20 (1–20)</p><p className="text-2xl font-bold text-emerald-700">{data?.tiers.t20 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-white border-stone-100"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£25 (21–45)</p><p className="text-2xl font-bold text-amber-800">{data?.tiers.t25 ?? 0}</p></div>
-        <div className="rounded-xl p-4 border bg-white border-stone-100"><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">£30 (46+)</p><p className="text-2xl font-bold text-red-700">{data?.tiers.t30 ?? 0}</p></div>
-      </div>
+          <h2 className="mt-5 font-outfit text-[17px] font-normal tracking-tight">Reset day</h2>
+          <p className="mt-1 text-[13px] font-light leading-relaxed text-stone-500">Clears all check-ins for {dayLabel(date)}. Numbering starts again at 1.</p>
+          <button onClick={resetDay} className={`${btn.light} mt-3 self-start`}>
+            <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+            Reset day
+          </button>
 
-      {/* Table */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-stone-500">Loading…</div>
-        ) : !data || data.checkins.length === 0 ? (
-          <div className="p-8 text-center text-stone-500">No check-ins for this day</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
-                  <th className="px-4 py-3">No.</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Party</th>
-                  <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3">In</th>
-                  <th className="px-4 py-3">Finish by</th>
-                  <th className="px-4 py-3">Left</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.checkins.map((c) => {
-                  const left = remaining(c.endsAt, now);
-                  return (
-                    <tr key={c.id} className="border-b border-stone-100 hover:bg-stone-50">
-                      <td className="px-4 py-3 text-sm font-bold text-stone-900">{c.number}{c.partySize > 1 ? `–${c.endCover}` : ""}</td>
-                      <td className="px-4 py-3 text-sm text-stone-700">{c.name || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-stone-700">{c.partySize}</td>
-                      <td className="px-4 py-3">
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">£{c.price}</span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-stone-500">{fmt(c.checkedInAt)}</td>
-                      <td className="px-4 py-3 text-sm text-stone-700">{fmt(c.endsAt)}</td>
-                      <td className={`px-4 py-3 text-sm font-medium ${left === "over" ? "text-red-700" : "text-emerald-700"}`}>{left}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+          <p className="mt-6 text-xs font-light leading-relaxed text-stone-500">
+            Each group gets a 1h 30m dining window from the moment they check in. Times update every 30 seconds.
+          </p>
+        </Sheet>
       </div>
-    </div>
+    </OwnLayout>
   );
 }

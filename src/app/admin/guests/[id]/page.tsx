@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, Users } from "lucide-react";
+import { OwnLayout, PageHead, GlassStats, Sheet, SheetTitle, Tag, Avatar, Empty, btn, statusTone, statusLabel } from "@/components/admin/ui";
 
 interface GuestDetail {
   id: string;
@@ -42,14 +44,12 @@ interface GuestDetail {
   }[];
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  confirmed: "bg-emerald-50 text-emerald-700",
-  modified: "bg-gold-100 text-gold-700",
-  pending_payment: "bg-amber-50 text-amber-800",
-  cancelled: "bg-red-50 text-red-700",
-  no_show: "bg-red-50 text-red-700",
-  completed: "bg-stone-100 text-stone-500",
-};
+const back = (
+  <Link href="/admin/guests" className={btn.glass}>
+    <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
+    Back to Guests
+  </Link>
+);
 
 export default function GuestProfilePage() {
   const params = useParams();
@@ -63,179 +63,166 @@ export default function GuestProfilePage() {
       .finally(() => setLoading(false));
   }, [params.id]);
 
-  if (loading) {
+  if (loading || !guest) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-stone-500">Loading guest profile...</div>
-      </div>
-    );
-  }
-
-  if (!guest) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-stone-500 mb-4">Guest not found</p>
-        <Link href="/admin/guests" className="text-gold-700 hover:text-gold-700 text-sm">
-          ← Back to Guests
-        </Link>
-      </div>
+      <OwnLayout>
+        <PageHead title="Guest" actions={back} />
+        <Sheet>
+          <Empty>{loading ? "Loading guest profile..." : "Guest not found"}</Empty>
+        </Sheet>
+      </OwnLayout>
     );
   }
 
   return (
-    <div>
-      <Link
-        href="/admin/guests"
-        className="text-sm text-stone-500 hover:text-gold-700 transition mb-4 block"
-      >
-        ← Back to Guests
-      </Link>
+    <OwnLayout>
+      <PageHead
+        title={guest.name}
+        subtitle={
+          <>
+            {guest.email} {guest.phone && `· ${guest.phone}`}
+          </>
+        }
+        actions={back}
+      />
 
-      {/* Guest header */}
-      <div className="bg-white border border-stone-100 rounded-2xl p-6 mb-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-normal tracking-tight text-stone-900 leading-tight">{guest.name}</h2>
-            <p className="text-stone-500 mt-1">
-              {guest.email} {guest.phone && `· ${guest.phone}`}
-            </p>
-            {guest.tags && (
-              <div className="flex gap-1 mt-2">
-                {guest.tags.split(",").map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-0.5 bg-gold-100 text-gold-700 rounded-full text-xs"
-                  >
-                    {tag.trim()}
-                  </span>
-                ))}
+      <GlassStats
+        items={[
+          { label: "Bookings", value: guest.totalBookings },
+          { label: "Visits", value: guest.totalVisits },
+          { label: "Total spend", value: `£${(guest.totalSpendPence / 100).toFixed(0)}` },
+          { label: "No-shows", value: guest.noShows },
+          { label: "Average spend", value: `£${guest.totalVisits > 0 ? (guest.totalSpendPence / 100 / guest.totalVisits).toFixed(0) : "0"}`, hint: "per visit" },
+        ]}
+      />
+
+      <div className="grid gap-3 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)] lg:items-start">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-1">
+          {/* Profile */}
+          <Sheet label="Profile" className="p-[18px]">
+            <div className="flex items-center gap-3">
+              <Avatar name={guest.name} />
+              <div className="min-w-0">
+                <h2 className="truncate font-outfit text-xl font-normal tracking-tight text-stone-900">{guest.name}</h2>
+                <p className="text-xs font-light text-stone-500">Member since {new Date(guest.createdAt).toLocaleDateString("en-GB")}</p>
               </div>
-            )}
-            {guest.notes && (
-              <p className="text-sm text-stone-500 mt-2 italic">{guest.notes}</p>
-            )}
-          </div>
-          <div className="text-right text-xs text-stone-500">
-            Member since {new Date(guest.createdAt).toLocaleDateString("en-GB")}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-stone-100">
-          <div>
-            <p className="text-xs text-stone-500 uppercase">Bookings</p>
-            <p className="text-xl font-bold text-stone-900">{guest.totalBookings}</p>
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 uppercase">Visits</p>
-            <p className="text-xl font-bold text-stone-900">{guest.totalVisits}</p>
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 uppercase">Total Spend</p>
-            <p className="text-xl font-bold text-stone-900">
-              £{(guest.totalSpendPence / 100).toFixed(0)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 uppercase">No-Shows</p>
-            <p className={`text-xl font-bold ${guest.noShows > 0 ? "text-red-700" : "text-stone-900"}`}>
-              {guest.noShows}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 uppercase">Avg Spend</p>
-            <p className="text-xl font-bold text-stone-900">
-              £{guest.totalVisits > 0 ? (guest.totalSpendPence / 100 / guest.totalVisits).toFixed(0) : "0"}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Booking history */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-stone-100">
-          <h2 className="text-lg font-semibold text-stone-900">Booking History</h2>
-        </div>
-
-        {guest.bookings.length === 0 ? (
-          <div className="p-6 text-center text-stone-500">No bookings yet</div>
-        ) : (
-          <div className="divide-y divide-stone-100">
-            {guest.bookings.map((b) => (
-              <div key={b.id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm text-gold-700">{b.confirmationCode}</span>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        STATUS_COLORS[b.status] || "bg-stone-100 text-stone-700"
-                      }`}
-                    >
-                      {b.status.replace("_", " ")}
-                    </span>
-                  </div>
-                  <span className="text-xs text-stone-500">{b.source}</span>
-                </div>
-                <div className="flex flex-wrap gap-4 mt-2 text-sm text-stone-500">
-                  <span>{b.date}</span>
-                  <span>{b.slot}</span>
-                  <span>{b.location}</span>
-                  <span>{b.partySize} guests</span>
-                  {b.depositAmountPence > 0 && (
-                    <span>Deposit £{(b.depositAmountPence / 100).toFixed(2)} ({b.depositStatus})</span>
+            </div>
+            <dl className="mt-4 space-y-3 border-t border-stone-100 pt-4 text-sm">
+              <div>
+                <dt className="text-xs font-light text-stone-500">Email</dt>
+                <dd className="mt-0.5 break-all">{guest.email || <span className="text-stone-400">Not given</span>}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-light text-stone-500">Phone</dt>
+                <dd className="mt-0.5">
+                  {guest.phone ? (
+                    <a href={`tel:${guest.phone.replace(/\s+/g, "")}`} className="hover:text-gold-700">
+                      {guest.phone}
+                    </a>
+                  ) : (
+                    <span className="text-stone-400">Not given</span>
                   )}
-                </div>
-                {b.addOns.length > 0 && (
-                  <div className="flex gap-2 mt-2">
-                    {b.addOns.map((a, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-gold-100 text-gold-700 rounded-full text-xs">
-                        {a.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {b.changes.length > 0 && (
-                  <div className="mt-2 pl-3 border-l border-stone-100">
-                    {b.changes.map((c, i) => (
-                      <p key={i} className="text-xs text-stone-400">
-                        {c.fieldChanged}: {c.oldValue} → {c.newValue}{" "}
-                        <span className="text-stone-300">
-                          ({new Date(c.createdAt).toLocaleDateString("en-GB")})
-                        </span>
-                      </p>
-                    ))}
-                  </div>
-                )}
+                </dd>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              {guest.tags && (
+                <div>
+                  <dt className="text-xs font-light text-stone-500">Tags</dt>
+                  <dd className="mt-1 flex flex-wrap gap-1">
+                    {guest.tags.split(",").map((tag) => (
+                      <Tag key={tag} tone={tag.trim().toLowerCase() === "vip" ? "gold" : "off"}>
+                        {tag.trim()}
+                      </Tag>
+                    ))}
+                  </dd>
+                </div>
+              )}
+              {guest.notes && (
+                <div>
+                  <dt className="text-xs font-light text-stone-500">Notes</dt>
+                  <dd className="mt-1 rounded-2xl bg-stone-50 px-3.5 py-2.5 text-[13px] text-stone-700">{guest.notes}</dd>
+                </div>
+              )}
+            </dl>
+          </Sheet>
 
-      {/* Visit history */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-100">
-          <h2 className="text-lg font-semibold text-stone-900">Visit History</h2>
+          {/* Visit history */}
+          <Sheet label="Visit history" className="overflow-hidden">
+            <div className="px-[18px] pb-3 pt-[18px]">
+              <SheetTitle aside={<span className="text-xs font-light text-stone-500">{guest.visits.length}</span>}>Visit history</SheetTitle>
+            </div>
+            {guest.visits.length === 0 ? (
+              <Empty>No visits recorded yet</Empty>
+            ) : (
+              <ul>
+                {guest.visits.map((v) => (
+                  <li key={v.id} className="flex items-start justify-between gap-3 border-t border-stone-100 px-[18px] py-3">
+                    <div className="min-w-0">
+                      <p className="text-sm text-stone-900">{v.visitDate}</p>
+                      {v.notes && <p className="mt-0.5 text-xs font-light text-stone-500">{v.notes}</p>}
+                    </div>
+                    <span className="shrink-0 text-sm tabular-nums text-gold-700">£{(v.spendPence / 100).toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Sheet>
         </div>
 
-        {guest.visits.length === 0 ? (
-          <div className="p-6 text-center text-stone-500">No visits recorded yet</div>
-        ) : (
-          <div className="divide-y divide-stone-100">
-            {guest.visits.map((v) => (
-              <div key={v.id} className="px-6 py-3 flex items-center justify-between">
-                <div>
-                  <span className="text-sm text-stone-900">{v.visitDate}</span>
-                  {v.notes && <span className="text-sm text-stone-500 ml-2">— {v.notes}</span>}
-                </div>
-                <span className="text-sm text-gold-700">
-                  £{(v.spendPence / 100).toFixed(2)}
-                </span>
-              </div>
-            ))}
+        {/* Booking history */}
+        <Sheet label="Booking history" className="overflow-hidden">
+          <div className="px-4 pb-3 pt-[18px] md:px-5">
+            <SheetTitle aside={<span className="text-xs font-light text-stone-500">{guest.bookings.length}</span>}>Booking history</SheetTitle>
           </div>
-        )}
+          {guest.bookings.length === 0 ? (
+            <Empty>No bookings yet</Empty>
+          ) : (
+            <ul>
+              {guest.bookings.map((b) => (
+                <li key={b.id} className="border-t border-stone-100 px-4 py-3.5 md:px-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-sm text-gold-700">{b.confirmationCode}</span>
+                    <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
+                    <span className="ml-auto text-xs text-stone-500">{b.source}</span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-600">
+                    <span className="text-stone-900">{b.date}</span>
+                    <span>{b.slot}</span>
+                    <span>{b.location}</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5" strokeWidth={1.75} />
+                      {b.partySize} guests
+                    </span>
+                    {b.depositAmountPence > 0 && (
+                      <span>
+                        Deposit £{(b.depositAmountPence / 100).toFixed(2)} ({b.depositStatus})
+                      </span>
+                    )}
+                  </div>
+                  {b.addOns.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {b.addOns.map((a, i) => (
+                        <Tag key={i} tone="gold">
+                          {a.name}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+                  {b.changes.length > 0 && (
+                    <div className="mt-2 space-y-0.5 border-l-2 border-stone-100 pl-3">
+                      {b.changes.map((c, i) => (
+                        <p key={i} className="text-xs text-stone-500">
+                          {c.fieldChanged}: {c.oldValue} → {c.newValue}{" "}
+                          <span className="text-stone-400">({new Date(c.createdAt).toLocaleDateString("en-GB")})</span>
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Sheet>
       </div>
-    </div>
+    </OwnLayout>
   );
 }

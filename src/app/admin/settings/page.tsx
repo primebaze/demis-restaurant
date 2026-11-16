@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, type ReactNode } from "react";
+import { CalendarX, Check, ChevronRight, Clock, Info, Lock, Pencil, PlusCircle, ShieldCheck, Store, Trash2, type LucideIcon } from "lucide-react";
+import { OwnLayout, PageHead, Seg, Sheet, StatTile, Tag, btn, field } from "@/components/admin/ui";
 
 interface AddOn {
   id: string;
@@ -40,6 +42,46 @@ interface Location {
 
 type Tab = "policies" | "addons" | "blackouts" | "timeslots" | "password";
 
+const TABS: { key: Tab; label: string; sub: string; intro: string; icon: LucideIcon }[] = [
+  { key: "policies", label: "Booking policies", sub: "Party size, deposits, cancel window", intro: "One set of rules for each location", icon: ShieldCheck },
+  { key: "timeslots", label: "Time slots", sub: "When each location takes bookings", intro: "When each location takes bookings, day by day", icon: Clock },
+  { key: "addons", label: "Add-ons", sub: "Extras guests can add to a booking", intro: "Extras guests can add to a booking", icon: PlusCircle },
+  { key: "blackouts", label: "Blackout dates", sub: "Days or hours closed to bookings", intro: "Days or hours closed to bookings", icon: CalendarX },
+  { key: "password", label: "Password", sub: "Change the admin password", intro: "Change the admin password", icon: Lock },
+];
+
+/* Small shared bits for this page */
+const label = "mb-1.5 ml-1 block text-xs text-stone-500";
+const card = "rounded-[20px] border border-stone-200 p-4 md:p-5";
+const smallPrimary =
+  "inline-flex h-8 items-center gap-1 rounded-full bg-gold-300 px-3 text-[13px] font-medium text-ink-900 transition hover:bg-gold-200 disabled:opacity-50";
+const iconDelete =
+  "inline-flex h-8 w-8 items-center justify-center rounded-full text-red-700 transition hover:bg-red-50";
+
+function CardTitle({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      <h3 className="text-base font-normal text-stone-900">{children}</h3>
+      {aside && <div className="ml-auto flex items-center gap-2">{aside}</div>}
+    </div>
+  );
+}
+
+function ActiveToggle({ active, onClick, offLabel }: { active: boolean; onClick: () => void; offLabel: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex h-8 items-center rounded-full px-3 text-xs transition ${
+        active ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+      }`}
+    >
+      {active ? "Active" : offLabel}
+    </button>
+  );
+}
+
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState<Tab>("policies");
   const [loading, setLoading] = useState(true);
@@ -63,60 +105,82 @@ export default function AdminSettingsPage() {
     fetchSettings();
   }, [fetchSettings]);
 
-  const TABS: { key: Tab; label: string }[] = [
-    { key: "policies", label: "Booking Policies" },
-    { key: "timeslots", label: "Time Slots" },
-    { key: "addons", label: "Add-ons" },
-    { key: "blackouts", label: "Blackout Dates" },
-    { key: "password", label: "Password" },
-  ];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-stone-500">Loading settings...</div>
-      </div>
-    );
-  }
+  const current = TABS.find((t) => t.key === tab) || TABS[0];
 
   return (
-    <div>
+    <OwnLayout>
+      <PageHead title="Settings" subtitle="Booking rules, time slots, add-ons, blackout dates and your password" />
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-white rounded-xl p-1 border border-stone-100 w-fit">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              tab === t.key
-                ? "bg-gold-100 text-gold-700"
-                : "text-stone-500 hover:text-stone-900"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex h-64 items-center justify-center font-light text-white/85">Loading settings...</div>
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
+          {/* Section list: a sheet on desktop, a switch or a menu on smaller screens */}
+          <Sheet label="Settings sections" className="hidden px-2.5 pb-2.5 pt-4 lg:block">
+            <nav aria-label="Settings sections">
+              <div className="px-3 pb-2.5 text-xs text-stone-500">Sections</div>
+              <div className="flex flex-col gap-1">
+                {TABS.map((t) => {
+                  const on = tab === t.key;
+                  const Icon = t.icon;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setTab(t.key)}
+                      aria-current={on ? "page" : undefined}
+                      className={`flex items-center gap-3 rounded-[18px] px-3 py-2.5 text-left transition ${
+                        on ? "bg-gold-300 text-ink-900" : "text-stone-900 hover:bg-stone-50"
+                      }`}
+                    >
+                      <span className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full ${on ? "bg-white/45" : "bg-stone-100"}`}>
+                        <Icon className="h-5 w-5" strokeWidth={1.5} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm">{t.label}</span>
+                        <span className={`mt-px block truncate text-xs ${on ? "text-ink-900/70" : "text-stone-500"}`}>{t.sub}</span>
+                      </span>
+                      {!on && <ChevronRight className="ml-auto h-[18px] w-[18px] shrink-0 opacity-60" strokeWidth={1.5} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </nav>
+          </Sheet>
 
-      {tab === "policies" && (
-        <PoliciesPanel policies={policies} onRefresh={fetchSettings} />
+          <div className="lg:hidden">
+            <div className="hidden md:block">
+              <div className="inline-flex rounded-full bg-white p-1">
+                <Seg label="Settings sections" options={TABS.map((t) => ({ value: t.key, label: t.label }))} value={tab} onChange={setTab} />
+              </div>
+            </div>
+            <label className="md:hidden">
+              <span className="sr-only">Settings section</span>
+              <select value={tab} onChange={(e) => setTab(e.target.value as Tab)} className={field}>
+                {TABS.map((t) => (
+                  <option key={t.key} value={t.key}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <Sheet label={current.label} className="min-w-0 p-4 md:px-[22px] md:py-5">
+            <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">{current.label}</h2>
+              <span className="text-[13px] font-light text-stone-500">{current.intro}</span>
+            </div>
+
+            {tab === "policies" && <PoliciesPanel policies={policies} onRefresh={fetchSettings} />}
+            {tab === "timeslots" && <TimeSlotsPanel locations={locations} />}
+            {tab === "addons" && <AddOnsPanel addOns={addOns} onRefresh={fetchSettings} />}
+            {tab === "blackouts" && <BlackoutsPanel blackoutDates={blackoutDates} locations={locations} onRefresh={fetchSettings} />}
+            {tab === "password" && <PasswordPanel />}
+          </Sheet>
+        </div>
       )}
-      {tab === "timeslots" && (
-        <TimeSlotsPanel locations={locations} />
-      )}
-      {tab === "addons" && (
-        <AddOnsPanel addOns={addOns} onRefresh={fetchSettings} />
-      )}
-      {tab === "blackouts" && (
-        <BlackoutsPanel
-          blackoutDates={blackoutDates}
-          locations={locations}
-          onRefresh={fetchSettings}
-        />
-      )}
-      {tab === "password" && <PasswordPanel />}
-    </div>
+    </OwnLayout>
   );
 }
 
@@ -156,91 +220,93 @@ function PoliciesPanel({
     onRefresh();
   }
 
-  return (
-    <div className="space-y-4">
-      {policies.map((p) => (
-        <div key={p.id} className="bg-white border border-stone-100 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-stone-900 font-semibold">{p.locationName}</h3>
-            {editId !== p.id && (
-              <button
-                onClick={() => startEdit(p)}
-                className="px-3 py-1 text-xs text-gold-700 border border-gold-400 rounded-lg hover:bg-gold-100 transition"
-              >
-                Edit
-              </button>
-            )}
-          </div>
+  const money = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
-          {editId === p.id ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {[
-                { key: "minPartySize", label: "Min Party" },
-                { key: "maxPartySize", label: "Max Party" },
-                { key: "depositThreshold", label: "Deposit Threshold" },
-                { key: "depositAmountPence", label: "Deposit (pence)" },
-                { key: "cancellationWindowH", label: "Cancel Window (hrs)" },
-                { key: "maxAdvanceDays", label: "Max Advance Days" },
-              ].map(({ key, label }) => (
-                <div key={key}>
-                  <label className="text-xs text-stone-500 block mb-1">{label}</label>
-                  <input
-                    type="number"
-                    value={(form as Record<string, unknown>)[key] as number || 0}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        [key]: parseInt(e.target.value) || 0,
-                      }))
-                    }
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-                  />
+  return (
+    <div className="space-y-3.5">
+      {policies.map((p) => {
+        const editing = editId === p.id;
+        return (
+          <div key={p.id} className={editing ? "rounded-[20px] border-[1.5px] border-gold-300 bg-gold-50 p-4 md:p-5" : card}>
+            <div className="mb-3.5 flex items-center gap-2.5">
+              <Store className={`h-5 w-5 ${editing ? "text-gold-700" : "text-stone-500"}`} strokeWidth={1.5} />
+              <h3 className="text-base font-normal text-stone-900">{p.locationName}</h3>
+              {editing ? (
+                <Tag tone="gold">Editing</Tag>
+              ) : (
+                <button type="button" onClick={() => startEdit(p)} className={`${btn.small} ml-auto`}>
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  Edit
+                </button>
+              )}
+            </div>
+
+            {editing ? (
+              <>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 md:grid-cols-3">
+                  {[
+                    { key: "minPartySize", label: "Min party" },
+                    { key: "maxPartySize", label: "Max party" },
+                    { key: "depositThreshold", label: "Deposit threshold" },
+                    { key: "depositAmountPence", label: "Deposit (pence)" },
+                    { key: "cancellationWindowH", label: "Cancel window (hrs)" },
+                    { key: "maxAdvanceDays", label: "Max advance days" },
+                  ].map(({ key, label: l }) => (
+                    <label key={key} className="block min-w-0">
+                      <span className={label}>{l}</span>
+                      <input
+                        type="number"
+                        value={((form as Record<string, unknown>)[key] as number) || 0}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            [key]: parseInt(e.target.value) || 0,
+                          }))
+                        }
+                        className={field}
+                      />
+                    </label>
+                  ))}
                 </div>
-              ))}
-              <div className="flex items-end gap-2 col-span-2 md:col-span-3">
-                <div className="ml-auto flex gap-2">
-                  <button
-                    onClick={savePolicy}
-                    disabled={saving}
-                    className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50"
-                  >
-                    {saving ? "Saving..." : "Save"}
-                  </button>
-                  <button
-                    onClick={() => setEditId(null)}
-                    className="px-4 py-2 text-stone-500 text-sm hover:text-stone-900 transition"
-                  >
+                <div className="mt-4 flex justify-end gap-2">
+                  <button type="button" onClick={() => setEditId(null)} className={btn.light}>
                     Cancel
                   </button>
+                  <button type="button" onClick={savePolicy} disabled={saving} className={`${btn.primary} !h-10`}>
+                    <Check className="h-4 w-4" strokeWidth={2} />
+                    {saving ? "Saving..." : "Save"}
+                  </button>
                 </div>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
+                <StatTile label="Party size" value={`${p.minPartySize} to ${p.maxPartySize}`} />
+                <StatTile label="Deposit threshold" value={`${p.depositThreshold}+ guests`} />
+                <StatTile label="Deposit amount" value={money(p.depositAmountPence)} />
+                <StatTile label="Cancel window" value={`${p.cancellationWindowH}h`} />
+                <StatTile label="Max advance" value={`${p.maxAdvanceDays} days`} />
               </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-stone-500 block text-xs">Party Size</span>
-                <span className="text-stone-900">{p.minPartySize} – {p.maxPartySize}</span>
-              </div>
-              <div>
-                <span className="text-stone-500 block text-xs">Deposit Threshold</span>
-                <span className="text-stone-900">{p.depositThreshold}+ guests</span>
-              </div>
-              <div>
-                <span className="text-stone-500 block text-xs">Deposit Amount</span>
-                <span className="text-stone-900">£{(p.depositAmountPence / 100).toFixed(2)}</span>
-              </div>
-              <div>
-                <span className="text-stone-500 block text-xs">Cancel Window</span>
-                <span className="text-stone-900">{p.cancellationWindowH}h</span>
-              </div>
-              <div>
-                <span className="text-stone-500 block text-xs">Max Advance</span>
-                <span className="text-stone-900">{p.maxAdvanceDays} days</span>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
+        );
+      })}
+
+      {policies.length > 0 && (
+        <div className="rounded-[20px] bg-stone-50 px-4 py-3 md:px-[18px]">
+          <div className="flex items-center gap-2 text-sm text-stone-900">
+            <Info className="h-[18px] w-[18px] text-stone-500" strokeWidth={1.5} />
+            In plain words
+          </div>
+          <ul className="mt-1.5 list-disc space-y-0.5 pl-[26px] text-[13px] leading-relaxed text-stone-600">
+            {policies.map((p) => (
+              <li key={p.id}>
+                {p.locationName}: tables of {p.minPartySize} to {p.maxPartySize}, up to {p.maxAdvanceDays} days ahead. {p.depositThreshold} or more pay a{" "}
+                {money(p.depositAmountPence)} deposit. Guests can cancel up to {p.cancellationWindowH} hours before.
+              </li>
+            ))}
+          </ul>
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -315,136 +381,96 @@ function AddOnsPanel({
   }
 
   return (
-    <div>
+    <div className="space-y-3.5">
       {/* Existing add-ons */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-stone-100">
-          <h3 className="text-stone-900 font-semibold">Current Add-ons</h3>
+      <div className="overflow-hidden rounded-[20px] border border-stone-200">
+        <div className="flex items-center px-4 py-3 md:px-5">
+          <h3 className="text-base font-normal text-stone-900">Current add-ons</h3>
+          <span className="ml-2 text-[13px] text-stone-500">{addOns.length}</span>
         </div>
-        <div className="divide-y divide-stone-100">
-          {addOns.map((a) => (
-            <div key={a.id} className="px-6 py-4">
+        {addOns.length === 0 ? (
+          <p className="border-t border-stone-100 px-5 py-8 text-center text-sm font-light text-stone-500">No add-ons yet</p>
+        ) : (
+          addOns.map((a) => (
+            <div key={a.id} className="border-t border-stone-100 px-4 py-3 md:px-5">
               {editId === a.id ? (
                 <div className="space-y-3">
-                  <div className="flex flex-wrap gap-3 items-end">
-                    <div className="flex-1 min-w-[140px]">
-                      <label className="text-xs text-stone-500 block mb-1">Name</label>
-                      <input
-                        type="text"
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[180px]">
-                      <label className="text-xs text-stone-500 block mb-1">Description</label>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_120px]">
+                    <label className="block min-w-0">
+                      <span className={label}>Name</span>
+                      <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className={field} />
+                    </label>
+                    <label className="block min-w-0">
+                      <span className={label}>Description</span>
                       <input
                         type="text"
                         value={editForm.description}
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
+                        className={field}
                       />
-                    </div>
-                    <div className="w-28">
-                      <label className="text-xs text-stone-500 block mb-1">Price (£)</label>
+                    </label>
+                    <label className="block min-w-0">
+                      <span className={label}>Price (£)</span>
                       <input
                         type="number"
                         step="0.01"
                         value={(editForm.pricePence / 100).toFixed(2)}
                         onChange={(e) => setEditForm({ ...editForm, pricePence: Math.round(parseFloat(e.target.value || "0") * 100) })}
-                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
+                        className={field}
                       />
-                    </div>
+                    </label>
                   </div>
-                  <div className="flex gap-2 justify-end">
-                    <button onClick={saveEdit} className="px-3 py-1 text-xs bg-gold-300 text-black font-medium rounded-lg hover:bg-gold-400 transition">Save</button>
-                    <button onClick={() => setEditId(null)} className="px-3 py-1 text-xs text-stone-500 hover:text-stone-900 transition">Cancel</button>
+                  <div className="flex justify-end gap-2">
+                    <button type="button" onClick={() => setEditId(null)} className={btn.small}>
+                      Cancel
+                    </button>
+                    <button type="button" onClick={saveEdit} className={smallPrimary}>
+                      <Check className="h-3.5 w-3.5" strokeWidth={2} />
+                      Save
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`font-medium ${a.isActive ? "text-stone-900" : "text-stone-500 line-through"}`}>
-                      {a.name}
-                    </p>
-                    <p className="text-xs text-stone-500">{a.description}</p>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-[15px] ${a.isActive ? "text-stone-900" : "text-stone-500 line-through"}`}>{a.name}</p>
+                    {a.description && <p className="text-xs text-stone-500">{a.description}</p>}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gold-700">
-                      £{(a.pricePence / 100).toFixed(2)}
-                    </span>
-                    <button
-                      onClick={() => startEdit(a)}
-                      className="px-2 py-1 text-xs text-stone-500 hover:text-stone-900 transition"
-                    >
+                  <div className="flex items-center gap-1.5">
+                    <span className="mr-1 text-sm tabular-nums text-gold-700">£{(a.pricePence / 100).toFixed(2)}</span>
+                    <button type="button" onClick={() => startEdit(a)} className={btn.small}>
+                      <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                       Edit
                     </button>
-                    <button
-                      onClick={() => toggleActive(a.id, a.isActive)}
-                      className={`px-2 py-1 text-xs rounded border transition ${
-                        a.isActive
-                          ? "text-emerald-700 border-emerald-200 hover:bg-emerald-50"
-                          : "text-stone-500 border-stone-200 hover:bg-stone-50"
-                      }`}
-                    >
-                      {a.isActive ? "Active" : "Inactive"}
-                    </button>
-                    <button
-                      onClick={() => deleteAddOn(a.id)}
-                      className="px-2 py-1 text-xs text-red-700 hover:text-red-700 transition"
-                    >
-                      ✕
+                    <ActiveToggle active={a.isActive} onClick={() => toggleActive(a.id, a.isActive)} offLabel="Inactive" />
+                    <button type="button" onClick={() => deleteAddOn(a.id)} aria-label={`Delete ${a.name}`} title="Delete" className={iconDelete}>
+                      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>
               )}
             </div>
-          ))}
-        </div>
+          ))
+        )}
       </div>
 
       {/* Create new add-on */}
-      <div className="bg-white border border-stone-100 rounded-2xl p-6">
-        <h3 className="text-stone-900 font-semibold mb-4">Add New</h3>
-        <form onSubmit={createAddOn} className="flex flex-wrap gap-3 items-end">
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Name</label>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              required
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-              placeholder="Birthday Cake"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Description</label>
-            <input
-              type="text"
-              value={newDesc}
-              onChange={(e) => setNewDesc(e.target.value)}
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-              placeholder="Custom celebration cake"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Price (£)</label>
-            <input
-              type="number"
-              step="0.01"
-              value={newPrice}
-              onChange={(e) => setNewPrice(e.target.value)}
-              required
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm w-24 focus:outline-none focus:border-gold-400"
-              placeholder="15.00"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={creating}
-            className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50"
-          >
+      <div className={card}>
+        <CardTitle>Add new</CardTitle>
+        <form onSubmit={createAddOn} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_120px_auto] sm:items-end">
+          <label className="block min-w-0">
+            <span className={label}>Name</span>
+            <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} required className={field} placeholder="Birthday Cake" />
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>Description</span>
+            <input type="text" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className={field} placeholder="Custom celebration cake" />
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>Price (£)</span>
+            <input type="number" step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required className={field} placeholder="15.00" />
+          </label>
+          <button type="submit" disabled={creating} className={`${btn.primary} justify-center`}>
             {creating ? "Adding..." : "Add"}
           </button>
         </form>
@@ -515,83 +541,60 @@ function BlackoutsPanel({
   }
 
   return (
-    <div>
+    <div className="space-y-3.5">
       {/* Existing blackout dates */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-stone-100">
-          <h3 className="text-stone-900 font-semibold">Blackout Dates</h3>
+      <div className="overflow-hidden rounded-[20px] border border-stone-200">
+        <div className="flex items-center px-4 py-3 md:px-5">
+          <h3 className="text-base font-normal text-stone-900">Blackout dates</h3>
+          <span className="ml-2 text-[13px] text-stone-500">{blackoutDates.length}</span>
         </div>
         {blackoutDates.length === 0 ? (
-          <div className="p-6 text-center text-stone-500">No blackout dates set</div>
+          <p className="border-t border-stone-100 px-5 py-8 text-center text-sm font-light text-stone-500">No blackout dates set</p>
         ) : (
-          <div className="divide-y divide-stone-100">
-            {blackoutDates.map((b) => (
-              <div key={b.id} className="px-6 py-3 flex items-center justify-between">
-                <div>
-                  <span className="text-stone-900 text-sm">{b.date}</span>
-                  {b.fromTime && b.toTime ? (
-                    <span className="ml-2 px-1.5 py-0.5 rounded bg-gold-100 text-gold-700 text-xs tabular-nums">
+          blackoutDates.map((b) => (
+            <div key={b.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-stone-100 px-4 py-3 md:px-5">
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
+                <span className="text-sm tabular-nums text-stone-900">{b.date}</span>
+                {b.fromTime && b.toTime ? (
+                  <Tag tone="gold">
+                    <span className="tabular-nums">
                       {b.fromTime} to {b.toTime}
                     </span>
-                  ) : (
-                    <span className="ml-2 px-1.5 py-0.5 rounded bg-stone-50 text-stone-500 text-xs">Whole day</span>
-                  )}
-                  <span className="text-stone-500 text-sm ml-2">— {b.reason}</span>
-                  {b.location && (
-                    <span className="text-xs text-stone-400 ml-2">({b.location.name})</span>
-                  )}
-                  {!b.locationId && (
-                    <span className="text-xs text-amber-800 ml-2">(All locations)</span>
-                  )}
-                </div>
-                <button
-                  onClick={() => deleteBlackout(b.id)}
-                  className="px-2 py-1 text-xs text-red-700 border border-red-200 rounded hover:bg-red-50 transition"
-                >
-                  Remove
-                </button>
+                  </Tag>
+                ) : (
+                  <Tag tone="off">Whole day</Tag>
+                )}
+                <span className="text-sm text-stone-600">{b.reason}</span>
+                {b.location && <span className="text-xs text-stone-400">({b.location.name})</span>}
+                {!b.locationId && <Tag tone="wait">All locations</Tag>}
               </div>
-            ))}
-          </div>
+              <button type="button" onClick={() => deleteBlackout(b.id)} className={`${btn.small} !text-red-700 hover:!border-red-200 hover:bg-red-50`}>
+                Remove
+              </button>
+            </div>
+          ))
         )}
       </div>
 
       {/* Add new blackout */}
-      <div className="bg-white border border-stone-100 rounded-2xl p-6">
-        <h3 className="text-stone-900 font-semibold mb-1">Add Blackout</h3>
-        <p className="text-xs text-stone-500 mb-4">
-          Leave From and To empty to block the whole day. Set them to block only those arrival times:
-          19:00 to 21:00 blocks 19:00, 19:30, 20:00 and 20:30, and 21:00 stays bookable.
+      <div className={card}>
+        <h3 className="text-base font-normal text-stone-900">Add a blackout</h3>
+        <p className="mb-3.5 mt-1 text-xs leading-relaxed text-stone-500">
+          Leave From and To empty to block the whole day. Set them to block only those arrival times: 19:00 to 21:00 blocks 19:00, 19:30, 20:00 and 20:30,
+          and 21:00 stays bookable.
         </p>
-        <form onSubmit={createBlackout} className="flex flex-wrap gap-3 items-end">
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Date</label>
-            <input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
-              required
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 [color-scheme:light]"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Reason</label>
-            <input
-              type="text"
-              value={newReason}
-              onChange={(e) => setNewReason(e.target.value)}
-              required
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-              placeholder="Private event"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Location</label>
-            <select
-              value={newLocation}
-              onChange={(e) => setNewLocation(e.target.value)}
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-            >
+        <form onSubmit={createBlackout} className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)_120px_120px] xl:items-end">
+          <label className="block min-w-0">
+            <span className={label}>Date</span>
+            <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} required className={field} />
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>Reason</span>
+            <input type="text" value={newReason} onChange={(e) => setNewReason(e.target.value)} required className={field} placeholder="Private event" />
+          </label>
+          <label className="col-span-2 block min-w-0 md:col-span-1">
+            <span className={label}>Location</span>
+            <select value={newLocation} onChange={(e) => setNewLocation(e.target.value)} className={field}>
               <option value="">All Locations</option>
               {locations.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -599,36 +602,22 @@ function BlackoutsPanel({
                 </option>
               ))}
             </select>
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>From (optional)</span>
+            <input type="time" step={1800} value={newFrom} onChange={(e) => setNewFrom(e.target.value)} className={field} />
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>To (optional)</span>
+            <input type="time" step={1800} value={newTo} onChange={(e) => setNewTo(e.target.value)} className={field} />
+          </label>
+          <div className="col-span-2 flex justify-end md:col-span-3 xl:col-span-5">
+            <button type="submit" disabled={creating} className={btn.primary}>
+              {creating ? "Adding..." : newFrom || newTo ? "Block these times" : "Block whole day"}
+            </button>
           </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">From (optional)</label>
-            <input
-              type="time"
-              step={1800}
-              value={newFrom}
-              onChange={(e) => setNewFrom(e.target.value)}
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 [color-scheme:light]"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">To (optional)</label>
-            <input
-              type="time"
-              step={1800}
-              value={newTo}
-              onChange={(e) => setNewTo(e.target.value)}
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 [color-scheme:light]"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={creating}
-            className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50"
-          >
-            {creating ? "Adding..." : newFrom || newTo ? "Block these times" : "Block whole day"}
-          </button>
         </form>
-        {formError && <p className="mt-3 text-sm text-red-700">{formError}</p>}
+        {formError && <p className="mt-3 rounded-2xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{formError}</p>}
       </div>
     </div>
   );
@@ -727,76 +716,91 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
     byDay[d].push(s);
   }
 
+  const small = "h-9 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm text-stone-900 outline-none focus:border-gold-400 focus:bg-white [color-scheme:light]";
+
   return (
-    <div>
+    <div className="space-y-3.5">
       {/* Location filter */}
-      <div className="flex gap-3 mb-6">
-        {locations.map((l) => (
-          <button
-            key={l.id}
-            onClick={() => setFilterLoc(l.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              filterLoc === l.id ? "bg-gold-100 text-gold-700 border border-gold-400" : "text-stone-500 border border-stone-100 hover:text-stone-900"
-            }`}
-          >
-            {l.name}
-          </button>
-        ))}
-      </div>
+      {locations.length > 0 && (
+        <Seg label="Location" options={locations.map((l) => ({ value: l.id, label: l.name }))} value={filterLoc} onChange={setFilterLoc} />
+      )}
 
       {loading ? (
-        <div className="text-stone-500 py-8 text-center">Loading time slots...</div>
+        <div className="py-8 text-center text-sm font-light text-stone-500">Loading time slots...</div>
       ) : (
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5, 6, 0].map((day) => {
+        <div className="overflow-hidden rounded-[20px] border border-stone-200">
+          {[1, 2, 3, 4, 5, 6, 0].map((day, i) => {
             const daySlots = byDay[day] || [];
             return (
-              <div key={day} className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
-                <div className="px-6 py-3 border-b border-stone-100 flex items-center justify-between">
-                  <h4 className="text-stone-900 font-semibold text-sm">{DAY_NAMES[day]}</h4>
-                  <span className="text-xs text-stone-500">{daySlots.length} slot{daySlots.length !== 1 ? "s" : ""}</span>
+              <div key={day} className={`grid gap-x-4 gap-y-1 px-4 py-3 md:grid-cols-[80px_minmax(0,1fr)] md:px-5 ${i > 0 ? "border-t border-stone-100" : ""}`}>
+                <div className="flex items-baseline gap-2 md:block md:pt-1.5">
+                  <h4 className="text-[15px] text-stone-900">{DAY_NAMES[day]}</h4>
+                  <span className="text-xs text-stone-500">
+                    {daySlots.length} slot{daySlots.length !== 1 ? "s" : ""}
+                  </span>
                 </div>
                 {daySlots.length === 0 ? (
-                  <div className="px-6 py-4 text-stone-400 text-sm">No slots</div>
+                  <div className="py-1.5 text-sm font-light text-stone-400">No slots</div>
                 ) : (
                   <div className="divide-y divide-stone-100">
                     {daySlots.map((s) => (
-                      <div key={s.id} className="px-6 py-3 flex items-center justify-between">
+                      <div key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-1.5">
                         {editing === s.id ? (
-                          <div className="flex items-center gap-3 flex-1">
-                            <input type="time" value={editForm.startTime} onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })} className="px-2 py-1 bg-stone-50 border border-stone-200 rounded text-stone-900 text-sm [color-scheme:light]" />
-                            <span className="text-stone-500">–</span>
-                            <input type="time" value={editForm.endTime} onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })} className="px-2 py-1 bg-stone-50 border border-stone-200 rounded text-stone-900 text-sm [color-scheme:light]" />
-                            <input type="number" value={editForm.maxCovers} onChange={(e) => setEditForm({ ...editForm, maxCovers: parseInt(e.target.value) || 0 })} className="px-2 py-1 bg-stone-50 border border-stone-200 rounded text-stone-900 text-sm w-20" placeholder="Covers" />
-                            <button onClick={saveEdit} className="px-3 py-1 text-xs bg-gold-300 text-black rounded hover:bg-gold-400">Save</button>
-                            <button onClick={() => setEditing(null)} className="px-3 py-1 text-xs text-stone-500 hover:text-stone-900">Cancel</button>
+                          <div className="flex flex-1 flex-wrap items-center gap-2">
+                            <input
+                              type="time"
+                              aria-label="Start"
+                              value={editForm.startTime}
+                              onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
+                              className={small}
+                            />
+                            <span className="text-sm text-stone-500">to</span>
+                            <input
+                              type="time"
+                              aria-label="End"
+                              value={editForm.endTime}
+                              onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
+                              className={small}
+                            />
+                            <input
+                              type="number"
+                              aria-label="Covers"
+                              value={editForm.maxCovers}
+                              onChange={(e) => setEditForm({ ...editForm, maxCovers: parseInt(e.target.value) || 0 })}
+                              className={`${small} w-20`}
+                              placeholder="Covers"
+                            />
+                            <button type="button" onClick={() => setEditing(null)} className={btn.small}>
+                              Cancel
+                            </button>
+                            <button type="button" onClick={saveEdit} className={smallPrimary}>
+                              <Check className="h-3.5 w-3.5" strokeWidth={2} />
+                              Save
+                            </button>
                           </div>
                         ) : (
                           <>
-                            <div className="flex items-center gap-4">
-                              <span className={`text-sm font-medium ${s.isActive ? "text-stone-900" : "text-stone-400 line-through"}`}>
-                                {s.startTime} – {s.endTime}
+                            <div className="flex min-w-0 flex-1 items-baseline gap-3">
+                              <span className={`text-sm tabular-nums ${s.isActive ? "text-stone-900" : "text-stone-400 line-through"}`}>
+                                {s.startTime} to {s.endTime}
                               </span>
                               <span className="text-xs text-stone-500">{s.maxCovers} covers</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <button
-                                onClick={() => { setEditing(s.id); setEditForm({ startTime: s.startTime, endTime: s.endTime, maxCovers: s.maxCovers }); }}
-                                className="px-2 py-1 text-xs text-stone-500 hover:text-stone-900 transition"
+                                type="button"
+                                onClick={() => {
+                                  setEditing(s.id);
+                                  setEditForm({ startTime: s.startTime, endTime: s.endTime, maxCovers: s.maxCovers });
+                                }}
+                                className={btn.small}
                               >
+                                <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                                 Edit
                               </button>
-                              <button
-                                onClick={() => toggleActive(s.id, s.isActive)}
-                                className={`px-2 py-1 text-xs rounded border transition ${s.isActive ? "text-emerald-700 border-emerald-200 hover:bg-emerald-50" : "text-stone-500 border-stone-200 hover:bg-stone-50"}`}
-                              >
-                                {s.isActive ? "Active" : "Off"}
-                              </button>
-                              <button
-                                onClick={() => deleteSlot(s.id)}
-                                className="px-2 py-1 text-xs text-red-700 hover:text-red-700 transition"
-                              >
-                                ✕
+                              <ActiveToggle active={s.isActive} onClick={() => toggleActive(s.id, s.isActive)} offLabel="Off" />
+                              <button type="button" onClick={() => deleteSlot(s.id)} aria-label={`Delete ${s.startTime} slot`} title="Delete" className={iconDelete}>
+                                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                               </button>
                             </div>
                           </>
@@ -812,29 +816,33 @@ function TimeSlotsPanel({ locations }: { locations: Location[] }) {
       )}
 
       {/* Add new slot */}
-      <div className="bg-white border border-stone-100 rounded-2xl p-6 mt-6">
-        <h3 className="text-stone-900 font-semibold mb-4">Add Time Slot</h3>
-        <form onSubmit={createSlot} className="flex flex-wrap gap-3 items-end">
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Day</label>
-            <select value={newDay} onChange={(e) => setNewDay(Number(e.target.value))} className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm">
-              {[1, 2, 3, 4, 5, 6, 0].map((d) => <option key={d} value={d}>{DAY_NAMES[d]}</option>)}
+      <div className={card}>
+        <CardTitle>Add a time slot</CardTitle>
+        <form onSubmit={createSlot} className="grid grid-cols-2 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
+          <label className="block min-w-0">
+            <span className={label}>Day</span>
+            <select value={newDay} onChange={(e) => setNewDay(Number(e.target.value))} className={field}>
+              {[1, 2, 3, 4, 5, 6, 0].map((d) => (
+                <option key={d} value={d}>
+                  {DAY_NAMES[d]}
+                </option>
+              ))}
             </select>
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Start</label>
-            <input type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm [color-scheme:light]" />
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">End</label>
-            <input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm [color-scheme:light]" />
-          </div>
-          <div>
-            <label className="text-xs text-stone-500 block mb-1">Max Covers</label>
-            <input type="number" value={newCovers} onChange={(e) => setNewCovers(parseInt(e.target.value) || 0)} className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm w-24" />
-          </div>
-          <button type="submit" disabled={creating} className="px-4 py-2 bg-gold-300 text-black font-medium text-sm rounded-lg hover:bg-gold-400 transition disabled:opacity-50">
-            {creating ? "Adding..." : "Add Slot"}
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>Start</span>
+            <input type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} className={field} />
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>End</span>
+            <input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className={field} />
+          </label>
+          <label className="block min-w-0">
+            <span className={label}>Max covers</span>
+            <input type="number" value={newCovers} onChange={(e) => setNewCovers(parseInt(e.target.value) || 0)} className={field} />
+          </label>
+          <button type="submit" disabled={creating} className={`${btn.primary} col-span-2 justify-center md:col-span-1`}>
+            {creating ? "Adding..." : "Add slot"}
           </button>
         </form>
       </div>
@@ -890,60 +898,30 @@ function PasswordPanel() {
   }
 
   return (
-    <div className="bg-white border border-stone-100 rounded-2xl p-6 max-w-md">
-      <h3 className="text-stone-900 font-semibold mb-4">Change Password</h3>
+    <div className={`${card} max-w-md`}>
+      <CardTitle>Change password</CardTitle>
 
       {message && (
-        <div
-          className={`mb-4 px-4 py-3 rounded-lg text-sm ${
-            message.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : "bg-red-50 text-red-700 border border-red-200"
-          }`}
-        >
+        <div className={`mb-4 rounded-2xl px-4 py-2.5 text-sm ${message.type === "success" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
           {message.text}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="text-xs text-stone-500 block mb-1">Current Password</label>
-          <input
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-stone-500 block mb-1">New Password</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-            minLength={8}
-            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-stone-500 block mb-1">Confirm New Password</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            minLength={8}
-            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full px-4 py-3 bg-gold-300 text-black font-semibold text-sm rounded-xl hover:bg-gold-400 transition disabled:opacity-50"
-        >
-          {saving ? "Updating..." : "Update Password"}
+      <form onSubmit={handleSubmit} className="space-y-3.5">
+        <label className="block">
+          <span className={label}>Current password</span>
+          <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required className={field} />
+        </label>
+        <label className="block">
+          <span className={label}>New password</span>
+          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} className={field} />
+        </label>
+        <label className="block">
+          <span className={label}>Confirm new password</span>
+          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} className={field} />
+        </label>
+        <button type="submit" disabled={saving} className={`${btn.primary} w-full justify-center`}>
+          {saving ? "Updating..." : "Update password"}
         </button>
       </form>
     </div>

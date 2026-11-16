@@ -108,3 +108,78 @@ export function Avatar({ name }: { name: string }) {
     </span>
   );
 }
+
+/** Outer wrapper for a page that draws its own layout. Tells the shell to drop its default title and sheet. */
+export function OwnLayout({ children }: { children: ReactNode }) {
+  return <div className="own-layout">{children}</div>;
+}
+
+/** Glass pill switch on the photo, e.g. Cricklewood | Streatham Hill. Uses links so each side has its own URL. */
+export function PillSwitch({ items, current, label = "Switch" }: { items: { href: string; label: string }[]; current: string; label?: string }) {
+  return (
+    <div className="inline-flex rounded-full border border-white/15 bg-[rgba(58,52,48,0.48)] p-1 backdrop-blur-xl" role="group" aria-label={label}>
+      {items.map((s) => {
+        const on = current === s.href;
+        return (
+          <a
+            key={s.href}
+            href={s.href}
+            aria-current={on ? "page" : undefined}
+            className={`inline-flex h-9 items-center rounded-full px-4 text-sm whitespace-nowrap transition ${on ? "bg-white text-stone-900" : "text-white/90 hover:text-white"}`}
+          >
+            {s.label}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Segmented control on a white sheet. */
+export function Seg<T extends string>({ options, value, onChange, label }: { options: { value: T; label: ReactNode }[]; value: T; onChange: (v: T) => void; label?: string }) {
+  return (
+    <div className="inline-flex flex-wrap gap-0.5 rounded-full bg-stone-100 p-1" role="group" aria-label={label}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          aria-pressed={value === o.value}
+          className={`h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap transition ${value === o.value ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Inputs on white sheets. */
+export const field =
+  "h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition focus:border-gold-400 focus:bg-white [color-scheme:light]";
+export const fieldArea =
+  "w-full rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition focus:border-gold-400 focus:bg-white";
+
+/** Small grey stat tile inside a white sheet. `hot` = the one number that matters most (solid gold). */
+export function StatTile({ label, value, hot = false }: { label: string; value: ReactNode; hot?: boolean }) {
+  return (
+    <div className={`rounded-[18px] p-3.5 ${hot ? "bg-gold-300 text-ink-900" : "bg-stone-100"}`}>
+      <div className={`text-xs font-light whitespace-nowrap ${hot ? "" : "text-stone-500"}`}>{label}</div>
+      <div className="mt-1 text-[22px]">{value}</div>
+    </div>
+  );
+}
+
+/** Footer bar at the bottom of a sheet (paging, summary, a main action). */
+export function SheetFooter({ children }: { children: ReactNode }) {
+  return <div className="flex flex-wrap items-center gap-2 border-t border-stone-100 px-4 py-3 text-[13px] md:px-5">{children}</div>;
+}
+
+/** Empty state inside a sheet. */
+export function Empty({ children }: { children: ReactNode }) {
+  return <p className="px-4 py-12 text-center text-sm font-light text-stone-500">{children}</p>;
+}
+
+/** Table look shared by every list. Wrap the <table> in <div className={tableWrap}> so it scrolls on small screens. */
+export const tableWrap = "overflow-x-auto";
+export const table = "w-full border-collapse text-sm [&_th]:whitespace-nowrap [&_th]:px-3.5 [&_th]:pb-2.5 [&_th]:pt-1 [&_th]:text-left [&_th]:text-xs [&_th]:font-normal [&_th]:text-stone-400 [&_td]:border-t [&_td]:border-stone-100 [&_td]:px-3.5 [&_td]:py-3 [&_td]:align-middle";

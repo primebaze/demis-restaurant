@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, StickyNote, Store, Users } from "lucide-react";
+import { Empty, OwnLayout, PageHead, Sheet, StatTile, Tag, btn, statusLabel, statusTone } from "@/components/admin/ui";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -37,14 +39,15 @@ export default function CalendarPage() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth()); // 0-indexed
   const [dateMap, setDateMap] = useState<Record<string, DateEntry>>({});
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const [selectedDate, setSelectedDate] = useState<string | null>(todayStr);
   const [loading, setLoading] = useState(true);
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [filterLoc, setFilterLoc] = useState("");
 
   // Fetch locations
   useEffect(() => {
-    fetch("/api/admin/settings/policies")
+    fetch("/api/admin/settings")
       .then((r) => r.json())
       .then((d) => {
         if (d.locations) setLocations(d.locations);
@@ -95,126 +98,139 @@ export default function CalendarPage() {
   }
 
   const cells = getMonthDays();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   function dateStr(day: number) {
     return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   }
 
   const selectedEntry = selectedDate ? dateMap[selectedDate] : null;
+  const monthCount = Object.values(dateMap).reduce((n, e) => n + e.count, 0);
+  const prevName = MONTH_NAMES[(month + 11) % 12];
+  const nextName = MONTH_NAMES[(month + 1) % 12];
+
+  const navBtn =
+    "inline-flex h-9 items-center gap-1 rounded-full border border-stone-200 px-3 text-[13px] text-stone-900 transition hover:border-stone-300";
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-      </div>
+    <OwnLayout>
+      <PageHead
+        title="Booking calendar"
+        subtitle="Every booking, day by day"
+        actions={
+          locations.length > 0 && (
+            <>
+              <button onClick={() => setFilterLoc("")} aria-pressed={!filterLoc} className={!filterLoc ? btn.primary : btn.glass}>
+                <MapPin className="h-[18px] w-[18px]" strokeWidth={1.5} />
+                All locations
+              </button>
+              {locations.map((l) => (
+                <button key={l.id} onClick={() => setFilterLoc(l.slug)} aria-pressed={filterLoc === l.slug} className={filterLoc === l.slug ? btn.primary : btn.glass}>
+                  <Store className="h-[18px] w-[18px]" strokeWidth={1.5} />
+                  {l.name}
+                </button>
+              ))}
+            </>
+          )
+        }
+      />
 
-      {/* Location filter */}
-      {locations.length > 0 && (
-        <div className="flex gap-3 mb-6">
-          <button
-            onClick={() => setFilterLoc("")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              !filterLoc ? "bg-gold-100 text-gold-700 border border-gold-400" : "text-stone-500 border border-stone-100 hover:text-stone-900"
-            }`}
-          >
-            All Locations
-          </button>
-          {locations.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setFilterLoc(l.slug)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                filterLoc === l.slug ? "bg-gold-100 text-gold-700 border border-gold-400" : "text-stone-500 border border-stone-100 hover:text-stone-900"
-              }`}
-            >
-              {l.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_380px]">
         {/* Calendar */}
-        <div className="lg:col-span-2 bg-stone-50 border border-stone-100 rounded-2xl p-6">
+        <Sheet label="Month" className="p-3 md:p-5">
           {/* Month navigation */}
-          <div className="flex items-center justify-between mb-6">
-            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition text-lg">
-              ‹
-            </button>
-            <h2 className="text-xl font-semibold text-stone-900">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-1 md:px-0">
+            <h2 className="font-outfit text-xl md:text-[22px] font-normal tracking-tight">
               {MONTH_NAMES[month]} {year}
             </h2>
-            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center rounded-full text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition text-lg">
-              ›
-            </button>
+            <span className="text-[13px] font-light text-stone-500">
+              {loading ? "Loading…" : `${monthCount} booking${monthCount !== 1 ? "s" : ""} this month`}
+            </span>
+            <div className="ml-auto flex gap-1.5">
+              <button onClick={prevMonth} aria-label="Previous month" className={navBtn}>
+                <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                <span className="hidden sm:inline">{prevName}</span>
+              </button>
+              <button onClick={nextMonth} aria-label="Next month" className={navBtn}>
+                <span className="hidden sm:inline">{nextName}</span>
+                <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+              </button>
+            </div>
           </div>
 
           {/* Day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="mt-3 grid grid-cols-7 gap-1 md:gap-1.5">
             {DAY_HEADERS.map((d) => (
-              <div key={d} className="text-center text-xs font-medium text-stone-500 py-1">
-                {d}
+              <div key={d} className="px-1 pb-1 text-center text-xs font-light text-stone-500 md:px-3 md:text-left">
+                <span className="md:hidden">{d[0]}</span>
+                <span className="hidden md:inline">{d}</span>
               </div>
             ))}
           </div>
 
           {/* Day cells */}
           {loading ? (
-            <div className="py-20 text-center text-stone-500">Loading...</div>
+            <Empty>Loading…</Empty>
           ) : (
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-1 md:gap-1.5">
               {cells.map((day, i) => {
                 if (day === null) {
-                  return <div key={`empty-${i}`} className="aspect-square" />;
+                  return <div key={`empty-${i}`} />;
                 }
                 const ds = dateStr(day);
                 const entry = dateMap[ds];
                 const isToday = ds === todayStr;
                 const isSelected = ds === selectedDate;
+                const isPast = ds < todayStr;
                 const hasBookings = entry && entry.count > 0;
 
                 return (
                   <button
                     key={ds}
                     onClick={() => setSelectedDate(ds)}
-                    className={`aspect-square rounded-xl flex flex-col items-center justify-center gap-1 text-sm transition relative ${
+                    aria-pressed={isSelected}
+                    aria-label={`${day} ${MONTH_NAMES[month]}${hasBookings ? `, ${entry.count} booking${entry.count !== 1 ? "s" : ""}` : ""}`}
+                    className={`relative flex h-14 flex-col items-center justify-between rounded-[14px] p-1.5 text-left transition md:h-[84px] md:items-start md:rounded-[18px] md:p-3 ${
                       isSelected
-                        ? "bg-gold-100 text-gold-700 border border-gold-400"
+                        ? "bg-gold-300 text-ink-900"
                         : isToday
-                        ? "bg-stone-50 text-stone-900 border border-stone-200"
-                        : "text-stone-700 hover:bg-stone-50"
+                        ? "bg-white text-stone-900 ring-1 ring-inset ring-stone-900"
+                        : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-400" : "text-stone-900"}`
                     }`}
                   >
-                    <span className={`font-medium ${isToday && !isSelected ? "text-gold-700" : ""}`}>
-                      {day}
-                    </span>
-                    {hasBookings && (
-                      <div className="flex gap-0.5">
+                    <span className="text-sm md:text-[17px] leading-none">{day}</span>
+                    {isToday && (
+                      <span className="absolute right-2.5 top-2.5 hidden text-[9px] tracking-wider text-stone-500 md:block">TODAY</span>
+                    )}
+                    {hasBookings ? (
+                      <span className="flex items-center gap-[3px]">
                         {entry.count <= 3 ? (
                           Array.from({ length: entry.count }).map((_, j) => (
-                            <span key={j} className="w-1.5 h-1.5 rounded-full bg-gold-300" />
+                            <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-gold-600"}`} />
                           ))
                         ) : (
                           <>
-                            <span className="w-1.5 h-1.5 rounded-full bg-gold-300" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-gold-300" />
-                            <span className="text-[10px] text-gold-700 leading-none ml-0.5">{entry.count}</span>
+                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-gold-600"}`} />
+                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-gold-600"}`} />
+                            <span className={`ml-0.5 text-[10px] leading-none ${isSelected ? "text-ink-900" : "text-gold-700"}`}>{entry.count}</span>
                           </>
                         )}
-                      </div>
+                      </span>
+                    ) : (
+                      <span className="h-1.5" />
                     )}
                   </button>
                 );
               })}
             </div>
           )}
-        </div>
+        </Sheet>
 
-        {/* Side panel — booking list for selected date */}
-        <div className="bg-stone-50 border border-stone-100 rounded-2xl p-6">
+        {/* Side panel: booking list for selected date */}
+        <Sheet label="Selected day" className="p-4 md:p-5 lg:sticky lg:top-24">
           {selectedDate ? (
             <>
-              <h3 className="text-stone-900 font-semibold mb-1">
+              <div className="text-xs font-light text-stone-500">Selected day</div>
+              <h3 className="font-outfit text-[22px] font-normal tracking-tight">
                 {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-GB", {
                   weekday: "long",
                   day: "numeric",
@@ -223,48 +239,51 @@ export default function CalendarPage() {
               </h3>
               {selectedEntry ? (
                 <>
-                  <p className="text-sm text-stone-500 mb-4">
-                    {selectedEntry.count} booking{selectedEntry.count !== 1 ? "s" : ""} · {selectedEntry.totalCovers} cover{selectedEntry.totalCovers !== 1 ? "s" : ""}
-                  </p>
-                  <div className="space-y-3">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <StatTile hot label="Bookings" value={selectedEntry.count} />
+                    <StatTile label="Covers" value={selectedEntry.totalCovers} />
+                  </div>
+                  <div className="mt-3 space-y-2 lg:max-h-[calc(100vh-330px)] lg:overflow-y-auto">
                     {selectedEntry.bookings.map((b) => (
-                      <div
-                        key={b.id}
-                        className="bg-white border border-stone-100 rounded-xl p-4"
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-stone-900 font-medium text-sm">{b.guest}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            b.status === "confirmed"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : b.status === "pending_payment"
-                              ? "bg-amber-50 text-amber-800"
-                              : "bg-stone-400/10 text-stone-500"
-                          }`}>
-                            {b.status.replace(/_/g, " ")}
+                      <div key={b.id} className="rounded-[18px] bg-stone-50 px-4 py-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-[15px] text-stone-900">{b.guest}</span>
+                          <Tag tone={statusTone(b.status)}>{statusLabel(b.status)}</Tag>
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-600">
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                            {b.time}
                           </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.5} />
+                            {b.partySize} guest{b.partySize !== 1 ? "s" : ""}
+                          </span>
+                          <span>{b.location}</span>
+                          <span className="ml-auto text-stone-400">#{b.code}</span>
                         </div>
-                        <div className="text-xs text-stone-500 space-y-0.5">
-                          <p>{b.time} · {b.partySize} guest{b.partySize !== 1 ? "s" : ""}</p>
-                          <p>{b.location} · #{b.code}</p>
-                          {b.notes && <p className="text-amber-800">📝 {b.notes}</p>}
-                        </div>
+                        {b.notes && (
+                          <p className="mt-1.5 flex items-start gap-1.5 text-xs text-gold-700">
+                            <StickyNote className="mt-px h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                            {b.notes}
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-stone-500 mt-2">No bookings on this date.</p>
+                <p className="mt-2 text-sm font-light text-stone-500">No bookings on this date.</p>
               )}
             </>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-3">🗓️</div>
-              <p className="text-stone-500 text-sm">Select a date to view bookings</p>
+            <div className="py-12 text-center">
+              <CalendarDays className="mx-auto mb-3 h-9 w-9 text-stone-300" strokeWidth={1.25} />
+              <p className="text-sm font-light text-stone-500">Select a date to view bookings</p>
             </div>
           )}
-        </div>
+        </Sheet>
       </div>
-    </div>
+    </OwnLayout>
   );
 }

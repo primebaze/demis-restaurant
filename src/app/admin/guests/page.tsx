@@ -2,6 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight, Download, FileText, Mail, Search, Send, Upload, Users, X } from "lucide-react";
+import {
+  OwnLayout, PageHead, Sheet, SheetFooter, Tag, Avatar, Seg, Empty, btn, field, fieldArea, table, tableWrap, statusTone, statusLabel,
+} from "@/components/admin/ui";
 
 interface GuestRow {
   id: string;
@@ -21,6 +25,7 @@ interface ComposeState {
   mode: "single" | "all";
   guestId?: string;
   toLabel: string;
+  toName?: string;
   subject: string;
   message: string;
   provider: "smtp" | "resend";
@@ -30,13 +35,32 @@ interface ComposeState {
   failures: { name: string; email: string }[];
 }
 
-function EnvelopeIcon() {
+/** "2026-11-15" to "Sun 15 Nov". Anything else is shown as it is. */
+function niceDate(d: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+  if (!m) return d;
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" });
+}
+
+function TagChips({ tags }: { tags: string }) {
+  if (!tags) return null;
   return (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-    </svg>
+    <>
+      {tags.split(",").map((tag) => {
+        const t = tag.trim();
+        if (!t) return null;
+        const hot = t.toLowerCase() === "vip";
+        return (
+          <span key={tag} className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] whitespace-nowrap ${hot ? "bg-gold-100 text-gold-800" : "bg-stone-100 text-stone-600"}`}>
+            {t}
+          </span>
+        );
+      })}
+    </>
   );
 }
+
+const label = "mb-1.5 ml-1 block text-xs font-light text-stone-500";
 
 export default function AdminGuestsPage() {
   const [guests, setGuests] = useState<GuestRow[]>([]);
@@ -54,7 +78,7 @@ export default function AdminGuestsPage() {
   const [editTags, setEditTags] = useState("");
   const [editNotes, setEditNotes] = useState("");
 
-  // Compose modal
+  // Compose panel
   const [compose, setCompose] = useState<ComposeState | null>(null);
 
   const fetchGuests = useCallback(async () => {
@@ -188,6 +212,7 @@ export default function AdminGuestsPage() {
       mode: "single",
       guestId: guest.id,
       toLabel: `${guest.name} <${guest.email}>`,
+      toName: guest.name,
       subject: "",
       message: "",
       provider: "smtp",
@@ -228,7 +253,7 @@ export default function AdminGuestsPage() {
     const body =
       compose.mode === "all"
         ? { all: true, subject: compose.subject, message: compose.message, provider: compose.provider }
-        : { guestId: compose.guestId, subject: compose.subject, message: compose.message };
+        : { guestId: compose.guestId, subject: compose.subject, message: compose.message, provider: compose.provider };
 
     const res = await fetch("/api/admin/email/guests", {
       method: "POST",
@@ -241,7 +266,7 @@ export default function AdminGuestsPage() {
       setCompose((c) => c && { ...c, sending: false, error: data.error || "Failed to send" });
     } else if (typeof data.queued === "number") {
       // Bulk send is queued and drained at 15/hour by the cron
-      const successMsg = `${data.queued} email${data.queued !== 1 ? "s" : ""} queued — sending at 15/hour. Track progress in Email Logs.`;
+      const successMsg = `${data.queued} email${data.queued !== 1 ? "s" : ""} queued, sending at 15 an hour. Track progress in Email Logs.`;
       setCompose((c) => c && { ...c, sending: false, success: successMsg, failures: [] });
       setTimeout(() => setCompose(null), 3500);
     } else {
@@ -253,334 +278,367 @@ export default function AdminGuestsPage() {
     }
   }
 
-  const inputCls = "w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-sm placeholder-stone-400 focus:outline-none focus:border-gold-400";
+  const composingFor = compose?.mode === "single" ? compose.guestId : undefined;
+
+  const editPanel = (
+    <div className="grid gap-3 rounded-[18px] bg-stone-50 p-3.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] md:items-end">
+      <label className="block">
+        <span className={label}>Tags (comma-separated)</span>
+        <input
+          type="text"
+          value={editTags}
+          onChange={(e) => setEditTags(e.target.value)}
+          placeholder="VIP, regular, birthday"
+          className={`${field} !h-10 !bg-white`}
+        />
+      </label>
+      <label className="block">
+        <span className={label}>Notes</span>
+        <textarea
+          value={editNotes}
+          onChange={(e) => setEditNotes(e.target.value)}
+          rows={1}
+          placeholder="Allergies, preferences..."
+          className={`${fieldArea} min-h-[40px] resize-y !bg-white !py-2.5`}
+        />
+      </label>
+      <div className="flex gap-1.5">
+        <button onClick={() => setEditingId(null)} className={`${btn.small} !h-10 !px-4`}>
+          Cancel
+        </button>
+        <button onClick={saveEdit} className={btn.dark}>
+          Save
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="text-sm text-stone-500 mt-0.5">{total} guests</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/guests/import"
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl transition"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
-            </svg>
-            Import
-          </Link>
-          <button
-            onClick={exportPdf}
-            disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl disabled:opacity-50 transition"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            {exporting ? "Exporting…" : "Export PDF"}
-          </button>
-          <button
-            onClick={exportCsv}
-            disabled={exportingCsv}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl disabled:opacity-50 transition"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            {exportingCsv ? "Exporting…" : "Export CSV"}
-          </button>
-          <button
-            onClick={openComposeAll}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-200 text-sm text-stone-700 hover:text-gold-700 hover:border-gold-400 rounded-xl transition"
-          >
-            <EnvelopeIcon />
-            Email All Guests
-          </button>
-        </div>
-      </div>
-
-      {/* Search */}
-      <form onSubmit={handleSearch} className="mb-6">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by name, email, or phone..."
-            className="flex-1 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-900 text-sm placeholder-stone-400 focus:outline-none focus:border-gold-400"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2.5 bg-gold-300 text-black font-medium text-sm rounded-xl hover:bg-gold-400 transition"
-          >
-            Search
-          </button>
-          {search && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setSearchInput("");
-                setPage(1);
-              }}
-              className="px-3 py-2.5 text-sm text-stone-500 hover:text-stone-900 transition"
-            >
-              Clear
+    <OwnLayout>
+      <PageHead
+        title="Guests"
+        subtitle={`${total.toLocaleString("en-GB")} guests, everyone who has booked with us or been imported`}
+        actions={
+          <>
+            <Link href="/admin/guests/import" className={btn.glass}>
+              <Upload className="h-5 w-5" strokeWidth={1.5} />
+              Import
+            </Link>
+            <button onClick={exportPdf} disabled={exporting} className={`${btn.glass} disabled:opacity-50`}>
+              <FileText className="h-5 w-5" strokeWidth={1.5} />
+              {exporting ? "Exporting…" : "Export PDF"}
             </button>
-          )}
-        </div>
-      </form>
-
-      {/* Guest list */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-stone-500">Loading guests...</div>
-        ) : guests.length === 0 ? (
-          <div className="p-8 text-center text-stone-500">No guests found</div>
-        ) : (
-          <div className="divide-y divide-stone-100">
-            {guests.map((g) => (
-              <div key={g.id} className="p-4 hover:bg-stone-50">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/guests/${g.id}`}
-                        className="text-stone-900 font-medium hover:text-gold-700 transition"
-                      >
-                        {g.name}
-                      </Link>
-                      {g.tags && (
-                        <div className="flex gap-1">
-                          {g.tags.split(",").map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-1.5 py-0.5 bg-gold-100 text-gold-700 rounded text-[10px]"
-                            >
-                              {tag.trim()}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-stone-500 mt-0.5">
-                      {g.email} {g.phone && `· ${g.phone}`}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-xs text-stone-500 shrink-0">
-                    <div className="text-center hidden sm:block">
-                      <p className="text-stone-900 font-medium text-sm">{g.totalBookings}</p>
-                      <p>Bookings</p>
-                    </div>
-                    <div className="text-center hidden sm:block">
-                      <p className="text-stone-900 font-medium text-sm">{g.totalVisits}</p>
-                      <p>Visits</p>
-                    </div>
-                    <div className="text-center hidden sm:block">
-                      <p className="text-stone-900 font-medium text-sm">
-                        £{(g.totalSpendPence / 100).toFixed(0)}
-                      </p>
-                      <p>Spend</p>
-                    </div>
-                    {g.email && (
-                      <button
-                        onClick={() => openComposeSingle(g)}
-                        title="Email this guest"
-                        className="px-2 py-1 text-xs text-stone-500 hover:text-gold-700 border border-stone-200 hover:border-gold-400 rounded transition flex items-center gap-1"
-                      >
-                        <EnvelopeIcon />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => startEdit(g)}
-                      className="px-2 py-1 text-xs text-stone-500 hover:text-gold-700 border border-stone-200 rounded transition"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </div>
-
-                {g.lastBooking && (
-                  <p className="text-xs text-stone-400 mt-1">
-                    Last booking: {g.lastBooking.date} ({g.lastBooking.status})
-                  </p>
-                )}
-
-                {/* Inline edit */}
-                {editingId === g.id && (
-                  <div className="mt-3 p-3 bg-stone-50 rounded-xl space-y-2">
-                    <div>
-                      <label className="text-xs text-stone-500">Tags (comma-separated)</label>
-                      <input
-                        type="text"
-                        value={editTags}
-                        onChange={(e) => setEditTags(e.target.value)}
-                        placeholder="VIP, regular, birthday"
-                        className="w-full mt-1 px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-stone-500">Notes</label>
-                      <textarea
-                        value={editNotes}
-                        onChange={(e) => setEditNotes(e.target.value)}
-                        rows={2}
-                        placeholder="Allergies, preferences..."
-                        className="w-full mt-1 px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 resize-none"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={saveEdit}
-                        className="px-3 py-1.5 bg-gold-300 text-black font-medium text-xs rounded-lg hover:bg-gold-400 transition"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="px-3 py-1.5 text-stone-500 text-xs hover:text-stone-900 transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition"
-            >
-              ← Previous
+            <button onClick={exportCsv} disabled={exportingCsv} className={`${btn.glass} disabled:opacity-50`}>
+              <Download className="h-5 w-5" strokeWidth={1.5} />
+              {exportingCsv ? "Exporting…" : "Export CSV"}
             </button>
-            <span className="text-sm text-stone-500">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
-              className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition"
-            >
-              Next →
+            <button onClick={openComposeAll} className={btn.primary}>
+              <Mail className="h-5 w-5" strokeWidth={1.5} />
+              Email all guests
             </button>
-          </div>
-        )}
-      </div>
+          </>
+        }
+      />
 
-      {/* Compose modal */}
-      {compose && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-stone-100 rounded-2xl p-6 w-full max-w-lg">
-            <h2 className="text-lg font-semibold text-stone-900 mb-5">Send Email</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs text-stone-500 uppercase tracking-wider">To</label>
-                <p className="mt-1 px-3 py-2.5 bg-stone-50 border border-stone-100 rounded-xl text-sm text-stone-500 truncate">
-                  {compose.toLabel}
-                </p>
-              </div>
-              <div>
-                <label className="text-xs text-stone-500 uppercase tracking-wider">Subject</label>
+      <div className={`grid gap-3 ${compose ? "lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]" : ""}`}>
+        {/* Guest list */}
+        <Sheet label="Guest list" className="overflow-hidden">
+          <div className="flex flex-col gap-3 px-4 pb-4 pt-[18px] md:flex-row md:items-center md:px-5">
+            <div className="flex items-baseline gap-3">
+              <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">Guests</h2>
+              <span className="text-[13px] font-light text-stone-500">Click a name for their profile</span>
+            </div>
+            <form onSubmit={handleSearch} className="flex gap-2 md:ml-auto md:w-[380px]">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-stone-400" strokeWidth={1.75} />
                 <input
                   type="text"
-                  value={compose.subject}
-                  onChange={(e) => setCompose((c) => c && { ...c, subject: e.target.value })}
-                  placeholder="e.g. Special offer for you"
-                  className={`mt-1 ${inputCls}`}
-                  autoFocus
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search by name, email or phone"
+                  aria-label="Search guests"
+                  className={`${field} !pl-10`}
                 />
               </div>
-              <div>
-                <label className="text-xs text-stone-500 uppercase tracking-wider">Message</label>
-                <textarea
-                  value={compose.message}
-                  onChange={(e) => setCompose((c) => c && { ...c, message: e.target.value })}
-                  rows={8}
-                  placeholder="Write your message here..."
-                  className={`mt-1 ${inputCls} resize-none`}
-                />
-                <p className="mt-1.5 text-xs text-stone-500 leading-relaxed">
-                  Type {"{name}"} for their first name and {"{feast}"} for a link to the Sunday Feast page. Links are
-                  tracked, see who clicked in Link Clicks.
-                </p>
-              </div>
+              <button type="submit" className={`${btn.dark} !h-11`}>
+                Search
+              </button>
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setSearchInput("");
+                    setPage(1);
+                  }}
+                  className={`${btn.light} !h-11`}
+                >
+                  Clear
+                </button>
+              )}
+            </form>
+          </div>
 
-              <div>
-                <label className="text-xs text-stone-500 uppercase tracking-wider">Send via</label>
-                <div className="mt-1.5 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCompose((c) => c && { ...c, provider: "smtp" })}
-                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "smtp" ? "bg-gold-100 border-gold-400 text-gold-700" : "bg-stone-50 border-stone-200 text-stone-500 hover:text-stone-900"}`}
-                  >
-                    SMTP <span className="text-xs opacity-70">{compose.mode === "all" ? "· 15/hour, queued" : "· inbox-friendly"}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCompose((c) => c && { ...c, provider: "resend" })}
-                    className={`flex-1 px-3 py-2 rounded-xl text-sm border transition ${compose.provider === "resend" ? "bg-gold-100 border-gold-400 text-gold-700" : "bg-stone-50 border-stone-200 text-stone-500 hover:text-stone-900"}`}
-                  >
-                    Resend <span className="text-xs opacity-70">· fast, no cap</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+          {loading ? (
+            <Empty>Loading guests...</Empty>
+          ) : guests.length === 0 ? (
+            <Empty>No guests found</Empty>
+          ) : (
+            <>
+              {/* Phones: one card per guest */}
+              <ul className="md:hidden">
+                {guests.map((g) => (
+                  <li key={g.id} className={`border-t border-stone-100 px-4 py-3.5 ${composingFor === g.id ? "bg-gold-50" : ""}`}>
+                    <div className="flex items-start gap-3">
+                      <Avatar name={g.name} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Link href={`/admin/guests/${g.id}`} className="text-[15px] text-stone-900 hover:text-gold-700">
+                            {g.name}
+                          </Link>
+                          <TagChips tags={g.tags} />
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-stone-500">
+                          {g.email} {g.phone && `· ${g.phone}`}
+                        </p>
+                        <p className="mt-1.5 text-xs text-stone-500">
+                          <span className="text-stone-900">{g.totalBookings}</span> bookings · <span className="text-stone-900">{g.totalVisits}</span> visits ·{" "}
+                          <span className="text-stone-900">£{(g.totalSpendPence / 100).toFixed(0)}</span> spend
+                        </p>
+                        {g.lastBooking && (
+                          <div className="mt-1.5 flex items-center gap-2 text-xs text-stone-500">
+                            Last booking {niceDate(g.lastBooking.date)}
+                            <Tag tone={statusTone(g.lastBooking.status)}>{statusLabel(g.lastBooking.status)}</Tag>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 gap-1.5">
+                        {g.email && <MailButton on={composingFor === g.id} name={g.name} onClick={() => openComposeSingle(g)} />}
+                        <button onClick={() => startEdit(g)} className={btn.small}>
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                    {editingId === g.id && <div className="mt-3">{editPanel}</div>}
+                  </li>
+                ))}
+              </ul>
 
-            {compose.error && (
-              <p className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                {compose.error}
-              </p>
+              {/* iPad and up: the table */}
+              <div className={`hidden md:block ${tableWrap}`}>
+                <table className={table}>
+                  <thead>
+                    <tr>
+                      <th className="!pl-5">Guest</th>
+                      <th className="!text-right">Bookings</th>
+                      <th className="!text-right">Visits</th>
+                      <th className="!text-right">Spend</th>
+                      <th>Last booking</th>
+                      <th className="!pr-5"><span className="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {guests.map((g) => (
+                      <GuestRows key={g.id} g={g} on={composingFor === g.id} editing={editingId === g.id} editPanel={editPanel} onMail={() => openComposeSingle(g)} onEdit={() => startEdit(g)} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          <SheetFooter>
+            <span className="text-stone-500">
+              {totalPages > 1 ? `Page ${page} of ${totalPages}` : `${total.toLocaleString("en-GB")} ${total === 1 ? "guest" : "guests"}`}
+            </span>
+            {totalPages > 1 && (
+              <>
+                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className={`${btn.small} ml-auto`}>
+                  <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="inline-flex h-8 items-center gap-1 rounded-full bg-stone-900 px-3 text-[13px] text-white transition hover:bg-black disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+                </button>
+              </>
             )}
-            {compose.success && (
-              <div className="mt-3">
-                <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
-                  {compose.success}
-                </p>
-                {compose.failures.length > 0 && (
-                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-xs text-red-700 font-medium mb-2">Failed deliveries:</p>
-                    <ul className="space-y-1">
-                      {compose.failures.map((f) => (
-                        <li key={f.email} className="text-xs text-stone-500">
-                          {f.name} — <span className="text-red-700">{f.email}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+          </SheetFooter>
+        </Sheet>
+
+        {/* Send email: a side sheet on computers and iPad landscape, a pop-up below that */}
+        {compose && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center lg:static lg:z-auto lg:block lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+            <Sheet label="Send email" className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-y-auto p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:max-w-none">
+              <div className="mb-4 flex items-center gap-2.5">
+                <h2 className="font-outfit text-xl font-normal tracking-tight text-stone-900">Send email</h2>
+                <button
+                  onClick={() => setCompose(null)}
+                  disabled={compose.sending}
+                  aria-label="Close"
+                  className="ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:text-stone-900 disabled:opacity-50"
+                >
+                  <X className="h-4 w-4" strokeWidth={1.75} />
+                </button>
+              </div>
+
+              <span className={label}>To</span>
+              <div className="mb-3.5 flex h-11 items-center gap-2 rounded-full border border-stone-200 bg-white px-2 pr-4 text-sm text-stone-600">
+                {compose.mode === "single" && compose.toName ? (
+                  <Avatar name={compose.toName} />
+                ) : (
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-800">
+                    <Users className="h-4 w-4" strokeWidth={1.75} />
+                  </span>
                 )}
+                <span className="truncate">{compose.toLabel}</span>
               </div>
-            )}
 
-            <div className="flex gap-3 mt-5">
-              <button
-                onClick={sendEmail}
-                disabled={compose.sending}
-                className="flex-1 py-2.5 bg-gold-300 text-black font-semibold text-sm rounded-xl hover:bg-gold-400 disabled:opacity-50 transition"
-              >
-                {compose.sending ? "Sending… (this may take a moment)" : "Send"}
-              </button>
-              <button
-                onClick={() => setCompose(null)}
-                disabled={compose.sending}
-                className="px-5 py-2.5 text-sm text-stone-500 hover:text-stone-900 border border-stone-200 rounded-xl transition"
-              >
-                Cancel
-              </button>
+              <label className={label} htmlFor="compose-subject">Subject</label>
+              <input
+                id="compose-subject"
+                type="text"
+                value={compose.subject}
+                onChange={(e) => setCompose((c) => c && { ...c, subject: e.target.value })}
+                placeholder="e.g. Special offer for you"
+                className={`${field} mb-3.5`}
+                autoFocus
+              />
+
+              <label className={label} htmlFor="compose-message">Message</label>
+              <textarea
+                id="compose-message"
+                value={compose.message}
+                onChange={(e) => setCompose((c) => c && { ...c, message: e.target.value })}
+                rows={8}
+                placeholder="Write your message here..."
+                className={`${fieldArea} resize-none`}
+              />
+              <p className="mx-1 mb-3.5 mt-2 text-xs font-light leading-relaxed text-stone-500">
+                Type <code className="rounded-md bg-gold-50 px-1.5 py-px font-outfit text-gold-700">{"{name}"}</code> for their first name and{" "}
+                <code className="rounded-md bg-gold-50 px-1.5 py-px font-outfit text-gold-700">{"{feast}"}</code> for a link to the Sunday Feast page. Links are
+                tracked, see who clicked in Link Clicks.
+              </p>
+
+              <span className={label}>Send via</span>
+              <div className="mb-4 [&>div]:flex [&>div]:w-full [&_button]:flex-1">
+                <Seg
+                  label="Send via"
+                  value={compose.provider}
+                  onChange={(p) => setCompose((c) => c && { ...c, provider: p })}
+                  options={[
+                    { value: "smtp", label: <>SMTP <span className="text-[11px] opacity-70">{compose.mode === "all" ? "15 an hour, queued" : "inbox-friendly"}</span></> },
+                    { value: "resend", label: <>Resend <span className="text-[11px] opacity-70">fast, no cap</span></> },
+                  ]}
+                />
+              </div>
+
+              {compose.error && <p className="mb-3 rounded-2xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{compose.error}</p>}
+              {compose.success && (
+                <div className="mb-3">
+                  <p className="rounded-2xl bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">{compose.success}</p>
+                  {compose.failures.length > 0 && (
+                    <div className="mt-2 rounded-2xl bg-red-50 px-4 py-3">
+                      <p className="mb-2 text-xs font-medium text-red-700">Failed deliveries:</p>
+                      <ul className="space-y-1">
+                        {compose.failures.map((f) => (
+                          <li key={f.email} className="text-xs text-stone-500">
+                            {f.name}: <span className="text-red-700">{f.email}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-auto flex gap-2">
+                <button onClick={() => setCompose(null)} disabled={compose.sending} className={`${btn.light} !h-11`}>
+                  Cancel
+                </button>
+                <button onClick={sendEmail} disabled={compose.sending} className={`${btn.primary} flex-1 justify-center`}>
+                  <Send className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                  {compose.sending ? "Sending… (this may take a moment)" : "Send"}
+                </button>
+              </div>
+            </Sheet>
+          </div>
+        )}
+      </div>
+    </OwnLayout>
+  );
+}
+
+function MailButton({ on, name, onClick }: { on: boolean; name: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title="Email this guest"
+      aria-label={`Email ${name}`}
+      className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
+        on ? "border-gold-300 bg-gold-300 text-ink-900" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:text-stone-900"
+      }`}
+    >
+      <Mail className="h-4 w-4" strokeWidth={1.75} />
+    </button>
+  );
+}
+
+function GuestRows({
+  g, on, editing, editPanel, onMail, onEdit,
+}: { g: GuestRow; on: boolean; editing: boolean; editPanel: React.ReactNode; onMail: () => void; onEdit: () => void }) {
+  return (
+    <>
+      <tr className={on ? "bg-gold-50" : "hover:bg-stone-50"}>
+        <td className="!pl-5">
+          <div className="flex items-center gap-3">
+            <Avatar name={g.name} />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Link href={`/admin/guests/${g.id}`} className="text-stone-900 transition hover:text-gold-700">
+                  {g.name}
+                </Link>
+                <TagChips tags={g.tags} />
+              </div>
+              <p className="max-w-[340px] truncate text-xs text-stone-500">
+                {g.email} {g.phone && `· ${g.phone}`}
+              </p>
             </div>
           </div>
-        </div>
+        </td>
+        <td className="text-right tabular-nums">{g.totalBookings}</td>
+        <td className="text-right tabular-nums">{g.totalVisits}</td>
+        <td className="text-right tabular-nums">£{(g.totalSpendPence / 100).toFixed(0)}</td>
+        <td className="whitespace-nowrap">
+          {g.lastBooking ? (
+            <>
+              <div className="mb-1 text-[13px]">{niceDate(g.lastBooking.date)}</div>
+              <Tag tone={statusTone(g.lastBooking.status)}>{statusLabel(g.lastBooking.status)}</Tag>
+            </>
+          ) : (
+            <span className="text-stone-300">·</span>
+          )}
+        </td>
+        <td className="!pr-5 text-right">
+          <span className="inline-flex gap-1.5">
+            {g.email && <MailButton on={on} name={g.name} onClick={onMail} />}
+            <button onClick={onEdit} className={btn.small}>
+              Edit
+            </button>
+          </span>
+        </td>
+      </tr>
+      {editing && (
+        <tr>
+          <td colSpan={6} className="!border-t-0 !px-5 !pb-3.5 !pt-0">
+            {editPanel}
+          </td>
+        </tr>
       )}
-    </div>
+    </>
   );
 }

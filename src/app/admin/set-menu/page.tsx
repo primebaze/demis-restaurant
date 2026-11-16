@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Download, Link as LinkIcon, ListFilter, Plus, TriangleAlert, X } from "lucide-react";
+import { Empty, OwnLayout, PageHead, Sheet, SheetFooter, SheetTitle, Tag, btn, field, fieldArea, table, tableWrap } from "@/components/admin/ui";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.demisrestaurant.co.uk";
 
@@ -29,17 +31,6 @@ type Group = {
   status: string;
   createdAt: string;
   selections: Selection[];
-};
-
-const APPETISER_COLORS: Record<string, string> = {
-  "Puff Puff": "bg-gold-100 text-gold-700",
-  Samosa: "bg-stone-100 text-stone-800",
-  "Spring Rolls": "bg-stone-100 text-stone-500",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  active: "bg-emerald-50 text-emerald-700",
-  inactive: "bg-red-50 text-red-700",
 };
 
 const LOCATIONS: Record<string, string> = {
@@ -196,315 +187,414 @@ export default function AdminSetMenuPage() {
     }
   }
 
-  const inputCls = "w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400 placeholder-stone-400";
-  const labelCls = "block text-xs text-stone-500 mb-1.5";
+  const labelCls = "mb-1.5 block px-1 text-xs font-light text-stone-500";
+  const appetiserTotals = (g: Group) =>
+    ["Puff Puff", "Samosa", "Spring Rolls"].map((a) => ({ name: a, count: g.selections.filter((s) => s.appetiser.includes(a)).length }));
+
+  function progress(g: Group) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-[15px] text-stone-900">{g.selections.length}</span>
+        <span className="text-xs text-stone-400">/ {g.partySize}</span>
+        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-stone-100">
+          <div
+            className={`h-full rounded-full ${g.status === "active" ? "bg-gold-400" : "bg-stone-400"}`}
+            style={{ width: `${Math.min(100, (g.selections.length / g.partySize) * 100)}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  function toggleBtn(g: Group) {
+    return (
+      <button
+        onClick={(e) => { e.stopPropagation(); toggleStatus(g.id, g.status); }}
+        disabled={toggling === g.id}
+        className={btn.small}
+      >
+        {toggling === g.id ? "…" : g.status === "active" ? "Deactivate" : "Activate"}
+      </button>
+    );
+  }
+
+  function copyBtn(g: Group, guestUrl: string) {
+    return (
+      <button onClick={(e) => { e.stopPropagation(); copyLink(guestUrl, g.groupCode); }} className={btn.small}>
+        {copied === g.groupCode ? <Check className="h-3.5 w-3.5 text-emerald-700" strokeWidth={2} /> : <LinkIcon className="h-3.5 w-3.5" strokeWidth={1.75} />}
+        {copied === g.groupCode ? "Copied!" : "Copy link"}
+      </button>
+    );
+  }
+
+  function allergyTag(a: string) {
+    return a ? (
+      <Tag tone="wait">
+        <TriangleAlert className="h-3 w-3" strokeWidth={2} />
+        {a}
+      </Tag>
+    ) : (
+      <span className="text-stone-400">None</span>
+    );
+  }
+
+  /** Organiser details, guest selections and appetiser totals, shown when a group is opened. */
+  function groupDetail(g: Group) {
+    return (
+      <div className="rounded-[18px] bg-white p-4 text-stone-900 md:px-5" onClick={(e) => e.stopPropagation()}>
+        {/* Organiser details */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-b border-stone-100 pb-4 md:flex md:flex-wrap md:gap-x-10">
+          {[
+            ["Email", g.organizerEmail || "Not given"],
+            ["Phone", g.organizerPhone || "Not given"],
+            ["Created", new Date(g.createdAt).toLocaleDateString("en-GB")],
+          ].map(([l, v]) => (
+            <div key={l} className="min-w-0">
+              <div className="text-[11px] font-light text-stone-500">{l}</div>
+              <div className="mt-0.5 break-words text-[13px]">{v}</div>
+            </div>
+          ))}
+          {g.notes && (
+            <div className="col-span-2 min-w-0">
+              <div className="text-[11px] font-light text-stone-500">Notes</div>
+              <div className="mt-0.5 text-[13px]">{g.notes}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Guest selections */}
+        <div className="mt-4 flex items-center gap-2">
+          <h3 className="text-[15px]">Guest selections</h3>
+          <span className="text-xs font-light text-stone-500">{g.selections.length} so far</span>
+          {g.selections.length > 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); exportGroupPdf(g); }}
+              disabled={exporting === g.id}
+              className={`${btn.small} ml-auto`}
+            >
+              <Download className="h-3.5 w-3.5" strokeWidth={1.75} />
+              {exporting === g.id ? "Exporting…" : "Export PDF"}
+            </button>
+          )}
+        </div>
+        {g.selections.length === 0 ? (
+          <p className="py-4 text-sm font-light text-stone-400">No selections yet</p>
+        ) : (
+          <>
+            <div className={`mt-2 hidden md:block ${tableWrap}`}>
+              <table className={`${table} text-[13px]`}>
+                <thead>
+                  <tr>
+                    <th className="w-8"><span className="sr-only">Number</span></th>
+                    <th>Guest</th>
+                    <th>Appetiser</th>
+                    <th>Starter</th>
+                    <th>Main</th>
+                    <th>Protein</th>
+                    <th>Dessert</th>
+                    <th>Allergies</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {g.selections.map((s, i) => (
+                    <tr key={s.id}>
+                      <td className="text-stone-400">{i + 1}.</td>
+                      <td>{s.guestName}</td>
+                      <td><Tag tone="gold">{s.appetiser}</Tag></td>
+                      <td>{s.starter}</td>
+                      <td>{s.main}</td>
+                      <td>{s.protein}</td>
+                      <td>{s.dessert}</td>
+                      <td>{allergyTag(s.allergies)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <ul className="mt-2 space-y-2 md:hidden">
+              {g.selections.map((s, i) => (
+                <li key={s.id} className="rounded-[16px] bg-stone-50 px-3.5 py-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-stone-400">{i + 1}.</span>
+                    <span className="text-sm">{s.guestName}</span>
+                    <span className="ml-auto"><Tag tone="gold">{s.appetiser}</Tag></span>
+                  </div>
+                  <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-stone-500">
+                    <span>Starter: <span className="text-stone-800">{s.starter}</span></span>
+                    <span>Main: <span className="text-stone-800">{s.main}</span></span>
+                    <span>Protein: <span className="text-stone-800">{s.protein}</span></span>
+                    <span>Dessert: <span className="text-stone-800">{s.dessert}</span></span>
+                  </div>
+                  {s.allergies && <div className="mt-2">{allergyTag(s.allergies)}</div>}
+                </li>
+              ))}
+            </ul>
+
+            {/* Appetiser summary */}
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-stone-100 pt-3 text-[13px]">
+              <span className="font-light text-stone-500">Appetisers</span>
+              {appetiserTotals(g).map((a) => (
+                <span key={a.name}>
+                  {a.name} <b className="font-medium">{a.count}</b>
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="text-sm text-stone-500 mt-0.5">{total} group{total !== 1 ? "s" : ""}</p>
-        </div>
-        <button
-          onClick={() => { setShowForm(true); setNewGroupResult(null); }}
-          className="px-4 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition"
-        >
-          + New Group
-        </button>
-      </div>
+    <OwnLayout>
+      <PageHead
+        title="Set Menu"
+        subtitle="Groups where each guest picks their own courses"
+        actions={
+          <>
+            <label className="relative">
+              <span className="sr-only">Status</span>
+              <ListFilter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white" strokeWidth={1.5} />
+              <select
+                value={filterStatus}
+                onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
+                className={`${btn.glass} appearance-none pl-10 pr-10`}
+              >
+                <option className="text-stone-900" value="">All statuses</option>
+                <option className="text-stone-900" value="active">Active</option>
+                <option className="text-stone-900" value="inactive">Inactive</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white" strokeWidth={1.5} />
+            </label>
+            {filterStatus && (
+              <button onClick={() => { setFilterStatus(""); setPage(1); }} className={btn.glass}>
+                Clear
+              </button>
+            )}
+            <button onClick={() => { setShowForm(true); setNewGroupResult(null); }} className={btn.primary}>
+              <Plus className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              New group
+            </button>
+          </>
+        }
+      />
 
       {/* New group form */}
       {showForm && (
-        <div className="mb-8 bg-white border border-stone-100 rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-stone-100">
-            <h2 className="text-base font-semibold text-stone-900">Create Set Menu Group</h2>
-            <p className="text-xs text-stone-500 mt-0.5">A shareable guest selection link will be generated automatically.</p>
-          </div>
+        <Sheet label="New set menu group" className="mb-4 p-5 md:p-6">
+          <SheetTitle
+            aside={
+              <button
+                onClick={() => { setShowForm(false); setFormError(""); setNewGroupResult(null); }}
+                aria-label="Close"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:text-stone-900"
+              >
+                <X className="h-4 w-4" strokeWidth={1.75} />
+              </button>
+            }
+          >
+            Create set menu group
+          </SheetTitle>
+          <p className="mt-0.5 text-[13px] font-light text-stone-500">A shareable guest selection link will be generated automatically.</p>
 
           {newGroupResult ? (
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gold-100 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-gold-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
+            <div className="mt-5">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-100 text-gold-800">
+                  <Check className="h-5 w-5" strokeWidth={2} />
+                </span>
                 <div>
-                  <p className="text-sm font-semibold text-stone-900">Group {newGroupResult.groupCode} created</p>
-                  <p className="text-xs text-stone-500">Share the link below with the organiser</p>
+                  <p className="text-sm text-stone-900">Group {newGroupResult.groupCode} created</p>
+                  <p className="text-xs font-light text-stone-500">Share the link below with the organiser</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-4 py-3">
-                <span className="text-sm text-stone-700 flex-1 truncate font-mono">{newGroupResult.guestSelectionUrl}</span>
-                <button
-                  onClick={() => copyLink(newGroupResult.guestSelectionUrl, newGroupResult.groupCode)}
-                  className="text-xs px-3 py-1.5 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-100 transition shrink-0"
-                >
+              <div className="flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 py-1.5 pl-4 pr-1.5">
+                <span className="flex-1 truncate font-mono text-sm text-stone-700">{newGroupResult.guestSelectionUrl}</span>
+                <button onClick={() => copyLink(newGroupResult.guestSelectionUrl, newGroupResult.groupCode)} className={`${btn.small} shrink-0`}>
+                  <LinkIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
                   {copied === newGroupResult.groupCode ? "Copied!" : "Copy"}
                 </button>
               </div>
-              <button
-                onClick={() => { setShowForm(false); setNewGroupResult(null); }}
-                className="mt-4 text-sm text-stone-500 hover:text-stone-900 transition"
-              >
+              <button onClick={() => { setShowForm(false); setNewGroupResult(null); }} className={`${btn.light} mt-4`}>
                 Close
               </button>
             </div>
           ) : (
-            <div className="p-6">
-              <div className="grid sm:grid-cols-2 gap-4 mb-4">
+            <div className="mt-5">
+              <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <label className={labelCls}>Organiser Name *</label>
-                  <input type="text" value={form.organizerName} onChange={(e) => setForm(f => ({ ...f, organizerName: e.target.value }))} placeholder="Full name" className={inputCls} />
+                  <label className={labelCls}>Organiser name *</label>
+                  <input type="text" value={form.organizerName} onChange={(e) => setForm(f => ({ ...f, organizerName: e.target.value }))} placeholder="Full name" className={field} />
                 </div>
                 <div>
-                  <label className={labelCls}>Organiser Email</label>
-                  <input type="email" value={form.organizerEmail} onChange={(e) => setForm(f => ({ ...f, organizerEmail: e.target.value }))} placeholder="email@example.com" className={inputCls} />
+                  <label className={labelCls}>Organiser email</label>
+                  <input type="email" value={form.organizerEmail} onChange={(e) => setForm(f => ({ ...f, organizerEmail: e.target.value }))} placeholder="email@example.com" className={field} />
                 </div>
                 <div>
-                  <label className={labelCls}>Organiser Phone</label>
-                  <input type="tel" value={form.organizerPhone} onChange={(e) => setForm(f => ({ ...f, organizerPhone: e.target.value }))} placeholder="07700 000000" className={inputCls} />
+                  <label className={labelCls}>Organiser phone</label>
+                  <input type="tel" value={form.organizerPhone} onChange={(e) => setForm(f => ({ ...f, organizerPhone: e.target.value }))} placeholder="07700 000000" className={field} />
                 </div>
                 <div>
-                  <label className={labelCls}>Event Date *</label>
-                  <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={inputCls + " [color-scheme:light]"} />
+                  <label className={labelCls}>Event date *</label>
+                  <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className={field} />
                 </div>
                 <div>
-                  <label className={labelCls}>Expected Party Size *</label>
-                  <input type="number" min="1" value={form.partySize} onChange={(e) => setForm(f => ({ ...f, partySize: e.target.value }))} placeholder="e.g. 40" className={inputCls} />
+                  <label className={labelCls}>Expected party size *</label>
+                  <input type="number" min="1" value={form.partySize} onChange={(e) => setForm(f => ({ ...f, partySize: e.target.value }))} placeholder="e.g. 40" className={field} />
                 </div>
                 <div>
                   <label className={labelCls}>Location</label>
-                  <select value={form.locationSlug} onChange={(e) => setForm(f => ({ ...f, locationSlug: e.target.value }))} className={inputCls}>
+                  <select value={form.locationSlug} onChange={(e) => setForm(f => ({ ...f, locationSlug: e.target.value }))} className={field}>
                     <option value="cricklewood">Cricklewood</option>
                     <option value="streatham">Streatham Hill</option>
                   </select>
                 </div>
-                <div className="sm:col-span-2">
+                <div className="sm:col-span-2 lg:col-span-3">
                   <label className={labelCls}>Notes (internal)</label>
-                  <textarea value={form.notes} onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any internal notes…" rows={2} className={inputCls + " resize-none"} />
+                  <textarea value={form.notes} onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any internal notes…" rows={2} className={`${fieldArea} resize-none`} />
                 </div>
               </div>
 
               {formError && (
-                <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{formError}</p>
+                <p className="mb-4 rounded-2xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{formError}</p>
               )}
 
-              <div className="flex gap-3">
-                <button onClick={createGroup} disabled={creating} className="px-5 py-2 bg-gold-300 text-ink-900 rounded-xl text-sm font-semibold hover:bg-gold-200 transition disabled:opacity-50">
-                  {creating ? "Creating…" : "Create Group & Generate Link"}
+              <div className="flex flex-wrap gap-2">
+                <button onClick={createGroup} disabled={creating} className={btn.primary}>
+                  {creating ? "Creating…" : "Create group and link"}
                 </button>
-                <button onClick={() => { setShowForm(false); setFormError(""); }} className="px-4 py-2 text-sm text-stone-500 hover:text-stone-900 transition">
+                <button onClick={() => { setShowForm(false); setFormError(""); }} className={btn.light}>
                   Cancel
                 </button>
               </div>
             </div>
           )}
-        </div>
+        </Sheet>
       )}
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <select
-          value={filterStatus}
-          onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 bg-white border border-stone-200 rounded-lg text-stone-900 text-sm focus:outline-none focus:border-gold-400"
-        >
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-        {filterStatus && (
-          <button onClick={() => { setFilterStatus(""); setPage(1); }} className="px-3 py-2 text-sm text-stone-500 hover:text-stone-900 transition">
-            Clear
-          </button>
-        )}
-      </div>
+      {/* Groups */}
+      <Sheet label="Groups" className="overflow-hidden">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 pb-3 pt-4 md:px-5 md:pt-5">
+          <h2 className="font-outfit text-[22px] font-normal tracking-tight">Groups</h2>
+          <span className="text-[13px] font-light text-stone-500">{total} group{total !== 1 ? "s" : ""}</span>
+          <span className="ml-auto hidden text-[13px] font-light text-stone-500 md:inline">Tap a group to see who has chosen what</span>
+        </div>
 
-      {/* Groups table */}
-      <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-stone-500">Loading groups…</div>
+          <Empty>Loading groups…</Empty>
         ) : groups.length === 0 ? (
-          <div className="p-8 text-center text-stone-500">No set menu groups yet</div>
+          <Empty>No set menu groups yet</Empty>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs uppercase text-stone-500 border-b border-stone-100">
-                  <th className="px-4 py-3">Group ID</th>
-                  <th className="px-4 py-3">Organiser</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Location</th>
-                  <th className="px-4 py-3">Selections</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Toggle</th>
-                  <th className="px-4 py-3">Link</th>
-                </tr>
-              </thead>
-              <tbody>
-                {groups.map((g) => {
-                  const guestUrl = `${SITE_URL}/set-menu/${g.groupCode}`;
-                  const isExpanded = expanded === g.id;
-                  return (
-                    <>
-                      <tr
-                        key={g.id}
-                        className="border-b border-stone-100 hover:bg-stone-50 cursor-pointer"
-                        onClick={() => setExpanded(isExpanded ? null : g.id)}
-                      >
-                        <td className="px-4 py-3 text-sm font-mono text-gold-700 font-semibold">{g.groupCode}</td>
-                        <td className="px-4 py-3">
-                          <p className="text-sm text-stone-900">{g.organizerName}</p>
-                          {g.organizerPhone && <p className="text-xs text-stone-500">{g.organizerPhone}</p>}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-stone-700">{formatDate(g.date)}</td>
-                        <td className="px-4 py-3 text-sm text-stone-500">{LOCATIONS[g.locationSlug] || g.locationSlug}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-stone-900 font-semibold">{g.selections.length}</span>
-                            <span className="text-xs text-stone-500">/ {g.partySize}</span>
-                            <div className="w-16 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gold-100 rounded-full"
-                                style={{ width: `${Math.min(100, (g.selections.length / g.partySize) * 100)}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[g.status] || "bg-stone-100 text-stone-700"}`}>
-                            {g.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); toggleStatus(g.id, g.status); }}
-                            disabled={toggling === g.id}
-                            className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 ${
-                              g.status === "active"
-                                ? "bg-red-50 text-red-700 hover:bg-red-50"
-                                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
-                            }`}
-                          >
-                            {toggling === g.id ? "…" : g.status === "active" ? "Deactivate" : "Activate"}
-                          </button>
-                        </td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); copyLink(guestUrl, g.groupCode); }}
-                            className="text-xs px-3 py-1.5 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-100 transition"
-                          >
-                            {copied === g.groupCode ? "Copied!" : "Copy Link"}
-                          </button>
-                        </td>
-                      </tr>
-
-                      {isExpanded && (
-                        <tr key={`${g.id}-detail`} className="bg-stone-50">
-                          <td colSpan={7} className="px-6 py-5">
-                            {/* Organiser details */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-5 pb-5 border-b border-stone-100">
-                              <div>
-                                <span className="text-stone-500 block text-xs mb-0.5">Email</span>
-                                <span className="text-stone-900">{g.organizerEmail || "—"}</span>
-                              </div>
-                              <div>
-                                <span className="text-stone-500 block text-xs mb-0.5">Phone</span>
-                                <span className="text-stone-900">{g.organizerPhone || "—"}</span>
-                              </div>
-                              <div>
-                                <span className="text-stone-500 block text-xs mb-0.5">Created</span>
-                                <span className="text-stone-900">{new Date(g.createdAt).toLocaleDateString("en-GB")}</span>
-                              </div>
-                              {g.notes && (
-                                <div className="col-span-2 md:col-span-1">
-                                  <span className="text-stone-500 block text-xs mb-0.5">Notes</span>
-                                  <span className="text-stone-900">{g.notes}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Guest selections */}
-                            <div className="flex items-center justify-between mb-3">
-                              <p className="text-xs uppercase tracking-wider text-stone-500">Guest Selections ({g.selections.length})</p>
-                              {g.selections.length > 0 && (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); exportGroupPdf(g); }}
-                                  disabled={exporting === g.id}
-                                  className="text-xs px-3 py-1.5 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-100 transition disabled:opacity-50 flex items-center gap-1.5"
-                                >
-                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                  </svg>
-                                  {exporting === g.id ? "Exporting…" : "Export PDF"}
-                                </button>
-                              )}
-                            </div>
-                            {g.selections.length === 0 ? (
-                              <p className="text-sm text-stone-400">No selections yet</p>
-                            ) : (
-                              <div className="space-y-2">
-                                {g.selections.map((s, i) => (
-                                  <div key={s.id} className="bg-white border border-stone-100 rounded-xl px-4 py-3">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div className="flex items-center gap-3">
-                                        <span className="text-xs text-stone-400 w-5 text-right">{i + 1}.</span>
-                                        <span className="text-sm font-semibold text-stone-900">{s.guestName}</span>
-                                      </div>
-                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPETISER_COLORS[s.appetiser] || "bg-stone-100 text-stone-700"}`}>
-                                        {s.appetiser}
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-x-4 gap-y-1 ml-8 text-xs text-stone-500">
-                                      <span>Starter: <span className="text-stone-700">{s.starter}</span></span>
-                                      <span>Main: <span className="text-stone-700">{s.main}</span></span>
-                                      <span>Protein: <span className="text-stone-700">{s.protein}</span></span>
-                                      <span>Dessert: <span className="text-stone-700">{s.dessert}</span></span>
-                                      {s.allergies && <span className="text-amber-800">⚠ {s.allergies}</span>}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Appetiser summary */}
-                            {g.selections.length > 0 && (
-                              <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap gap-4">
-                                {["Puff Puff", "Samosa", "Spring Rolls"].map((a) => {
-                                  const count = g.selections.filter((s) => s.appetiser.includes(a)).length;
-                                  return (
-                                    <div key={a} className="text-sm">
-                                      <span className="text-stone-500">{a}: </span>
-                                      <span className="text-stone-900 font-semibold">{count}</span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
+          <>
+            {/* Table: iPad and desktop */}
+            <div className={`hidden md:block ${tableWrap}`}>
+              <table className={`${table} [&_td:first-child]:pl-5 [&_th:first-child]:pl-5 [&_td:last-child]:pr-5 [&_th:last-child]:pr-5`}>
+                <thead>
+                  <tr>
+                    <th>Group ID</th>
+                    <th>Organiser</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Selections</th>
+                    <th>Status</th>
+                    <th>Toggle</th>
+                    <th className="!text-right">Link</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groups.map((g) => {
+                    const guestUrl = `${SITE_URL}/set-menu/${g.groupCode}`;
+                    const isExpanded = expanded === g.id;
+                    return (
+                      <Fragment key={g.id}>
+                        <tr
+                          className={`cursor-pointer transition-colors ${isExpanded ? "bg-gold-50" : "hover:bg-stone-50"}`}
+                          onClick={() => setExpanded(isExpanded ? null : g.id)}
+                          onKeyDown={(e) => { if (e.key === "Enter") setExpanded(isExpanded ? null : g.id); }}
+                          tabIndex={0}
+                          aria-expanded={isExpanded}
+                        >
+                          <td className="whitespace-nowrap font-mono text-[13px] text-gold-700">{g.groupCode}</td>
+                          <td>
+                            <div>{g.organizerName}</div>
+                            {g.organizerPhone && <div className="text-xs font-light text-stone-500">{g.organizerPhone}</div>}
                           </td>
+                          <td className="whitespace-nowrap">{formatDate(g.date)}</td>
+                          <td className="whitespace-nowrap">{LOCATIONS[g.locationSlug] || g.locationSlug}</td>
+                          <td>{progress(g)}</td>
+                          <td><Tag tone={g.status === "active" ? "ok" : "off"}>{g.status === "active" ? "Active" : "Inactive"}</Tag></td>
+                          <td>{toggleBtn(g)}</td>
+                          <td className="text-right">{copyBtn(g, guestUrl)}</td>
                         </tr>
-                      )}
-                    </>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+                        {isExpanded && (
+                          <tr className="bg-gold-50">
+                            <td colSpan={8} className="!border-t-0 !pb-4 !pt-0">
+                              {groupDetail(g)}
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Cards: phones */}
+            <div className="space-y-2 px-3 pb-3 md:hidden">
+              {groups.map((g) => {
+                const guestUrl = `${SITE_URL}/set-menu/${g.groupCode}`;
+                const isExpanded = expanded === g.id;
+                return (
+                  <article key={g.id} className={`rounded-[18px] p-3.5 ${isExpanded ? "bg-gold-50" : "bg-stone-50"}`}>
+                    <button type="button" onClick={() => setExpanded(isExpanded ? null : g.id)} aria-expanded={isExpanded} className="block w-full text-left">
+                      <div className="flex items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[15px]">{g.organizerName}</div>
+                          <div className="text-xs font-light text-stone-500">
+                            <span className="font-mono text-gold-700">{g.groupCode}</span> · {formatDate(g.date)} · {LOCATIONS[g.locationSlug] || g.locationSlug}
+                          </div>
+                        </div>
+                        <Tag tone={g.status === "active" ? "ok" : "off"}>{g.status === "active" ? "Active" : "Inactive"}</Tag>
+                      </div>
+                      <div className="mt-2.5 flex items-center gap-2">
+                        {progress(g)}
+                        <ChevronDown className={`ml-auto h-4 w-4 text-stone-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} strokeWidth={1.75} />
+                      </div>
+                    </button>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {toggleBtn(g)}
+                      {copyBtn(g, guestUrl)}
+                    </div>
+                    {isExpanded && <div className="mt-3">{groupDetail(g)}</div>}
+                  </article>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
-              ← Previous
-            </button>
-            <span className="text-sm text-stone-500">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm text-stone-500 hover:text-stone-900 disabled:opacity-30 transition">
-              Next →
-            </button>
-          </div>
+          <SheetFooter>
+            <span className="text-stone-500">Page {page} of {totalPages}</span>
+            <div className="ml-auto flex gap-2">
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className={btn.small}>
+                <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                Previous
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="inline-flex h-8 items-center gap-1 rounded-full bg-stone-900 px-3 text-[13px] text-white transition hover:bg-black disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+              </button>
+            </div>
+          </SheetFooter>
         )}
-      </div>
-    </div>
+      </Sheet>
+    </OwnLayout>
   );
 }

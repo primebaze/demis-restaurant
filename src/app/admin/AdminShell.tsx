@@ -291,9 +291,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           children
         ) : (
           <>
-            {head && <PageHead title={head.title} subtitle={head.subtitle} />}
+            {head && (
+              <div className="shell-head">
+                <PageHead title={head.title} subtitle={head.subtitle} />
+              </div>
+            )}
             {sw && (
-              <div className="mb-4 inline-flex rounded-full border border-white/15 bg-[rgba(58,52,48,0.48)] p-1 backdrop-blur-xl" role="group" aria-label="Switch">
+              <div className="shell-switch mb-4 inline-flex rounded-full border border-white/15 bg-[rgba(58,52,48,0.48)] p-1 backdrop-blur-xl" role="group" aria-label="Switch">
                 {sw.items.map((s) => {
                   const on = pathname.startsWith(s.href);
                   return (
@@ -310,7 +314,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </div>
             )}
             <div
-              className={`rounded-[22px] bg-white p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] md:p-6 ${
+              className={`shell-sheet rounded-[22px] bg-white p-4 text-stone-900 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] md:p-6 ${
                 pathname.startsWith("/admin/shoot-plans") ? "overflow-visible" : "overflow-x-auto"
               }`}
             >

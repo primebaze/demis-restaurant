@@ -113,3 +113,9 @@
   box-shadow: 0 0 0 1000px rgba(74, 62, 54, 0.92) inset;
   transition: background-color 9999s ease-out 0s;
 }
+
+/* Pages that draw their own layout (title, glass strip, sheets) put "own-layout" on
+   their outer element; the shell then drops its default title and white sheet. */
+main:has(.own-layout) .shell-head,
+main:has(.own-layout) .shell-switch { display: none; }
+main:has(.own-layout) .shell-sheet { background: transparent; padding: 0; box-shadow: none; border-radius: 0; overflow: visible; color: inherit; }
