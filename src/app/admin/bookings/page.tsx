@@ -592,7 +592,7 @@ export default function AdminBookingsPage() {
                   aria-label={`${dayLabel(ds)}, ${plural(n, "booking", "bookings")}`}
                   className={`flex h-11 md:h-12 lg:h-11 xl:h-12 flex-col items-center justify-center gap-1 rounded-[14px] text-sm transition ${
                     isSel
-                      ? "bg-gold-300 text-ink-900"
+                      ? "bg-stone-900 text-white"
                       : isToday
                       ? "bg-white text-stone-900 ring-1 ring-inset ring-stone-900"
                       : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-400" : "text-stone-900"}`
@@ -601,7 +601,7 @@ export default function AdminBookingsPage() {
                   <span className="leading-none">{Number(ds.slice(8))}</span>
                   <span className="flex h-2 items-center gap-[3px]">
                     {Array.from({ length: Math.min(n, 4) }).map((_, j) => (
-                      <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSel ? "bg-ink-900" : "bg-ember-400"}`} />
+                      <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSel ? "bg-gold-300" : "bg-ember-400"}`} />
                     ))}
                   </span>
                 </button>

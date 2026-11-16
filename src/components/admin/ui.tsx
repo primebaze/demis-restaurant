@@ -404,7 +404,7 @@ export function DateField({
                   onClick={() => pick(iso)}
                   aria-pressed={sel}
                   className={`flex h-9 items-center justify-center rounded-full text-sm transition ${
-                    sel ? "bg-gold-300 font-medium text-ink-900" : isToday ? "ring-1 ring-inset ring-stone-900 hover:bg-stone-100" : "hover:bg-stone-100"
+                    sel ? "bg-stone-900 font-medium text-white" : isToday ? "ring-1 ring-inset ring-stone-900 hover:bg-stone-100" : "hover:bg-stone-100"
                   }`}
                 >
                   {d}

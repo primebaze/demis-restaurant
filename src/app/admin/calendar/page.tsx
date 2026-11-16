@@ -247,7 +247,7 @@ export default function CalendarPage() {
                     aria-label={`${day} ${MONTH_NAMES[month]}${hasBookings ? `, ${entry.count} booking${entry.count !== 1 ? "s" : ""}` : ""}`}
                     className={`relative flex h-14 flex-col items-center justify-between rounded-[14px] p-1.5 text-left transition md:h-[84px] md:items-start md:rounded-[18px] md:p-3 ${
                       isSelected
-                        ? "bg-gold-300 text-ink-900"
+                        ? "bg-stone-900 text-white"
                         : isToday
                         ? "bg-white text-stone-900 ring-1 ring-inset ring-stone-900"
                         : `bg-stone-100 hover:bg-stone-200 ${isPast ? "text-stone-400" : "text-stone-900"}`
@@ -255,19 +255,19 @@ export default function CalendarPage() {
                   >
                     <span className="text-sm md:text-[17px] leading-none">{day}</span>
                     {isToday && (
-                      <span className="absolute right-2.5 top-2.5 hidden text-[9px] tracking-wider text-stone-500 md:block">TODAY</span>
+                      <span className={`absolute right-2.5 top-2.5 hidden text-[9px] tracking-wider md:block ${isSelected ? "text-white/70" : "text-stone-500"}`}>TODAY</span>
                     )}
                     {hasBookings ? (
                       <span className="flex items-center gap-[3px]">
                         {entry.count <= 3 ? (
                           Array.from({ length: entry.count }).map((_, j) => (
-                            <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-ember-400"}`} />
+                            <i key={j} className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-gold-300" : "bg-ember-400"}`} />
                           ))
                         ) : (
                           <>
-                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-ember-400"}`} />
-                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-ink-900" : "bg-ember-400"}`} />
-                            <span className={`ml-0.5 text-[10px] leading-none ${isSelected ? "text-ink-900" : "text-ember-600"}`}>{entry.count}</span>
+                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-gold-300" : "bg-ember-400"}`} />
+                            <i className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-gold-300" : "bg-ember-400"}`} />
+                            <span className={`ml-0.5 text-[10px] leading-none ${isSelected ? "text-gold-200" : "text-ember-600"}`}>{entry.count}</span>
                           </>
                         )}
                       </span>
