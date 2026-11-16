@@ -22,9 +22,9 @@ export const FEAST_MAX_PARTY = 15;
 /** Day of the week the feast runs, 0 = Sunday. */
 const SERVICE_WEEKDAY = 0;
 
-// The feast runs 1:30pm to 6pm. Arrival times guests can pick, the last one at 6pm.
+// The feast runs 1:30pm to 6pm. Arrival times guests can pick, the last one at 5:30pm.
 export const ARRIVAL_SLOTS = [
-  "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00",
+  "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
 ];
 export const BRUNCH_START = "1:30pm";
 export const BRUNCH_END = "6pm";
