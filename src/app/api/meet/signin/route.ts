@@ -36,7 +36,7 @@ export async function POST(req: Request) {
   const lock = await prisma.meetPinLock.findUnique({ where: { clockinId: staffId } });
   if (lock?.lockedUntil && lock.lockedUntil > new Date()) {
     const mins = Math.ceil((lock.lockedUntil.getTime() - Date.now()) / 60_000);
-    return NextResponse.json({ error: `Too many wrong PINs. Try again in ${mins} minute${mins === 1 ? "" : "s"}, or ask a manager.` }, { status: 423 });
+    return NextResponse.json({ error: `Too many wrong PINs. Try again in ${mins} minute${mins === 1 ? "" : "s"}, or ask a manager.`, lockedUntil: lock.lockedUntil.toISOString() }, { status: 423 });
   }
 
   let ok = false;
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       update: { failures: lockedUntil ? 0 : failures, lockedUntil },
     });
     return NextResponse.json(
-      { error: lockedUntil ? `Too many wrong PINs. That name is locked for ${LOCK_MINUTES} minutes.` : "That PIN isn't right" },
+      { error: lockedUntil ? `Too many wrong PINs. That name is locked for ${LOCK_MINUTES} minutes.` : "That PIN isn't right", ...(lockedUntil ? { lockedUntil: lockedUntil.toISOString() } : {}) },
       { status: lockedUntil ? 423 : 401 },
     );
   }

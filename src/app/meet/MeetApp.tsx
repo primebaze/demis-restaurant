@@ -155,6 +155,18 @@ function SignIn({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+  // Locked after too many wrong PINs: the pad is off and nothing is sent until the time is up.
+  const [lockedUntil, setLockedUntil] = useState(0);
+  const [tick, setTick] = useState(Date.now());
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const t = setInterval(() => {
+      setTick(Date.now());
+      if (Date.now() >= lockedUntil) { setLockedUntil(0); setError(""); }
+    }, 1000);
+    return () => clearInterval(t);
+  }, [lockedUntil]);
+  const lockedLeft = lockedUntil ? Math.max(0, lockedUntil - tick) : 0;
 
   // Staff type the first 3 letters of their name; only matching names come back.
   const letters = query.replace(/[^a-zA-Z]/g, "").length;
@@ -171,7 +183,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
           setLoadError("");
           setPeople(list);
           // Only one person: pick them and put the keyboard away for the PIN pad.
-          if (list.length === 1) { setPicked(list[0]); setPin(""); setError(""); searchRef.current?.blur(); }
+          if (list.length === 1) { setPicked(list[0]); setPin(""); setError(""); setLockedUntil(0); searchRef.current?.blur(); }
         })
         .catch((e) => !stale && setLoadError(e.message));
     }, 250);
@@ -193,6 +205,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
         if (!res.ok) {
           setError(d.error || "Couldn't sign in");
           setPin("");
+          if (d.lockedUntil) { setLockedUntil(new Date(d.lockedUntil).getTime()); setTick(Date.now()); }
           return;
         }
         onDone();
@@ -212,6 +225,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
   const press = (d: string) => {
     if (busy) return;
     if (picked == null) return setError("Type your name and tap it first");
+    if (lockedUntil && Date.now() < lockedUntil) return; // locked: don't send anything
     if (pinRef.current.length >= 4) return;
     setError("");
     const next = pinRef.current + d;
@@ -249,7 +263,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 20, background: C.card }}>
           <span style={{ width: 44, height: 44, flex: "none", borderRadius: "50%", background: personColour(picked.id).bg, color: personColour(picked.id).fg, fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(picked.name)}</span>
           <span style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{picked.name}</span>
-          <button type="button" onClick={() => { setPicked(null); setPin(""); setError(""); setQuery(""); setPeople(null); setTimeout(() => searchRef.current?.focus(), 0); }} style={{ height: 34, padding: "0 14px", border: 0, borderRadius: 17, background: C.chip, color: "#fff", fontSize: 13, fontFamily: "inherit" }}>Not you?</button>
+          <button type="button" onClick={() => { setPicked(null); setPin(""); setError(""); setLockedUntil(0); setQuery(""); setPeople(null); setTimeout(() => searchRef.current?.focus(), 0); }} style={{ height: 34, padding: "0 14px", border: 0, borderRadius: 17, background: C.chip, color: "#fff", fontSize: 13, fontFamily: "inherit" }}>Not you?</button>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -276,7 +290,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
           ) : (
             <div role="group" aria-label="Pick your name" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {people.map((p) => (
-                <button key={p.id} type="button" onClick={() => { setPicked(p); setPin(""); setError(""); searchRef.current?.blur(); }} style={{ display: "flex", alignItems: "center", gap: 12, height: 56, padding: "0 12px", border: 0, borderRadius: 18, background: C.card, color: "#fff", fontSize: 15, fontFamily: "inherit", textAlign: "left" }}>
+                <button key={p.id} type="button" onClick={() => { setPicked(p); setPin(""); setError(""); setLockedUntil(0); searchRef.current?.blur(); }} style={{ display: "flex", alignItems: "center", gap: 12, height: 56, padding: "0 12px", border: 0, borderRadius: 18, background: C.card, color: "#fff", fontSize: 15, fontFamily: "inherit", textAlign: "left" }}>
                   <span style={{ width: 36, height: 36, flex: "none", borderRadius: "50%", background: personColour(p.id).bg, color: personColour(p.id).fg, fontSize: 15, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(p.name)}</span>
                   {p.name}
                 </button>
@@ -297,18 +311,22 @@ function SignIn({ onDone }: { onDone: () => void }) {
             />
           ))}
         </div>
-        {(error || busy) && (
+        {lockedLeft > 0 ? (
+          <p role="status" style={{ margin: 0, minHeight: 18, fontSize: 13, color: "#fca5a5", textAlign: "center" }}>
+            Too many wrong PINs. Locked for {Math.floor(lockedLeft / 60_000)}:{String(Math.floor((lockedLeft % 60_000) / 1000)).padStart(2, "0")}, or ask a manager to unlock you.
+          </p>
+        ) : (error || busy) && (
           <p role="status" style={{ margin: 0, minHeight: 18, fontSize: 13, color: busy ? C.muted : "#fca5a5", textAlign: "center" }}>{busy ? "Checking…" : error}</p>
         )}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, padding: "0 12px" }}>
+      <div aria-disabled={lockedLeft > 0} style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, padding: "0 12px", opacity: lockedLeft > 0 ? 0.35 : 1, pointerEvents: lockedLeft > 0 ? "none" : undefined }}>
         {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
-          <button key={d} type="button" onClick={() => press(d)} style={key} className="active:brightness-150">{d}</button>
+          <button key={d} type="button" onClick={() => press(d)} disabled={lockedLeft > 0} style={key} className="active:brightness-150">{d}</button>
         ))}
         {/* Face ID arrives with passkeys; until then this slot stays empty. */}
         <span />
-        <button type="button" onClick={() => press("0")} style={key} className="active:brightness-150">0</button>
+        <button type="button" onClick={() => press("0")} disabled={lockedLeft > 0} style={key} className="active:brightness-150">0</button>
         <button type="button" aria-label="Delete digit" onClick={() => setPin((p) => p.slice(0, -1))} style={plain}>
           <Icon name="backspace" size={26} />
         </button>
