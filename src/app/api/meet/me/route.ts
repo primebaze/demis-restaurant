@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentMeetState } from "@/lib/meet-auth";
 import { getClockedIn } from "@/lib/clockin";
+import { pushPublicKey } from "@/lib/meet-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,8 @@ export async function GET() {
       manager: s.manager,
       branch: s.branch,
       notifyChoice: s.notifyChoice,
+      pushReady: !!pushPublicKey(), // notification keys set on this server
+
       clockedInSince: since,
     },
     { headers },

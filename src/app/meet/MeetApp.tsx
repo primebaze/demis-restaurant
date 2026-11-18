@@ -32,6 +32,7 @@ type Me =
       manager: boolean;
       branch: string;
       notifyChoice: string;
+      pushReady: boolean;
       clockedInSince: string | null;
     };
 
@@ -370,7 +371,8 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
   }, [tab, rota?.unseen]);
 
   // Ask once, straight after installing.
-  if (me.notifyChoice === "" && pushSupported()) return <AllowNotifications onDone={reload} />;
+  // Skipped if this server has no notification keys (e.g. a local copy), so it never blocks the app.
+  if (me.notifyChoice === "" && me.pushReady && pushSupported()) return <AllowNotifications onDone={reload} />;
   return (
     <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
       {tab === "home" ? <Home me={me} rota={rota} onRota={() => setTab("rota")} />
