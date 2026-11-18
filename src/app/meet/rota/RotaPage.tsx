@@ -280,7 +280,7 @@ export default function RotaPage() {
                     </tr>
                     {data.costs && (
                       <>
-                        <tr style={{ color: C.sub, textAlign: "center" }}>
+                        <tr id="budget-row" style={{ color: C.sub, textAlign: "center", scrollMarginTop: 120 }}>
                           <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>Budget</th>
                           {data.days.map((d) => {
                             const b = costOf(d)?.budget ?? null;
@@ -342,7 +342,10 @@ export default function RotaPage() {
                 <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota hours</span><strong style={{ fontWeight: 600 }}>{fmtHours(totals.all)} h</strong></p>
                 {data?.costs && (
                   <>
-                    <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Budget</span><strong style={{ fontWeight: 600 }}>{hasBudget ? money(budgetTotal) : "Not set"}</strong></p>
+                    <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Budget</span>{hasBudget ? <strong style={{ fontWeight: 600 }}>{money(budgetTotal)}</strong> : (
+                      <button onClick={() => document.getElementById("budget-row")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                        style={{ border: 0, background: "none", padding: 0, fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: C.ink, textDecoration: "underline", cursor: "pointer" }}>Set budget</button>
+                    )}</p>
                     <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota cost</span><strong style={{ fontWeight: 600 }}>{money(costTotal)}</strong></p>
                     {hasBudget && (
                       <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}>
