@@ -33,7 +33,7 @@ export async function POST(req: Request, { params }: Ctx) {
 
   if (body.action === "url") {
     const up = await uploadUrl(`rec/${m.id}`, "audio", String(body.ext || ""));
-    return up ? NextResponse.json(up) : NextResponse.json({ error: "Can't upload that" }, { status: 400 });
+    return up ? NextResponse.json(up) : NextResponse.json({ error: "Recording storage isn't working right now" }, { status: 503 });
   }
   if (body.action === "done") {
     const seq = Number(body.seq);

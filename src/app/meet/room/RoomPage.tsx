@@ -24,6 +24,7 @@ const card: CSSProperties = { borderRadius: 24, background: "#ffffff", boxShadow
 export default function RoomPage({ id }: { id: string }) {
   const [d, setD] = useState<Detail | null>(null);
   const [error, setError] = useState("");
+  const [saveError, setSaveError] = useState("");
   const [state, setState] = useState<"ready" | "recording" | "paused" | "ending">("ready");
   const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
   const [micId, setMicId] = useState("");
@@ -61,13 +62,16 @@ export default function RoomPage({ id }: { id: string }) {
       try {
         const ext = job.mime.includes("mp4") ? "mp4" : job.mime.includes("ogg") ? "ogg" : "webm";
         const up = await postJson(`/api/meet/meetings/${id}/piece`, { action: "url", ext });
-        if (!up.ok) throw new Error();
-        const put = await fetch(String(up.data.url), { method: "PUT", headers: { "Content-Type": job.mime.split(";")[0], "x-upsert": "false" }, body: job.blob });
-        if (!put.ok) throw new Error();
+        if (!up.ok) throw new Error(String(up.data.error || "no upload link"));
+        const put = await fetch(String(up.data.url), { method: "PUT", headers: { "Content-Type": job.mime.split(";")[0], "x-upsert": "false" }, body: job.blob }).catch(() => null);
+        if (!put?.ok) throw new Error("the upload didn't go through");
         const done = await postJson(`/api/meet/meetings/${id}/piece`, { action: "done", path: up.data.path, seq: job.seq, startMs: job.startMs, mime: job.mime, room: true });
-        if (!done.ok) throw new Error();
+        if (!done.ok) throw new Error(String(done.data.error || "couldn't save it"));
         queue.current.shift();
-      } catch {
+        setSaveError("");
+      } catch (e) {
+        // Say so on screen: a recording that isn't being saved must never look like it is.
+        setSaveError(`The recording isn't saving (${e instanceof Error ? e.message : "unknown problem"}). It keeps trying; check the connection.`);
         if (++job.tries > 8) queue.current.shift();
         break;
       }
@@ -199,7 +203,7 @@ export default function RoomPage({ id }: { id: string }) {
             )}
           </div>
         </div>
-        {error && <p role="alert" style={{ margin: 0, textAlign: "center", fontSize: 13, color: "#b91c1c" }}>{error}</p>}
+        {(error || saveError) && <p role="alert" style={{ margin: 0, textAlign: "center", fontSize: 13, color: "#b91c1c" }}>{error || saveError}</p>}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 10 }}>
           {state === "ready" ? (
             <button onClick={start} disabled={!d || d.meeting.status === "ended" || d.meeting.status === "ready"} style={{ height: 52, padding: "0 24px", border: 0, borderRadius: 26, background: "linear-gradient(120deg, #ff7a45, #e8513a)", color: "#ffffff", fontSize: 15, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Icon name="mic" size={22} fill />{d?.meeting.status === "live" ? "Carry on recording" : "Start recording"}</button>

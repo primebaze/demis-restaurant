@@ -73,6 +73,7 @@ function levelOf(ctx: AudioContext | null, stream: MediaStream): (() => number) 
 export function useCall(meetingId: string, me: { id: number; name: string }, opts: { record: boolean; room?: boolean }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [saveError, setSaveError] = useState("");
   const [peers, setPeers] = useState<PeerView[]>([]);
   const [local, setLocal] = useState<MediaStream | null>(null);
   const [mic, setMic] = useState(true);
@@ -218,7 +219,9 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
         if (!put.ok) throw new Error("upload");
         await post(`${base}/piece`, { action: "done", path: up.path, seq: job.seq, startMs: job.startMs, mime: job.mime, room: !!opts.room });
         uploads.current.shift();
-      } catch {
+        setSaveError("");
+      } catch (e) {
+        setSaveError(`Your voice isn't being saved for the notes (${e instanceof Error ? e.message : "unknown problem"}). It keeps trying.`);
         job.tries++;
         if (job.tries > 6) uploads.current.shift(); // give up on this piece after a few minutes of trying
         break;
@@ -439,5 +442,5 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
     send("", "state", hello());
   }, [send, hello]);
 
-  return { status, error, peers, local, mic, cam, speakingSelf, startedAt, recording, pending, join, leave, toggleMic, toggleCam, myPeerId: myPeer.current };
+  return { status, error: error || saveError, peers, local, mic, cam, speakingSelf, startedAt, recording, pending, join, leave, toggleMic, toggleCam, myPeerId: myPeer.current };
 }

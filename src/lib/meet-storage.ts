@@ -26,11 +26,21 @@ export function storageReady(): boolean {
   return !!storage();
 }
 
-/** Make the private bucket the first time it's needed. */
+/**
+ * Make the private bucket the first time it's needed. The size limit must stay within the
+ * project's own upload limit (50MB on Supabase's free plan), or Supabase refuses to make it.
+ * Recording pieces are 30 seconds (well under 1MB), so this is only ever a ceiling.
+ */
 async function ensureBucket(s: SupabaseClient) {
   if (bucketChecked) return;
   const { data } = await s.storage.getBucket(BUCKET);
-  if (!data) await s.storage.createBucket(BUCKET, { public: false, fileSizeLimit: "60MB" });
+  if (!data) {
+    const { error } = await s.storage.createBucket(BUCKET, { public: false, fileSizeLimit: "50MB" });
+    if (error && !/already exists/i.test(error.message)) {
+      console.error(`[meet-storage] couldn't create the "${BUCKET}" bucket: ${error.message}`);
+      return; // try again next time
+    }
+  }
   bucketChecked = true;
 }
 
@@ -53,7 +63,10 @@ export async function uploadUrl(folder: string, kind: keyof typeof ALLOWED, ext:
   await ensureBucket(s);
   const path = `${folder.replace(/[^a-z0-9/_-]/gi, "")}/${Date.now()}-${randomBytes(6).toString("hex")}.${e}`;
   const { data, error } = await s.storage.from(BUCKET).createSignedUploadUrl(path);
-  if (error || !data) return null;
+  if (error || !data) {
+    console.error(`[meet-storage] no upload URL for ${path}: ${error?.message || "no data"}`);
+    return null;
+  }
   return { path, url: data.signedUrl, token: data.token };
 }
 
