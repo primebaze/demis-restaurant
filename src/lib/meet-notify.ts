@@ -88,7 +88,9 @@ export async function notifyPeople(clockinIds: number[], notice: Notice, opts: {
       const person = active.get(id);
       if (!person?.email) continue;
       const first = person.name.split(" ")[0];
-      const html = buildGuestEmailHtml(`Hi ${first},\n${notice.body}\nOpen Demi's Meetings: ${APP_URL}${notice.url || "/meet"}\nThe Demi's team`);
+      // No link: on a phone it opens Safari (the website), not the home-screen app, so the email
+      // just tells them to open the app.
+      const html = buildGuestEmailHtml(`Hi ${first},\n${notice.body}\nOpen the Demi's app on your phone to see it.\nThe Demi's team`);
       const ok = await sendViaResend(person.email, notice.title, html).catch(() => false);
       if (ok) emailed++;
     }

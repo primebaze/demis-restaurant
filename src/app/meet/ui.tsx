@@ -10,7 +10,7 @@ import type { CSSProperties } from "react";
 // Every Material Symbol the app uses (Google needs them sorted). Add new ones here.
 const ICONS = [
   "record_voice_over", "assignment_late", "visibility",
-  "add", "add_photo_alternate", "add_task", "admin_panel_settings", "arrow_back", "arrow_forward", "assignment_ind",
+  "add", "add_box", "add_photo_alternate", "add_task", "admin_panel_settings", "arrow_back", "arrow_forward", "assignment_ind",
   "auto_awesome", "auto_stories", "backspace", "badge", "beach_access", "build", "calendar_month", "calendar_today",
   "call", "call_end", "campaign", "cancel", "chat", "check", "check_circle", "chevron_left", "chevron_right", "cleaning_services",
   "close", "closed_caption", "content_copy", "delete", "description", "download", "edit_note", "event", "event_busy",

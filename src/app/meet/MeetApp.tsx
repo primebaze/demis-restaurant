@@ -497,47 +497,187 @@ function AlertsScreenLive({ me, onBack, onOpen, onTurnOn }: { me: ApprovedMe; on
 
 /* ─── 25 · Add to home screen (iPhone) ─── */
 
+// iPhone pictures for the steps: drawn here (not screenshots) so they stay sharp and match
+// the Safari the person actually has. Safari 26 moved Share into the address bar, on the right;
+// older Safari has it in the middle of the bottom bar.
+const IOS_BLUE = "#0a84ff";
+const mock: CSSProperties = { position: "relative", borderRadius: 18, background: "#2c2c2e", padding: 12, overflow: "visible" };
+
+/** A bouncing arrow pointing at the thing to tap. `dir` is where the arrow points. */
+function Pointer({ dir, style }: { dir: "down" | "up" | "right"; style?: CSSProperties }) {
+  const rot = dir === "down" ? 0 : dir === "up" ? 180 : -90;
+  return (
+    <span aria-hidden="true" className="meet-pointer" style={{ position: "absolute", width: 34, height: 40, ...style }}>
+      <svg viewBox="0 0 34 40" width="34" height="40" style={{ transform: `rotate(${rot}deg)`, display: "block", filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}>
+        <path d="M17 2v26" stroke={C.gold} strokeWidth="5" strokeLinecap="round" />
+        <path d="M5 22l12 14 12-14" fill="none" stroke={C.gold} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
+
+/** A ring round the button to tap. */
+const target = (round = true): CSSProperties => ({ boxShadow: `0 0 0 2px ${C.gold}`, borderRadius: round ? 999 : 10 });
+
+function ShareGlyph({ colour = "#fff", size = 20 }: { colour?: string; size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" style={{ display: "block" }}>
+      <path d="M12 3v12M7.5 7.5L12 3l4.5 4.5" fill="none" stroke={colour} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 10H6.5A1.5 1.5 0 0 0 5 11.5v8A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 17.5 10H16" fill="none" stroke={colour} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function AppTile({ size = 52 }: { size?: number }) {
+  return (
+    <span style={{ width: size, height: size, borderRadius: size * 0.24, background: "#141414", boxShadow: "0 0 0 1px #3a3a3a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: size * 0.07, flex: "none" }}>
+      <img src="/meet/logo.png" alt="" style={{ height: size * 0.15, width: "auto" }} />
+      <span style={{ fontSize: Math.max(5, size * 0.1), fontWeight: 600, letterSpacing: "0.16em", color: C.gold }}>MEETINGS</span>
+    </span>
+  );
+}
+
+function SafariBar({ newSafari }: { newSafari: boolean }) {
+  const url = <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 13, textAlign: "center" }}>meeting.demisrestaurant.co.uk</span>;
+  const tool = (glyph: ReactNode, key: string, on = false) => (
+    <span key={key} style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", color: "#d4d4d4", ...(on ? target() : {}) }}>{glyph}</span>
+  );
+  const arrow = (d: string) => <svg viewBox="0 0 24 24" width="20" height="20"><path d={d} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  return (
+    <div style={{ ...mock, ...(newSafari ? { paddingTop: 50 } : { paddingBottom: 52 }) }}>
+      {newSafari ? (
+        <>
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, height: 44, padding: "0 6px 0 14px", borderRadius: 22, background: "#3a3a3c" }}>
+            {url}
+            <span style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", ...target() }}><ShareGlyph /></span>
+            <Pointer dir="down" style={{ right: 6, top: -46 }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 6px 0", color: "#8e8e93" }}>
+            {tool(arrow("M15 5l-7 7 7 7"), "b")}{tool(arrow("M9 5l7 7-7 7"), "f")}{tool(arrow("M12 5v14M5 12h14"), "n")}{tool(<span style={{ width: 18, height: 18, borderRadius: 5, border: "2px solid currentColor" }} />, "t")}{tool(<span style={{ fontSize: 18, letterSpacing: 1 }}>⋯</span>, "m")}
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ display: "flex", alignItems: "center", height: 40, padding: "0 14px", borderRadius: 12, background: "#3a3a3c" }}>{url}</div>
+          <div style={{ position: "relative", display: "flex", justifyContent: "space-between", padding: "10px 10px 0" }}>
+            {tool(arrow("M15 5l-7 7 7 7"), "b")}{tool(arrow("M9 5l7 7-7 7"), "f")}
+            <span style={{ position: "relative" }}>{tool(<ShareGlyph colour={IOS_BLUE} />, "s", true)}<Pointer dir="up" style={{ left: 0, top: 40 }} /></span>
+            {tool(<span style={{ width: 18, height: 14, border: "2px solid currentColor", borderRadius: 3 }} />, "bk")}{tool(<span style={{ width: 18, height: 18, borderRadius: 5, border: "2px solid currentColor" }} />, "t")}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ShareSheet() {
+  const row = (label: string, glyph: ReactNode, on = false) => (
+    <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", height: 40, padding: "0 12px", background: on ? "#3a3a3c" : "transparent", borderTop: "1px solid #3a3a3c", fontSize: 13, color: on ? "#fff" : "#a1a1a6", ...(on ? target(false) : {}) }}>
+      {label}<span style={{ color: on ? "#fff" : "#8e8e93", display: "flex" }}>{glyph}</span>
+      {on && <Pointer dir="right" style={{ left: -44, top: 0 }} />}
+    </div>
+  );
+  return (
+    <div style={{ ...mock, paddingLeft: 52 }}>
+      <div style={{ borderRadius: 12, background: "#1c1c1e", overflow: "visible" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px" }}>
+          <AppTile size={30} /><span style={{ fontSize: 12, color: "#a1a1a6", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Demi&rsquo;s Meetings</span>
+        </div>
+        {row("Copy", <Icon name="content_copy" size={18} />)}
+        {row("Add to Home Screen", <Icon name="add_box" size={19} />, true)}
+        {row("Add Bookmark", <Icon name="push_pin" size={18} />)}
+      </div>
+    </div>
+  );
+}
+
+function AddDialog() {
+  return (
+    <div style={{ ...mock, paddingTop: 54 }}>
+      <div style={{ borderRadius: 12, background: "#1c1c1e", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 13 }}>
+          <span style={{ color: IOS_BLUE }}>Cancel</span>
+          <span style={{ fontWeight: 600 }}>Add to Home Screen</span>
+          <span style={{ position: "relative" }}>
+            <span style={{ display: "inline-block", padding: "3px 10px", color: IOS_BLUE, fontWeight: 600, ...target() }}>Add</span>
+            <Pointer dir="down" style={{ right: 6, top: -52 }} />
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}><AppTile size={40} /><span style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: "#2c2c2e", fontSize: 13 }}>Demi&rsquo;s</span></div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 13 }}>
+          Open as Web App<span style={{ width: 38, height: 22, borderRadius: 11, background: "#30d158", position: "relative" }}><span style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: "50%", background: "#fff" }} /></span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeScreen() {
+  const blank = (i: number) => <span key={i} style={{ width: 44, height: 44, borderRadius: 11, background: "#3a3a3c" }} />;
+  return (
+    <div style={{ ...mock, padding: "16px 12px 14px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 44px)", justifyContent: "space-between", rowGap: 14 }}>
+        {[0, 1, 2, 3, 4, 5].map(blank)}
+        <span style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          <span style={{ ...target(false), borderRadius: 11 }}><AppTile size={44} /></span>
+          <span style={{ fontSize: 10, color: "#fff" }}>Demi&rsquo;s</span>
+          <Pointer dir="up" style={{ left: 5, top: 62 }} />
+        </span>
+        {blank(7)}
+      </div>
+      <div style={{ height: 40 }} />
+    </div>
+  );
+}
+
 function InstallGuide() {
-  const steps: [string, string, string?][] = [
-    ["Tap the Share button at the bottom of Safari", "ios_share", "#60a5fa"],
-    ["Choose “Add to Home Screen”, then tap Add", "add_box"],
-    ["Open Demi’s from your home screen and sign in", "touch_app"],
+  // Safari 26 and later: Share sits at the right of the address bar.
+  const [newSafari, setNewSafari] = useState(true);
+  useEffect(() => {
+    const v = Number(navigator.userAgent.match(/Version\/(\d+)/)?.[1] || 0);
+    if (v && v < 26) setNewSafari(false);
+  }, []);
+  const steps: { text: ReactNode; picture: ReactNode }[] = [
+    { text: <>Tap the <strong style={{ fontWeight: 600 }}>Share</strong> button {newSafari ? "at the right of the address bar" : "in the middle of the bottom bar"}</>, picture: <SafariBar newSafari={newSafari} /> },
+    { text: <>Scroll down and tap <strong style={{ fontWeight: 600 }}>Add to Home Screen</strong></>, picture: <ShareSheet /> },
+    { text: <>Leave <strong style={{ fontWeight: 600 }}>Open as Web App</strong> on, then tap <strong style={{ fontWeight: 600 }}>Add</strong></>, picture: <AddDialog /> },
+    { text: <>Open <strong style={{ fontWeight: 600 }}>Demi&rsquo;s</strong> from your home screen and sign in</>, picture: <HomeScreen /> },
   ];
   return (
     <Phone style={{ gap: 20 }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: 24, textAlign: "center" }}>
-        <span style={{ width: 84, height: 84, borderRadius: 22, background: "#141414", boxShadow: "0 0 0 1px #2a2a2a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 }}>
-          <img src="/meet/logo.png" alt="" style={{ height: 12, width: "auto" }} />
-          <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.18em", color: C.gold }}>MEETINGS</span>
-        </span>
+      <style>{`@keyframes meetNudge{0%,100%{translate:0 0}50%{translate:0 5px}}.meet-pointer{animation:meetNudge 1.1s ease-in-out infinite}@media (prefers-reduced-motion:reduce){.meet-pointer{animation:none}}`}</style>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: 8, textAlign: "center" }}>
+        <AppTile size={72} />
         <div>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em" }}>Put Demi&rsquo;s on your home screen</h1>
           <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.5, color: C.muted }}>So you get your rota, tasks and meeting alerts on your lock screen, like a normal app.</p>
         </div>
       </div>
 
-      <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-        {steps.map(([text, icon, colour], i) => (
-          <li key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, borderRadius: 20, background: C.card }}>
-            <span style={{ width: 32, height: 32, flex: "none", borderRadius: "50%", background: "#fff", color: C.bg, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
-            <span style={{ flex: 1, fontSize: 15 }}>{text}</span>
-            <Icon name={icon} size={26} style={colour ? { color: colour } : undefined} />
+      <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+        {steps.map((st, i) => (
+          <li key={i} style={{ display: "flex", flexDirection: "column", gap: 12, padding: 14, borderRadius: 20, background: C.card }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ width: 30, height: 30, flex: "none", borderRadius: "50%", background: "#fff", color: C.bg, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
+              <span style={{ flex: 1, fontSize: 15, lineHeight: 1.4 }}>{st.text}</span>
+            </div>
+            <div aria-hidden="true">{st.picture}</div>
           </li>
         ))}
       </ol>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 16, background: "#1a1a1a", fontSize: 12, color: C.muted }}>
-        <Icon name="info" size={18} />Opened this from WhatsApp? Tap ⋯ and choose &ldquo;Open in Safari&rdquo; first.
+        <Icon name="info" size={18} />Opened this from WhatsApp or email? Tap ⋯ and choose &ldquo;Open in Safari&rdquo; first.
       </div>
 
-      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <div aria-hidden="true" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, color: "#60a5fa", fontSize: 12, fontWeight: 500 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: newSafari ? "flex-end" : "center", gap: 6 }}>
+        <div aria-hidden="true" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, color: IOS_BLUE, fontSize: 12, fontWeight: 500, paddingRight: newSafari ? 14 : 0 }}>
           Share is down here<Icon name="south" size={24} />
         </div>
-        <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, minHeight: 44, fontSize: 13, color: C.muted }}>
-          <Icon name="lock" size={17} />You need to do this once before you can carry on
-        </p>
       </div>
+      <p style={{ margin: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, fontSize: 13, color: C.muted }}>
+        <Icon name="lock" size={17} />You need to do this once before you can carry on
+      </p>
     </Phone>
   );
 }
