@@ -188,7 +188,7 @@ function Join({ d, mic, cam, onMic, onCam, onJoin, busy, error }: { d: Detail; m
       <div style={{ position: "relative", height: 210, borderRadius: 26, overflow: "hidden", background: "#2a1d14", boxShadow: "0 14px 30px -16px rgba(20,20,20,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         {preview ? <Media stream={preview} mirror /> : <span style={{ width: 72, height: 72, borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 28, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(d.me.name)}</span>}
         <span style={{ ...glass, position: "absolute", left: 12, top: 12, height: 28, padding: "0 11px", borderRadius: 14, fontSize: 12, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}><span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ade80" }} />Live · {count} in the call</span>
-        {d.meeting.liveNotes && <span style={{ ...glass, position: "absolute", right: 12, bottom: 12, height: 28, padding: "0 11px", borderRadius: 14, fontSize: 12, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}><Icon name="radio_button_checked" size={15} fill />Recording</span>}
+        {d.meeting.liveNotes && <span style={{ ...glass, position: "absolute", right: 12, bottom: 12, height: 28, padding: "0 11px", borderRadius: 14, fontSize: 12, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}><Icon name="radio_button_checked" size={15} fill />Will be recorded</span>}
       </div>
       <div style={{ textAlign: "center" }}>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: "-0.025em" }}>{d.meeting.title}</h1>
@@ -203,7 +203,7 @@ function Join({ d, mic, cam, onMic, onCam, onJoin, busy, error }: { d: Detail; m
       </div>
       {d.meeting.liveNotes && (
         <p style={{ margin: 0, display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, color: L.sub, lineHeight: 1.5, padding: "0 6px" }}>
-          <Icon name="info" size={19} style={{ color: L.accent, flex: "none" }} />This meeting is recorded, and notes and tasks are written for the team.
+          <Icon name="info" size={19} style={{ color: L.accent, flex: "none" }} />Recording starts when you join: your phone records only your own microphone, and notes and tasks are written for the team.
         </p>
       )}
       {error && <p role="alert" style={{ margin: 0, padding: "10px 12px", borderRadius: 14, background: "#fef2f2", color: "#b91c1c", fontSize: 13 }}>{error}</p>}
