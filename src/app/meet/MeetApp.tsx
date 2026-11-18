@@ -5,7 +5,7 @@ import { Icon, IconFont, personColour, personColourLight, initial, firstName, BR
 import { useData, type Meeting } from "./phone/kit";
 import { TasksScreen, TaskScreen } from "./phone/Tasks";
 import { NewsScreen, DocsScreen, AlertsScreen } from "./phone/Feed";
-import { MeScreen, HoursFixScreen, ReportScreen, ReportPersonScreen, type FixTarget } from "./phone/Me";
+import { MeScreen, HoursFixScreen, ReportScreen, ReportPersonScreen, MyReportsScreen, type FixTarget } from "./phone/Me";
 import { CalendarScreen, NotesScreen, NotesListScreen } from "./phone/Calendar";
 import { ManageScreen, PostScreen } from "./phone/Manage";
 import ManagerHome from "./ManagerHome";
@@ -371,7 +371,7 @@ const pushSupported = () =>
 
 type Tab = "home" | "calendar" | "tasks" | "manage" | "news" | "me" | "rota";
 type Sub =
-  | { k: "task"; id: string } | { k: "alerts" } | { k: "notes"; id: string } | { k: "notesList" } | { k: "report" } | { k: "reportPerson" }
+  | { k: "task"; id: string } | { k: "alerts" } | { k: "notes"; id: string } | { k: "notesList" } | { k: "report" } | { k: "reportPerson" } | { k: "myReports" }
   | { k: "fix"; t: FixTarget } | { k: "docs" } | { k: "settings" } | { k: "post" } | { k: "allow" };
 const TABS: Tab[] = ["home", "calendar", "tasks", "manage", "news", "me", "rota"];
 
@@ -386,6 +386,7 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
     const q = new URLSearchParams(window.location.search);
     if (q.get("task")) return { k: "task", id: q.get("task")! };
     if (q.get("notes")) return { k: "notes", id: q.get("notes")! };
+    if (q.get("reports")) return { k: "myReports" };
     return null;
   });
   const [rota, setRota] = useState<MyRota | null>(null);
@@ -445,6 +446,7 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
     if (q.get("join")) { window.location.href = `/meet/call/${q.get("join")}`; return; }
     if (q.get("task")) return setSub({ k: "task", id: q.get("task")! });
     if (q.get("notes")) return setSub({ k: "notes", id: q.get("notes")! });
+    if (q.get("reports")) return setSub({ k: "myReports" });
     const t = q.get("tab") as Tab | null;
     setSub(null);
     setTab(t && TABS.includes(t) ? t : "home");
@@ -465,8 +467,9 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
   else if (sub?.k === "alerts") screen = <AlertsScreenLive me={me} onBack={back} onOpen={go} onTurnOn={() => setSub({ k: "allow" })} />;
   else if (sub?.k === "notes") screen = <NotesScreen id={sub.id} onBack={back} onTask={(id) => setSub({ k: "task", id })} />;
   else if (sub?.k === "notesList") screen = <NotesListScreen onBack={() => { setSub(null); setTab("me"); }} onOpen={(id) => setSub({ k: "notes", id })} />;
-  else if (sub?.k === "report") screen = <ReportScreen branch={me.branch} onBack={back} onPerson={() => setSub({ k: "reportPerson" })} />;
-  else if (sub?.k === "reportPerson") screen = <ReportPersonScreen meId={me.person.id} branch={me.branch} onBack={() => setSub({ k: "report" })} />;
+  else if (sub?.k === "report") screen = <ReportScreen branch={me.branch} onBack={back} onPerson={() => setSub({ k: "reportPerson" })} onTrack={() => setSub({ k: "myReports" })} />;
+  else if (sub?.k === "reportPerson") screen = <ReportPersonScreen meId={me.person.id} branch={me.branch} onBack={() => setSub({ k: "report" })} onTrack={() => setSub({ k: "myReports" })} />;
+  else if (sub?.k === "myReports") screen = <MyReportsScreen onBack={back} onNew={() => setSub({ k: "report" })} />;
   else if (sub?.k === "fix") screen = <HoursFixScreen target={sub.t} onBack={back} />;
   else if (sub?.k === "docs") screen = <DocsScreen onBack={back} />;
   else if (sub?.k === "settings") screen = <SettingsScreen me={me} onBack={back} onSignOut={onSignOut} onTurnOn={() => setSub({ k: "allow" })} />;
@@ -477,7 +480,7 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
   else if (tab === "tasks") screen = <TasksScreen onOpen={(id) => setSub({ k: "task", id })} />;
   else if (tab === "manage" && me.manager) screen = <ManageScreen onPost={() => setSub({ k: "post" })} />;
   else if (tab === "news") screen = <NewsScreen onDocs={() => setSub({ k: "docs" })} />;
-  else screen = <MeScreen me={me} onSettings={() => setSub({ k: "settings" })} onFix={(t) => setSub({ k: "fix", t })} onNotes={() => setSub({ k: "notesList" })} onReport={() => setSub({ k: "report" })} />;
+  else screen = <MeScreen me={me} onSettings={() => setSub({ k: "settings" })} onFix={(t) => setSub({ k: "fix", t })} onNotes={() => setSub({ k: "notesList" })} onReport={() => setSub({ k: "report" })} onReports={() => setSub({ k: "myReports" })} />;
 
   return (
     <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>

@@ -16,12 +16,13 @@ export type FixTarget = { date: string; in: string; out: string | null; branch: 
 
 const LETTER = ["M", "T", "W", "T", "F", "S", "S"];
 
-export function MeScreen({ me, onSettings, onFix, onNotes, onReport }: {
+export function MeScreen({ me, onSettings, onFix, onNotes, onReport, onReports }: {
   me: { person: { id: number; name: string; role: string }; branch: string };
-  onSettings: () => void; onFix: (t: FixTarget) => void; onNotes: () => void; onReport: () => void;
+  onSettings: () => void; onFix: (t: FixTarget) => void; onNotes: () => void; onReport: () => void; onReports: () => void;
 }) {
   const [period, setPeriod] = useState<"week" | "month">("week");
   const { data, error } = useData<Hours>("/api/meet/hours");
+  const openReports = (useData<{ reports: MyReport[] }>("/api/meet/reports").data?.reports || []).filter((r) => r.status !== "closed").length;
   const col = personColour(me.person.id);
   const role = me.person.role ? me.person.role[0].toUpperCase() + me.person.role.slice(1) : "";
 
@@ -89,6 +90,11 @@ export function MeScreen({ me, onSettings, onFix, onNotes, onReport }: {
         <button onClick={onNotes} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, padding: 14, border: 0, borderRadius: 18, background: D.card, color: "#ffffff", fontFamily: "inherit", cursor: "pointer" }}><Icon name="auto_stories" size={22} /><span style={{ fontSize: 14, fontWeight: 500 }}>Meeting notes</span></button>
         <button onClick={onReport} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, padding: 14, border: 0, borderRadius: 18, background: D.card, color: "#ffffff", fontFamily: "inherit", cursor: "pointer" }}><Icon name="report" size={22} style={{ color: D.peach }} /><span style={{ fontSize: 14, fontWeight: 500 }}>Report something</span></button>
       </div>
+      <button onClick={onReports} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 56, padding: "0 16px", border: 0, borderRadius: 18, background: D.card, color: "#ffffff", fontFamily: "inherit", fontSize: 14, fontWeight: 500, textAlign: "left", cursor: "pointer" }}>
+        <Icon name="history" size={22} /><span style={{ flex: 1 }}>My reports</span>
+        {openReports > 0 && <span style={{ fontSize: 12, padding: "3px 9px", borderRadius: 10, background: D.pill, color: D.peach }}>{openReports} open</span>}
+        <Icon name="chevron_right" size={20} style={{ color: D.faint }} />
+      </button>
     </Screen>
   );
 }
@@ -170,7 +176,7 @@ export function HoursFixScreen({ target, onBack }: { target: FixTarget; onBack: 
 const PROBLEMS: [string, string, string][] = [["equipment", "Equipment", "build"], ["stock", "Stock", "inventory_2"], ["safety", "Safety", "health_and_safety"], ["customer", "Customer", "sentiment_dissatisfied"], ["hours", "My hours", "schedule"], ["other", "Other", ""]];
 
 /** 21 · Report a problem (with the switch to 22 · a colleague). */
-export function ReportScreen({ branch, onBack, onPerson }: { branch: string; onBack: () => void; onPerson: () => void }) {
+export function ReportScreen({ branch, onBack, onPerson, onTrack }: { branch: string; onBack: () => void; onPerson: () => void; onTrack: () => void }) {
   const [cat, setCat] = useState("equipment");
   const [text, setText] = useState("");
   const [where, setWhere] = useState(branch === "streatham" || branch === "cricklewood" ? branch : "cricklewood");
@@ -195,7 +201,7 @@ export function ReportScreen({ branch, onBack, onPerson }: { branch: string; onB
     if (!r.ok) return setErr(r.data.error || "Couldn't send that");
     setSent(true);
   }
-  if (sent) return <Sent onBack={onBack} text="Sent to the managers. You'll get an update here when it's sorted." />;
+  if (sent) return <Sent onBack={onBack} onTrack={onTrack} text="Sent to the managers. You can see when they've picked it up in My reports, and you'll get a notification when it's sorted." />;
   return (
     <Screen>
       <Back onBack={onBack} title="Report something" />
@@ -239,7 +245,7 @@ export function ReportScreen({ branch, onBack, onPerson }: { branch: string; onB
 const CONCERNS: [string, string][] = [["behaviour", "Behaviour"], ["bullying", "Bullying or harassment"], ["safety", "Safety or hygiene"], ["timekeeping", "Timekeeping"], ["other", "Something else"]];
 
 /** 22 · A concern about a colleague. */
-export function ReportPersonScreen({ meId, branch, onBack }: { meId: number; branch: string; onBack: () => void }) {
+export function ReportPersonScreen({ meId, branch, onBack, onTrack }: { meId: number; branch: string; onBack: () => void; onTrack: () => void }) {
   const { data } = useData<{ people: { id: number; name: string }[] }>("/api/meet/requests?people=1");
   const [who, setWho] = useState("");
   const [cat, setCat] = useState("");
@@ -260,7 +266,7 @@ export function ReportPersonScreen({ meId, branch, onBack }: { meId: number; bra
     if (!r.ok) return setErr(r.data.error || "Couldn't send that");
     setSent(true);
   }
-  if (sent) return <Sent onBack={onBack} text={anon ? "Sent privately without your name. Only managers and the owner can read it." : "Sent privately. Only managers and the owner can read it, and they may speak to you about it."} />;
+  if (sent) return <Sent onBack={onBack} onTrack={anon ? undefined : onTrack} text={anon ? "Sent privately without your name. Only managers and the owner can read it." : "Sent privately. Only managers and the owner can read it, and they may speak to you about it."} />;
   const ready = who && cat && text.trim().length >= 3;
   return (
     <Screen gap={14}>
@@ -307,7 +313,7 @@ export function ReportPersonScreen({ meId, branch, onBack }: { meId: number; bra
   );
 }
 
-function Sent({ onBack, text }: { onBack: () => void; text: string }) {
+function Sent({ onBack, text, onTrack }: { onBack: () => void; text: string; onTrack?: () => void }) {
   return (
     <Screen>
       <Back onBack={onBack} title="Report something" />
@@ -315,7 +321,86 @@ function Sent({ onBack, text }: { onBack: () => void; text: string }) {
         <Icon name="task_alt" size={22} style={{ color: "#5eead4", flex: "none" }} />
         <p style={{ margin: 0, lineHeight: 1.5 }}>{text}</p>
       </div>
-      <button onClick={onBack} style={{ ...bigWhite, marginTop: "auto" }}>Done</button>
+      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
+        {onTrack && <button onClick={onTrack} style={{ height: 52, border: 0, borderRadius: 26, background: D.card, color: "#ffffff", fontSize: 15, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}><Icon name="history" size={20} />Follow it in My reports</button>}
+        <button onClick={onBack} style={bigWhite}>Done</button>
+      </div>
+    </Screen>
+  );
+}
+
+/* My reports: what I've sent with my name on, and where each one has got to. */
+
+export type MyReport = { id: string; kind: string; category: string; body: string; status: string; reply: string; urgent: boolean; by: string; handledAt: string; at: string };
+const CATEGORY: Record<string, [string, string]> = {
+  equipment: ["Equipment", "build"], stock: ["Stock", "inventory_2"], safety: ["Safety", "health_and_safety"], customer: ["Customer", "sentiment_dissatisfied"],
+  hours: ["My hours", "schedule"], other: ["Something else", "report"],
+};
+const when = (iso: string) => (iso ? new Date(iso).toLocaleString("en-GB", { timeZone: "Europe/London", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
+
+/** Sent, then Seen by a manager, then Sorted. */
+function Tracker({ status }: { status: string }) {
+  const at = status === "closed" ? 2 : status === "seen" ? 1 : 0;
+  const steps = ["Sent", "Seen", "Sorted"];
+  return (
+    <ol aria-label={`Progress: ${steps[at]}`} style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
+      {steps.map((label, i) => {
+        const done = i <= at;
+        const colour = !done ? D.dash : at === 2 ? "#5eead4" : D.peach;
+        return (
+          <li key={label} aria-current={i === at ? "step" : undefined} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ height: 4, borderRadius: 2, background: colour }} />
+            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: done ? "#ffffff" : D.faint, fontWeight: i === at ? 600 : 400 }}>
+              {done && <Icon name={i === at && at < 2 ? "radio_button_checked" : "check_circle"} size={14} fill style={{ color: colour }} />}{label}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export function MyReportsScreen({ onBack, onNew }: { onBack: () => void; onNew: () => void }) {
+  const { data, error } = useData<{ reports: MyReport[] }>("/api/meet/reports");
+  const list = data?.reports || [];
+  const open = list.filter((r) => r.status !== "closed").length;
+  return (
+    <Screen>
+      <Back onBack={onBack} title="My reports" sub={data ? (open ? `${open} still open` : list.length ? "All sorted" : "") : ""} />
+      {error && <p role="alert" style={{ margin: 0, fontSize: 13, color: D.red }}>{error}</p>}
+      {!data && !error && <p style={{ margin: 0, fontSize: 14, color: D.muted }}>Loading…</p>}
+      {data && list.length === 0 && (
+        <div style={{ padding: "22px 16px", borderRadius: 20, background: D.card, textAlign: "center", color: D.muted, fontSize: 14, lineHeight: 1.5 }}>
+          Nothing sent yet. Reports you send with your name on show up here, so you can see when a manager has picked them up.
+        </div>
+      )}
+      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+        {list.map((r) => {
+          const [label, icon] = r.kind === "person" ? ["About a colleague", "shield_person"] : CATEGORY[r.category] || CATEGORY.other;
+          return (
+            <li key={r.id} style={{ display: "flex", flexDirection: "column", gap: 12, padding: 16, borderRadius: 20, background: D.card }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Icon name={icon} size={20} style={{ color: r.kind === "person" ? "#c4b5fd" : D.peach }} />
+                <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>{label}</span>
+                {r.urgent && r.status !== "closed" && <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 10, background: "#24160f", color: "#fb923c" }}>Urgent</span>}
+              </div>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: D.soft, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{r.body}</p>
+              <Tracker status={r.status} />
+              <p style={{ margin: 0, fontSize: 12, color: D.faint }}>
+                Sent {when(r.at)}
+                {r.status !== "new" && r.handledAt ? ` · ${r.status === "closed" ? "sorted" : "seen"} ${when(r.handledAt)}${r.by ? ` by ${r.by}` : ""}` : ""}
+              </p>
+              {r.status === "closed" && r.reply && (
+                <div style={{ padding: "12px 14px", borderRadius: 14, background: "#172e2a", color: "#ccfbf1", fontSize: 14, lineHeight: 1.45 }}>
+                  <span style={{ display: "block", fontSize: 12, color: "#5eead4", marginBottom: 4 }}>{r.by ? `${r.by} replied` : "Manager's reply"}</span>{r.reply}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {data && <p style={{ margin: 0, fontSize: 12, color: D.faint, textAlign: "center" }}>Reports sent without your name can&rsquo;t be followed here.</p>}
+      <button onClick={onNew} style={{ ...dashedBtn, flex: "none", height: 52, marginTop: "auto", width: "100%", justifyContent: "center" }}><Icon name="add" size={20} />Report something new</button>
     </Screen>
   );
 }

@@ -21,9 +21,12 @@ export async function GET(req: Request) {
   const manage = new URL(req.url).searchParams.get("manage") === "1";
 
   if (!manage) {
-    const mine = await prisma.meetReport.findMany({ where: { reporterId: me.person.id }, orderBy: { createdAt: "desc" }, take: 20 });
+    const mine = await prisma.meetReport.findMany({ where: { reporterId: me.person.id }, orderBy: { createdAt: "desc" }, take: 30 });
     return NextResponse.json({
-      reports: mine.map((r) => ({ id: r.id, kind: r.kind, category: r.category, body: r.body, status: r.status, reply: r.reply, at: r.createdAt.toISOString() })),
+      reports: mine.map((r) => ({
+        id: r.id, kind: r.kind, category: r.category, body: r.body, status: r.status, reply: r.reply, urgent: r.urgent,
+        by: r.handledBy ? r.handledBy.split(" ")[0] : "", handledAt: r.handledAt?.toISOString() || "", at: r.createdAt.toISOString(),
+      })),
     }, { headers: { "Cache-Control": "no-store" } });
   }
 
@@ -112,7 +115,7 @@ export async function POST(req: Request) {
     if (body.action === "close") {
       await prisma.meetReport.update({ where: { id: r.id }, data: { status: "closed", reply, handledBy: me.person.name.slice(0, 80), handledAt: new Date() } });
       if (r.reporterId) {
-        await notifyPeople([r.reporterId], { title: "Your report is sorted", body: reply || "A manager has dealt with what you reported. Thank you.", url: "/meet?tab=me", tag: `report-${r.id}`, icon: "task_alt" }).catch(() => null);
+        await notifyPeople([r.reporterId], { title: "Your report is sorted", body: reply || "A manager has dealt with what you reported. Thank you.", url: "/meet?reports=1", tag: `report-${r.id}`, icon: "task_alt" }).catch(() => null);
       }
       return NextResponse.json({ ok: true });
     }
