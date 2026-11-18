@@ -13,7 +13,7 @@ const ICONS = [
   "chevron_right", "expand_more", "face", "flag", "groups", "home", "hourglass_top", "how_to_reg", "info", "ios_share",
   "lock", "logout", "mail", "more_horiz", "notifications", "notifications_active", "notifications_off", "person",
   "schedule", "search", "smartphone", "south", "storefront", "task_alt", "toggle_off", "touch_app", "videocam",
-  "view_timeline", "add", "chevron_left", "close", "content_copy", "delete", "send", "swap_horiz", "beach_access", "sync",
+  "view_timeline", "add", "chevron_left", "close", "content_copy", "delete", "send", "swap_horiz", "beach_access", "sync", "radio_button_checked",
 ].sort();
 
 export function IconFont() {

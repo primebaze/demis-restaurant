@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Icon, IconFont, personColour, initial, firstName, BRANCH, ago } from "./ui";
+import ManagerHome from "./ManagerHome";
 
 /*
  * Demi's Meetings, staff phone screens. Built to the design canvas
@@ -326,6 +327,19 @@ type TeamShift = { date: string; start: string; end: string; name: string; role:
 type RotaWeek = { week: string; label: string; published: boolean; days: string[]; mine: MyShift[]; team: TeamShift[] };
 type MyRota = { today: string; weeks: RotaWeek[]; unseen: { id: string; week: string; label: string; branch: string }[] };
 
+/** True on a computer-sized screen (the design's computer layouts start at 1024px). */
+function useWide() {
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const on = () => setWide(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return wide;
+}
+
 function useDevice() {
   const [info, setInfo] = useState<{ ios: boolean; standalone: boolean; phone: boolean } | null>(null);
   useEffect(() => {
@@ -343,6 +357,7 @@ const pushSupported = () =>
 function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
   const [tab, setTab] = useState<Tab>(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "rota" ? "rota" : "home"));
   const [rota, setRota] = useState<MyRota | null>(null);
+  const wide = useWide();
 
   const loadRota = useCallback(async () => {
     const res = await fetch("/api/meet/my-rota", { cache: "no-store" }).catch(() => null);
@@ -373,6 +388,8 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
   // Ask once, straight after installing.
   // Skipped if this server has no notification keys (e.g. a local copy), so it never blocks the app.
   if (me.notifyChoice === "" && me.pushReady && pushSupported()) return <AllowNotifications onDone={reload} />;
+  // Managers on a computer get the computer Home (design 1) instead of the phone screens.
+  if (me.manager && wide && tab === "home") return <ManagerHome name={me.person.name} />;
   return (
     <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
       {tab === "home" ? <Home me={me} rota={rota} onRota={() => setTab("rota")} />
