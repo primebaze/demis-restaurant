@@ -85,6 +85,7 @@ export async function scheduleNext(m: MeetMeeting) {
 export async function endStaleMeetings() {
   const live = await prisma.meetMeeting.findMany({ where: { status: "live" } });
   for (const m of live) {
+    if (await endIfOverLimit(m)) continue; // reached 30 min (room) or 1 hour (call)
     const last = await prisma.meetAttendee.findFirst({ where: { meetingId: m.id }, orderBy: { lastSeenAt: "desc" } });
     const lastAt = last?.lastSeenAt?.getTime() || m.startedAt?.getTime() || 0;
     if (Date.now() - lastAt > 20 * 60_000) {
@@ -100,6 +101,24 @@ export async function endStaleMeetings() {
 }
 
 export const MEETING_KINDS = ["call", "room"] as const;
+
+/** Longest a meeting can run, to keep recording and transcription costs in check. */
+export const MAX_MINUTES: Record<string, number> = { room: 30, call: 60 };
+export const maxMinutes = (kind: string) => MAX_MINUTES[kind] ?? 60;
+/** When a live meeting must stop (its start plus the limit). */
+export const hardStop = (m: Pick<MeetMeeting, "kind" | "startedAt">) => (m.startedAt ? new Date(m.startedAt.getTime() + maxMinutes(m.kind) * 60_000) : null);
+
+/** End a live meeting that has reached its time limit. True if it was ended. */
+export async function endIfOverLimit(m: MeetMeeting): Promise<boolean> {
+  const stop = hardStop(m);
+  if (m.status !== "live" || !stop || Date.now() < stop.getTime()) return false;
+  const ended = await prisma.meetMeeting.updateMany({ where: { id: m.id, status: "live" }, data: { status: "ended", endedAt: stop } });
+  if (ended.count) {
+    await closeAttendance(m);
+    await scheduleNext(m);
+  }
+  return true;
+}
 
 /** London wall-clock date and time to a real moment (handles summer time). */
 export function londonToDate(date: string, time: string): Date {

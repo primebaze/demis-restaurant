@@ -4,7 +4,7 @@ import { requireMeet } from "@/lib/meet-auth";
 import { activePeople, firstNameOf } from "@/lib/meet-people";
 import { notifyPeople } from "@/lib/meet-notify";
 import { isDate, isTime, londonToday, addDays, dayLabel } from "@/lib/meet-rota";
-import { endStaleMeetings, presenceOf, londonToDate, londonDate, londonHM, MEETING_KINDS } from "@/lib/meet-meetings";
+import { endStaleMeetings, presenceOf, londonToDate, londonDate, londonHM, MEETING_KINDS, maxMinutes } from "@/lib/meet-meetings";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +66,9 @@ export async function POST(req: Request) {
   if (!title) return NextResponse.json({ error: "Give it a title" }, { status: 400 });
   if (!(MEETING_KINDS as readonly string[]).includes(body.kind)) return NextResponse.json({ error: "Pick a video call or a room recording" }, { status: 400 });
   if (!isDate(body.date) || !isTime(body.time)) return NextResponse.json({ error: "Pick a date and a time" }, { status: 400 });
-  if (!Number.isFinite(minutes) || minutes < 5 || minutes > 240) return NextResponse.json({ error: "Length must be 5 minutes to 4 hours" }, { status: 400 });
+  if (!Number.isFinite(minutes) || minutes < 5 || minutes > maxMinutes(body.kind)) {
+    return NextResponse.json({ error: body.kind === "room" ? "Room recordings can be up to 30 minutes" : "Video calls can be up to 1 hour" }, { status: 400 });
+  }
   const startsAt = londonToDate(body.date, body.time);
   if (startsAt.getTime() < Date.now() - 12 * 3600_000) return NextResponse.json({ error: "That time has passed" }, { status: 400 });
 

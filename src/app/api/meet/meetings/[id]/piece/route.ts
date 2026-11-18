@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireMeet } from "@/lib/meet-auth";
-import { meetingFor } from "@/lib/meet-meetings";
+import { meetingFor, endIfOverLimit } from "@/lib/meet-meetings";
 import { uploadUrl, isOurPath, storageReady } from "@/lib/meet-storage";
 import { transcribePieceNow } from "@/lib/meet-notes";
 
@@ -14,7 +14,8 @@ type Ctx = { params: Promise<{ id: string }> };
  * Recording pieces: each device records its own microphone in short pieces and uploads
  * them straight to private storage while the meeting runs.
  *   { action: "url", ext }                              → a one-time upload URL
- *   { action: "done", path, seq, startMs, mime, room }  → saves the piece for the notes
+ *   { action: "done", path, seq, startMs, mime, room }  → saves the piece for the notes (returns its id)
+ *   { action: "transcribe", id }                        → live captions for one saved piece
  */
 export async function POST(req: Request, { params }: Ctx) {
   const me = await requireMeet();
@@ -24,6 +25,7 @@ export async function POST(req: Request, { params }: Ctx) {
   if (!found) return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
   const m = found.meeting;
   if (!m.liveNotes) return NextResponse.json({ error: "This meeting isn't recorded" }, { status: 400 });
+  await endIfOverLimit(m).catch(() => false); // past its time limit: ended now, but the last pieces still count
   // Pieces still uploading when the meeting ends are accepted for 30 minutes.
   const open = m.status === "live" || (m.status === "ended" && m.endedAt && Date.now() - m.endedAt.getTime() < 30 * 60_000);
   if (!open) return NextResponse.json({ error: "Recording is closed" }, { status: 400 });
@@ -45,8 +47,14 @@ export async function POST(req: Request, { params }: Ctx) {
     const rec = await prisma.meetRecording.create({
       data: { meetingId: m.id, clockinId: room ? 0 : me.person.id, seq, startMs: Math.round(startMs), path: body.path, mime: String(body.mime || "").slice(0, 60) },
     });
-    // Live notes: transcribe this piece straight away (about a minute behind the call).
-    if (m.status === "live") await transcribePieceNow(rec.id, m.kind === "room").catch(() => {});
+    // Saved. Transcribing is a separate request (action "transcribe") the phone sends without waiting,
+    // so uploads, and ending the meeting, never wait for the transcription service.
+    return NextResponse.json({ ok: true, id: rec.id });
+  }
+  if (body.action === "transcribe") {
+    // Live captions: transcribe one piece now (about a minute behind the call). The notes pick up any left over.
+    const rec = await prisma.meetRecording.findFirst({ where: { id: String(body.id || ""), meetingId: m.id } });
+    if (rec) await transcribePieceNow(rec.id, m.kind === "room").catch(() => {});
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });

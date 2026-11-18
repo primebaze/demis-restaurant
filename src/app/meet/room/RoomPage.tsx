@@ -19,6 +19,7 @@ const PIECE_MS = 30_000;
 const SPEAKER = ["#1d4ed8", "#be185d", "#047857", "#6d28d9", "#b45309", "#0f766e"];
 const clock = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
 const mmss = (ms: number) => { const s = Math.floor(ms / 1000); return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
+const ROOM_LIMIT_MS = 30 * 60_000;
 const card: CSSProperties = { borderRadius: 24, background: "#ffffff", boxShadow: "0 1px 2px rgba(20,20,20,0.05)" };
 
 export default function RoomPage({ id }: { id: string }) {
@@ -56,7 +57,15 @@ export default function RoomPage({ id }: { id: string }) {
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(t); }, []);
   useEffect(() => { navigator.mediaDevices?.enumerateDevices().then((all) => setMics(all.filter((x) => x.kind === "audioinput"))).catch(() => {}); }, [state]);
 
-  const flush = useCallback(async () => {
+  // One upload run at a time: two at once uploaded the same piece twice (doubled words in the notes).
+  const flushing = useRef<Promise<void> | null>(null);
+  const flush = useCallback((): Promise<void> => {
+    if (flushing.current) return flushing.current;
+    flushing.current = flushRun().finally(() => { flushing.current = null; });
+    return flushing.current;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+  const flushRun = async () => {
     while (queue.current.length) {
       const job = queue.current[0];
       try {
@@ -69,6 +78,8 @@ export default function RoomPage({ id }: { id: string }) {
         if (!done.ok) throw new Error(String(done.data.error || "couldn't save it"));
         queue.current.shift();
         setSaveError("");
+        // Live notes: transcribe it in the background; nothing here waits for that.
+        if (done.data.id) postJson(`/api/meet/meetings/${id}/piece`, { action: "transcribe", id: done.data.id }).catch(() => {});
       } catch (e) {
         // Say so on screen: a recording that isn't being saved must never look like it is.
         setSaveError(`The recording isn't saving (${e instanceof Error ? e.message : "unknown problem"}). It keeps trying; check the connection.`);
@@ -76,7 +87,7 @@ export default function RoomPage({ id }: { id: string }) {
         break;
       }
     }
-  }, [id]);
+  };
 
   const piece = useCallback(() => {
     if (!running.current || !stream.current) return;
@@ -139,17 +150,17 @@ export default function RoomPage({ id }: { id: string }) {
     setState("paused");
   }
   function resume() { running.current = true; setState("recording"); piece(); }
-  async function end() {
-    if (!confirm("End the recording and make the notes?")) return;
+  async function end(ask = true) {
+    if (ask && !confirm("End the recording and make the notes?")) return;
     setState("ending");
     running.current = false;
     if (rec.current?.state === "recording") rec.current.stop();
-    await new Promise((r) => setTimeout(r, 600));
-    for (let i = 0; i < 30 && queue.current.length; i++) { await flush(); await new Promise((r) => setTimeout(r, 700)); }
+    // The meeting ends now (the last piece is still accepted after), so it never looks stuck.
+    await Promise.all([postJson(`/api/meet/meetings/${id}`, { action: "end" }), saveRoom(present)]);
     stream.current?.getTracks().forEach((t) => t.stop());
-    await saveRoom(present);
-    await postJson(`/api/meet/meetings/${id}`, { action: "end" });
     wake.current?.release().catch(() => {});
+    await new Promise((r) => setTimeout(r, 300)); // the recorder hands over its last piece
+    for (let i = 0; i < 12 && queue.current.length; i++) { await flush(); if (queue.current.length) await new Promise((r) => setTimeout(r, 700)); }
     window.location.href = `/meet/notes/${id}`;
   }
   async function saveRoom(ids: number[]) { await postJson(`/api/meet/meetings/${id}`, { action: "room", present: ids }); }
@@ -173,6 +184,14 @@ export default function RoomPage({ id }: { id: string }) {
   const extra = (d?.people || []).filter((p) => present.includes(p.id) && !roomList.some((a) => a.id === p.id));
   const micName = mics.find((m) => m.deviceId === micId)?.label || mics.find((m) => m.deviceId === "default")?.label || mics[0]?.label || "this computer's microphone";
   const elapsed = startedAt.current && state !== "ready" ? now - startedAt.current : 0;
+  const leftMs = startedAt.current ? ROOM_LIMIT_MS - (now - startedAt.current) : ROOM_LIMIT_MS;
+
+  // Room recordings stop at 30 minutes (keeps recording and transcription costs in check).
+  const endRef = useRef(end);
+  endRef.current = end;
+  useEffect(() => {
+    if ((state === "recording" || state === "paused") && startedAt.current && leftMs <= 0) endRef.current(false);
+  }, [state, leftMs]);
 
   return (
     <div style={{ minHeight: "100dvh", boxSizing: "border-box", background: C.page, color: C.ink, fontSize: 14, padding: 18, display: "flex", flexWrap: "wrap", gap: 18, alignItems: "stretch" }}>
@@ -203,6 +222,9 @@ export default function RoomPage({ id }: { id: string }) {
             )}
           </div>
         </div>
+        {state !== "ready" && leftMs > 0 && leftMs <= 5 * 60_000 && (
+          <p role="status" style={{ margin: 0, textAlign: "center", fontSize: 13, color: "#b45309" }}>Room recordings stop at 30 minutes. {Math.ceil(leftMs / 60_000)} min left; it ends and makes the notes by itself.</p>
+        )}
         {(error || saveError) && <p role="alert" style={{ margin: 0, textAlign: "center", fontSize: 13, color: "#b91c1c" }}>{error || saveError}</p>}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 10 }}>
           {state === "ready" ? (
@@ -210,7 +232,7 @@ export default function RoomPage({ id }: { id: string }) {
           ) : (
             <>
               <button onClick={state === "paused" ? resume : pause} disabled={state === "ending"} style={{ height: 52, padding: "0 22px", border: 0, borderRadius: 26, background: C.page, fontSize: 15, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, color: C.ink, cursor: "pointer" }}><Icon name={state === "paused" ? "play_arrow" : "pause"} size={22} />{state === "paused" ? "Carry on" : "Pause"}</button>
-              <button onClick={end} disabled={state === "ending"} style={{ height: 52, padding: "0 24px", border: 0, borderRadius: 26, background: "linear-gradient(120deg, #ff7a45, #e8513a)", color: "#ffffff", fontSize: 15, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Icon name="stop_circle" size={22} fill />{state === "ending" ? "Saving the last bit…" : "End and make notes"}</button>
+              <button onClick={() => end()} disabled={state === "ending"} style={{ height: 52, padding: "0 24px", border: 0, borderRadius: 26, background: "linear-gradient(120deg, #ff7a45, #e8513a)", color: "#ffffff", fontSize: 15, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Icon name="stop_circle" size={22} fill />{state === "ending" ? "Saving the last bit…" : "End and make notes"}</button>
             </>
           )}
         </div>

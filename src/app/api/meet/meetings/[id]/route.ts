@@ -7,7 +7,7 @@ import { notifyPeople } from "@/lib/meet-notify";
 import { readUrls } from "@/lib/meet-storage";
 import { getShifts } from "@/lib/clockin";
 import { dayLabel } from "@/lib/meet-rota";
-import { meetingFor, presenceOf, addedSeconds, closeAttendance, scheduleNext, londonDate, londonHM } from "@/lib/meet-meetings";
+import { meetingFor, presenceOf, addedSeconds, closeAttendance, scheduleNext, londonDate, londonHM, endIfOverLimit, hardStop } from "@/lib/meet-meetings";
 import { processNotes, transcriptionReady, summaryReady, liveLines, type Line } from "@/lib/meet-notes";
 import type { MeetMeeting, MeetAttendee } from "@prisma/client";
 
@@ -47,7 +47,7 @@ async function view(m: MeetMeeting, list: MeetAttendee[], me: NonNullable<Awaite
   return {
     meeting: {
       id: m.id, title: m.title, kind: m.kind, status: m.status, date: day, time: londonHM(m.startsAt), startsAt: m.startsAt.toISOString(), minutes: m.minutes,
-      private: m.private, liveNotes: m.liveNotes, repeat: m.repeat, hostId: m.hostId, host: firstNameOf(m.hostName),
+      private: m.private, liveNotes: m.liveNotes, repeat: m.repeat, hostId: m.hostId, host: firstNameOf(m.hostName), stopsAt: hardStop(m)?.toISOString() || "",
       startedAt: m.startedAt?.toISOString() || "", endedAt: m.endedAt?.toISOString() || "",
     },
     me: { id: me.person.id, name: me.person.name, manager: me.manager, invited: !!mine?.invited, joined: !!mine?.joinedAt, seconds: mine?.seconds || 0 },
@@ -121,7 +121,7 @@ export async function POST(req: Request, { params }: Ctx) {
     }
     if (body.action === "here") {
       if (!mine?.joinedAt) return NextResponse.json({ error: "Join first" }, { status: 400 });
-      if (m.status !== "live") return NextResponse.json({ ok: true, ended: true });
+      if (m.status !== "live" || (await endIfOverLimit(m))) return NextResponse.json({ ok: true, ended: true });
       await prisma.meetAttendee.update({ where: key, data: { lastSeenAt: now, leftAt: null, seconds: mine.seconds + addedSeconds({ ...mine, leftAt: null }) } });
       return NextResponse.json({ ok: true, ended: false });
     }
@@ -143,6 +143,7 @@ export async function POST(req: Request, { params }: Ctx) {
       return NextResponse.json({ ok: true });
     }
     if (body.action === "end") {
+      if (m.status === "ended" || m.status === "ready") return NextResponse.json({ ok: true }); // already ended (time limit, or another manager)
       if (m.status !== "live") return NextResponse.json({ error: "It isn't live" }, { status: 400 });
       const ended = await prisma.meetMeeting.update({ where: { id: m.id }, data: { status: "ended", endedAt: now } });
       await closeAttendance(ended);

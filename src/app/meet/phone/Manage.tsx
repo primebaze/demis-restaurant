@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Icon, personColour, initial, firstName, BRANCH } from "../ui";
 import { D, Screen, Chip, bigWhite, field, mono, useData, send, dayShort, dayNum, londonToday } from "./kit";
+import NewMeeting from "../NewMeeting";
 
 /* 30 · Manager phone: the Manage tab for quick jobs. Rota building, payroll and attendance stay on the computer. */
 
@@ -24,6 +25,7 @@ export function ManageScreen({ onPost }: { onPost: () => void }) {
   const reports = useData<{ reports: Report[] }>("/api/meet/reports?manage=1");
   const reqs = useData<{ waiting: Req[] }>("/api/meet/requests/manage");
   const tasks = useData<{ tasks: TaskRow[] }>("/api/meet/tasks?manage=1");
+  const [newKind, setNewKind] = useState<"" | "call" | "room">("");
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState("");
   const today = londonToday();
@@ -69,6 +71,12 @@ export function ManageScreen({ onPost }: { onPost: () => void }) {
         </div>
         <button aria-label="Post news" onClick={onPost} style={{ height: 44, padding: "0 14px", border: 0, borderRadius: 22, background: "#ffffff", color: D.bg, fontSize: 14, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}><Icon name="campaign" size={20} />Post</button>
       </div>
+      {/* Managers set up and start meetings from here too (the meeting's own screen has the Start button). */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+        <button onClick={() => setNewKind("call")} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, padding: 14, border: 0, borderRadius: 18, background: "linear-gradient(140deg, #ff7a45, #e0502f)", color: "#ffffff", fontFamily: "inherit", textAlign: "left", cursor: "pointer" }}><Icon name="videocam" size={22} fill /><span style={{ fontSize: 14, fontWeight: 600 }}>New video call</span><span style={{ fontSize: 11, opacity: 0.85 }}>Up to 1 hour</span></button>
+        <button onClick={() => setNewKind("room")} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, padding: 14, border: 0, borderRadius: 18, background: D.card, color: "#ffffff", fontFamily: "inherit", textAlign: "left", cursor: "pointer" }}><Icon name="mic" size={22} style={{ color: D.peach }} /><span style={{ fontSize: 14, fontWeight: 600 }}>Record a meeting</span><span style={{ fontSize: 11, color: D.muted }}>One phone in the room · up to 30 min</span></button>
+      </div>
+      {newKind && <NewMeeting kind={newKind} onClose={() => setNewKind("")} onCreated={(id) => { setNewKind(""); window.location.href = `/meet/${newKind === "room" ? "room" : "call"}/${id}`; }} />}
       {msg && <p role="status" style={{ margin: 0, fontSize: 13, color: D.soft }}>{msg}</p>}
       {urgent.map((r) => (
         <article key={r.id} style={{ borderRadius: 22, background: r.kind === "person" ? "#1e1b2e" : "linear-gradient(140deg, #ff7a45, #e0502f)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>

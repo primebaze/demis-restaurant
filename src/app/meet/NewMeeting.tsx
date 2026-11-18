@@ -15,7 +15,9 @@ const londonNow = () => {
 };
 const quick: CSSProperties = { marginLeft: "auto", height: 24, padding: "0 10px", border: 0, borderRadius: 12, background: C.page, color: C.ink, fontSize: 12, fontWeight: 500, fontFamily: "inherit", cursor: "pointer" };
 const weekday = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
-const LENGTHS = [15, 20, 30, 45, 60, 90, 120];
+const LENGTHS = [15, 20, 30, 45, 60];
+// Longest allowed (keeps recording and transcription costs in check): room 30 min, call 1 hour.
+const MAX_LEN: Record<"call" | "room", number> = { room: 30, call: 60 };
 
 const fieldWrap: CSSProperties = { position: "relative" };
 const field: CSSProperties = { width: "100%", height: 48, boxSizing: "border-box", padding: "0 12px 0 42px", border: 0, borderRadius: 16, background: C.page, fontSize: 15, fontFamily: "inherit", color: C.ink };
@@ -67,7 +69,7 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
     const on = kind === k;
     return (
       <label style={{ display: "flex", gap: 12, padding: 16, borderRadius: 20, background: on ? C.ink : C.page, color: on ? "#ffffff" : C.ink, cursor: "pointer", position: "relative" }}>
-        <input type="radio" name="kind" checked={on} onChange={() => setKind(k)} style={{ position: "absolute", opacity: 0, width: 1, height: 1 }} />
+        <input type="radio" name="kind" checked={on} onChange={() => { setKind(k); setMinutes((m) => Math.min(m, MAX_LEN[k])); }} style={{ position: "absolute", opacity: 0, width: 1, height: 1 }} />
         <Icon name={icon} size={24} fill={k === "call"} style={{ color: iconColour }} />
         <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <span style={{ fontSize: 15, fontWeight: 600 }}>{name}</span>
@@ -118,10 +120,13 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
             <div style={fieldWrap}><Icon name="schedule" size={19} style={fieldIcon} /><input id="nm-time" type="time" step={300} value={time} onChange={(e) => setTime(e.target.value)} style={field} /></div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label htmlFor="nm-len" style={lbl}>Length</label>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <label htmlFor="nm-len" style={lbl}>Length</label>
+              <span style={{ marginLeft: "auto", fontSize: 12, color: C.sub }}>Up to {kind === "room" ? "30 min" : "1 hour"}</span>
+            </div>
             <div style={fieldWrap}><Icon name="timer" size={19} style={fieldIcon} />
               <select id="nm-len" value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} style={{ ...field, appearance: "none" }}>
-                {LENGTHS.map((m) => <option key={m} value={m}>{m < 60 ? `${m} min` : `${m / 60} hour${m > 60 ? "s" : ""}`}</option>)}
+                {LENGTHS.filter((m) => m <= MAX_LEN[kind]).map((m) => <option key={m} value={m}>{m < 60 ? `${m} min` : `${m / 60} hour${m > 60 ? "s" : ""}`}</option>)}
               </select>
             </div>
           </div>

@@ -209,7 +209,11 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
 
   /* ─── Recording: 30-second pieces of this device's own microphone ─── */
 
-  const flushUploads = useCallback(async () => {
+  // One upload run at a time: two at once uploaded the same piece twice (doubled words in the notes).
+  const flushing = useRef<Promise<void> | null>(null);
+  const flushUploads = useCallback((): Promise<void> => {
+    if (flushing.current) return flushing.current;
+    flushing.current = (async () => {
     while (uploads.current.length) {
       const job = uploads.current[0];
       try {
@@ -217,8 +221,10 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
         const up = await post(`${base}/piece`, { action: "url", ext });
         const put = await fetch(up.url, { method: "PUT", headers: { "Content-Type": job.mime.split(";")[0], "x-upsert": "false" }, body: job.blob });
         if (!put.ok) throw new Error("upload");
-        await post(`${base}/piece`, { action: "done", path: up.path, seq: job.seq, startMs: job.startMs, mime: job.mime, room: !!opts.room });
+        const saved = await post(`${base}/piece`, { action: "done", path: up.path, seq: job.seq, startMs: job.startMs, mime: job.mime, room: !!opts.room });
         uploads.current.shift();
+        // Live captions: transcribe it in the background; nothing here waits for that.
+        if (saved?.id) post(`${base}/piece`, { action: "transcribe", id: saved.id }).catch(() => {});
         setSaveError("");
       } catch (e) {
         setSaveError(`Your voice isn't being saved for the notes (${e instanceof Error ? e.message : "unknown problem"}). It keeps trying.`);
@@ -228,6 +234,8 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
       }
     }
     setPending(uploads.current.length);
+    })().finally(() => { flushing.current = null; });
+    return flushing.current;
   }, [base, opts.room]);
 
   const startPiece = useCallback((callStart: number) => {
@@ -388,7 +396,8 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
     stopAll();
     await post(base, { action: "leave" }).catch(() => {});
     // Let the last recording piece finish uploading.
-    for (let i = 0; i < 20 && uploads.current.length; i++) { await flushUploads(); await new Promise((r) => setTimeout(r, 500)); }
+    await new Promise((r) => setTimeout(r, 300)); // the recorder hands over its last piece
+    for (let i = 0; i < 12 && uploads.current.length; i++) { await flushUploads(); if (uploads.current.length) await new Promise((r) => setTimeout(r, 500)); }
     setStatus("ended");
   }, [base, send, stopAll, flushUploads]);
 

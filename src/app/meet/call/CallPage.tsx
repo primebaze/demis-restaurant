@@ -12,7 +12,7 @@ import { useCall, type PeerView } from "./useCall";
 
 type Attendee = { id: number; name: string; branch: string; invited: boolean; presence: string; joinedAt: string; leftAt: string; seconds: number; onShift: boolean };
 type Detail = {
-  meeting: { id: string; title: string; kind: string; status: string; date: string; time: string; startsAt: string; minutes: number; private: boolean; liveNotes: boolean; host: string; startedAt: string; endedAt: string };
+  meeting: { id: string; title: string; kind: string; status: string; date: string; time: string; startsAt: string; minutes: number; private: boolean; liveNotes: boolean; host: string; startedAt: string; endedAt: string; stopsAt?: string };
   me: { id: number; name: string; manager: boolean; invited: boolean; joined: boolean; seconds: number };
   attendees: Attendee[];
   notes: { tasks: { id: string; title: string; ownerId: number; dueDate: string; status: string }[] } | null;
@@ -100,6 +100,11 @@ export default function CallPage({ id }: { id: string }) {
     const d = await res.json().catch(() => ({}));
     if (res.status === 401) { window.location.replace(`/meet?join=${encodeURIComponent(id)}`); return; }
     if (!res.ok) return setError(d.error || "Meeting not found");
+    // Room recordings have no call: managers go to the room screen; staff are told.
+    if (d.meeting?.kind === "room") {
+      if (d.me?.manager) { window.location.replace(`/meet/room/${id}`); return; }
+      return setError("This meeting is recorded on one device in the room, so there's no call to join.");
+    }
     setError("");
     setDetail(d);
   }, [id]);
@@ -328,7 +333,25 @@ function useStage(peers: PeerView[]) {
 }
 
 /* ─── 31 · In the call, phone ─── */
+/** End the meeting for everyone (managers): it ends at once, then the last bit of audio uploads. */
+async function endForEveryone(d: Detail, call: Call) {
+  await fetch(`/api/meet/meetings/${d.meeting.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "end" }) }).catch(() => {});
+  await call.leave();
+  window.location.href = `/meet/notes/${d.meeting.id}`;
+}
+
+/** Minutes left before the 1-hour limit, once it's 5 or fewer. */
+function useLimitWarning(stopsAt?: string) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 15_000); return () => clearInterval(t); }, []);
+  if (!stopsAt) return "";
+  const left = new Date(stopsAt).getTime() - now;
+  return left > 0 && left <= 5 * 60_000 ? `Calls end at 1 hour. ${Math.ceil(left / 60_000)} min left.` : "";
+}
+
 function PhoneCall({ d, call }: { d: Detail; call: Call }) {
+  const [leaving, setLeaving] = useState(false);
+  const warn = useLimitWarning(d.meeting.stopsAt);
   const elapsed = useTimer(call.startedAt);
   const main = useStage(call.peers);
   const rest = call.peers.filter((p) => p !== main);
@@ -382,12 +405,20 @@ function PhoneCall({ d, call }: { d: Detail; call: Call }) {
           </div>
         )}
         {call.error && <p role="alert" style={{ margin: 0, fontSize: 12, color: "#fca5a5", textAlign: "center" }}>{call.error}</p>}
+        {warn && <p role="status" style={{ margin: 0, fontSize: 12, color: "#fcd34d", textAlign: "center" }}>{warn}</p>}
+        {leaving && (
+          <div role="dialog" aria-label="End or leave" style={{ display: "flex", flexDirection: "column", gap: 8, padding: 12, borderRadius: 22, background: D.card }}>
+            <button onClick={() => endForEveryone(d, call)} style={{ height: 50, border: 0, borderRadius: 25, background: gradient, color: "#ffffff", fontSize: 15, fontWeight: 600, fontFamily: "inherit" }}>End for everyone and make the notes</button>
+            <button onClick={() => { setLeaving(false); call.leave(); }} style={{ height: 46, border: 0, borderRadius: 23, background: D.btn, color: "#ffffff", fontSize: 14, fontFamily: "inherit" }}>Just leave (it carries on)</button>
+            <button onClick={() => setLeaving(false)} style={{ height: 40, border: 0, borderRadius: 20, background: "transparent", color: D.muted, fontSize: 14, fontFamily: "inherit" }}>Cancel</button>
+          </div>
+        )}
         <nav aria-label="Call controls" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "4px 2px 0" }}>
           <button aria-label={call.mic ? "Mute microphone" : "Unmute microphone"} aria-pressed={!call.mic} onClick={call.toggleMic} style={roundDark(call.mic)}><Icon name={call.mic ? "mic" : "mic_off"} size={24} fill={call.mic} /></button>
           <button aria-label={call.cam ? "Turn camera off" : "Turn camera on"} onClick={call.toggleCam} style={roundDark(call.cam)}><Icon name={call.cam ? "videocam" : "videocam_off"} size={24} fill={call.cam} /></button>
           <button aria-label={captions ? "Captions on" : "Captions off"} aria-pressed={captions} onClick={() => setCaptions(!captions)} disabled={!(d.live && d.ready.transcription)} style={{ ...roundDark(false), boxShadow: captions && d.live && d.ready.transcription ? "inset 0 0 0 2px #ffffff" : "none", opacity: d.live && d.ready.transcription ? 1 : 0.4 }}><Icon name="closed_caption" size={24} /></button>
           <a href="/meet" aria-label="Back to the app, stay in the call" style={{ ...roundDark(false), textDecoration: "none" }}><Icon name="home" size={24} /></a>
-          <button aria-label="Leave the call" onClick={call.leave} style={{ width: 72, height: 56, border: 0, borderRadius: 28, background: gradient, color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="call_end" size={26} fill /></button>
+          <button aria-label={d.me.manager ? "End or leave the call" : "Leave the call"} onClick={() => (d.me.manager ? setLeaving(true) : call.leave())} style={{ width: 72, height: 56, border: 0, borderRadius: 28, background: gradient, color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="call_end" size={26} fill /></button>
         </nav>
         <p style={{ margin: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: D.muted }}><Icon name="screen_lock_portrait" size={15} />Screen stays on. If your phone locks, you&rsquo;ll rejoin by yourself.</p>
       </div>
@@ -399,6 +430,7 @@ function PhoneCall({ d, call }: { d: Detail; call: Call }) {
 const TALK = ["#f2643a", "#ffad8c", "#ffd5c4", "#ece8e3", "#d6d1cb"];
 
 function ComputerCall({ d, call }: { d: Detail; call: Call }) {
+  const limitWarn = useLimitWarning(d.meeting.stopsAt);
   const elapsed = useTimer(call.startedAt);
   const main = useStage(call.peers);
   const rest = call.peers.filter((p) => p !== main);
@@ -433,9 +465,7 @@ function ComputerCall({ d, call }: { d: Detail; call: Call }) {
   }
   async function endForAll() {
     if (!confirm("End the meeting for everyone?")) return;
-    await fetch(`/api/meet/meetings/${d.meeting.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "end" }) }).catch(() => {});
-    await call.leave();
-    window.location.href = `/meet/notes/${d.meeting.id}`;
+    await endForEveryone(d, call);
   }
   const tiles = [main, ...rest];
   const gridCols = tiles.length <= 1 ? "1fr" : "repeat(3, minmax(0, 1fr))";
@@ -468,6 +498,7 @@ function ComputerCall({ d, call }: { d: Detail; call: Call }) {
               </div>
             </div>
             {call.error && <p role="alert" style={{ margin: 0, padding: "8px 12px", borderRadius: 12, background: "#fef3c7", color: "#92400e", fontSize: 13 }}>{call.error}</p>}
+            {limitWarn && <p role="status" style={{ margin: 0, padding: "8px 12px", borderRadius: 12, background: "#fef3c7", color: "#92400e", fontSize: 13 }}>{limitWarn}</p>}
             <nav aria-label="Call controls" style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <button aria-label="Full screen" onClick={() => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {})} style={ctrl(false)}><Icon name="open_in_full" size={21} /></button>
               <div style={{ flex: 1, display: "flex", justifyContent: "center", gap: 10 }}>
