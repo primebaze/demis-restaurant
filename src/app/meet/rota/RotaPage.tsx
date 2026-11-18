@@ -47,7 +47,6 @@ const btnBlack: CSSProperties = { height: 40, padding: "0 18px", border: 0, bord
 const panel: CSSProperties = { borderRadius: 24, background: "#ffffff", padding: 16, display: "flex", flexDirection: "column", gap: 8, boxShadow: "0 1px 2px rgba(20,20,20,0.05)" };
 
 export default function RotaPage() {
-  const [show, setShow] = useState<"all" | Branch>("all");
   const [data, setData] = useState<Week | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
@@ -84,12 +83,41 @@ export default function RotaPage() {
     await Promise.all([load(data?.week), loadRequests()]);
   }
 
-  async function setBudget(date: string, current: number | null) {
-    const v = prompt(`Budget for ${dayLong(date)} (£). Leave empty to clear.`, current != null ? String(current) : "");
-    if (v === null) return;
-    const amount = v.trim() === "" ? null : Number(v.replace(/[£,\s]/g, ""));
-    if (amount !== null && !Number.isFinite(amount)) return setNote("Enter an amount in pounds, like 450");
-    await act({ action: "budget", date, amount }, "budget", amount ? `Budget for ${dayHead(date)} set to ${money(amount)}.` : `Budget for ${dayHead(date)} cleared.`);
+  // Budget editor in This week: one box per day, saved together.
+  const [budgetOpen, setBudgetOpen] = useState(false);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  function openBudget(focusDate?: string) {
+    const d: Record<string, string> = {};
+    for (const day of data?.days || []) { const b = costOf(day)?.budget; d[day] = b != null ? String(b) : ""; }
+    setDraft(d);
+    setBudgetOpen(true);
+    setTimeout(() => {
+      document.getElementById("budget-editor")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (focusDate) (document.getElementById(`budget-${focusDate}`) as HTMLInputElement | null)?.focus();
+    }, 50);
+  }
+  async function saveBudgets() {
+    const changed = (data?.days || []).filter((day) => {
+      const was = costOf(day)?.budget ?? null;
+      const now = draft[day]?.trim() ? Number(draft[day].replace(/[£,\s]/g, "")) : null;
+      return now !== was;
+    });
+    for (const day of changed) {
+      const v = draft[day]?.trim();
+      const amount = v ? Number(v.replace(/[£,\s]/g, "")) : null;
+      if (amount !== null && (!Number.isFinite(amount) || amount < 0)) return setNote(`Enter an amount in pounds for ${dayHead(day)}, like 450`);
+    }
+    setBusy("budget");
+    setNote("");
+    for (const day of changed) {
+      const v = draft[day]?.trim();
+      const res = await fetch("/api/meet/rota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "budget", date: day, amount: v ? Number(v.replace(/[£,\s]/g, "")) : null }) }).catch(() => null);
+      if (!res?.ok) { setBusy(""); setNote("Couldn't save the budget. Try again."); await load(data?.week); return; }
+    }
+    setBusy("");
+    setBudgetOpen(false);
+    setNote(changed.length ? "Budget saved." : "");
+    await load(data?.week);
   }
 
   const costOf = (date: string) => data?.costs?.days.find((d) => d.date === date);
@@ -112,11 +140,8 @@ export default function RotaPage() {
   }
 
   // The filter narrows the one rota to a branch: its shifts, and the people who work there.
-  const shifts = useMemo(() => (data?.shifts || []).filter((s) => show === "all" || s.branch === show), [data, show]);
-  const people = useMemo(() => {
-    const working = new Set(shifts.map((s) => s.staffId));
-    return (data?.people || []).filter((p) => show === "all" || working.has(p.id) || p.branch === show || p.branch === "both" || p.branch === "");
-  }, [data, shifts, show]);
+  const shifts = useMemo(() => data?.shifts || [], [data]);
+  const people = useMemo(() => data?.people || [], [data]);
 
   const byCell = useMemo(() => {
     const m = new Map<string, Shift[]>();
@@ -161,7 +186,7 @@ export default function RotaPage() {
   }
 
   // A new shift goes to the person's branch, else the branch being shown, else Cricklewood.
-  const branchFor = (p: Person): Branch => (p.branch === "cricklewood" || p.branch === "streatham" ? p.branch : show !== "all" ? show : "cricklewood");
+  const branchFor = (p: Person): Branch => (p.branch === "cricklewood" || p.branch === "streatham" ? p.branch : "cricklewood");
 
   return (
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", maxWidth: "100vw", overflowX: "clip" }}>
@@ -184,16 +209,40 @@ export default function RotaPage() {
               <button aria-label="Next week" disabled={!data || !!busy} onClick={() => data && load(addDays(data.week, 7))} style={{ width: 32, height: 32, border: 0, borderRadius: 16, background: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)" }}><Icon name="chevron_right" size={20} /></button>
             </div>
           </div>
-          <label style={{ ...btnWhite, position: "relative" }}>
-            <Icon name="storefront" size={19} />
-            {show === "all" ? "Both branches" : BRANCH_NAME[show]}
-            <Icon name="expand_more" size={18} />
-            <select aria-label="Show branch" value={show} onChange={(e) => setShow(e.target.value as "all" | Branch)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", fontSize: 16 }}>
-              <option value="all">Both branches</option>
-              <option value="cricklewood">Cricklewood</option>
-              <option value="streatham">Streatham</option>
-            </select>
-          </label>
+          <div style={{ position: "relative" }}>
+            <button disabled={!data?.costs || !!busy} onClick={() => (budgetOpen ? setBudgetOpen(false) : openBudget())} style={btnWhite} aria-expanded={budgetOpen}>
+              <Icon name="savings" size={19} />
+              {hasBudget ? <>Budget <strong style={{ fontWeight: 600 }}>{money(budgetTotal)}</strong></> : "Set budget"}
+              <Icon name="expand_more" size={18} />
+            </button>
+              {budgetOpen && (
+                <div id="budget-editor" role="dialog" aria-label="Budget for the week" style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 30, width: 290, maxWidth: "calc(100vw - 32px)", display: "flex", flexDirection: "column", gap: 8, padding: 14, borderRadius: 18, background: "#ffffff", boxShadow: "0 12px 32px rgba(20,20,20,0.16), 0 1px 2px rgba(20,20,20,0.08)" }}>
+                        <p style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Budget · {data?.weekLabel}</p>
+                        <p style={{ margin: 0, fontSize: 12, color: C.sub }}>Budget for each day, in pounds. Leave a day empty for no budget.</p>
+                        {(data?.days || []).map((day) => (
+                          <label key={day} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, fontSize: 13 }}>
+                            <span>{dayHead(day)}</span>
+                            <span style={{ display: "flex", alignItems: "center", gap: 4, background: C.page, borderRadius: 10, padding: "0 10px", boxShadow: `inset 0 0 0 1px ${C.dash}` }}>
+                              <span style={{ color: C.sub }}>£</span>
+                              <input id={`budget-${day}`} inputMode="decimal" value={draft[day] ?? ""} placeholder="0"
+                                onChange={(e) => setDraft((x) => ({ ...x, [day]: e.target.value }))}
+                                style={{ width: 80, height: 36, border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 16, textAlign: "right", color: C.ink }} />
+                            </span>
+                          </label>
+                        ))}
+                        <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                          <button onClick={saveBudgets} disabled={busy === "budget"}
+                            style={{ flex: 1, height: 38, border: 0, borderRadius: 999, background: C.ink, color: "#fff", fontFamily: "inherit", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                            {busy === "budget" ? "Saving…" : "Save budget"}
+                          </button>
+                          <button onClick={() => setBudgetOpen(false)}
+                            style={{ height: 38, padding: "0 16px", border: 0, borderRadius: 999, background: "#fff", color: C.ink, fontFamily: "inherit", fontSize: 13, cursor: "pointer", boxShadow: `inset 0 0 0 1px ${C.dash}` }}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+          </div>
           <button disabled={!data || !!busy} onClick={() => data && confirm(`Copy last week's shifts into ${data.weekLabel}? People already working a day keep what they have.`) && act({ action: "copy_last_week", week: data.week }, "copy", "Copied {n} shifts from last week.")} style={btnWhite}>
             <Icon name="content_copy" size={19} />{busy === "copy" ? "Copying…" : "Copy last week"}
           </button>
@@ -280,13 +329,13 @@ export default function RotaPage() {
                     </tr>
                     {data.costs && (
                       <>
-                        <tr id="budget-row" style={{ color: C.sub, textAlign: "center", scrollMarginTop: 120 }}>
+                        <tr style={{ color: C.sub, textAlign: "center" }}>
                           <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>Budget</th>
                           {data.days.map((d) => {
                             const b = costOf(d)?.budget ?? null;
                             return (
                               <td key={d} style={{ padding: 0 }}>
-                                <button aria-label={`Set budget for ${dayLong(d)}`} onClick={() => setBudget(d, b)} disabled={!!busy}
+                                <button aria-label={`Set budget for ${dayLong(d)}`} onClick={() => openBudget(d)} disabled={!!busy}
                                   style={{ width: "100%", height: 30, border: 0, borderRadius: 10, background: b != null ? C.page : "transparent", color: b != null ? C.ink : C.plus, fontSize: 12, fontFamily: "inherit", cursor: "pointer", boxShadow: b != null ? "none" : `inset 0 0 0 1.5px ${C.dash}` }}>
                                   {b != null ? money(b) : "+ £"}
                                 </button>
@@ -342,10 +391,7 @@ export default function RotaPage() {
                 <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota hours</span><strong style={{ fontWeight: 600 }}>{fmtHours(totals.all)} h</strong></p>
                 {data?.costs && (
                   <>
-                    <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Budget</span>{hasBudget ? <strong style={{ fontWeight: 600 }}>{money(budgetTotal)}</strong> : (
-                      <button onClick={() => document.getElementById("budget-row")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-                        style={{ border: 0, background: "none", padding: 0, fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: C.ink, textDecoration: "underline", cursor: "pointer" }}>Set budget</button>
-                    )}</p>
+                    <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Budget</span><strong style={{ fontWeight: 600 }}>{hasBudget ? money(budgetTotal) : "Not set"}</strong></p>
                     <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota cost</span><strong style={{ fontWeight: 600 }}>{money(costTotal)}</strong></p>
                     {hasBudget && (
                       <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}>
