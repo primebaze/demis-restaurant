@@ -86,7 +86,7 @@ export type Meeting = {
   id: string; title: string; kind: "call" | "room"; status: string; date: string; time: string; startsAt: string; minutes: number; private: boolean;
   host: string; startedAt: string; invited: { id: number; name: string }[]; inNow: { id: number; name: string }[]; came: number; mineInvited: boolean; mineJoined: boolean;
 };
-export type Task = {
+export type Task = { repeatDays?: string;
   id: string; title: string; dueDate: string; status: string; steps: { text: string; done: boolean }[]; stepsDone: number; meetingId: string | null; meeting: string;
   quote: string; quoteBy: string; quoteMs: number | null; note: string; helpNote: string; hasPhoto: boolean; createdBy: string; doneAt: string; at: string;
 };

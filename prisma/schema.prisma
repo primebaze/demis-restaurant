@@ -812,6 +812,7 @@ model MeetTask {
   photoPath String    @default("")
   helpNote  String    @default("") // "I need help or more time"
   createdBy String    @default("")
+  repeatDays String   @default("") // repeating task: weekdays "1,3,5" (1 = Monday, 7 = Sunday); "" = once
   doneAt    DateTime?
   nudgedAt  DateTime?
   createdAt DateTime  @default(now())

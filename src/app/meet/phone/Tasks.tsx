@@ -55,6 +55,7 @@ export function TasksScreen({ onOpen }: { onOpen: (id: string) => void }) {
                 <button key={t.id} onClick={() => onOpen(t.id)} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: 0, borderRadius: 20, background: D.card, color: "#ffffff", textAlign: "left", fontFamily: "inherit", cursor: "pointer" }}>
                   <span style={{ width: 26, height: 26, borderRadius: "50%", border: `2px solid ${late ? D.red : D.ring}`, boxSizing: "border-box", flex: "none" }} />
                   <span style={{ flex: 1, minWidth: 0 }}><span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{t.title}</span>{meta && <span style={{ display: "block", marginTop: 3, fontSize: 12, color: D.muted }}>{meta}</span>}</span>
+                  {t.repeatDays && <Icon name="repeat" size={15} style={{ color: D.muted }} />}
                   {t.dueDate && <span style={{ fontSize: 12, color: late ? D.red : D.muted, whiteSpace: "nowrap" }}>{dayShort(t.dueDate)} {dayNum(t.dueDate)}</span>}
                 </button>
               );
@@ -137,7 +138,7 @@ export function TaskScreen({ id, onBack }: { id: string; onBack: () => void }) {
       </div>
       <div>
         <h1 style={{ margin: 0, fontSize: 26, fontWeight: 500, lineHeight: 1.2, letterSpacing: "-0.02em", textDecoration: done ? "line-through" : "none", color: done ? D.muted : "#ffffff" }}>{t.title}</h1>
-        <p style={{ margin: "8px 0 0", fontSize: 13, color: D.muted }}>{[t.dueDate ? `${lateDays ? "Was due" : "Due"} ${dayLong(t.dueDate)}` : "", t.meeting ? `from ${t.meeting}${t.meetingDate ? ` on ${dayLong(t.meetingDate.slice(0, 10))}` : ""}` : t.createdBy ? `from ${t.createdBy}` : ""].filter(Boolean).join(" · ")}</p>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: D.muted }}>{[t.dueDate ? `${lateDays ? "Was due" : "Due"} ${dayLong(t.dueDate)}` : "", t.repeatDays ? `repeats ${t.repeatDays === "1,2,3,4,5,6,7" ? "every day" : t.repeatDays.split(",").map((n) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][Number(n) - 1]).join(", ")}` : "", t.meeting ? `from ${t.meeting}${t.meetingDate ? ` on ${dayLong(t.meetingDate.slice(0, 10))}` : ""}` : t.createdBy ? `from ${t.createdBy}` : ""].filter(Boolean).join(" · ")}</p>
       </div>
       {t.quote && (
         <figure style={{ margin: 0, borderRadius: 20, background: D.card, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>

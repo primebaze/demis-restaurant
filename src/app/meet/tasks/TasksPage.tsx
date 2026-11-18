@@ -8,7 +8,7 @@ import { ManagerFrame, PageHead, PAGE as C, panel, useJson, postJson } from "../
 
 type Step = { text: string; done: boolean };
 type Task = {
-  id: string; title: string; ownerId: number; owner: string; dueDate: string; status: string; steps: Step[]; stepsDone: number;
+  id: string; title: string; ownerId: number; owner: string; dueDate: string; status: string; steps: Step[]; stepsDone: number; repeatDays?: string;
   meetingId: string | null; meeting: string; quote: string; quoteBy: string; note: string; helpNote: string; hasPhoto: boolean;
   createdBy: string; doneAt: string; nudgedAt: string; at: string;
 };
@@ -117,7 +117,7 @@ export default function TasksPage() {
                 <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 2 }}>
                   {list.map((t) => {
                     const late = (t.status === "open" || t.status === "help") && t.dueDate && t.dueDate < today;
-                    const meta = [t.meeting, t.meetingId ? "" : "", DM(t.at), t.steps.length ? `${t.stepsDone} of ${t.steps.length} steps done` : "", t.status === "help" ? "asked for help or more time" : ""].filter(Boolean).join(" · ");
+                    const meta = [t.repeatDays ? `↻ ${repeatText(t.repeatDays)}` : "", t.meeting, t.meetingId ? "" : "", DM(t.at), t.steps.length ? `${t.stepsDone} of ${t.steps.length} steps done` : "", t.status === "help" ? "asked for help or more time" : ""].filter(Boolean).join(" · ");
                     return (
                       <li key={t.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: 12, borderRadius: 16, background: late ? "#fff8f5" : "transparent", flexWrap: "wrap" }}>
                         {t.status === "suggested" ? <Icon name="auto_awesome" size={20} fill style={{ color: C.accent }} />
@@ -152,12 +152,22 @@ export default function TasksPage() {
   );
 }
 
+const WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const repeatText = (days: number[] | string) => {
+  const list = (typeof days === "string" ? days.split(",").map(Number) : days).filter(Boolean);
+  if (list.length === 7) return "every day";
+  if (list.join(",") === "1,2,3,4,5") return "weekdays";
+  return list.map((n) => WEEK[n - 1].slice(0, 3)).join(", ");
+};
+const dayChip = (on: boolean): CSSProperties => ({ height: 36, padding: "0 14px", border: on ? "1px solid transparent" : "1px solid #e6e1db", borderRadius: 18, background: on ? C.ink : "#ffffff", color: on ? "#ffffff" : C.ink, fontSize: 13, fontWeight: on ? 500 : 400, fontFamily: "inherit", cursor: "pointer" });
+
 /** New task, or open one: edit it, see the meeting quote and what the person added. */
 function TaskDialog({ task, people, today, onClose, onSaved }: { task?: Task; people: { id: number; name: string }[]; today: string; onClose: () => void; onSaved: (msg: string) => void }) {
   const [title, setTitle] = useState(task?.title || "");
   const [owner, setOwner] = useState<number | "">(task?.ownerId || "");
   const [due, setDue] = useState(task?.dueDate || "");
   const [steps, setSteps] = useState(task ? task.steps.map((s) => s.text).join("\n") : "");
+  const [repeat, setRepeat] = useState<number[]>(task?.repeatDays ? task.repeatDays.split(",").map(Number) : []);
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const detail = useJson<{ task: Task & { photo: string } }>(task ? `/api/meet/tasks?id=${task.id}` : null).data?.task;
@@ -167,12 +177,12 @@ function TaskDialog({ task, people, today, onClose, onSaved }: { task?: Task; pe
     setErr("");
     const list = steps.split("\n").map((s) => s.trim()).filter(Boolean);
     const r = task
-      ? await postJson("/api/meet/tasks", { id: task.id, action: "edit", title, ownerId: owner, dueDate: due, ...(steps !== task.steps.map((s) => s.text).join("\n") ? { steps: list } : {}) })
-      : await postJson("/api/meet/tasks", { action: "create", title, ownerId: owner, dueDate: due, steps: list });
+      ? await postJson("/api/meet/tasks", { id: task.id, action: "edit", title, ownerId: owner, dueDate: due, repeatDays: repeat, ...(steps !== task.steps.map((s) => s.text).join("\n") ? { steps: list } : {}) })
+      : await postJson("/api/meet/tasks", { action: "create", title, ownerId: owner, dueDate: due, repeatDays: repeat, steps: list });
     setBusy("");
     if (!r.ok) return setErr(r.data.error || "Couldn't save that");
     const name = firstName(people.find((p) => p.id === owner)?.name || "");
-    onSaved(task ? "Task saved." : `Task given to ${name}. They've been told.`);
+    onSaved(task ? "Task saved." : repeat.length ? `Repeating task given to ${name}. A new one appears each time, on ${repeatText(repeat)}.` : `Task given to ${name}. They've been told.`);
   }
   async function remove() {
     if (!task || !confirm(`Delete "${task.title}"?`)) return;
@@ -201,10 +211,22 @@ function TaskDialog({ task, people, today, onClose, onSaved }: { task?: Task; pe
               {people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: C.sub }}>Due
+          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: C.sub }}>{repeat.length ? "Starts (optional)" : "Due"}
             <input type="date" value={due} min={task ? undefined : today} onChange={(e) => setDue(e.target.value)} style={field} />
           </label>
         </div>
+        <fieldset style={{ margin: 0, padding: 0, border: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+          <legend style={{ fontSize: 13, color: C.sub, marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}><Icon name="repeat" size={17} />Repeat {repeat.length ? <span style={{ color: C.ink }}>· {repeatText(repeat)}</span> : "(optional)"}</legend>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <button type="button" aria-pressed={repeat.length === 7} onClick={() => setRepeat(repeat.length === 7 ? [] : [1, 2, 3, 4, 5, 6, 7])} style={dayChip(repeat.length === 7)}>Every day</button>
+            {WEEK.map((label, i) => {
+              const n = i + 1;
+              const on = repeat.includes(n);
+              return <button key={n} type="button" aria-pressed={on} aria-label={label} onClick={() => setRepeat(on ? repeat.filter((x) => x !== n) : [...repeat, n].sort())} style={{ ...dayChip(on), width: 44, padding: 0 }}>{label.slice(0, 2)}</button>;
+            })}
+          </div>
+          {repeat.length > 0 && <p style={{ margin: 0, fontSize: 12, color: C.sub }}>A new task appears for each of these days. If one is missed it shows as overdue, and the next one still appears. {task ? "Clear the days to stop repeating." : ""}</p>}
+        </fieldset>
         <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: C.sub }}>Steps (one per line, optional)
           <textarea rows={3} value={steps} onChange={(e) => setSteps(e.target.value)} placeholder={"Count the dry store\nCount the freezer and fridge\nSend the sheet to Ada"} style={{ ...field, height: "auto", padding: "10px 12px", lineHeight: 1.5, resize: "vertical" }} />
         </label>

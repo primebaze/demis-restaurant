@@ -6,8 +6,12 @@ import { readUrl, isOurPath } from "@/lib/meet-storage";
 import { notifyPeople } from "@/lib/meet-notify";
 import { isDate, londonToday, dayLabel } from "@/lib/meet-rota";
 import type { MeetTask } from "@prisma/client";
+import { cleanRepeat, firstOnOrAfter, scheduleNextTask } from "@/lib/meet-tasks";
 
 export const dynamic = "force-dynamic";
+
+const DAY_SHORT = ["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const repeatLabel = (r: string) => (r === "1,2,3,4,5,6,7" ? "every day" : r.split(",").map((n) => DAY_SHORT[Number(n)]).join(", "));
 
 type Step = { text: string; done: boolean };
 const stepsOf = (t: MeetTask): Step[] => (Array.isArray(t.steps) ? (t.steps as Step[]) : []);
@@ -20,7 +24,7 @@ function view(t: MeetTask, meetingTitle: string, ownerName = "") {
     id: t.id, title: t.title, ownerId: t.ownerId, owner: ownerName, dueDate: t.dueDate, status: t.status, steps,
     stepsDone: steps.filter((s) => s.done).length, meetingId: t.meetingId, meeting: meetingTitle, quote: t.quote, quoteBy: t.quoteBy, quoteMs: t.quoteMs,
     note: t.note, helpNote: t.helpNote, hasPhoto: !!t.photoPath, createdBy: firstNameOf(t.createdBy), doneAt: t.doneAt?.toISOString() || "",
-    nudgedAt: t.nudgedAt?.toISOString() || "", at: t.createdAt.toISOString(),
+    nudgedAt: t.nudgedAt?.toISOString() || "", at: t.createdAt.toISOString(), repeatDays: t.repeatDays,
   };
 }
 
@@ -109,9 +113,12 @@ export async function POST(req: Request) {
       if (!people.some((p) => p.id === ownerId)) return NextResponse.json({ error: "Pick who it's for" }, { status: 400 });
       if (body.dueDate && (!isDate(body.dueDate) || body.dueDate < today)) return NextResponse.json({ error: "Pick a due date from today on" }, { status: 400 });
       const meetingId = typeof body.meetingId === "string" && (await prisma.meetMeeting.findUnique({ where: { id: body.meetingId } })) ? body.meetingId : null;
-      const t = await prisma.meetTask.create({ data: { title, ownerId, dueDate: body.dueDate || "", steps: cleanSteps(body.steps), meetingId, createdBy: me.person.name } });
+      // Repeating: due on the first chosen day (from the date picked, or today).
+      const repeatDays = cleanRepeat(body.repeatDays);
+      const dueDate = repeatDays ? firstOnOrAfter(repeatDays, body.dueDate || today) : body.dueDate || "";
+      const t = await prisma.meetTask.create({ data: { title, ownerId, dueDate, repeatDays, steps: cleanSteps(body.steps), meetingId, createdBy: me.person.name } });
       if (ownerId !== me.person.id) {
-        await notifyPeople([ownerId], { title: `New task: ${title}`, body: `From ${firstNameOf(me.person.name)}${t.dueDate ? ` · due ${dayLabel(t.dueDate)}` : ""}`, url: `/meet?task=${t.id}`, tag: `task-${t.id}`, icon: "assignment_ind" }).catch(() => null);
+        await notifyPeople([ownerId], { title: `New task: ${title}`, body: `From ${firstNameOf(me.person.name)}${t.repeatDays ? ` · repeats ${repeatLabel(t.repeatDays)}, first one ${dayLabel(t.dueDate)}` : t.dueDate ? ` · due ${dayLabel(t.dueDate)}` : ""}`, url: `/meet?task=${t.id}`, tag: `task-${t.id}`, icon: "assignment_ind" }).catch(() => null);
       }
       return NextResponse.json({ ok: true, id: t.id });
     }
@@ -133,6 +140,7 @@ export async function POST(req: Request) {
       }
       if (body.action === "done") {
         await prisma.meetTask.update({ where: { id: t.id }, data: { status: "done", doneAt: new Date(), steps: stepsOf(t).map((s) => ({ ...s, done: true })) } });
+        await scheduleNextTask(t).catch(() => {}); // repeating: the next one appears
         return NextResponse.json({ ok: true });
       }
       if (body.action === "reopen") {
@@ -173,6 +181,11 @@ export async function POST(req: Request) {
         data.dueDate = body.dueDate || "";
       }
       if (body.steps !== undefined) data.steps = cleanSteps(body.steps);
+      if (body.repeatDays !== undefined) {
+        // Clearing the days stops the repeat (this one stays; no more are made).
+        data.repeatDays = cleanRepeat(body.repeatDays);
+        if (data.repeatDays && !(data.dueDate ?? t.dueDate)) data.dueDate = firstOnOrAfter(data.repeatDays, today);
+      }
       await prisma.meetTask.update({ where: { id: t.id }, data });
       return NextResponse.json({ ok: true });
     }
