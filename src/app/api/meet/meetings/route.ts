@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     if (body.kind === "call" && invite.length === 0) return NextResponse.json({ error: "Invite at least one person" }, { status: 400 });
     const meeting = await prisma.meetMeeting.create({
       data: {
-        title, kind: body.kind, startsAt, minutes, repeat: body.repeat ? "weekly" : "", private: !!body.private, liveNotes: body.liveNotes !== false,
+        title, kind: body.kind, startsAt, minutes, repeat: body.repeat === "daily" ? "daily" : body.repeat === "weekly" || body.repeat === true ? "weekly" : "", private: !!body.private, liveNotes: body.liveNotes !== false,
         hostId: me.person.id, hostName: me.person.name,
       },
     });

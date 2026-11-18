@@ -33,7 +33,7 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
   const [invite, setInvite] = useState<number[]>([]);
   const [search, setSearch] = useState("");
   const [liveNotes, setLiveNotes] = useState(true);
-  const [repeat, setRepeat] = useState(false);
+  const [repeat, setRepeat] = useState<"" | "daily" | "weekly">("");
   const [priv, setPriv] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -153,7 +153,8 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, borderRadius: 20, background: C.page, padding: "6px 16px" }}>
           {toggle("auto_awesome", "Live notes, captions and tasks", liveNotes, setLiveNotes, true, C.accent, true)}
-          {toggle("repeat", `Repeat every ${weekday(date)}`, repeat, setRepeat)}
+          {toggle("repeat", "Repeat every day", repeat === "daily", (v) => setRepeat(v ? "daily" : ""))}
+          {toggle("repeat", `Repeat every ${weekday(date)}`, repeat === "weekly", (v) => setRepeat(v ? "weekly" : ""))}
           {toggle("lock", "Private (manager PIN to read notes)", priv, setPriv)}
         </div>
         {err && <p role="alert" style={{ margin: 0, fontSize: 13, color: "#b91c1c" }}>{err}</p>}

@@ -7,7 +7,7 @@ import { notifyPeople } from "@/lib/meet-notify";
 import { readUrls } from "@/lib/meet-storage";
 import { getShifts } from "@/lib/clockin";
 import { dayLabel } from "@/lib/meet-rota";
-import { meetingFor, presenceOf, addedSeconds, closeAttendance, londonDate, londonHM } from "@/lib/meet-meetings";
+import { meetingFor, presenceOf, addedSeconds, closeAttendance, scheduleNext, londonDate, londonHM } from "@/lib/meet-meetings";
 import { processNotes, transcriptionReady, summaryReady, liveLines, type Line } from "@/lib/meet-notes";
 import type { MeetMeeting, MeetAttendee } from "@prisma/client";
 
@@ -145,15 +145,8 @@ export async function POST(req: Request, { params }: Ctx) {
       if (m.status !== "live") return NextResponse.json({ error: "It isn't live" }, { status: 400 });
       const ended = await prisma.meetMeeting.update({ where: { id: m.id }, data: { status: "ended", endedAt: now } });
       await closeAttendance(ended);
-      // Weekly meetings: the next one goes in the calendar straight away.
-      if (m.repeat === "weekly") {
-        const next = new Date(m.startsAt.getTime() + 7 * 86400_000);
-        const exists = await prisma.meetMeeting.findFirst({ where: { title: m.title, startsAt: next } });
-        if (!exists) {
-          const copy = await prisma.meetMeeting.create({ data: { title: m.title, kind: m.kind, startsAt: next, minutes: m.minutes, repeat: "weekly", private: m.private, liveNotes: m.liveNotes, hostId: m.hostId, hostName: m.hostName } });
-          await prisma.meetAttendee.createMany({ data: found.attendees.filter((a) => a.invited).map((a) => ({ meetingId: copy.id, clockinId: a.clockinId, invited: true })) });
-        }
-      }
+      // Repeating meetings: the next one goes in the calendar straight away.
+      await scheduleNext(ended);
       return NextResponse.json({ ok: true });
     }
     if (body.action === "cancel") {

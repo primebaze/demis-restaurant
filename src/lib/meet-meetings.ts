@@ -51,7 +51,37 @@ export async function closeAttendance(meeting: MeetMeeting) {
   }
 }
 
-/** Live meetings that nobody has pinged for 20 minutes are ended automatically (host closed the laptop). */
+/**
+ * Repeating meetings ("daily" or "weekly"): put the next one in the calendar, at the same London
+ * time (so the clocks changing doesn't move it an hour), with the same invites. The next one is the
+ * first occurrence still to come, so a missed day doesn't fill the calendar with past meetings.
+ * Safe to call more than once: it does nothing if that meeting already exists.
+ */
+export async function scheduleNext(m: MeetMeeting) {
+  if (m.repeat !== "daily" && m.repeat !== "weekly") return;
+  const step = m.repeat === "daily" ? 1 : 7;
+  const time = londonHM(m.startsAt);
+  let day = londonDate(m.startsAt);
+  let next: Date;
+  do {
+    const d = new Date(`${day}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + step);
+    day = d.toISOString().slice(0, 10);
+    next = londonToDate(day, time);
+  } while (next.getTime() <= Date.now());
+  const exists = await prisma.meetMeeting.findFirst({ where: { title: m.title, startsAt: next } });
+  if (exists) return;
+  const invited = await prisma.meetAttendee.findMany({ where: { meetingId: m.id, invited: true }, select: { clockinId: true } });
+  const copy = await prisma.meetMeeting.create({
+    data: { title: m.title, kind: m.kind, startsAt: next, minutes: m.minutes, repeat: m.repeat, private: m.private, liveNotes: m.liveNotes, hostId: m.hostId, hostName: m.hostName },
+  });
+  await prisma.meetAttendee.createMany({ data: invited.map((a) => ({ meetingId: copy.id, clockinId: a.clockinId, invited: true })) });
+}
+
+/**
+ * Live meetings that nobody has pinged for 20 minutes are ended automatically (host closed the laptop).
+ * Repeating meetings that ended, or whose time passed without anyone starting them, roll on to the next one.
+ */
 export async function endStaleMeetings() {
   const live = await prisma.meetMeeting.findMany({ where: { status: "live" } });
   for (const m of live) {
@@ -60,8 +90,13 @@ export async function endStaleMeetings() {
     if (Date.now() - lastAt > 20 * 60_000) {
       await prisma.meetMeeting.update({ where: { id: m.id }, data: { status: "ended", endedAt: new Date(lastAt || Date.now()) } });
       await closeAttendance(m);
+      await scheduleNext(m);
     }
   }
+  const missed = await prisma.meetMeeting.findMany({
+    where: { status: "scheduled", repeat: { in: ["daily", "weekly"] }, startsAt: { lt: new Date(Date.now() - 12 * 3600_000) } },
+  });
+  for (const m of missed) await scheduleNext(m);
 }
 
 export const MEETING_KINDS = ["call", "room"] as const;

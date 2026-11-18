@@ -737,7 +737,7 @@ model MeetMeeting {
   status     String    @default("scheduled") // scheduled, live, ended (notes being made), ready, failed
   startsAt   DateTime
   minutes    Int       @default(30) // planned length
-  repeat     String    @default("") // "", weekly
+  repeat     String    @default("") // "", daily, weekly
   private    Boolean   @default(false) // notes need the manager PIN
   liveNotes  Boolean   @default(true) // transcribe, summarise and spot tasks
   hostId     Int // clock-in staff id of the manager who set it up
