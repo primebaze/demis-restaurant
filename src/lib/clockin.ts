@@ -93,7 +93,7 @@ const fromRaw = (s: RawShift): ClockinShift => ({ id: s.id, staffId: s.staff_id,
 
 // Local test rota for development without the clock-in link.
 const devShifts: ClockinShift[] = [];
-let devNextId = 1;
+let devNextId = 900001; // far above real clock-in shift ids, so test rows never clash
 
 /** Every shift between two dates (YYYY-MM-DD, inclusive). */
 export async function getShifts(start: string, end: string): Promise<ClockinShift[]> {
