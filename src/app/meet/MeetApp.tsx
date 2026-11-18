@@ -505,7 +505,7 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
   else screen = <MeScreen me={me} onSettings={() => setSub({ k: "settings" })} onFix={(t) => setSub({ k: "fix", t })} onNotes={() => setSub({ k: "notesList" })} onReport={() => setSub({ k: "report" })} onReports={() => setSub({ k: "myReports" })} />;
 
   return (
-    <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+    <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column", paddingBottom: sub ? 0 : "calc(66px + max(10px, env(safe-area-inset-bottom)))", boxSizing: "border-box" }}>
       {screen}
       {!sub && <TabBar tab={tab} manager={me.manager} onTab={setTab} />}
     </div>
@@ -1122,7 +1122,9 @@ function TabBar({ tab, manager, onTab }: { tab: Tab; manager: boolean; onTab: (t
     );
   };
   return (
-    <nav aria-label="App" style={{ position: "sticky", bottom: 0, padding: "10px 22px max(26px, env(safe-area-inset-bottom))", background: C.bg, borderTop: `1px solid ${C.line}`, display: "flex", justifyContent: "space-between" }}>
+    // Pinned to the real bottom of the screen (a 100dvh column can come out shorter than the screen on
+    // iPhone, leaving the bar floating); only the home-bar safe area is added under it.
+    <nav aria-label="App" style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 40, margin: "0 auto", maxWidth: 430, boxSizing: "border-box", padding: "10px 22px max(10px, env(safe-area-inset-bottom))", background: C.bg, borderTop: `1px solid ${C.line}`, display: "flex", justifyContent: "space-between" }}>
       {item("Home", "home", "home")}
       {item("Calendar", "calendar_month", "calendar")}
       {manager ? item("Manage", "admin_panel_settings", "manage") : item("Tasks", "check_circle", "tasks")}
