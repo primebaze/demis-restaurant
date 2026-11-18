@@ -48,7 +48,9 @@ export async function middleware(req: NextRequest) {
   if (meetOnMainSite(req)) return new NextResponse("Not found", { status: 404 });
 
   // Protect admin routes (except /admin/login)
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+  // Pictures under /admin (e.g. the login page photo) are public files, never redirected.
+  const isFile = /\.(?:jpe?g|png|webp|avif|gif|svg|ico)$/i.test(pathname);
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login") && !isFile) {
     const token = req.cookies.get("admin_token")?.value;
 
     if (!token) {
