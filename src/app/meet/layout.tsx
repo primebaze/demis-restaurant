@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
+import localFont from "next/font/local";
+
+// Times and numbers, as in the design (file already in the project).
+const geistMono = localFont({ src: "../fonts/GeistMonoVF.woff", variable: "--font-geist-mono", weight: "100 900", display: "swap" });
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500", "600"], variable: "--font-outfit", display: "swap" });
 
@@ -24,5 +28,5 @@ export const viewport: Viewport = {
 };
 
 export default function MeetLayout({ children }: { children: React.ReactNode }) {
-  return <div className={`${outfit.variable} min-h-dvh bg-ink-950 font-outfit text-white antialiased`}>{children}</div>;
+  return <div className={`${outfit.variable} ${geistMono.variable} min-h-dvh bg-ink-950 font-outfit text-white antialiased`}>{children}</div>;
 }

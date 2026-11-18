@@ -659,7 +659,7 @@ function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null;
                   <li key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 18, background: C.card, outline: d === today ? "1.5px solid #5eead4" : undefined }}>
                     {dayCol(false)}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: 0, fontFamily: "'Geist Mono', monospace", fontSize: 14 }}>{s.start} – {s.end}</p>
+                      <p style={{ margin: 0, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 14 }}>{s.start} – {s.end}</p>
                       <p style={{ margin: "2px 0 0", fontSize: 12, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{detail || BRANCH[s.branch] || ""}</p>
                     </div>
                   </li>
@@ -680,7 +680,7 @@ function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null;
                 ) : people.map((t, i) => (
                   <p key={i} style={{ margin: "4px 0 0", display: "flex", gap: 10, fontSize: 14, color: t.me ? "#5eead4" : "#fff" }}>
                     <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.me ? "You" : t.name}</span>
-                    <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 13 }}>{t.start} – {t.end}</span>
+                    <span style={{ fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 13 }}>{t.start} – {t.end}</span>
                   </p>
                 ))}
               </section>

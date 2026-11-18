@@ -92,8 +92,12 @@ type RawShift = { id: number; staff_id: number; date: string; start: string; end
 const fromRaw = (s: RawShift): ClockinShift => ({ id: s.id, staffId: s.staff_id, date: s.date, start: s.start, end: s.end, notes: s.notes });
 
 // Local test rota for development without the clock-in link.
-const devShifts: ClockinShift[] = [];
-let devNextId = 900001; // far above real clock-in shift ids, so test rows never clash
+// Kept on globalThis so every route sees the same list in development (each route is its own bundle).
+const devStore = ((globalThis as unknown as { __meetDevRota?: { shifts: ClockinShift[]; next: number } }).__meetDevRota ??= {
+  shifts: [],
+  next: 900001, // far above real clock-in shift ids, so test rows never clash
+});
+const devShifts = devStore.shifts;
 
 /** Every shift between two dates (YYYY-MM-DD, inclusive). */
 export async function getShifts(start: string, end: string): Promise<ClockinShift[]> {
@@ -126,7 +130,7 @@ const toRaw = (s: ShiftInput) => ({ staff_id: s.staffId, date: s.date, start: s.
 
 export async function createShift(s: ShiftInput, actor: string): Promise<ClockinShift> {
   if (DEV_MOCK) {
-    const shift = { id: devNextId++, staffId: s.staffId, date: s.date, start: s.start, end: s.end, notes: s.notes ?? null };
+    const shift = { id: devStore.next++, staffId: s.staffId, date: s.date, start: s.start, end: s.end, notes: s.notes ?? null };
     devShifts.push(shift);
     return shift;
   }

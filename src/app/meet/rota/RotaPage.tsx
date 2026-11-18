@@ -204,7 +204,7 @@ export default function RotaPage() {
                                 {list.map((s) => (
                                   <button key={s.id} aria-label={`${p.name}, ${dayLong(d)}, ${s.start} to ${s.end}. Change`} title={s.notes || undefined}
                                     onClick={() => openEdit({ id: s.id, person: p, date: d, start: s.start, end: s.end, notes: s.notes || "" })}
-                                    style={{ flex: 1, minHeight: list.length > 1 ? 24 : 50, borderRadius: 12, border: 0, background: col.bg, color: col.fg, textAlign: "center", fontFamily: "'Geist Mono', monospace", fontSize: 12, cursor: "pointer" }}>
+                                    style={{ flex: 1, minHeight: list.length > 1 ? 24 : 50, borderRadius: 12, border: 0, background: col.bg, color: col.fg, textAlign: "center", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 12, cursor: "pointer" }}>
                                     {short(s.start)}–{short(s.end)}{s.notes ? " •" : ""}
                                   </button>
                                 ))}
@@ -288,7 +288,7 @@ function ShiftEditor({ edit, common, busy, error, onClose, onSave, onDelete }: {
             {common.map(([s, en]) => {
               const on = e.start === s && e.end === en;
               return (
-                <button key={`${s}-${en}`} aria-pressed={on} onClick={() => setE({ ...e, start: s, end: en })} style={{ height: 34, padding: "0 12px", border: 0, borderRadius: 17, background: on ? C.ink : C.page, color: on ? "#ffffff" : C.ink, fontSize: 13, fontFamily: "'Geist Mono', monospace" }}>
+                <button key={`${s}-${en}`} aria-pressed={on} onClick={() => setE({ ...e, start: s, end: en })} style={{ height: 34, padding: "0 12px", border: 0, borderRadius: 17, background: on ? C.ink : C.page, color: on ? "#ffffff" : C.ink, fontSize: 13, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace" }}>
                   {s}–{en}
                 </button>
               );
