@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
     "h-[52px] w-full rounded-full border border-white/30 bg-white/[0.14] pl-12 pr-4 text-[15px] font-light text-white placeholder:text-white/75 outline-none transition focus:border-white focus:bg-white/20";
 
   return (
-    <div className="admin-bg relative min-h-screen font-outfit text-white">
+    <div className="admin-bg relative min-h-[100dvh] font-outfit text-white">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/logo.png" alt="Demi's" className="absolute left-6 top-7 md:left-9 md:top-8 h-6 w-auto" />
       <a
@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
         Back to the website
       </a>
 
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-end gap-8 px-5 pb-8 pt-24 min-[700px]:flex-row min-[700px]:items-center min-[700px]:justify-between min-[700px]:gap-6 min-[700px]:pb-0">
+      <div className="mx-auto flex min-h-[100dvh] max-w-6xl flex-col justify-end gap-8 px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-24 min-[700px]:flex-row min-[700px]:items-center min-[700px]:justify-between min-[700px]:gap-6 min-[700px]:pb-0">
         <div className="min-[700px]:self-end min-[700px]:pb-12">
           <h1 className="text-5xl min-[700px]:text-[44px] min-[700px]:whitespace-nowrap lg:text-[76px] font-extralight tracking-tight leading-none [text-shadow:0_2px_22px_rgba(0,0,0,0.3)]">
             Welcome back
