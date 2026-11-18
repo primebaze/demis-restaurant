@@ -129,7 +129,7 @@ export default function RotaPage() {
   return (
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", maxWidth: "100vw", overflowX: "clip" }}>
       <IconFont />
-      <style>{`html,body{background:${C.page};overflow-x:hidden;overscroll-behavior-x:none}`}</style>
+      <style>{`html,body{background:${C.page};overflow-x:clip;overscroll-behavior-x:none}`}</style>
       <Sidebar current="rota" />
       <TopBar />
 
@@ -241,7 +241,7 @@ export default function RotaPage() {
               <p style={{ margin: "6px 8px 4px", fontSize: 12, color: C.sub }}>Click a box to add or change a shift. The colour shows the branch.</p>
             </section>
 
-            <aside style={{ flex: "1 1 260px", minWidth: 0, display: "flex", flexDirection: "column", gap: 14 }}>
+            <aside className="lg:sticky lg:top-[18px] lg:max-h-[calc(100dvh-36px)] lg:overflow-y-auto" style={{ flex: "1 1 260px", minWidth: 0, display: "flex", flexDirection: "column", gap: 14 }}>
               <section aria-labelledby="rq-h" style={{ ...panel, gap: 10 }}>
                 <h2 id="rq-h" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Requests</h2>
                 <p style={{ margin: 0, fontSize: 13, color: C.sub }}>Swap and time-off requests from staff phones will show here.</p>

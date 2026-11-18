@@ -61,7 +61,7 @@ export default function ManagerHome({ name }: { name: string }) {
   return (
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", overflowX: "clip" }}>
       <IconFont />
-      <style>{`html,body{background:${C.page};overflow-x:hidden}`}</style>
+      <style>{`html,body{background:${C.page};overflow-x:clip}`}</style>
       <Sidebar current="home" badges={{ staff: data?.phonesWaiting || 0, rota: (data?.rota.changed ? 1 : 0) }} />
 
       <main style={{ flex: "999 1 560px", minWidth: 0, boxSizing: "border-box", padding: "18px 24px 24px 8px", display: "flex", flexDirection: "column", gap: 18 }}>
@@ -105,7 +105,7 @@ export default function ManagerHome({ name }: { name: string }) {
             )}
           </section>
 
-          <aside style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column", gap: 18 }}>
+          <aside className="lg:sticky lg:top-[18px] lg:max-h-[calc(100dvh-36px)] lg:overflow-y-auto" style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column", gap: 18 }}>
             <section aria-labelledby="att-h" style={card}>
               <h2 id="att-h" style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 600, letterSpacing: "-0.01em" }}>Needs you</h2>
               {data && needs.length === 0 && <p style={{ margin: 0, fontSize: 13, color: C.sub }}>Nothing right now, {firstName(name)}.</p>}

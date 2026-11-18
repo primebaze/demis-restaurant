@@ -24,7 +24,7 @@ export function Sidebar({ current, badges = {} }: { current: ManagerPage; badges
     ["Reports", "flag", null, null],
   ];
   return (
-    <nav aria-label="Main" className="hidden md:flex" style={{ flex: "1 1 220px", maxWidth: 244, boxSizing: "border-box", padding: "18px 14px", flexDirection: "column", gap: 18 }}>
+    <nav aria-label="Main" className="hidden md:flex" style={{ flex: "1 1 220px", maxWidth: 244, boxSizing: "border-box", padding: "18px 14px", flexDirection: "column", gap: 18, position: "sticky", top: 0, alignSelf: "flex-start", maxHeight: "100dvh", overflowY: "auto" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, height: 48, padding: "0 16px", borderRadius: 16, background: C.ink }}>
         <img src="/meet/logo.png" alt="Demi's" style={{ height: 15, width: "auto" }} />
         <span aria-hidden="true" style={{ width: 1, height: 18, background: "#3a3632" }} />

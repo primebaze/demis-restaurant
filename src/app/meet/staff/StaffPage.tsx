@@ -94,7 +94,7 @@ export default function StaffPage() {
   return (
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", maxWidth: "100vw", overflowX: "clip" }} onClick={() => setMenu(null)}>
       <IconFont />
-      <style>{`html,body{background:${C.page};overflow-x:hidden;overscroll-behavior-x:none}`}</style>
+      <style>{`html,body{background:${C.page};overflow-x:clip;overscroll-behavior-x:none}`}</style>
       <Sidebar current="staff" badges={{ staff: counts.waiting }} />
       <TopBar />
 
@@ -134,7 +134,7 @@ export default function StaffPage() {
             </div>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "flex-start" }}>
-              <section aria-labelledby="ph-h" style={{ flex: "1 1 340px", minWidth: 0, borderRadius: 24, background: "#ffffff", padding: 16, display: "flex", flexDirection: "column", gap: 10, boxShadow: "0 1px 2px rgba(20,20,20,0.05)" }}>
+              <section className="lg:sticky lg:top-[18px] lg:max-h-[calc(100dvh-36px)] lg:overflow-y-auto" aria-labelledby="ph-h" style={{ flex: "1 1 340px", minWidth: 0, borderRadius: 24, background: "#ffffff", padding: 16, display: "flex", flexDirection: "column", gap: 10, boxShadow: "0 1px 2px rgba(20,20,20,0.05)" }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                   <h2 id="ph-h" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Phones waiting for you</h2>
                   <span style={{ marginLeft: "auto", fontSize: 12, color: C.sub }}>Signed in with the right PIN</span>
