@@ -8,7 +8,7 @@ import { PAGE as C, mono, postJson } from "../ManagerShell";
 
 type Attendee = { id: number; name: string; inRoom: boolean; onShift: boolean; invited: boolean };
 type Detail = {
-  meeting: { id: string; title: string; status: string; startedAt: string; liveNotes: boolean };
+  meeting: { id: string; title: string; status: string; startedAt: string; liveNotes: boolean; date?: string };
   attendees: Attendee[];
   people: { id: number; name: string; branch: string }[];
   live: { lines: { ms: number; name: string; text: string }[] } | null;
@@ -227,7 +227,9 @@ export default function RoomPage({ id }: { id: string }) {
         )}
         {(error || saveError) && <p role="alert" style={{ margin: 0, textAlign: "center", fontSize: 13, color: "#b91c1c" }}>{error || saveError}</p>}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 10 }}>
-          {state === "ready" ? (
+          {state === "ready" && d?.meeting.status === "scheduled" && d.meeting.date && d.meeting.date !== new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }) ? (
+            <p style={{ margin: 0, fontSize: 14, color: C.sub, textAlign: "center" }}>This meeting is on {new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d.meeting.date}T12:00:00Z`))}. You can start recording on the day.</p>
+          ) : state === "ready" ? (
             <button onClick={start} disabled={!d || d.meeting.status === "ended" || d.meeting.status === "ready"} style={{ height: 52, padding: "0 24px", border: 0, borderRadius: 26, background: "linear-gradient(120deg, #ff7a45, #e8513a)", color: "#ffffff", fontSize: 15, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Icon name="mic" size={22} fill />{d?.meeting.status === "live" ? "Carry on recording" : "Start recording"}</button>
           ) : (
             <>

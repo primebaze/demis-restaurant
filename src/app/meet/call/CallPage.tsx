@@ -256,7 +256,11 @@ function Waiting({ d, mic, cam, onMic, onCam, reload }: { d: Detail; mic: boolea
           </ul>
         </section>
       )}
-      {d.me.manager ? (
+      {d.me.manager && d.meeting.date !== new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }) ? (
+        <p style={{ margin: 0, padding: "14px 16px", borderRadius: 20, background: "#ffffff", fontSize: 14, color: L.sub, textAlign: "center" }}>
+          This meeting is on {new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d.meeting.date}T12:00:00Z`))}. You can start it on the day.
+        </p>
+      ) : d.me.manager ? (
         <button onClick={start} disabled={busy} style={{ height: 52, border: 0, borderRadius: 26, background: L.ink, color: "#ffffff", fontSize: 15, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}><Icon name="videocam" size={20} fill />{busy ? "Starting…" : "Start the meeting now"}</button>
       ) : (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderRadius: 20, background: L.coralBg }}>

@@ -135,6 +135,10 @@ export async function POST(req: Request, { params }: Ctx) {
     if (body.action === "start") {
       if (m.status === "live") return NextResponse.json({ ok: true });
       if (m.status !== "scheduled") return NextResponse.json({ error: "This meeting has already happened" }, { status: 400 });
+      // Only on its own day: a meeting set for another day can't be started early (or late).
+      if (londonDate(m.startsAt) !== londonDate(now)) {
+        return NextResponse.json({ error: `This meeting is on ${dayLabel(londonDate(m.startsAt))}. Start it on the day, or set up a new one for today.` }, { status: 400 });
+      }
       await prisma.meetMeeting.update({ where: { id: m.id }, data: { status: "live", startedAt: now } });
       const invited = found.attendees.filter((a) => a.invited && a.clockinId !== me.person.id).map((a) => a.clockinId);
       if (m.kind === "call") {

@@ -228,9 +228,13 @@ function MeetingSheet({ m, onClose, onChanged }: { m: Meeting; onClose: () => vo
         {err && <p role="alert" style={{ margin: 0, fontSize: 13, color: "#b91c1c" }}>{err}</p>}
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={cancel} disabled={!!busy} style={{ height: 44, padding: "0 16px", border: 0, borderRadius: 22, background: C.page, color: "#b91c1c", fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>{busy === "cancel" ? "Cancelling…" : "Cancel meeting"}</button>
-          <button onClick={start} disabled={!!busy} style={{ marginLeft: "auto", height: 44, padding: "0 20px", border: 0, borderRadius: 22, background: C.ink, color: "#ffffff", fontSize: 14, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-            <Icon name={m.kind === "room" ? "mic" : "videocam"} size={19} fill />{busy === "start" ? "Starting…" : m.kind === "room" ? "Start recording" : "Start now"}
-          </button>
+          {m.date === todayLondon() ? (
+            <button onClick={start} disabled={!!busy} style={{ marginLeft: "auto", height: 44, padding: "0 20px", border: 0, borderRadius: 22, background: C.ink, color: "#ffffff", fontSize: 14, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+              <Icon name={m.kind === "room" ? "mic" : "videocam"} size={19} fill />{busy === "start" ? "Starting…" : m.kind === "room" ? "Start recording" : "Start now"}
+            </button>
+          ) : (
+            <span style={{ marginLeft: "auto", alignSelf: "center", fontSize: 13, color: C.sub }}>Can be started on {fmt(m.date, { weekday: "short", day: "numeric", month: "short" })}</span>
+          )}
         </div>
       </div>
     </div>
