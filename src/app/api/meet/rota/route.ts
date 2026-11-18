@@ -1,29 +1,24 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireMeet } from "@/lib/meet-auth";
-import { getClockinStaff, createShift, updateShift, deleteShift, getShifts, type ClockinShift } from "@/lib/clockin";
+import { getClockinStaff, createShift, updateShift, deleteShift, getShifts } from "@/lib/clockin";
 import {
-  branchWeek, publishState, snapshotOf, mondayOf, weekDays, addDays, londonToday, isBranch, isDate, isTime,
-  shiftHours, dayLabel, weekLabel, type Branch,
+  weekRota, publishState, snapshotOf, mondayOf, weekDays, addDays, londonToday, isBranch, isDate, isTime,
+  shiftHours, dayLabel, weekLabel, ALL, type RotaShift,
 } from "@/lib/meet-rota";
 import { notifyPeople } from "@/lib/meet-notify";
 
 export const dynamic = "force-dynamic";
 
-const BRANCH_NAME: Record<Branch, string> = { cricklewood: "Cricklewood", streatham: "Streatham" };
+const BRANCH_NAME: Record<string, string> = { cricklewood: "Cricklewood", streatham: "Streatham" };
 
-async function load(branch: Branch, monday: string) {
+/** One rota for both branches: everyone on the staff list, every shift with its branch. */
+async function load(monday: string) {
   const staff = (await getClockinStaff()).filter((s) => s.active);
-  const { shifts, homeOf } = await branchWeek(branch, monday, staff);
-  const { last, changedPeople } = await publishState(branch, monday, shifts);
+  const { shifts, homeOf } = await weekRota(monday, staff);
+  const { last, changedPeople } = await publishState(monday, shifts);
 
-  // People in this branch (or both / not set), plus anyone with a shift here this week.
-  const withShifts = new Set(shifts.map((s) => s.staffId));
   const people = staff
-    .filter((s) => {
-      const home = homeOf.get(s.id) || "";
-      return withShifts.has(s.id) || home === branch || home === "both" || home === "";
-    })
     .map((s) => ({ id: s.id, name: s.name, role: s.role, branch: homeOf.get(s.id) || "" }))
     .sort((a, b) => Number(b.role === "manager") - Number(a.role === "manager") || a.name.localeCompare(b.name));
 
@@ -36,7 +31,6 @@ async function load(branch: Branch, monday: string) {
   }
 
   return {
-    branch,
     week: monday,
     weekLabel: weekLabel(monday),
     days: weekDays(monday),
@@ -47,18 +41,14 @@ async function load(branch: Branch, monday: string) {
   };
 }
 
-/** GET ?week=YYYY-MM-DD : both branches' week (Cricklewood and Streatham sections). Managers only. */
+/** GET ?week=YYYY-MM-DD : the week's rota. Managers only. */
 export async function GET(req: Request) {
   const me = await requireMeet(true);
   if (!me) return NextResponse.json({ error: "Managers only" }, { status: 403 });
   const week = new URL(req.url).searchParams.get("week");
   const monday = mondayOf(isDate(week) ? week : londonToday());
   try {
-    const sections = [await load("cricklewood", monday), await load("streatham", monday)];
-    return NextResponse.json(
-      { week: monday, weekLabel: weekLabel(monday), days: weekDays(monday), today: londonToday(), sections },
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    return NextResponse.json(await load(monday), { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Can't load the rota" }, { status: 502 });
   }
@@ -68,8 +58,8 @@ export async function GET(req: Request) {
  * POST
  *   { action: "save", branch, id?, staffId, date, start, end, notes? }
  *   { action: "delete", id }
- *   { action: "copy_last_week", branch, week }
- *   { action: "publish", branch, week }   (first time: everyone on it; after that: only people whose shifts changed)
+ *   { action: "copy_last_week", week }
+ *   { action: "publish", week }   (first time: everyone on it; after that: only people whose shifts changed)
  */
 export async function POST(req: Request) {
   const me = await requireMeet(true);
@@ -81,7 +71,7 @@ export async function POST(req: Request) {
     if (body.action === "save") {
       const staffId = Number(body.staffId);
       if (!isBranch(body.branch) || !Number.isInteger(staffId) || !isDate(body.date) || !isTime(body.start) || !isTime(body.end)) {
-        return NextResponse.json({ error: "Pick a person, a day and both times" }, { status: 400 });
+        return NextResponse.json({ error: "Pick a person, a branch, a day and both times" }, { status: 400 });
       }
       if (body.start === body.end) return NextResponse.json({ error: "Start and finish can't be the same" }, { status: 400 });
       if (shiftHours(body.start, body.end) > 16) return NextResponse.json({ error: "A shift can't be longer than 16 hours" }, { status: 400 });
@@ -101,74 +91,53 @@ export async function POST(req: Request) {
     }
 
     if (body.action === "copy_last_week") {
-      const branches = body.branch === "all" ? (["cricklewood", "streatham"] as Branch[]) : isBranch(body.branch) ? [body.branch as Branch] : [];
-      if (!branches.length || !isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
+      if (!isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
       const monday = mondayOf(body.week);
       const staff = (await getClockinStaff()).filter((s) => s.active);
-      // Anyone already working that day (at either branch) keeps what they have.
+      const prev = await weekRota(addDays(monday, -7), staff);
+      // Anyone already working that day keeps what they have.
       const thisWeek = await getShifts(monday, addDays(monday, 6));
       const busy = new Set(thisWeek.map((s) => `${s.staffId}|${s.date}`));
       let copied = 0;
-      for (const branch of branches) {
-        const prev = await branchWeek(branch, addDays(monday, -7), staff);
-        for (const s of prev.shifts) {
-          const date = addDays(s.date, 7);
-          if (busy.has(`${s.staffId}|${date}`)) continue;
-          const shift = await createShift({ staffId: s.staffId, date, start: s.start, end: s.end, notes: s.notes }, actor);
-          await prisma.meetShiftBranch.create({ data: { shiftId: shift.id, branch } });
-          busy.add(`${s.staffId}|${date}`);
-          copied++;
-        }
+      for (const s of prev.shifts) {
+        const date = addDays(s.date, 7);
+        if (busy.has(`${s.staffId}|${date}`)) continue;
+        const shift = await createShift({ staffId: s.staffId, date, start: s.start, end: s.end, notes: s.notes }, actor);
+        await prisma.meetShiftBranch.create({ data: { shiftId: shift.id, branch: s.branch } });
+        busy.add(`${s.staffId}|${date}`);
+        copied++;
       }
       return NextResponse.json({ ok: true, copied });
     }
 
     if (body.action === "publish") {
-      const branches = body.branch === "all" ? (["cricklewood", "streatham"] as Branch[]) : isBranch(body.branch) ? [body.branch as Branch] : [];
-      if (!branches.length || !isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
+      if (!isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
       const monday = mondayOf(body.week);
       const staff = (await getClockinStaff()).filter((s) => s.active);
-      let people = 0;
-      let sent = 0;
-      for (const branch of branches) {
-        const r = await publishBranch(branch, monday, staff, actor);
-        if (r) { people += r.people; sent++; }
+      const { shifts } = await weekRota(monday, staff);
+      const { last, changedPeople } = await publishState(monday, shifts);
+      if (!last && shifts.length === 0) return NextResponse.json({ error: "There are no shifts in this week yet" }, { status: 400 });
+      if (last && changedPeople.length === 0) return NextResponse.json({ error: "Nothing has changed since it was sent" }, { status: 400 });
+
+      await prisma.meetRotaPublish.create({ data: { branch: ALL, weekStart: monday, snapshot: snapshotOf(shifts), publishedBy: actor.slice(0, 80) } });
+
+      const label = weekLabel(monday);
+      const byPerson = new Map<number, RotaShift[]>();
+      for (const s of shifts) byPerson.set(s.staffId, [...(byPerson.get(s.staffId) || []), s]);
+      const recipients = last ? changedPeople : Array.from(byPerson.keys());
+
+      for (const id of recipients) {
+        const mine = (byPerson.get(id) || []).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+        const list = mine.map((s) => `${dayLabel(s.date)}: ${s.start} – ${s.end}, ${BRANCH_NAME[s.branch]}`).join("\n");
+        const title = last ? `Your shifts changed: ${label}` : `New rota: ${label}`;
+        const text = mine.length ? `${last ? "Your updated shifts" : "Your shifts"}:\n${list}` : `You're no longer on the rota for ${label}.`;
+        await notifyPeople([id], { title, body: text, url: "/meet?tab=rota", tag: `rota-${monday}` }).catch(() => null);
       }
-      if (!sent) return NextResponse.json({ error: "Nothing new to send for this week" }, { status: 400 });
-      return NextResponse.json({ ok: true, people, branches: sent });
+      return NextResponse.json({ ok: true, people: recipients.length, update: !!last });
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Couldn't save that" }, { status: 502 });
   }
-}
-
-/**
- * Send one branch's week. First time: everyone on it. After that: only the people whose
- * shifts changed. Returns null when there's nothing to send.
- */
-async function publishBranch(branch: Branch, monday: string, staff: Awaited<ReturnType<typeof getClockinStaff>>, actor: string) {
-  const { shifts } = await branchWeek(branch, monday, staff);
-  const { last, changedPeople } = await publishState(branch, monday, shifts);
-  if (!last && shifts.length === 0) return null;
-  if (last && changedPeople.length === 0) return null;
-
-  await prisma.meetRotaPublish.create({ data: { branch, weekStart: monday, snapshot: snapshotOf(shifts), publishedBy: actor.slice(0, 80) } });
-
-  const label = weekLabel(monday);
-  const byPerson = new Map<number, ClockinShift[]>();
-  for (const s of shifts) byPerson.set(s.staffId, [...(byPerson.get(s.staffId) || []), s]);
-  const recipients = last ? changedPeople : Array.from(byPerson.keys());
-
-  for (const id of recipients) {
-    const mine = (byPerson.get(id) || []).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
-    const list = mine.map((s) => `${dayLabel(s.date)}: ${s.start} – ${s.end}`).join("\n");
-    const title = last ? `Your shifts changed: ${label}` : `New rota: ${label}`;
-    const body = mine.length
-      ? `${last ? "Your updated shifts" : "Your shifts"} at ${BRANCH_NAME[branch]}:\n${list}`
-      : `You're no longer on the ${BRANCH_NAME[branch]} rota for ${label}.`;
-    await notifyPeople([id], { title, body, url: "/meet?tab=rota", tag: `rota-${branch}-${monday}` }).catch(() => null);
-  }
-  return { people: recipients.length };
 }

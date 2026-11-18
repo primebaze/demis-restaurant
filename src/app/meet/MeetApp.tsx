@@ -600,6 +600,25 @@ function Home({ me, rota, onRota }: { me: ApprovedMe; rota: MyRota | null; onRot
   );
 }
 
+/* Branch colours, same as the manager rota: yellow is Streatham, green is Cricklewood. */
+const BRANCH_DOT: Record<string, { dot: string; text: string }> = {
+  cricklewood: { dot: "#34d399", text: "#a7f3d0" },
+  streatham: { dot: "#f59e0b", text: "#fde68a" },
+};
+function BranchDot({ branch }: { branch: string }) {
+  const c = BRANCH_DOT[branch];
+  return c ? <span aria-label={BRANCH[branch]} role="img" style={{ width: 8, height: 8, borderRadius: "50%", background: c.dot, flex: "none" }} /> : null;
+}
+function BranchTag({ branch }: { branch: string }) {
+  const c = BRANCH_DOT[branch];
+  if (!c) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "var(--font-outfit), sans-serif", fontSize: 12, color: c.text }}>
+      <BranchDot branch={branch} />{BRANCH[branch]}
+    </span>
+  );
+}
+
 /* ─── 19 · Staff phone: rota ─── */
 
 function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null; onBack: () => void }) {
@@ -678,7 +697,7 @@ function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null;
                   <li key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 18, background: C.card, outline: d === today ? "1.5px solid #5eead4" : undefined }}>
                     {dayCol(false)}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: 0, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 14 }}>{s.start} – {s.end}</p>
+                      <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 14 }}>{s.start} – {s.end}<BranchTag branch={s.branch} /></p>
                       <p style={{ margin: "2px 0 0", fontSize: 12, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{detail || BRANCH[s.branch] || ""}</p>
                     </div>
                   </li>
@@ -699,7 +718,7 @@ function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null;
                 ) : people.map((t, i) => (
                   <p key={i} style={{ margin: "4px 0 0", display: "flex", gap: 10, fontSize: 14, color: t.me ? "#5eead4" : "#fff" }}>
                     <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.me ? "You" : t.name}</span>
-                    <span style={{ fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 13 }}>{t.start} – {t.end}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 13 }}><BranchDot branch={t.branch} />{t.start} – {t.end}</span>
                   </p>
                 ))}
               </section>

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireMeet } from "@/lib/meet-auth";
 import { getClockinStaff } from "@/lib/clockin";
 import { listDevices } from "@/lib/meet-devices";
-import { addDays, branchWeek, londonToday, mondayOf, publishState, weekLabel, BRANCHES } from "@/lib/meet-rota";
+import { addDays, weekRota, londonToday, mondayOf, publishState, weekLabel, shiftHours } from "@/lib/meet-rota";
 
 export const dynamic = "force-dynamic";
 
@@ -30,28 +30,23 @@ export async function GET() {
     let seen = 0;
     let onRota = 0;
     const onToday: { name: string; start: string; end: string; branch: string }[] = [];
-    const notSentNext: string[] = [];
-    const notSentThis: string[] = [];
 
-    for (const branch of BRANCHES) {
-      const now = await branchWeek(branch, thisWeek, staff);
-      const st = await publishState(branch, thisWeek, now.shifts);
-      for (const s of now.shifts) {
-        hours += (() => { const [a, b] = [s.start, s.end].map((t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))); let d = b - a; if (d <= 0) d += 1440; return d / 60; })();
-        people.add(s.staffId);
-        if (s.date === today) onToday.push({ name: nameOf.get(s.staffId) || "", start: s.start, end: s.end, branch });
-      }
-      changed += st.changedPeople.length;
-      if (!st.last && now.shifts.length) notSentThis.push(branch);
-      if (st.last) {
-        const sent = new Set(((st.last.snapshot as string[]) || []).map((k) => Number(k.split("|")[0])));
-        onRota += sent.size;
-        seen += await prisma.meetRotaSeen.count({ where: { publishId: st.last.id, clockinId: { in: Array.from(sent) } } });
-      }
-      const next = await branchWeek(branch, nextWeek, staff);
-      const nextSt = await publishState(branch, nextWeek, next.shifts);
-      if (!nextSt.last) notSentNext.push(branch);
+    const now = await weekRota(thisWeek, staff);
+    const st = await publishState(thisWeek, now.shifts);
+    for (const s of now.shifts) {
+      hours += shiftHours(s.start, s.end);
+      people.add(s.staffId);
+      if (s.date === today) onToday.push({ name: nameOf.get(s.staffId) || "", start: s.start, end: s.end, branch: s.branch });
     }
+    changed = st.changedPeople.length;
+    const thisNotSent = !st.last && now.shifts.length > 0;
+    if (st.last) {
+      const sent = new Set(((st.last.snapshot as string[]) || []).map((k) => Number(k.split("|")[0])));
+      onRota = sent.size;
+      seen = await prisma.meetRotaSeen.count({ where: { publishId: st.last.id, clockinId: { in: Array.from(sent) } } });
+    }
+    const next = await weekRota(nextWeek, staff);
+    const nextNotSent = !(await publishState(nextWeek, next.shifts)).last;
 
     return NextResponse.json(
       {
@@ -62,8 +57,8 @@ export async function GET() {
           thisWeekLabel: weekLabel(thisWeek),
           nextWeekLabel: weekLabel(nextWeek),
           changed,
-          notSentNext,
-          notSentThis,
+          nextNotSent,
+          thisNotSent,
           hours: Math.round(hours * 10) / 10,
           people: people.size,
           seen,

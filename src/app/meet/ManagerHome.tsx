@@ -17,7 +17,7 @@ type Data = {
   today: string;
   phonesWaiting: number;
   locked: string[];
-  rota: { thisWeekLabel: string; nextWeekLabel: string; changed: number; notSentNext: string[]; notSentThis: string[]; hours: number; people: number; seen: number; onRota: number };
+  rota: { thisWeekLabel: string; nextWeekLabel: string; changed: number; nextNotSent: boolean; thisNotSent: boolean; hours: number; people: number; seen: number; onRota: number };
   onToday: { name: string; start: string; end: string; branch: string }[];
 };
 
@@ -46,9 +46,9 @@ export default function ManagerHome({ name }: { name: string }) {
   const needs: { href: string; icon: string; bg: string; fg: string; title: string; sub: string }[] = [];
   if (data) {
     if (data.phonesWaiting) needs.push({ href: "/meet/staff", icon: "smartphone", bg: "#fff1ec", fg: "#e2552b", title: `${data.phonesWaiting} phone${data.phonesWaiting === 1 ? "" : "s"} to approve`, sub: "Staff signed in on a new phone" });
-    if (data.rota.notSentThis.length) needs.push({ href: "/meet/rota", icon: "view_timeline", bg: "#fff1ec", fg: "#e2552b", title: "This week's rota not sent", sub: `${data.rota.thisWeekLabel} · ${data.rota.notSentThis.map((b) => BRANCH[b]).join(" and ")}` });
+    if (data.rota.thisNotSent) needs.push({ href: "/meet/rota", icon: "view_timeline", bg: "#fff1ec", fg: "#e2552b", title: "This week's rota not sent", sub: data.rota.thisWeekLabel });
     if (data.rota.changed) needs.push({ href: "/meet/rota", icon: "view_timeline", bg: "#fff1ec", fg: "#e2552b", title: "Rota changes not sent", sub: `${data.rota.changed} ${data.rota.changed === 1 ? "person's" : "people's"} shifts changed · ${data.rota.thisWeekLabel}` });
-    if (data.rota.notSentNext.length) needs.push({ href: "/meet/rota", icon: "view_timeline", bg: "#eef2ff", fg: "#4f46e5", title: `Next week's rota not sent`, sub: `${data.rota.nextWeekLabel} · ${data.rota.notSentNext.map((b) => BRANCH[b]).join(" and ")}` });
+    if (data.rota.nextNotSent) needs.push({ href: "/meet/rota", icon: "view_timeline", bg: "#eef2ff", fg: "#4f46e5", title: "Next week's rota not sent", sub: data.rota.nextWeekLabel });
     for (const n of data.locked) needs.push({ href: "/meet/staff", icon: "lock", bg: "#fef7e6", fg: "#b45309", title: `${firstName(n)} is locked out`, sub: "Too many wrong PINs" });
   }
 

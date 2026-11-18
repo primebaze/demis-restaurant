@@ -41,38 +41,44 @@ export function shiftHours(start: string, end: string): number {
   return Math.round((d / 60) * 100) / 100;
 }
 
-const key = (s: ClockinShift) => `${s.staffId}|${s.date}|${s.start}|${s.end}`;
+
+export type RotaShift = ClockinShift & { branch: Branch };
 
 /**
- * Shifts for one branch's week. A shift belongs to the branch it was given; older
- * shifts with no branch follow the person's branch, and go under Cricklewood when
- * that's "both" or not set (a manager can move them in the shift box).
+ * The week's rota: one rota for both branches. Each shift is at one branch: the
+ * branch it was given, else the person's branch, else Cricklewood (a manager can
+ * move it in the shift box). Only shifts for people on the staff list are included.
  */
-export async function branchWeek(branch: Branch, monday: string, staff: ClockinStaff[]) {
+export async function weekRota(monday: string, staff: ClockinStaff[]) {
   const shifts = await getShifts(monday, addDays(monday, 6));
   const tags = await prisma.meetShiftBranch.findMany({ where: { shiftId: { in: shifts.map((s) => s.id) } } });
   const tagOf = new Map(tags.map((t) => [t.shiftId, t.branch]));
   const extras = await prisma.meetStaff.findMany();
   const homeOf = new Map(extras.map((e) => [e.clockinId, e.branch]));
   const known = new Set(staff.map((s) => s.id));
-
-  const inBranch = shifts.filter((s) => known.has(s.staffId) && shiftBranch(s.id, s.staffId, tagOf, homeOf) === branch);
-  return { shifts: inBranch, homeOf };
+  const withBranch: RotaShift[] = shifts
+    .filter((s) => known.has(s.staffId))
+    .map((s) => ({ ...s, branch: shiftBranch(s.id, s.staffId, tagOf, homeOf) }));
+  return { shifts: withBranch, homeOf };
 }
 
-/** The latest publish of this week for this branch, and how many people's shifts changed since. */
-export async function publishState(branch: Branch, monday: string, current: ClockinShift[]) {
-  const last = await prisma.meetRotaPublish.findFirst({ where: { branch, weekStart: monday }, orderBy: { publishedAt: "desc" } });
+// One publish row per week covers both branches.
+export const ALL = "all";
+const rotaKey = (s: RotaShift) => `${s.staffId}|${s.date}|${s.start}|${s.end}|${s.branch}`;
+
+/** The latest send of this week, and whose shifts changed since (moving branch counts). */
+export async function publishState(monday: string, current: RotaShift[]) {
+  const last = await prisma.meetRotaPublish.findFirst({ where: { branch: ALL, weekStart: monday }, orderBy: { publishedAt: "desc" } });
   if (!last) return { last: null, changedPeople: [] as number[] };
   const before = new Set((last.snapshot as string[]) || []);
-  const now = new Set(current.map(key));
+  const now = new Set(current.map(rotaKey));
   const changed = new Set<number>();
   Array.from(before).forEach((k) => { if (!now.has(k)) changed.add(Number(k.split("|")[0])); });
   Array.from(now).forEach((k) => { if (!before.has(k)) changed.add(Number(k.split("|")[0])); });
   return { last, changedPeople: Array.from(changed) };
 }
 
-export const snapshotOf = (shifts: ClockinShift[]) => shifts.map(key).sort();
+export const snapshotOf = (shifts: RotaShift[]) => shifts.map(rotaKey).sort();
 
 /** Weeks (Mondays) that have been published for any branch, so staff only see sent rotas. */
 export async function publishedWeeks(mondays: string[]): Promise<Set<string>> {
