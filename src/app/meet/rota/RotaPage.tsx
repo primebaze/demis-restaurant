@@ -86,32 +86,52 @@ export default function RotaPage() {
   // Budget editor in This week: one box per day, saved together.
   const [budgetOpen, setBudgetOpen] = useState(false);
   const [draft, setDraft] = useState<Record<string, string>>({});
+  const [budgetMode, setBudgetMode] = useState<"week" | "day">("week");
+  const [weekDraft, setWeekDraft] = useState("");
+  const pounds = (v: string | undefined) => (v?.trim() ? Number(v.replace(/[£,\s]/g, "")) : null);
   function openBudget(focusDate?: string) {
     const d: Record<string, string> = {};
     for (const day of data?.days || []) { const b = costOf(day)?.budget; d[day] = b != null ? String(b) : ""; }
     setDraft(d);
+    // Whole week unless the days were set to different amounts (or a day box was tapped).
+    const set = Object.values(d).filter(Boolean);
+    const even = set.length === 0 || (set.length === 7 && Math.abs(Math.max(...set.map(Number)) - Math.min(...set.map(Number))) <= 0.01);
+    setBudgetMode(focusDate || !even ? "day" : "week");
+    setWeekDraft(set.length ? String(Math.round(set.reduce((n, v) => n + Number(v), 0) * 100) / 100) : "");
     setBudgetOpen(true);
     setTimeout(() => {
       document.getElementById("budget-editor")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       if (focusDate) (document.getElementById(`budget-${focusDate}`) as HTMLInputElement | null)?.focus();
     }, 50);
   }
+  /** A week's budget shared across the 7 days to the penny (any leftover pennies go to the first days). */
+  function splitWeek(total: number | null): Record<string, number | null> {
+    const days = data?.days || [];
+    const out: Record<string, number | null> = {};
+    if (total === null || total <= 0) { days.forEach((d) => (out[d] = null)); return out; }
+    const pence = Math.round(total * 100);
+    const base = Math.floor(pence / days.length);
+    days.forEach((d, i) => (out[d] = (base + (i < pence - base * days.length ? 1 : 0)) / 100));
+    return out;
+  }
   async function saveBudgets() {
-    const changed = (data?.days || []).filter((day) => {
-      const was = costOf(day)?.budget ?? null;
-      const now = draft[day]?.trim() ? Number(draft[day].replace(/[£,\s]/g, "")) : null;
-      return now !== was;
-    });
-    for (const day of changed) {
-      const v = draft[day]?.trim();
-      const amount = v ? Number(v.replace(/[£,\s]/g, "")) : null;
-      if (amount !== null && (!Number.isFinite(amount) || amount < 0)) return setNote(`Enter an amount in pounds for ${dayHead(day)}, like 450`);
+    const wanted: Record<string, number | null> = {};
+    if (budgetMode === "week") {
+      const total = pounds(weekDraft);
+      if (total !== null && (!Number.isFinite(total) || total < 0)) return setNote("Enter the week's budget in pounds, like 3000");
+      Object.assign(wanted, splitWeek(total));
+    } else {
+      for (const day of data?.days || []) {
+        const amount = pounds(draft[day]);
+        if (amount !== null && (!Number.isFinite(amount) || amount < 0)) return setNote(`Enter an amount in pounds for ${dayHead(day)}, like 450`);
+        wanted[day] = amount;
+      }
     }
+    const changed = (data?.days || []).filter((day) => (wanted[day] ?? null) !== (costOf(day)?.budget ?? null));
     setBusy("budget");
     setNote("");
     for (const day of changed) {
-      const v = draft[day]?.trim();
-      const res = await fetch("/api/meet/rota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "budget", date: day, amount: v ? Number(v.replace(/[£,\s]/g, "")) : null }) }).catch(() => null);
+      const res = await fetch("/api/meet/rota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "budget", date: day, amount: wanted[day] }) }).catch(() => null);
       if (!res?.ok) { setBusy(""); setNote("Couldn't save the budget. Try again."); await load(data?.week); return; }
     }
     setBusy("");
@@ -218,18 +238,60 @@ export default function RotaPage() {
               {budgetOpen && (
                 <div id="budget-editor" role="dialog" aria-label="Budget for the week" style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 30, width: 290, maxWidth: "calc(100vw - 32px)", display: "flex", flexDirection: "column", gap: 8, padding: 14, borderRadius: 18, background: "#ffffff", boxShadow: "0 12px 32px rgba(20,20,20,0.16), 0 1px 2px rgba(20,20,20,0.08)" }}>
                         <p style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Budget · {data?.weekLabel}</p>
-                        <p style={{ margin: 0, fontSize: 12, color: C.sub }}>Budget for each day, in pounds. Leave a day empty for no budget.</p>
-                        {(data?.days || []).map((day) => (
-                          <label key={day} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, fontSize: 13 }}>
-                            <span>{dayHead(day)}</span>
-                            <span style={{ display: "flex", alignItems: "center", gap: 4, background: C.page, borderRadius: 10, padding: "0 10px", boxShadow: `inset 0 0 0 1px ${C.dash}` }}>
-                              <span style={{ color: C.sub }}>£</span>
-                              <input id={`budget-${day}`} inputMode="decimal" value={draft[day] ?? ""} placeholder="0"
-                                onChange={(e) => setDraft((x) => ({ ...x, [day]: e.target.value }))}
-                                style={{ width: 80, height: 36, border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 16, textAlign: "right", color: C.ink }} />
-                            </span>
-                          </label>
-                        ))}
+                        <div role="tablist" aria-label="Budget by" style={{ display: "flex", padding: 3, borderRadius: 999, background: C.page }}>
+                          {([["week", "Whole week"], ["day", "Each day"]] as const).map(([m, label]) => (
+                            <button key={m} role="tab" aria-selected={budgetMode === m}
+                              onClick={() => {
+                                if (m === "day" && budgetMode === "week") {
+                                  // Carry the week's amount over as an even split, so it can be adjusted day by day.
+                                  const split = splitWeek(pounds(weekDraft));
+                                  setDraft(Object.fromEntries(Object.entries(split).map(([d, v]) => [d, v != null ? String(v) : ""])));
+                                }
+                                if (m === "week" && budgetMode === "day") {
+                                  const sum = (data?.days || []).reduce((n, d) => n + (pounds(draft[d]) || 0), 0);
+                                  setWeekDraft(sum ? String(Math.round(sum * 100) / 100) : "");
+                                }
+                                setBudgetMode(m);
+                              }}
+                              style={{ flex: 1, height: 32, border: 0, borderRadius: 999, background: budgetMode === m ? "#ffffff" : "transparent", boxShadow: budgetMode === m ? "0 1px 2px rgba(20,20,20,0.1)" : "none", color: budgetMode === m ? C.ink : C.sub, fontFamily: "inherit", fontSize: 13, fontWeight: budgetMode === m ? 600 : 500, cursor: "pointer" }}>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                        {budgetMode === "week" ? (
+                          <>
+                            <p style={{ margin: 0, fontSize: 12, color: C.sub }}>One amount for the whole week. It&rsquo;s shared evenly across the 7 days. Leave it empty for no budget.</p>
+                            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, fontSize: 13 }}>
+                              <span>Week</span>
+                              <span style={{ display: "flex", alignItems: "center", gap: 4, background: C.page, borderRadius: 10, padding: "0 10px", boxShadow: `inset 0 0 0 1px ${C.dash}` }}>
+                                <span style={{ color: C.sub }}>£</span>
+                                <input id="budget-week" inputMode="decimal" value={weekDraft} placeholder="0" autoFocus
+                                  onChange={(e) => setWeekDraft(e.target.value)}
+                                  style={{ width: 110, height: 40, border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 16, textAlign: "right", color: C.ink }} />
+                              </span>
+                            </label>
+                            {(() => {
+                              const t = pounds(weekDraft);
+                              return t && Number.isFinite(t) && t > 0 ? <p style={{ margin: 0, fontSize: 12, color: C.sub, textAlign: "right" }}>About {money(Math.round((t / 7) * 100) / 100)} a day</p> : null;
+                            })()}
+                          </>
+                        ) : (
+                          <>
+                            <p style={{ margin: 0, fontSize: 12, color: C.sub }}>Budget for each day, in pounds. Leave a day empty for no budget.</p>
+                            {(data?.days || []).map((day) => (
+                              <label key={day} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, fontSize: 13 }}>
+                                <span>{dayHead(day)}</span>
+                                <span style={{ display: "flex", alignItems: "center", gap: 4, background: C.page, borderRadius: 10, padding: "0 10px", boxShadow: `inset 0 0 0 1px ${C.dash}` }}>
+                                  <span style={{ color: C.sub }}>£</span>
+                                  <input id={`budget-${day}`} inputMode="decimal" value={draft[day] ?? ""} placeholder="0"
+                                    onChange={(e) => setDraft((x) => ({ ...x, [day]: e.target.value }))}
+                                    style={{ width: 80, height: 36, border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 16, textAlign: "right", color: C.ink }} />
+                                </span>
+                              </label>
+                            ))}
+                            <p style={{ margin: 0, fontSize: 12, color: C.sub, textAlign: "right" }}>Week {money(Math.round((data?.days || []).reduce((n, d) => n + (pounds(draft[d]) || 0), 0) * 100) / 100)}</p>
+                          </>
+                        )}
                         <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                           <button onClick={saveBudgets} disabled={busy === "budget"}
                             style={{ flex: 1, height: 38, border: 0, borderRadius: 999, background: C.ink, color: "#fff", fontFamily: "inherit", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
