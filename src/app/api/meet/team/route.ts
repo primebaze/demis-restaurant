@@ -14,7 +14,7 @@ export async function GET() {
   if (!me) return NextResponse.json({ error: "Managers only" }, { status: 403 });
 
   const [staff, extras, devices, subs, locks, devList] = await Promise.all([
-    getClockinStaff(true),
+    getClockinStaff(), // kept for a minute; new starters show within 60s
     prisma.meetStaff.findMany(),
     prisma.meetDevice.findMany({ where: { status: { in: ["approved", "pending"] } }, select: { clockinId: true, status: true, label: true, lastSeenAt: true, notifyChoice: true } }),
     prisma.meetPushSub.findMany({ select: { clockinId: true } }),

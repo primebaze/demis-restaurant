@@ -89,7 +89,7 @@ export default function MeetApp() {
   return (
     <>
       <IconFont />
-      <style>{`html,body{background:${C.bg}}`}</style>
+      <style>{`html,body{background:${C.bg};overflow-x:hidden;overscroll-behavior-x:none}`}</style>
       <div style={{ minHeight: "100dvh", background: C.bg, color: "#fff", fontSize: 14 }}>{screen}</div>
     </>
   );

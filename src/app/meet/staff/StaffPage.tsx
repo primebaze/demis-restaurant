@@ -15,6 +15,7 @@ type Person = {
 type Pending = { id: string; clockinId: number; staffName: string; label: string; createdAt: string };
 type Filter = "all" | "off" | "not_set_up" | "turned_off";
 
+const CACHE_KEY = "meet-team-v1";
 const roleLabel = (r: string) => (r ? r[0].toUpperCase() + r.slice(1) : "");
 
 export default function StaffPage() {
@@ -29,14 +30,26 @@ export default function StaffPage() {
 
   const load = useCallback(async () => {
     const res = await fetch("/api/meet/team", { cache: "no-store" }).catch(() => null);
-    if (!res) return setError("Can't connect right now");
-    if (res.status === 403 || res.status === 401) return setError("This page is for managers.");
-    if (!res.ok) return setError("Can't load the staff list right now");
+    if (!res) return setError((e) => e || "Can't connect right now");
+    if (res.status === 403 || res.status === 401) {
+      try { sessionStorage.removeItem(CACHE_KEY); } catch {}
+      setData(null);
+      return setError("This page is for managers.");
+    }
+    if (!res.ok) return setError((e) => e || "Can't load the staff list right now");
+    const fresh = await res.json();
     setError("");
-    setData(await res.json());
+    setData(fresh);
+    // Remember it on this phone so the next visit shows it straight away.
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(fresh)); } catch {}
   }, []);
 
   useEffect(() => {
+    // Show the last list at once (if any), then refresh it in the background.
+    try {
+      const saved = sessionStorage.getItem(CACHE_KEY);
+      if (saved) setData(JSON.parse(saved));
+    } catch {}
     load();
     const t = setInterval(load, 30_000);
     const onShow = () => document.visibilityState === "visible" && load();
@@ -78,9 +91,9 @@ export default function StaffPage() {
   const locked = people.filter((p) => p.lockedUntil);
 
   return (
-    <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap" }} onClick={() => setMenu(null)}>
+    <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", maxWidth: "100vw", overflowX: "clip" }} onClick={() => setMenu(null)}>
       <IconFont />
-      <style>{`html,body{background:${C.page}}`}</style>
+      <style>{`html,body{background:${C.page};overflow-x:hidden;overscroll-behavior-x:none}`}</style>
       <Sidebar waiting={counts.waiting} />
       <TopBar />
 
@@ -109,7 +122,7 @@ export default function StaffPage() {
         {error ? (
           <p style={{ ...card, margin: 0, color: C.sub }}>{error} {error.includes("managers") && <a href="/meet" style={{ color: C.ink }}>Back to the app</a>}</p>
         ) : !data ? (
-          <p style={{ ...card, margin: 0, color: C.sub }}>Loading…</p>
+          <Skeleton />
         ) : (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
@@ -396,6 +409,30 @@ function PersonCard({ p, busy, onBranch, onSignOut }: { p: Person; busy: string;
           <Icon name="logout" size={17} />
         </button>
       )}
+    </div>
+  );
+}
+
+/* First visit: grey shapes in the page's real layout while the list loads. */
+function Skeleton() {
+  const bar = (w: number | string, h: number, r = 8): CSSProperties => ({ width: w, height: h, borderRadius: r, background: "#ece8e3" });
+  return (
+    <div aria-busy="true" aria-label="Loading staff" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} style={card}><div style={bar("60%", 12)} /><div style={{ ...bar(44, 26), marginTop: 12 }} /></div>
+        ))}
+      </div>
+      <div style={{ ...card, borderRadius: 24, display: "flex", flexDirection: "column", gap: 0 }}>
+        <div style={bar(110, 16)} />
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", borderTop: i ? `1px solid ${C.line}` : undefined, marginTop: i ? 0 : 12 }}>
+            <div style={bar(36, 36, 18)} />
+            <div style={{ flex: 1 }}><div style={bar("45%", 12)} /><div style={{ ...bar("30%", 10), marginTop: 8 }} /></div>
+            <div style={bar(76, 30, 15)} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
