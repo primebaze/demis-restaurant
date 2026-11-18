@@ -111,6 +111,10 @@ export function HoursFixScreen({ target, onBack }: { target: FixTarget; onBack: 
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [sent, setSent] = useState(false);
+  // One fix a week: a second one needs the person to confirm the warning (it puts them on the watch list).
+  const used = useData<{ fixesThisWeek: number }>("/api/meet/hours").data?.fixesThisWeek || 0;
+  const [warned, setWarned] = useState(false);
+  const overLimit = used >= 1 || warned;
   const ok = /^\d{2}:\d{2}$/.test(start) && /^\d{2}:\d{2}$/.test(end) && start !== end;
   const total = ok ? spanH(start, end) : 0;
   const changed = start !== target.in || end !== (target.out || "");
@@ -118,8 +122,9 @@ export function HoursFixScreen({ target, onBack }: { target: FixTarget; onBack: 
   async function submit() {
     setBusy(true);
     setErr("");
-    const r = await send("/api/meet/hours", { date: target.date, start, end, wasStart: target.in, reason: [reason, extra.trim()].filter(Boolean).join(". ") });
+    const r = await send("/api/meet/hours", { date: target.date, start, end, wasStart: target.in, reason: [reason, extra.trim()].filter(Boolean).join(". "), confirmRepeat: overLimit });
     setBusy(false);
+    if (r.data.warning) { setWarned(true); return; } // the server counted one we didn't know about: show the warning
     if (!r.ok) return setErr(r.data.error || "Couldn't send that");
     setSent(true);
   }
@@ -164,9 +169,15 @@ export function HoursFixScreen({ target, onBack }: { target: FixTarget; onBack: 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{REASONS.map((r) => <Chip key={r} on={reason === r} onClick={() => setReason(reason === r ? "" : r)} style={{ fontSize: 13 }}>{r}</Chip>)}</div>
         <input id="hf-why" value={extra} onChange={(e) => setExtra(e.target.value)} maxLength={200} placeholder="Anything else? (optional)" style={{ height: 48, boxSizing: "border-box", padding: "0 14px", border: 0, borderRadius: 16, background: D.card, color: "#ffffff", fontSize: 14, fontFamily: "inherit" }} />
       </div>
+      {overLimit && (
+        <div role="alert" style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "14px 16px", borderRadius: 18, background: "#2a1d0a", color: "#fde68a", fontSize: 14, lineHeight: 1.45 }}>
+          <Icon name="warning" size={22} fill style={{ color: D.amber, flex: "none" }} />
+          <span>You&rsquo;ve already asked to fix your hours this week. You can only fix them once a week. If you send this, you&rsquo;ll go on the managers&rsquo; watch list for the next 8 weeks.</span>
+        </div>
+      )}
       {err && <p role="alert" style={{ margin: 0, fontSize: 13, color: D.red }}>{err}</p>}
       <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
-        <button onClick={submit} disabled={busy || !ok || !changed || !(reason || extra.trim())} style={{ ...bigWhite, opacity: ok && changed && (reason || extra.trim()) ? 1 : 0.5 }}>{busy ? "Sending…" : "Send for approval"}</button>
+        <button onClick={submit} disabled={busy || !ok || !changed || !(reason || extra.trim())} style={{ ...bigWhite, ...(overLimit ? { background: D.amber, color: "#1c1917" } : {}), opacity: ok && changed && (reason || extra.trim()) ? 1 : 0.5 }}>{busy ? "Sending…" : overLimit ? "Send anyway" : "Send for approval"}</button>
         <p style={{ margin: 0, textAlign: "center", fontSize: 12, color: D.muted }}>A manager checks it. You&rsquo;ll see &ldquo;fixed&rdquo; on this shift once it&rsquo;s approved.</p>
       </div>
     </Screen>

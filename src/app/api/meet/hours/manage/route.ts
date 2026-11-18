@@ -5,7 +5,7 @@ import { getTimesheets, setDayHours } from "@/lib/clockin";
 import { activePeople, firstNameOf } from "@/lib/meet-people";
 import { londonToday, mondayOf, addDays, isDate, isTime, weekRota, weekLabel, shiftHours, dayLabel } from "@/lib/meet-rota";
 import { notifyPeople } from "@/lib/meet-notify";
-import { dayHoursWithFix, spanMinutes } from "@/lib/meet-hours";
+import { dayHoursWithFix, spanMinutes, hoursWatchList, repeatFixIds } from "@/lib/meet-hours";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +60,8 @@ export async function GET(req: Request) {
     for (const m of fixWeeks) for (const s of (await weekRota(m, people)).shifts) fixRota.set(`${s.staffId}|${s.date}`, { start: s.start, end: s.end });
     const nameOf = (id: number) => people.find((p) => p.id === id)?.name || "Someone";
 
+    const watch = await hoursWatchList();
+    const repeats = await repeatFixIds(fixes.map((f) => f.id));
     const workedTotal = rows.reduce((n, r) => n + r.worked, 0);
     const rotaTotal = rota.shifts.filter((s) => s.date <= today).reduce((n, s) => n + shiftHours(s.start, s.end), 0);
     return NextResponse.json({
@@ -68,9 +70,10 @@ export async function GET(req: Request) {
       fixes: fixes.map((f) => {
         const r = fixRota.get(`${f.clockinId}|${f.date}`);
         const overBy = r ? spanMinutes(f.start, f.end) - spanMinutes(r.start, r.end) : 0;
-        return { id: f.id, staffId: f.clockinId, name: nameOf(f.clockinId), date: f.date, wasStart: f.wasStart, wasEnd: f.wasEnd, start: f.start, end: f.end, reason: f.reason, rota: r || null, overBy };
+        return { id: f.id, staffId: f.clockinId, name: nameOf(f.clockinId), date: f.date, wasStart: f.wasStart, wasEnd: f.wasEnd, start: f.start, end: f.end, reason: f.reason, rota: r || null, overBy, repeat: repeats.has(f.id), watch: watch.has(f.clockinId) };
       }),
       missed,
+      watchList: Array.from(watch.entries()).map(([id, weeks]) => ({ staffId: id, name: nameOf(id), weeks })),
       rows: rows.sort((a, b) => a.name.localeCompare(b.name)),
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {

@@ -7,7 +7,7 @@ import { D, Screen, Chip, bigWhite, field, mono, useData, send, dayShort, dayNum
 /* 30 · Manager phone: the Manage tab for quick jobs. Rota building, payroll and attendance stay on the computer. */
 
 type Device = { id: string; clockinId: number; staffName: string; label: string };
-type Fix = { id: string; staffId: number; name: string; date: string; wasStart: string; wasEnd: string; start: string; end: string; reason: string };
+type Fix = { id: string; staffId: number; name: string; date: string; wasStart: string; wasEnd: string; start: string; end: string; reason: string; repeat?: boolean; watch?: boolean };
 type Report = { id: string; kind: string; category: string; body: string; urgent: boolean; branch: string; photo: string; from: string; status: string; at: string };
 type Req = { kind: string; status: string };
 type TaskRow = { status: string; dueDate: string };
@@ -85,7 +85,7 @@ export function ManageScreen({ onPost }: { onPost: () => void }) {
       ))}
       {fixes.map((f) => (
         <article key={f.id} style={card}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>{avatar(f.staffId, f.name)}<span style={{ flex: 1, minWidth: 0 }}><span style={{ display: "block", fontSize: 12, color: D.muted }}>Fix hours · {dayShort(f.date)} {dayNum(f.date)}</span><span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{firstName(f.name)}: {f.reason.split(".")[0].toLowerCase()}</span></span></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>{avatar(f.staffId, f.name)}<span style={{ flex: 1, minWidth: 0 }}><span style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", fontSize: 12, color: D.muted }}>Fix hours · {dayShort(f.date)} {dayNum(f.date)}{f.repeat && <span style={{ padding: "1px 7px", borderRadius: 8, background: "#2a1d0a", color: D.amber, fontWeight: 600 }}>2nd this week</span>}{f.watch && <span style={{ padding: "1px 7px", borderRadius: 8, background: D.pill, color: D.soft, fontWeight: 600 }}>Watch list</span>}</span><span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{firstName(f.name)}: {f.reason.split(".")[0].toLowerCase()}</span></span></div>
           <p style={{ margin: 0, fontFamily: mono, fontSize: 13, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}><span style={{ color: D.muted, textDecoration: "line-through" }}>{f.wasStart || "none"} – {f.wasEnd || "none"}</span><Icon name="arrow_forward" size={16} style={{ color: D.muted }} /><span style={{ fontWeight: 600 }}>{f.start} – {f.end}</span></p>
           {twoBtns(() => act("/api/meet/hours/manage", { id: f.id, action: "approve" }, f.id + "y", `Approved. Saved to ${firstName(f.name)}'s hours.`, hours.reload), () => act("/api/meet/hours/manage", { id: f.id, action: "decline" }, f.id + "n", "Declined.", hours.reload), f.id)}
         </article>

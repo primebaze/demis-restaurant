@@ -6,9 +6,9 @@ import { ManagerFrame, PageHead, PAGE as C, panel, btnWhite, mono, useJson, post
 
 /* 24 · Admin: hours and corrections. Values from the design canvas. */
 
-type Fix = { id: string; staffId: number; name: string; date: string; wasStart: string; wasEnd: string; start: string; end: string; reason: string; rota: { start: string; end: string } | null; overBy: number };
+type Fix = { id: string; staffId: number; name: string; date: string; wasStart: string; wasEnd: string; start: string; end: string; reason: string; rota: { start: string; end: string } | null; overBy: number; repeat?: boolean; watch?: boolean };
 type Row = { staffId: number; name: string; shifts: number; rota: number; worked: number; fixes: number; missed: string[] };
-type Data = { week: string; weekLabel: string; stats: { worked: number; againstRota: number; fixes: number; missed: number }; fixes: Fix[]; missed: { staffId: number; name: string; date: string; in: string }[]; rows: Row[] };
+type Data = { week: string; weekLabel: string; stats: { worked: number; againstRota: number; fixes: number; missed: number }; fixes: Fix[]; missed: { staffId: number; name: string; date: string; in: string }[]; watchList?: { staffId: number; name: string; weeks: number }[]; rows: Row[] };
 
 const DAY = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 const WD = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
@@ -71,7 +71,7 @@ export default function HoursPage() {
                   <article key={f.id} style={{ padding: 14, borderRadius: 18, background: C.page, display: "flex", flexDirection: "column", gap: 10 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ width: 32, height: 32, borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(f.name)}</span>
-                      <span style={{ flex: 1 }}><span style={{ display: "block", fontWeight: 500 }}>{firstName(f.name)} · {DAY(f.date)}</span><span style={{ display: "block", fontSize: 12, color: C.sub }}>{f.reason}</span></span>
+                      <span style={{ flex: 1 }}><span style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", fontWeight: 500 }}>{firstName(f.name)} · {DAY(f.date)}{f.repeat && <span style={{ padding: "1px 8px", borderRadius: 8, background: "#fef3c7", color: "#92400e", fontSize: 11, fontWeight: 600 }}>2nd this week</span>}{f.watch && <span style={{ padding: "1px 8px", borderRadius: 8, background: "#e7e5e4", color: "#44403c", fontSize: 11, fontWeight: 600 }} title="Asked to fix their hours more than once in a week, in the last 8 weeks">Watch list</span>}</span><span style={{ display: "block", fontSize: 12, color: C.sub }}>{f.reason}</span></span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontFamily: mono, fontSize: 13 }}>
                       <span style={{ color: C.sub, textDecoration: "line-through" }}>{f.wasStart || "none"} – {f.wasEnd || "none"}</span>
@@ -100,6 +100,13 @@ export default function HoursPage() {
                 <div style={{ marginTop: 4, padding: 12, borderRadius: 16, background: "#fef3c7", color: "#92400e", fontSize: 13, display: "flex", flexDirection: "column", gap: 4 }}>
                   <strong style={{ fontWeight: 600 }}>No clock-out yet</strong>
                   {data.missed.map((m) => <span key={m.staffId + m.date}>{firstName(m.name)} · {DAY(m.date)} · in at {m.in}. Ask them to send a fix from their phone.</span>)}
+                </div>
+              )}
+              {(data.watchList || []).length > 0 && (
+                <div style={{ marginTop: 4, padding: 12, borderRadius: 16, background: "#f5f5f4", color: "#44403c", fontSize: 13, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <strong style={{ fontWeight: 600 }}>Watch list</strong>
+                  <span style={{ fontSize: 12, color: "#78716c" }}>Asked to fix their hours more than once in a week, in the last 8 weeks. Staff can fix their hours once a week.</span>
+                  {data.watchList!.map((w) => <span key={w.staffId}>{w.name} · {w.weeks === 1 ? "1 week" : `${w.weeks} weeks`} with more than one fix</span>)}
                 </div>
               )}
             </section>

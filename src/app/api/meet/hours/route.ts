@@ -5,7 +5,7 @@ import { getTimesheets, getShifts } from "@/lib/clockin";
 import { londonToday, mondayOf, addDays, isDate, isTime, weekRota } from "@/lib/meet-rota";
 import { activePeople, firstNameOf } from "@/lib/meet-people";
 import { notifyPeople } from "@/lib/meet-notify";
-import { spanMinutes } from "@/lib/meet-hours";
+import { spanMinutes, fixesThisWeek } from "@/lib/meet-hours";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
       .sort((a, b) => (b.date + b.in).localeCompare(a.date + a.in));
 
     return NextResponse.json(
-      { period, today, week, weekTotal, lastWeek, weeks, recent, fixes: fixes.slice(0, 10).map((f) => ({ id: f.id, date: f.date, start: f.start, end: f.end, status: f.status, by: firstNameOf(f.decidedBy) })) },
+      { period, today, week, weekTotal, lastWeek, weeks, recent, fixesThisWeek: await fixesThisWeek(me.person.id), fixes: fixes.slice(0, 10).map((f) => ({ id: f.id, date: f.date, start: f.start, end: f.end, status: f.status, by: firstNameOf(f.decidedBy) })) },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (e) {
@@ -68,7 +68,9 @@ export async function GET(req: Request) {
   }
 }
 
-/** POST { date, start, end, reason } : ask a manager to fix one shift's times (design 23). */
+const ordinal = (n: number) => (n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
+
+/** POST { date, start, end, reason, confirmRepeat? } : ask a manager to fix one shift's times (design 23). */
 export async function POST(req: Request) {
   const me = await requireMeet();
   if (!me) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
@@ -84,6 +86,11 @@ export async function POST(req: Request) {
   try {
     const open = await prisma.meetHoursFix.findFirst({ where: { clockinId: me.person.id, date: body.date, status: "asked" } });
     if (open) return NextResponse.json({ error: "You've already asked to fix that day" }, { status: 400 });
+    // One fix a week. A second one needs the person to confirm the warning, and puts them on the watch list.
+    const already = await fixesThisWeek(me.person.id);
+    if (already >= 1 && body.confirmRepeat !== true) {
+      return NextResponse.json({ warning: true, error: "You've already asked to fix your hours this week. Asking again puts you on the managers' watch list for the next 8 weeks." }, { status: 409 });
+    }
     const [sheet] = await getTimesheets(body.date, body.date, me.person.id);
     const shifts = sheet?.days.find((d) => d.date === body.date)?.shifts || [];
     const was = shifts.find((s) => s.in === body.wasStart) || shifts[0];
@@ -91,7 +98,7 @@ export async function POST(req: Request) {
       data: { clockinId: me.person.id, date: body.date, wasStart: was?.in || "", wasEnd: was?.out || "", start: body.start, end: body.end, reason },
     });
     const managers = (await activePeople()).filter((p) => p.manager && p.id !== me.person.id).map((p) => p.id);
-    await notifyPeople(managers, { title: "Hours fix to approve", body: `${firstNameOf(me.person.name)}: ${body.start} – ${body.end} on ${body.date}. ${reason}`, url: "/meet/hours", tag: `fix-${me.person.id}-${body.date}`, icon: "schedule" }).catch(() => null);
+    await notifyPeople(managers, { title: "Hours fix to approve", body: `${already >= 1 ? `${ordinal(already + 1)} fix this week (watch list). ` : ""}${firstNameOf(me.person.name)}: ${body.start} – ${body.end} on ${body.date}. ${reason}`, url: "/meet/hours", tag: `fix-${me.person.id}-${body.date}`, icon: "schedule" }).catch(() => null);
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Couldn't send that" }, { status: 502 });
