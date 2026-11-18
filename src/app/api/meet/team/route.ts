@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireMeet } from "@/lib/meet-auth";
-import { getClockinStaff } from "@/lib/clockin";
+import { getClockinStaff, setStaffActive } from "@/lib/clockin";
 import { listDevices } from "@/lib/meet-devices";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +50,7 @@ export async function GET() {
 }
 
 /**
- * POST { action: "branch", id, branch } | { action: "unlock", id } | { action: "signout_all", id }
+ * POST { action: "branch", id, branch } | { action: "unlock", id } | { action: "signout_all", id } | { action: "active", id, active }
  */
 export async function POST(req: Request) {
   const me = await requireMeet(true);
@@ -78,6 +78,28 @@ export async function POST(req: Request) {
       }),
       prisma.meetPushSub.deleteMany({ where: { clockinId: id } }),
     ]);
+    return NextResponse.json({ ok: true });
+  }
+  if (body.action === "active") {
+    // Turn someone off because they've left (or back on). It's done in the clock-in app, so they
+    // also can't clock in, and everything here (sign-in, invites, emails, notifications) follows it.
+    if (id === me.person.id) return NextResponse.json({ error: "You can't turn yourself off" }, { status: 400 });
+    const active = body.active === true;
+    try {
+      await setStaffActive(id, active, me.person.name);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      return NextResponse.json({ error: /404/.test(msg) ? "The clock-in app needs updating before staff can be turned off from here." : msg || "Couldn't reach the clock-in app" }, { status: 502 });
+    }
+    if (!active) {
+      await prisma.$transaction([
+        prisma.meetDevice.updateMany({
+          where: { clockinId: id, status: { in: ["approved", "pending"] } },
+          data: { status: "revoked", sessionUntil: null, decidedBy: me.person.name.slice(0, 80), decidedAt: new Date() },
+        }),
+        prisma.meetPushSub.deleteMany({ where: { clockinId: id } }),
+      ]);
+    }
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });

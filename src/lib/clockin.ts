@@ -105,6 +105,16 @@ export async function getClockinPerson(id: number): Promise<ClockinStaff | null>
   return all.find((s) => s.id === id) ?? null;
 }
 
+/** Turn someone off (they've left) or back on, in the clock-in app itself. */
+export async function setStaffActive(id: number, active: boolean, actor: string): Promise<void> {
+  if (DEV_MOCK) {
+    const s = DEV_STAFF.find((x) => x.id === id);
+    if (s) s.active = active;
+    return;
+  }
+  await bridgeWrite(`/staff/${id}/active`, "PUT", actor, { active });
+}
+
 /** True only when the PIN is right AND the person is switched on in the clock-in app. */
 export async function verifyClockinPin(staffId: number, pin: string): Promise<boolean> {
   if (!/^\d{4}$/.test(pin)) return false;

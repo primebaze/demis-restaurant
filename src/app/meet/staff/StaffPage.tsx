@@ -197,6 +197,7 @@ export default function StaffPage() {
                     <PersonCard key={p.id} p={p} busy={busy}
                       onBranch={(b) => post("/api/meet/team", { action: "branch", id: p.id, branch: b }, `b${p.id}`, `${p.name}: ${BRANCH[b] || "no branch"}.`)}
                       onSignOut={() => { if (confirm(`Sign ${p.name} out of every phone? They'd need a manager to approve their phone again.`)) post("/api/meet/team", { action: "signout_all", id: p.id }, `s${p.id}`, `${p.name} is signed out of all phones.`); }}
+                      onActive={(on) => { if (confirm(on ? `Turn ${p.name} back on? They can clock in and use the app again.` : `Turn ${p.name} off? Do this when someone has left Demi's.\n\nThey'll be turned off in the clock-in app too (no clocking in), signed out of every phone, and won't get any more emails or notifications. You can turn them back on later.`)) post("/api/meet/team", { action: "active", id: p.id, active: on }, `a${p.id}`, on ? `${p.name} is turned back on.` : `${p.name} is turned off. No more emails or notifications.`); }}
                     />
                   ))}
                   {shown.length === 0 && <p style={{ margin: 0, padding: "16px 8px", color: C.sub }}>No one here.</p>}
@@ -219,6 +220,7 @@ export default function StaffPage() {
                         <Row key={p.id} p={p} open={menu === p.id} busy={busy} onMenu={(e) => { e.stopPropagation(); setMenu(menu === p.id ? null : p.id); }}
                           onBranch={(b) => post("/api/meet/team", { action: "branch", id: p.id, branch: b }, `b${p.id}`, `${p.name}: ${BRANCH[b] || "no branch"}.`)}
                           onSignOut={() => { setMenu(null); if (confirm(`Sign ${p.name} out of every phone? They'd need a manager to approve their phone again.`)) post("/api/meet/team", { action: "signout_all", id: p.id }, `s${p.id}`, `${p.name} is signed out of all phones.`); }}
+                          onActive={(on) => { setMenu(null); if (confirm(on ? `Turn ${p.name} back on? They can clock in and use the app again.` : `Turn ${p.name} off? Do this when someone has left Demi's.\n\nThey'll be turned off in the clock-in app too (no clocking in), signed out of every phone, and won't get any more emails or notifications. You can turn them back on later.`)) post("/api/meet/team", { action: "active", id: p.id, active: on }, `a${p.id}`, on ? `${p.name} is turned back on.` : `${p.name} is turned off. No more emails or notifications.`); }}
                         />
                       ))}
                       {shown.length === 0 && (
@@ -230,7 +232,7 @@ export default function StaffPage() {
               </section>
             </div>
             <p style={{ margin: "0 4px", fontSize: 12, color: C.sub }}>
-              Names and roles come from the clock-in app, so new starters and leavers update on their own. Anyone turned off in the clock-in app stays off here: they can&rsquo;t sign in, aren&rsquo;t invited to meetings and get no notifications. Turning them back on in the clock-in app brings them back.
+              Names and roles come from the clock-in app, so new starters and leavers update on their own. When someone leaves, turn them off here (the switch button, or the &hellip; menu on a computer). It turns them off in the clock-in app too, signs them out of every phone, and stops all emails and notifications. Turned-off staff can be turned back on at any time.
             </p>
           </>
         )}
@@ -252,7 +254,7 @@ function Avatar({ size, bg, fg, children }: { size: number; bg: string; fg: stri
   return <span style={{ width: size, height: size, flex: "none", borderRadius: "50%", background: bg, color: fg, fontSize: size > 32 ? 13 : 12, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{children}</span>;
 }
 
-function Row({ p, open, busy, onMenu, onBranch, onSignOut }: { p: Person; open: boolean; busy: string; onMenu: (e: React.MouseEvent) => void; onBranch: (b: string) => void; onSignOut: () => void }) {
+function Row({ p, open, busy, onMenu, onBranch, onSignOut, onActive }: { p: Person; open: boolean; busy: string; onMenu: (e: React.MouseEvent) => void; onBranch: (b: string) => void; onSignOut: () => void; onActive: (on: boolean) => void }) {
   const col = p.active ? personColourLight(p.id) : { bg: C.line, fg: C.sub };
   const notif =
     p.notifications === "on" ? <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#047857" }}><Icon name="notifications_active" size={17} />On</span>
@@ -291,21 +293,31 @@ function Row({ p, open, busy, onMenu, onBranch, onSignOut }: { p: Person; open: 
         <td style={{ padding: 8, color: C.sub }}>{p.lastSeen ? ago(p.lastSeen) : "Never"}</td>
         <td style={{ padding: "8px 12px", textAlign: "right" }}>
           {dim ? (
-            <span style={{ padding: "3px 9px", borderRadius: 999, background: C.line, color: C.body, fontSize: 12, fontWeight: 500, whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 4 }}><Icon name="toggle_off" size={14} />Off in clock-in</span>
-          ) : p.phones.length > 0 ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <span style={{ padding: "3px 9px", borderRadius: 999, background: C.line, color: C.body, fontSize: 12, fontWeight: 500, whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 4 }}><Icon name="toggle_off" size={14} />Turned off</span>
+              <button onClick={() => onActive(true)} disabled={busy === `a${p.id}`} style={{ height: 30, padding: "0 12px", border: 0, borderRadius: 15, background: C.page, color: C.ink, fontSize: 12, fontWeight: 500, fontFamily: "inherit", whiteSpace: "nowrap" }}>{busy === `a${p.id}` ? "…" : "Turn back on"}</button>
+            </span>
+          ) : (
             <button aria-label={`Options for ${p.name}`} aria-expanded={open} onClick={onMenu} style={{ width: 32, height: 32, border: 0, borderRadius: 16, background: open ? C.ink : C.page, color: open ? "#ffffff" : C.ink, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="more_horiz" size={18} />
             </button>
-          ) : null}
+          )}
         </td>
       </tr>
       {open && (
         <tr>
           <td colSpan={6} style={{ padding: "0 12px 10px" }}>
             <div onClick={(e) => e.stopPropagation()} style={{ marginLeft: "auto", width: 260, borderRadius: 16, background: C.ink, color: "#ffffff", padding: 6, boxShadow: "0 12px 30px -10px rgba(20,20,20,0.5)", display: "flex", flexDirection: "column" }}>
-              <p style={{ margin: 0, padding: "8px 10px", fontSize: 12, color: "#bdb8b2", display: "flex", alignItems: "center", gap: 8 }}><Icon name="smartphone" size={18} />{p.phones.join(", ")}</p>
-              <button onClick={onSignOut} style={{ height: 38, padding: "0 10px", border: 0, borderRadius: 12, background: "transparent", color: "#ffb999", fontSize: 13, fontFamily: "inherit", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }}>
-                <Icon name="logout" size={18} />Sign out of all phones
+              {p.phones.length > 0 && (
+                <>
+                  <p style={{ margin: 0, padding: "8px 10px", fontSize: 12, color: "#bdb8b2", display: "flex", alignItems: "center", gap: 8 }}><Icon name="smartphone" size={18} />{p.phones.join(", ")}</p>
+                  <button onClick={onSignOut} style={{ height: 38, padding: "0 10px", border: 0, borderRadius: 12, background: "transparent", color: "#ffffff", fontSize: 13, fontFamily: "inherit", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="logout" size={18} />Sign out of all phones
+                  </button>
+                </>
+              )}
+              <button onClick={() => onActive(false)} style={{ height: 38, padding: "0 10px", border: 0, borderRadius: 12, background: "transparent", color: "#ffb999", fontSize: 13, fontFamily: "inherit", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }}>
+                <Icon name="toggle_off" size={18} />Turn off (they&rsquo;ve left)
               </button>
             </div>
           </td>
@@ -316,11 +328,11 @@ function Row({ p, open, busy, onMenu, onBranch, onSignOut }: { p: Person; open: 
 }
 
 /* Phones: one person as a card (same details as a table row). */
-function PersonCard({ p, busy, onBranch, onSignOut }: { p: Person; busy: string; onBranch: (b: string) => void; onSignOut: () => void }) {
+function PersonCard({ p, busy, onBranch, onSignOut, onActive }: { p: Person; busy: string; onBranch: (b: string) => void; onSignOut: () => void; onActive: (on: boolean) => void }) {
   const col = p.active ? personColourLight(p.id) : { bg: C.line, fg: C.sub };
   const dim = !p.active;
   const status =
-    dim ? "Off in clock-in"
+    dim ? "Turned off"
     : p.waiting > 0 ? `${p.waiting} phone waiting`
     : p.notifications === "on" ? "Notifications on"
     : p.notifications === "off" ? "Notifications off · email only"
@@ -347,6 +359,13 @@ function PersonCard({ p, busy, onBranch, onSignOut }: { p: Person; busy: string;
       {!dim && p.phones.length > 0 && (
         <button aria-label={`Sign ${p.name} out of all phones`} onClick={onSignOut} style={{ width: 34, height: 34, border: 0, borderRadius: 17, background: C.page, color: C.ink, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name="logout" size={17} />
+        </button>
+      )}
+      {dim ? (
+        <button onClick={() => onActive(true)} disabled={busy === `a${p.id}`} style={{ height: 34, padding: "0 12px", border: 0, borderRadius: 17, background: C.page, color: C.ink, fontSize: 13, fontFamily: "inherit", whiteSpace: "nowrap" }}>{busy === `a${p.id}` ? "…" : "Turn on"}</button>
+      ) : (
+        <button aria-label={`Turn ${p.name} off (they've left)`} onClick={() => onActive(false)} style={{ width: 34, height: 34, border: 0, borderRadius: 17, background: C.page, color: "#b45309", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="toggle_off" size={18} />
         </button>
       )}
     </div>
