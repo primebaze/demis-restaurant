@@ -669,3 +669,32 @@ model MeetPushSub {
   @@index([clockinId])
   @@index([deviceId])
 }
+
+/// Which branch a clock-in rota shift is at (the clock-in app has no branches).
+model MeetShiftBranch {
+  shiftId   Int      @id // rota_shifts.id in the clock-in app
+  branch    String // cricklewood, streatham
+  updatedAt DateTime @updatedAt
+}
+
+/// A week's rota for one branch, as sent to staff. `snapshot` lets "Send changes"
+/// tell only the people whose shifts changed since.
+model MeetRotaPublish {
+  id          String   @id @default(cuid())
+  branch      String
+  weekStart   String // Monday, YYYY-MM-DD (London)
+  snapshot    Json     @default("[]") // ["staffId|date|start|end", ...]
+  publishedBy String   @default("")
+  publishedAt DateTime @default(now())
+
+  @@index([weekStart, branch])
+}
+
+/// Someone opened the rota after it was published.
+model MeetRotaSeen {
+  publishId String
+  clockinId Int
+  seenAt    DateTime @default(now())
+
+  @@id([publishId, clockinId])
+}

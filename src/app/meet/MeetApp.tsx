@@ -319,6 +319,11 @@ function Waiting({ me, onSignOut }: { me: { state: "pending" | "declined"; name:
 /* ─── Signed in ─── */
 
 type ApprovedMe = Extract<Me, { state: "approved" }>;
+type Tab = "home" | "rota" | "me";
+type MyShift = { id: number; date: string; start: string; end: string; notes: string | null; branch: string; hours: number };
+type TeamShift = { date: string; start: string; end: string; name: string; role: string; me: boolean; branch: string };
+type RotaWeek = { week: string; label: string; published: boolean; days: string[]; mine: MyShift[]; team: TeamShift[] };
+type MyRota = { today: string; weeks: RotaWeek[]; unseen: { id: string; week: string; label: string; branch: string }[] };
 
 function useDevice() {
   const [info, setInfo] = useState<{ ios: boolean; standalone: boolean; phone: boolean } | null>(null);
@@ -335,18 +340,42 @@ const pushSupported = () =>
   typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 
 function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
-  const [tab, setTab] = useState<"home" | "me">("home");
+  const [tab, setTab] = useState<Tab>(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "rota" ? "rota" : "home"));
+  const [rota, setRota] = useState<MyRota | null>(null);
+
+  const loadRota = useCallback(async () => {
+    const res = await fetch("/api/meet/my-rota", { cache: "no-store" }).catch(() => null);
+    if (res?.ok) setRota(await res.json());
+  }, []);
 
   // Keep the service worker registered so notifications arrive.
   useEffect(() => {
     if (pushSupported()) navigator.serviceWorker.register("/meet/sw.js", { scope: "/meet" }).catch(() => {});
   }, []);
 
+  // Fresh rota on open and whenever the app comes back to the front.
+  useEffect(() => {
+    loadRota();
+    const onShow = () => document.visibilityState === "visible" && loadRota();
+    document.addEventListener("visibilitychange", onShow);
+    return () => document.removeEventListener("visibilitychange", onShow);
+  }, [loadRota]);
+
+  // Opening the rota counts as having seen a newly sent one.
+  useEffect(() => {
+    if (tab !== "rota" || !rota?.unseen.length) return;
+    fetch("/api/meet/my-rota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seen: rota.unseen.map((u) => u.id) }) })
+      .then(() => setRota((r) => (r ? { ...r, unseen: [] } : r)))
+      .catch(() => {});
+  }, [tab, rota?.unseen]);
+
   // Ask once, straight after installing.
   if (me.notifyChoice === "" && pushSupported()) return <AllowNotifications onDone={reload} />;
   return (
     <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
-      {tab === "home" ? <Home me={me} /> : <MeScreen me={me} onSignOut={onSignOut} />}
+      {tab === "home" ? <Home me={me} rota={rota} onRota={() => setTab("rota")} />
+        : tab === "rota" ? <RotaScreen me={me} rota={rota} onBack={() => setTab("home")} />
+        : <MeScreen me={me} onSignOut={onSignOut} />}
       <TabBar tab={tab} onTab={setTab} />
     </div>
   );
@@ -485,9 +514,36 @@ function greeting() {
 }
 const londonTime = (iso: string) => new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }).format(new Date(iso));
 
-function Home({ me }: { me: ApprovedMe }) {
+const shortDay = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+const dayMonth = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+
+function Home({ me, rota, onRota }: { me: ApprovedMe; rota: MyRota | null; onRota: () => void }) {
   const col = personColour(me.person.id);
-  const on = !!me.clockedInSince;
+  const clocked = !!me.clockedInSince;
+  const mine = (rota?.weeks || []).flatMap((w) => w.mine);
+  const today = rota?.today || "";
+  const todays = mine.filter((s) => s.date === today);
+  const next = mine.find((s) => s.date > today);
+  const onToday = todays.length > 0 || clocked;
+  const branchName = BRANCH[todays[0]?.branch || next?.branch || me.branch];
+
+  const title = todays.length
+    ? `On shift today · ${todays.map((s) => `${s.start} – ${s.end}`).join(", ")}`
+    : clocked ? `On shift · clocked in ${londonTime(me.clockedInSince!)}` : "Not on shift today";
+  const sub = [
+    branchName,
+    todays.length && clocked ? `clocked in ${londonTime(me.clockedInSince!)}` : "",
+    next ? `next shift ${shortDay(next.date)} ${next.start}` : "",
+  ].filter(Boolean).join(" · ") || "From the rota and clock-in app";
+
+  const linkRow = (href: string, icon: string, label: string) => (
+    <a href={href} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 54, padding: "0 14px", borderRadius: 22, background: C.card, color: "#fff", textDecoration: "none" }}>
+      <Icon name={icon} size={21} />
+      <span style={{ flex: 1, fontSize: 15 }}>{label}</span>
+      <Icon name="chevron_right" size={20} style={{ color: C.faint }} />
+    </a>
+  );
+
   return (
     <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 40px) 18px 18px", display: "flex", flexDirection: "column", gap: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
@@ -498,28 +554,139 @@ function Home({ me }: { me: ApprovedMe }) {
         </div>
       </div>
 
-      <div
-        style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 56, padding: "8px 14px", boxSizing: "border-box", borderRadius: 18, background: on ? "#172e2a" : C.card }}
-      >
-        <Icon name="badge" size={22} style={{ color: on ? "#5eead4" : C.muted }} />
+      {rota && rota.unseen.length > 0 && (
+        <article style={{ borderRadius: 22, background: "linear-gradient(140deg, #ff7a45, #e0502f)", padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+          <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600 }}><Icon name="view_timeline" size={16} fill />New rota</p>
+          <p style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: "-0.01em" }}>Your shifts for {rota.unseen[0].label}</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.85)" }}>{BRANCH[rota.unseen[0].branch] || ""}</span>
+            <button onClick={onRota} style={{ marginLeft: "auto", height: 34, padding: "0 14px", border: 0, borderRadius: 17, background: "#ffffff", color: C.bg, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }}>See it</button>
+          </div>
+        </article>
+      )}
+
+      <button onClick={onRota} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 56, padding: "8px 14px", boxSizing: "border-box", border: 0, borderRadius: 18, background: onToday ? "#172e2a" : C.card, color: "#fff", textAlign: "left", fontFamily: "inherit", width: "100%" }}>
+        <Icon name="badge" size={22} style={{ color: onToday ? "#5eead4" : C.muted }} />
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: "block", fontSize: 14, fontWeight: 500, color: on ? "#ccfbf1" : "#fff" }}>
-            {on ? `On shift · clocked in ${londonTime(me.clockedInSince!)}` : "Not clocked in"}
-          </span>
-          <span style={{ display: "block", fontSize: 12, color: on ? "#99f6e4" : C.muted }}>
-            {[BRANCH[me.branch], "from the clock-in app"].filter(Boolean).join(" · ")}
-          </span>
+          <span style={{ display: "block", fontSize: 14, fontWeight: 500, color: onToday ? "#ccfbf1" : "#fff" }}>{title}</span>
+          <span style={{ display: "block", fontSize: 12, color: onToday ? "#99f6e4" : C.muted }}>{sub}</span>
         </span>
-      </div>
+        <Icon name="chevron_right" size={20} style={{ color: onToday ? "#5eead4" : C.faint }} />
+      </button>
 
       {me.manager && <PhoneApprovals />}
+      {me.manager && linkRow("/meet/rota", "view_timeline", "Build the rota")}
+      {me.manager && linkRow("/meet/staff", "groups", "Staff and phones")}
+    </main>
+  );
+}
 
-      {me.manager && (
-        <a href="/meet/staff" style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 54, padding: "0 14px", borderRadius: 22, background: C.card, color: "#fff", textDecoration: "none" }}>
-          <Icon name="groups" size={21} />
-          <span style={{ flex: 1, fontSize: 15 }}>Staff and phones</span>
-          <Icon name="chevron_right" size={20} style={{ color: C.faint }} />
-        </a>
+/* ─── 19 · Staff phone: rota ─── */
+
+function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null; onBack: () => void }) {
+  const [view, setView] = useState<"mine" | "team">("mine");
+  const [wi, setWi] = useState(0);
+  const weeks = rota?.weeks || [];
+  const w = weeks[wi];
+  const published = weeks.filter((x) => x.published);
+  const today = rota?.today || "";
+  const role = me.person.role ? me.person.role[0].toUpperCase() + me.person.role.slice(1) : "";
+
+  const mine = w?.mine || [];
+  const hours = mine.reduce((a, s) => a + s.hours, 0);
+  const nextShift = weeks.flatMap((x) => x.mine).find((s) => s.date > today || (s.date === today));
+  const branchLine = BRANCH[mine[0]?.branch || me.branch] || "";
+
+  const tabBtn = (key: "mine" | "team", label: string) => (
+    <button role="tab" aria-selected={view === key} onClick={() => setView(key)} style={{ height: 38, border: 0, borderRadius: 19, background: view === key ? "#ffffff" : "transparent", color: view === key ? C.bg : "#ffffff", fontSize: 14, fontWeight: view === key ? 500 : 400, fontFamily: "inherit" }}>{label}</button>
+  );
+
+  return (
+    <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 40px) 18px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 6 }}>
+        <button onClick={onBack} aria-label="Back to home" style={{ width: 44, height: 44, border: 0, borderRadius: 22, background: C.chip, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="arrow_back" size={22} /></button>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em" }}>Rota</h1>
+          <p style={{ margin: "1px 0 0", fontSize: 12, color: C.muted }}>{[branchLine, w?.label].filter(Boolean).join(" · ")}</p>
+        </div>
+        {weeks.length > 1 && (
+          <button onClick={() => setWi(wi === 0 ? 1 : 0)} style={{ height: 36, padding: "0 12px", border: 0, borderRadius: 18, background: C.chip, color: "#fff", fontSize: 13, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 4 }}>
+            {wi === 0 ? "Next week" : "This week"}<Icon name={wi === 0 ? "chevron_right" : "chevron_left"} size={18} />
+          </button>
+        )}
+      </div>
+
+      <div role="tablist" aria-label="Rota view" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 4, padding: 4, borderRadius: 22, background: C.card }}>
+        {tabBtn("mine", "My shifts")}
+        {tabBtn("team", "Whole team")}
+      </div>
+
+      {!rota ? (
+        <div style={{ height: 80, borderRadius: 20, background: C.card }} />
+      ) : published.length === 0 || !w?.published ? (
+        <div style={{ padding: "14px 16px", borderRadius: 20, background: C.card, color: C.muted, fontSize: 14, lineHeight: 1.5 }}>
+          {published.length === 0 ? "No rota has been sent yet. You'll get a notification and an email when it is." : `The rota for ${w.label} hasn't been sent yet.`}
+        </div>
+      ) : view === "mine" ? (
+        <>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 20, background: "#172e2a" }}>
+            <Icon name="schedule" size={22} style={{ color: "#5eead4" }} />
+            <span style={{ flex: 1 }}>
+              <span style={{ display: "block", fontSize: 15, fontWeight: 500, color: "#ccfbf1" }}>{mine.length} shift{mine.length === 1 ? "" : "s"} · {Number.isInteger(hours) ? hours : hours.toFixed(1)} hours</span>
+              <span style={{ display: "block", fontSize: 12, color: "#99f6e4" }}>{nextShift ? `Next: ${dayMonth(nextShift.date)}, ${nextShift.start}` : "No more shifts this week"}</span>
+            </span>
+          </div>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            {w.days.map((d) => {
+              const list = mine.filter((s) => s.date === d);
+              const dayCol = (muted: boolean) => (
+                <div style={{ width: 44, textAlign: "center" }}>
+                  <p style={{ margin: 0, fontSize: 11, color: muted ? C.faint : C.muted }}>{shortDay(d)}</p>
+                  <p style={{ margin: 0, fontSize: 17, fontWeight: 600, color: muted ? C.faint : "#fff" }}>{Number(d.slice(8))}</p>
+                </div>
+              );
+              if (list.length === 0) {
+                return (
+                  <li key={d} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 18, background: "#161616" }}>
+                    {dayCol(true)}<p style={{ margin: 0, flex: 1, fontSize: 14, color: C.faint }}>Day off</p>
+                  </li>
+                );
+              }
+              return list.map((s) => {
+                const others = (w.team || []).filter((t) => t.date === d && !t.me).map((t) => firstName(t.name));
+                const detail = [role, s.notes, others.length ? `with ${others.slice(0, 3).join(", ")}${others.length > 3 ? ` +${others.length - 3}` : ""}` : ""].filter(Boolean).join(" · ");
+                return (
+                  <li key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 18, background: C.card, outline: d === today ? "1.5px solid #5eead4" : undefined }}>
+                    {dayCol(false)}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: 0, fontFamily: "'Geist Mono', monospace", fontSize: 14 }}>{s.start} – {s.end}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{detail || BRANCH[s.branch] || ""}</p>
+                    </div>
+                  </li>
+                );
+              });
+            })}
+          </ul>
+        </>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {w.days.map((d) => {
+            const people = w.team.filter((t) => t.date === d).sort((a, b) => a.start.localeCompare(b.start));
+            return (
+              <section key={d} style={{ padding: "12px 14px", borderRadius: 18, background: C.card, outline: d === today ? "1.5px solid #5eead4" : undefined }}>
+                <p style={{ margin: "0 0 6px", fontSize: 12, color: C.muted }}>{dayMonth(d)}</p>
+                {people.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: 14, color: C.faint }}>No one on the rota</p>
+                ) : people.map((t, i) => (
+                  <p key={i} style={{ margin: "4px 0 0", display: "flex", gap: 10, fontSize: 14, color: t.me ? "#5eead4" : "#fff" }}>
+                    <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.me ? "You" : t.name}</span>
+                    <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 13 }}>{t.start} – {t.end}</span>
+                  </p>
+                ))}
+              </section>
+            );
+          })}
+        </div>
       )}
     </main>
   );
@@ -548,8 +715,8 @@ function MeScreen({ me, onSignOut }: { me: ApprovedMe; onSignOut: () => void }) 
 
 /* ─── Bottom tabs (Calendar, Tasks and News switch on as they're built) ─── */
 
-function TabBar({ tab, onTab }: { tab: "home" | "me"; onTab: (t: "home" | "me") => void }) {
-  const item = (label: string, icon: string, key?: "home" | "me") => {
+function TabBar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
+  const item = (label: string, icon: string, key?: Tab) => {
     const current = key === tab;
     const live = !!key;
     return (
@@ -569,7 +736,7 @@ function TabBar({ tab, onTab }: { tab: "home" | "me"; onTab: (t: "home" | "me") 
   return (
     <nav aria-label="App" style={{ position: "sticky", bottom: 0, padding: "10px 22px max(26px, env(safe-area-inset-bottom))", background: C.bg, borderTop: `1px solid ${C.line}`, display: "flex", justifyContent: "space-between" }}>
       {item("Home", "home", "home")}
-      {item("Calendar", "calendar_month")}
+      {item("Calendar", "calendar_month", "rota")}
       {item("Tasks", "check_circle")}
       {item("News", "campaign")}
       {item("Me", "person", "me")}

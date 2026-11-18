@@ -84,3 +84,72 @@ export async function getClockedIn(): Promise<Map<number, string>> {
   const data = await bridge<{ clocked_in: { staff_id: number; since: string }[] }>("/clocked-in");
   return new Map((data.clocked_in || []).map((r) => [r.staff_id, r.since]));
 }
+
+/* ─── Rota (shifts live in the clock-in app; both rota builders share them) ─── */
+
+export type ClockinShift = { id: number; staffId: number; date: string; start: string; end: string; notes: string | null };
+type RawShift = { id: number; staff_id: number; date: string; start: string; end: string; notes: string | null };
+const fromRaw = (s: RawShift): ClockinShift => ({ id: s.id, staffId: s.staff_id, date: s.date, start: s.start, end: s.end, notes: s.notes });
+
+// Local test rota for development without the clock-in link.
+const devShifts: ClockinShift[] = [];
+let devNextId = 1;
+
+/** Every shift between two dates (YYYY-MM-DD, inclusive). */
+export async function getShifts(start: string, end: string): Promise<ClockinShift[]> {
+  if (DEV_MOCK) return devShifts.filter((s) => s.date >= start && s.date <= end).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+  const data = await bridge<{ shifts: RawShift[] }>(`/rota?start=${start}&end=${end}`);
+  return (data.shifts || []).map(fromRaw);
+}
+
+export type ShiftInput = { staffId: number; date: string; start: string; end: string; notes?: string | null };
+
+async function bridgeWrite<T>(path: string, method: string, actor: string, body?: object): Promise<T> {
+  if (!API || KEY.length < 32) throw new Error("Clock-in link is not set up");
+  const res = await fetch(`${API}${path}`, {
+    method,
+    headers: { Accept: "application/json", "Content-Type": "application/json", "X-Bridge-Key": KEY, "X-Bridge-Actor": actor.slice(0, 60) },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // Laravel validation: { message, errors: { field: [msg] } }
+    const first = data?.errors ? (Object.values(data.errors)[0] as string[])?.[0] : null;
+    throw new Error(first || data?.message || `Clock-in link answered ${res.status}`);
+  }
+  return data as T;
+}
+
+const toRaw = (s: ShiftInput) => ({ staff_id: s.staffId, date: s.date, start: s.start, end: s.end, notes: s.notes ?? null });
+
+export async function createShift(s: ShiftInput, actor: string): Promise<ClockinShift> {
+  if (DEV_MOCK) {
+    const shift = { id: devNextId++, staffId: s.staffId, date: s.date, start: s.start, end: s.end, notes: s.notes ?? null };
+    devShifts.push(shift);
+    return shift;
+  }
+  const d = await bridgeWrite<{ shift: RawShift }>("/rota/shifts", "POST", actor, toRaw(s));
+  return fromRaw(d.shift);
+}
+
+export async function updateShift(id: number, s: ShiftInput, actor: string): Promise<ClockinShift> {
+  if (DEV_MOCK) {
+    const i = devShifts.findIndex((x) => x.id === id);
+    if (i < 0) throw new Error("Shift not found");
+    devShifts[i] = { id, staffId: s.staffId, date: s.date, start: s.start, end: s.end, notes: s.notes ?? null };
+    return devShifts[i];
+  }
+  const d = await bridgeWrite<{ shift: RawShift }>(`/rota/shifts/${id}`, "PUT", actor, toRaw(s));
+  return fromRaw(d.shift);
+}
+
+export async function deleteShift(id: number, actor: string): Promise<void> {
+  if (DEV_MOCK) {
+    const i = devShifts.findIndex((x) => x.id === id);
+    if (i >= 0) devShifts.splice(i, 1);
+    return;
+  }
+  await bridgeWrite(`/rota/shifts/${id}`, "DELETE", actor);
+}
