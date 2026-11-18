@@ -11,8 +11,9 @@ type Person = { id: number; name: string; role: string; branch: string };
 const londonNow = () => {
   const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
   const g = (t: string) => p.find((x) => x.type === t)?.value || "";
-  return { date: `${g("year")}-${g("month")}-${g("day")}`, hour: Number(g("hour")) };
+  return { date: `${g("year")}-${g("month")}-${g("day")}`, hour: Number(g("hour")), time: `${g("hour")}:${g("minute")}` };
 };
+const quick: CSSProperties = { marginLeft: "auto", height: 24, padding: "0 10px", border: 0, borderRadius: 12, background: C.page, color: C.ink, fontSize: 12, fontWeight: 500, fontFamily: "inherit", cursor: "pointer" };
 const weekday = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 const LENGTHS = [15, 20, 30, 45, 60, 90, 120];
 
@@ -103,11 +104,17 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label htmlFor="nm-day" style={lbl}>Date</label>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <label htmlFor="nm-day" style={lbl}>Date</label>
+              <button type="button" onClick={() => setDate(londonNow().date)} aria-pressed={date === londonNow().date} style={{ ...quick, ...(date === londonNow().date ? { background: C.ink, color: "#ffffff" } : {}) }}>Today</button>
+            </div>
             <div style={fieldWrap}><Icon name="calendar_today" size={19} style={fieldIcon} /><input id="nm-day" type="date" value={date} min={now.date} onChange={(e) => setDate(e.target.value)} style={field} /></div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label htmlFor="nm-time" style={lbl}>Time</label>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <label htmlFor="nm-time" style={lbl}>Time</label>
+              <button type="button" onClick={() => { const n = londonNow(); setDate(n.date); setTime(n.time); }} title="Today, starting now" style={quick}>Now</button>
+            </div>
             <div style={fieldWrap}><Icon name="schedule" size={19} style={fieldIcon} /><input id="nm-time" type="time" step={300} value={time} onChange={(e) => setTime(e.target.value)} style={field} /></div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
