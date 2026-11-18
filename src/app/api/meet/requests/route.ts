@@ -19,6 +19,11 @@ export async function GET(req: Request) {
   const free = url.searchParams.get("free");
 
   try {
+    // Names only, for pickers on the phone (e.g. "Who is it about?" in a private report).
+    if (url.searchParams.get("people") === "1") {
+      const staff = (await getClockinStaff()).filter((s) => s.active);
+      return NextResponse.json({ people: staff.map((s) => ({ id: s.id, name: s.name })).sort((a, b) => a.name.localeCompare(b.name)) }, { headers: { "Cache-Control": "no-store" } });
+    }
     if (isDate(free)) {
       const people = await freeOn(free, me.person.id);
       return NextResponse.json({ people: people.map((p) => ({ id: p.id, name: p.name })) }, { headers: { "Cache-Control": "no-store" } });

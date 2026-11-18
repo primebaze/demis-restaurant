@@ -1,7 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Icon, IconFont, personColour, initial, firstName, BRANCH, ago } from "./ui";
+import { Icon, IconFont, personColour, personColourLight, initial, firstName, BRANCH } from "./ui";
+import { useData, type Meeting } from "./phone/kit";
+import { TasksScreen, TaskScreen } from "./phone/Tasks";
+import { NewsScreen, DocsScreen, AlertsScreen } from "./phone/Feed";
+import { MeScreen, HoursFixScreen, ReportScreen, ReportPersonScreen, type FixTarget } from "./phone/Me";
+import { CalendarScreen, NotesScreen, NotesListScreen } from "./phone/Calendar";
+import { ManageScreen, PostScreen } from "./phone/Manage";
 import ManagerHome from "./ManagerHome";
 
 /*
@@ -186,12 +192,16 @@ function SignIn({ onDone }: { onDone: () => void }) {
     [picked, onDone],
   );
 
+  // The PIN so far, kept in a ref too so quick typing never reads a stale value.
+  const pinRef = useRef("");
+  pinRef.current = pin;
   const press = (d: string) => {
     if (busy) return;
     if (picked == null) return setError("Tap your name first");
-    if (pin.length >= 4) return;
+    if (pinRef.current.length >= 4) return;
     setError("");
-    const next = pin + d;
+    const next = pinRef.current + d;
+    pinRef.current = next;
     setPin(next);
     if (next.length === 4) submit(next);
   };
@@ -234,6 +244,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
                 key={p.id}
                 type="button"
                 aria-pressed={on}
+                aria-label={p.name}
                 onClick={() => { setPicked(p.id); setPin(""); setError(""); }}
                 style={{ flex: "none", width: 72, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, border: 0, padding: 0, background: "transparent", color: on ? "#fff" : C.muted, fontSize: 13, fontWeight: on ? 600 : 400, fontFamily: "inherit" }}
               >
@@ -321,7 +332,6 @@ function Waiting({ me, onSignOut }: { me: { state: "pending" | "declined"; name:
 /* ─── Signed in ─── */
 
 type ApprovedMe = Extract<Me, { state: "approved" }>;
-type Tab = "home" | "rota" | "me";
 type Req = {
   id: string; kind: "swap" | "timeoff"; status: string; shiftId: number | null; date: string; start: string; end: string; branch: string;
   target: string; from: string; to: string; approvedFrom: string; approvedTo: string; by: string; createdAt: string;
@@ -359,12 +369,39 @@ function useDevice() {
 const pushSupported = () =>
   typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 
+type Tab = "home" | "calendar" | "tasks" | "manage" | "news" | "me" | "rota";
+type Sub =
+  | { k: "task"; id: string } | { k: "alerts" } | { k: "notes"; id: string } | { k: "notesList" } | { k: "report" } | { k: "reportPerson" }
+  | { k: "fix"; t: FixTarget } | { k: "docs" } | { k: "settings" } | { k: "post" } | { k: "allow" };
+const TABS: Tab[] = ["home", "calendar", "tasks", "manage", "news", "me", "rota"];
+
 function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
-  const [tab, setTab] = useState<Tab>(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "rota" ? "rota" : "home"));
+  const [tab, setTab] = useState<Tab>(() => {
+    if (typeof window === "undefined") return "home";
+    const t = new URLSearchParams(window.location.search).get("tab") as Tab | null;
+    return t && TABS.includes(t) ? t : "home";
+  });
+  const [sub, setSub] = useState<Sub | null>(() => {
+    if (typeof window === "undefined") return null;
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("task")) return { k: "task", id: q.get("task")! };
+    if (q.get("notes")) return { k: "notes", id: q.get("notes")! };
+    return null;
+  });
   const [rota, setRota] = useState<MyRota | null>(null);
   const [requests, setRequests] = useState<MyRequests | null>(null);
   const [asking, setAsking] = useState<"" | "swap" | "timeoff">("");
   const wide = useWide();
+
+  // A notification link to a call opens the call page.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const join = q.get("join");
+    if (join) return window.location.replace(`/meet/call/${encodeURIComponent(join)}`);
+    // A page opened while signed out sends people here; after sign-in they go back to it.
+    const back = q.get("back");
+    if (back && /^\/meet\/[A-Za-z0-9/_-]+$/.test(back)) window.location.replace(back);
+  }, []);
 
   const loadRota = useCallback(async () => {
     const [r1, r2] = await Promise.all([
@@ -396,20 +433,66 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
       .catch(() => {});
   }, [tab, rota?.unseen]);
 
+  // Each screen starts at the top.
+  useEffect(() => { window.scrollTo(0, 0); }, [tab, sub]);
+
+  /** Links inside the app (from notifications and cards) open the right screen. */
+  const go = useCallback((url: string) => {
+    if (!url.startsWith("/meet")) return;
+    const [path, query = ""] = url.split("?");
+    const q = new URLSearchParams(query);
+    if (path !== "/meet" && path !== "/meet/") { window.location.href = url; return; }
+    if (q.get("join")) { window.location.href = `/meet/call/${q.get("join")}`; return; }
+    if (q.get("task")) return setSub({ k: "task", id: q.get("task")! });
+    if (q.get("notes")) return setSub({ k: "notes", id: q.get("notes")! });
+    const t = q.get("tab") as Tab | null;
+    setSub(null);
+    setTab(t && TABS.includes(t) ? t : "home");
+  }, []);
+
   // Ask once, straight after installing.
   // Skipped if this server has no notification keys (e.g. a local copy), so it never blocks the app.
   if (me.notifyChoice === "" && me.pushReady && pushSupported()) return <AllowNotifications onDone={reload} />;
+  if (sub?.k === "allow") return <AllowNotifications onDone={() => { setSub(null); reload(); }} />;
   // Managers on a computer get the computer Home (design 1) instead of the phone screens.
-  if (me.manager && wide && tab === "home") return <ManagerHome name={me.person.name} />;
+  if (me.manager && wide && tab === "home" && !sub) return <ManagerHome name={me.person.name} />;
   if (asking && rota) return <AskScreen start={asking} rota={rota} requests={requests} onClose={() => setAsking("")} onSent={() => { setAsking(""); loadRota(); }} />;
+
+  const back = () => setSub(null);
+  const myShifts = (rota?.weeks || []).flatMap((w) => (w.published ? w.mine : [])).map((s) => ({ date: s.date, start: s.start, end: s.end, branch: s.branch }));
+  let screen: ReactNode;
+  if (sub?.k === "task") screen = <TaskScreen id={sub.id} onBack={back} />;
+  else if (sub?.k === "alerts") screen = <AlertsScreenLive me={me} onBack={back} onOpen={go} onTurnOn={() => setSub({ k: "allow" })} />;
+  else if (sub?.k === "notes") screen = <NotesScreen id={sub.id} onBack={back} onTask={(id) => setSub({ k: "task", id })} />;
+  else if (sub?.k === "notesList") screen = <NotesListScreen onBack={() => { setSub(null); setTab("me"); }} onOpen={(id) => setSub({ k: "notes", id })} />;
+  else if (sub?.k === "report") screen = <ReportScreen branch={me.branch} onBack={back} onPerson={() => setSub({ k: "reportPerson" })} />;
+  else if (sub?.k === "reportPerson") screen = <ReportPersonScreen meId={me.person.id} branch={me.branch} onBack={() => setSub({ k: "report" })} />;
+  else if (sub?.k === "fix") screen = <HoursFixScreen target={sub.t} onBack={back} />;
+  else if (sub?.k === "docs") screen = <DocsScreen onBack={back} />;
+  else if (sub?.k === "settings") screen = <SettingsScreen me={me} onBack={back} onSignOut={onSignOut} onTurnOn={() => setSub({ k: "allow" })} />;
+  else if (sub?.k === "post") screen = <PostScreen onBack={back} />;
+  else if (tab === "home") screen = <Home me={me} rota={rota} requests={requests} onRota={() => setTab("rota")} reload={loadRota} onTask={(id) => setSub({ k: "task", id })} onAlerts={() => setSub({ k: "alerts" })} onTasks={() => setTab("tasks")} onNotes={(id) => setSub({ k: "notes", id })} />;
+  else if (tab === "rota") screen = <RotaScreen me={me} rota={rota} requests={requests} onBack={() => setTab("calendar")} onAsk={(m) => setAsking(m)} reload={loadRota} />;
+  else if (tab === "calendar") screen = <CalendarScreen shifts={myShifts} onTask={(id) => setSub({ k: "task", id })} onRota={() => setTab("rota")} onNotes={(id) => setSub({ k: "notes", id })} />;
+  else if (tab === "tasks") screen = <TasksScreen onOpen={(id) => setSub({ k: "task", id })} />;
+  else if (tab === "manage" && me.manager) screen = <ManageScreen onPost={() => setSub({ k: "post" })} />;
+  else if (tab === "news") screen = <NewsScreen onDocs={() => setSub({ k: "docs" })} />;
+  else screen = <MeScreen me={me} onSettings={() => setSub({ k: "settings" })} onFix={(t) => setSub({ k: "fix", t })} onNotes={() => setSub({ k: "notesList" })} onReport={() => setSub({ k: "report" })} />;
+
   return (
     <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
-      {tab === "home" ? <Home me={me} rota={rota} requests={requests} onRota={() => setTab("rota")} reload={loadRota} />
-        : tab === "rota" ? <RotaScreen me={me} rota={rota} requests={requests} onBack={() => setTab("home")} onAsk={(m) => setAsking(m)} reload={loadRota} />
-        : <MeScreen me={me} onSignOut={onSignOut} />}
-      <TabBar tab={tab} onTab={setTab} />
+      {screen}
+      {!sub && <TabBar tab={tab} manager={me.manager} onTab={setTab} />}
     </div>
   );
+}
+
+/** Notifications, with any meeting I'm invited to that's live right now on top. */
+function AlertsScreenLive({ me, onBack, onOpen, onTurnOn }: { me: ApprovedMe; onBack: () => void; onOpen: (url: string) => void; onTurnOn: () => void }) {
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+  const live = (useData<{ meetings: Meeting[] }>(`/api/meet/meetings?from=${today}&to=${today}`).data?.meetings || []).filter((m) => m.status === "live" && m.mineInvited);
+  const pushOff = me.pushReady && pushSupported() && me.notifyChoice === "off";
+  return <AlertsScreen onBack={onBack} onOpen={onOpen} live={live} pushOff={pushOff} onTurnOn={onTurnOn} />;
 }
 
 /* ─── 25 · Add to home screen (iPhone) ─── */
@@ -548,15 +631,37 @@ const londonTime = (iso: string) => new Intl.DateTimeFormat("en-GB", { hour: "2-
 const shortDay = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 const dayMonth = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 
-function Home({ me, rota, requests, onRota, reload }: { me: ApprovedMe; rota: MyRota | null; requests: MyRequests | null; onRota: () => void; reload: () => void }) {
+type HomeTask = { id: string; title: string; dueDate: string; status: string };
+const TASK_ICON: [RegExp, string][] = [[/call|phone|chase|ring/i, "call"], [/clean/i, "cleaning_services"], [/order|stock|count/i, "inventory_2"], [/fix|repair|broken/i, "build"], [/send|email/i, "send"], [/book/i, "event"]];
+const taskIcon = (t: string) => TASK_ICON.find(([r]) => r.test(t))?.[1] || "task_alt";
+
+function Home({ me, rota, requests, onRota, reload, onTask, onAlerts, onTasks, onNotes }: {
+  me: ApprovedMe; rota: MyRota | null; requests: MyRequests | null; onRota: () => void; reload: () => void;
+  onTask: (id: string) => void; onAlerts: () => void; onTasks: () => void; onNotes: (id: string) => void;
+}) {
   const col = personColour(me.person.id);
   const clocked = !!me.clockedInSince;
   const mine = (rota?.weeks || []).flatMap((w) => w.mine);
-  const today = rota?.today || "";
+  const today = rota?.today || new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
   const todays = mine.filter((s) => s.date === today);
   const next = mine.find((s) => s.date > today);
   const onToday = todays.length > 0 || clocked;
   const branchName = BRANCH[todays[0]?.branch || next?.branch || me.branch];
+  const [filter, setFilter] = useState<"all" | "today" | "upcoming" | "past">("all");
+
+  const from = new Date(Date.now() - 30 * 86400_000).toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+  const to = new Date(Date.now() + 30 * 86400_000).toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+  const meetings = (useData<{ meetings: Meeting[] }>(`/api/meet/meetings?from=${from}&to=${to}`).data?.meetings || []).filter((m) => m.mineInvited || m.mineJoined);
+  const tasks = (useData<{ tasks: HomeTask[] }>("/api/meet/tasks").data?.tasks || []).filter((t) => t.status !== "done");
+  const unread = useData<{ unread: number }>("/api/meet/alerts").data?.unread || 0;
+
+  const live = meetings.find((m) => m.status === "live");
+  const upcoming = meetings.filter((m) => m.status === "scheduled" && m.startsAt >= new Date(Date.now() - 3600_000).toISOString());
+  const list = filter === "today" ? meetings.filter((m) => m.date === today && m !== live)
+    : filter === "upcoming" ? upcoming
+    : filter === "past" ? meetings.filter((m) => m.status === "ended" || m.status === "ready").reverse()
+    : upcoming.slice(0, 2);
+  const openTasks = [...tasks].sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
 
   const title = todays.length
     ? `On shift today · ${todays.map((s) => `${s.start} – ${s.end}`).join(", ")}`
@@ -567,13 +672,21 @@ function Home({ me, rota, requests, onRota, reload }: { me: ApprovedMe; rota: My
     next ? `next shift ${shortDay(next.date)} ${next.start}` : "",
   ].filter(Boolean).join(" · ") || "From the rota and clock-in app";
 
-  const linkRow = (href: string, icon: string, label: string) => (
-    <a href={href} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 54, padding: "0 14px", borderRadius: 22, background: C.card, color: "#fff", textDecoration: "none" }}>
-      <Icon name={icon} size={21} />
-      <span style={{ flex: 1, fontSize: 15 }}>{label}</span>
-      <Icon name="chevron_right" size={20} style={{ color: C.faint }} />
-    </a>
-  );
+  const meetingRow = (m: Meeting) => {
+    const past = m.status === "ended" || m.status === "ready";
+    const body = (
+      <>
+        <span style={{ width: 40, height: 40, borderRadius: 14, background: "#262626", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}><Icon name={m.kind === "room" ? "mic" : past ? "auto_stories" : "videocam"} size={21} /></span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{m.title}</span>
+          <span style={{ display: "block", marginTop: 2, fontSize: 12, color: C.muted }}>{m.date === today ? "Today" : shortDay(m.date)} {m.time} · {past ? (m.mineJoined ? "notes" : "missed") : `${m.minutes} min`}</span>
+        </span>
+        <Icon name="chevron_right" size={20} style={{ color: C.faint }} />
+      </>
+    );
+    const style = { display: "flex", alignItems: "center", gap: 12, padding: 14, border: 0, borderRadius: 20, background: C.card, color: "#ffffff", textDecoration: "none", textAlign: "left" as const, fontFamily: "inherit", width: "100%", cursor: "pointer" };
+    return past ? <button key={m.id} onClick={() => !m.private && m.mineJoined && onNotes(m.id)} style={style}>{body}</button> : <a key={m.id} href={`/meet/call/${m.id}`} style={style}>{body}</a>;
+  };
 
   return (
     <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 40px) 18px 18px", display: "flex", flexDirection: "column", gap: 18 }}>
@@ -583,7 +696,42 @@ function Home({ me, rota, requests, onRota, reload }: { me: ApprovedMe; rota: My
           <p style={{ margin: 0, fontSize: 13, color: C.muted }}>{greeting()}</p>
           <p style={{ margin: "1px 0 0", fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>{firstName(me.person.name)}</p>
         </div>
+        <button onClick={onAlerts} aria-label={unread ? `Notifications, ${unread} new` : "Notifications"} style={{ position: "relative", width: 44, height: 44, border: 0, borderRadius: 22, background: C.chip, color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <Icon name="notifications" size={22} />
+          {unread > 0 && <span style={{ position: "absolute", top: 10, right: 11, width: 8, height: 8, borderRadius: "50%", background: "#f2643a" }} />}
+        </button>
       </div>
+
+      <div role="group" aria-label="Show meetings" style={{ display: "flex", gap: 8, marginRight: -18, paddingRight: 18, overflowX: "auto", scrollbarWidth: "none" }}>
+        {([["all", "All meetings"], ["today", "Today"], ["upcoming", "Upcoming"], ["past", "Past"]] as const).map(([k, l]) => (
+          <button key={k} aria-pressed={filter === k} onClick={() => setFilter(k)} style={{ height: 44, padding: "0 20px", border: 0, borderRadius: 22, background: filter === k ? "#ffffff" : "#232323", color: filter === k ? C.bg : "#ffffff", fontSize: 15, fontWeight: filter === k ? 500 : 400, fontFamily: "inherit", whiteSpace: "nowrap", flex: "none", cursor: "pointer" }}>{l}</button>
+        ))}
+      </div>
+
+      {live && (filter === "all" || filter === "today") && (
+        <section aria-labelledby="on-h" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <h1 id="on-h" style={{ margin: 0, fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em" }}>Ongoing meeting</h1>
+          <div style={{ borderRadius: 26, background: "linear-gradient(140deg, #ff7a45 0%, #f2643a 50%, #d9472f 100%)", padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 26, padding: "0 10px", borderRadius: 13, background: "rgba(255,255,255,0.22)", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ffffff" }} />Live · {Math.max(1, Math.round((Date.now() - new Date(live.startedAt || live.startsAt).getTime()) / 60_000))} min</span>
+              <span style={{ marginLeft: "auto", fontSize: 12, color: "rgba(255,255,255,0.9)" }}>{live.kind === "room" ? "Room recording" : "Video call"}</span>
+            </div>
+            <div>
+              <p style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em" }}>{live.title}</p>
+              <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.9)" }}>{live.time} – {(() => { const [h, mm] = live.time.split(":").map(Number); const e = h * 60 + mm + live.minutes; return `${String(Math.floor(e / 60) % 24).padStart(2, "0")}:${String(e % 60).padStart(2, "0")}`; })()} · {live.inNow.length ? `${live.inNow.slice(0, 2).map((p) => firstName(p.name)).join(", ")}${live.inNow.length > 2 ? ` and ${live.inNow.length - 2} other${live.inNow.length > 3 ? "s" : ""}` : ""} ${live.inNow.length === 1 ? "is" : "are"} in` : "Nobody in yet"}</p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div aria-hidden="true" style={{ display: "flex" }}>
+                {live.inNow.slice(0, 2).map((p, i) => <span key={p.id} style={{ width: 30, height: 30, marginLeft: i ? -8 : 0, borderRadius: "50%", border: "2px solid #f2643a", background: "#ffffff", color: personColourLight(p.id).fg, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(p.name)}</span>)}
+                {live.inNow.length > 2 && <span style={{ width: 30, height: 30, marginLeft: -8, borderRadius: "50%", border: "2px solid #f2643a", background: "#ffffff", color: "#6d28d9", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>+{live.inNow.length - 2}</span>}
+              </div>
+              {live.kind === "call" && <a href={`/meet/call/${live.id}`} style={{ marginLeft: "auto", height: 44, boxSizing: "border-box", display: "inline-flex", alignItems: "center", gap: 6, padding: "0 20px", borderRadius: 22, background: "#ffffff", color: C.bg, fontSize: 15, fontWeight: 600, textDecoration: "none" }}><Icon name="videocam" size={20} fill />Join</a>}
+            </div>
+          </div>
+        </section>
+      )}
+      {list.length > 0 && <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{filter === "all" && <h2 style={{ margin: 0, fontSize: 15, fontWeight: 500, color: "#d4d4d4" }}>Coming up</h2>}{list.map(meetingRow)}</div>}
+      {list.length === 0 && filter !== "all" && <p style={{ margin: 0, color: C.muted, fontSize: 14 }}>{filter === "past" ? "No past meetings yet." : filter === "today" ? (live ? "" : "No meetings today.") : "Nothing coming up."}</p>}
 
       {rota && rota.unseen.length > 0 && (
         <article style={{ borderRadius: 22, background: "linear-gradient(140deg, #ff7a45, #e0502f)", padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
@@ -596,7 +744,7 @@ function Home({ me, rota, requests, onRota, reload }: { me: ApprovedMe; rota: My
         </article>
       )}
 
-      <button onClick={onRota} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 56, padding: "8px 14px", boxSizing: "border-box", border: 0, borderRadius: 18, background: onToday ? "#172e2a" : C.card, color: "#fff", textAlign: "left", fontFamily: "inherit", width: "100%" }}>
+      <button onClick={onRota} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 56, padding: "8px 14px", boxSizing: "border-box", border: 0, borderRadius: 18, background: onToday ? "#172e2a" : C.card, color: "#fff", textAlign: "left", fontFamily: "inherit", width: "100%", cursor: "pointer" }}>
         <Icon name="badge" size={22} style={{ color: onToday ? "#5eead4" : C.muted }} />
         <span style={{ flex: 1, minWidth: 0 }}>
           <span style={{ display: "block", fontSize: 14, fontWeight: 500, color: onToday ? "#ccfbf1" : "#fff" }}>{title}</span>
@@ -607,9 +755,24 @@ function Home({ me, rota, requests, onRota, reload }: { me: ApprovedMe; rota: My
 
       {(requests?.forMe || []).map((r) => <SwapAsk key={r.id} r={r} onDone={reload} />)}
 
-      {me.manager && <PhoneApprovals />}
-      {me.manager && linkRow("/meet/rota", "view_timeline", "Build the rota")}
-      {me.manager && linkRow("/meet/staff", "groups", "Staff and phones")}
+      <section aria-labelledby="mt-h" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "baseline" }}>
+          <h2 id="mt-h" style={{ margin: 0, fontSize: 20, fontWeight: 500, letterSpacing: "-0.01em" }}>My tasks</h2>
+          <span style={{ marginLeft: 8, fontSize: 13, color: C.muted }}>{openTasks.length} open</span>
+          {openTasks.length > 3 && <button onClick={onTasks} style={{ marginLeft: "auto", border: 0, background: "transparent", color: C.muted, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>See all</button>}
+        </div>
+        {openTasks.length === 0 && <p style={{ margin: 0, padding: "14px 16px", borderRadius: 20, background: C.card, color: C.muted, fontSize: 14 }}>No tasks right now.</p>}
+        {openTasks.slice(0, 3).map((t) => {
+          const late = t.dueDate && t.dueDate < today;
+          return (
+            <button key={t.id} onClick={() => onTask(t.id)} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: 0, borderRadius: 20, background: C.card, color: "#ffffff", textAlign: "left", fontFamily: "inherit", cursor: "pointer" }}>
+              <span style={{ width: 40, height: 40, borderRadius: 14, background: late ? "rgba(239,68,68,0.16)" : "#262626", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}><Icon name={late ? "priority_high" : taskIcon(t.title)} size={21} style={{ color: late ? "#fca5a5" : "#ffffff" }} /></span>
+              <span style={{ flex: 1, minWidth: 0 }}><span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{t.title}</span><span style={{ display: "block", marginTop: 2, fontSize: 12, color: late ? "#fca5a5" : C.muted }}>{late ? `Overdue · was due ${dayMonth(t.dueDate)}` : t.dueDate ? `Due ${dayMonth(t.dueDate)}` : "No due date"}</span></span>
+              <Icon name="chevron_right" size={20} style={{ color: C.faint }} />
+            </button>
+          );
+        })}
+      </section>
     </main>
   );
 }
@@ -755,43 +918,40 @@ function RotaScreen({ me, rota, requests, onBack, onAsk, reload }: { me: Approve
   );
 }
 
-/* ─── 18 · Me (sign out for now) ─── */
+/* ─── Settings (from the Me screen): notifications and signing out ─── */
 
-function MeScreen({ me, onSignOut }: { me: ApprovedMe; onSignOut: () => void }) {
-  const col = personColour(me.person.id);
-  const role = me.person.role ? me.person.role[0].toUpperCase() + me.person.role.slice(1) : "";
+function SettingsScreen({ me, onBack, onSignOut, onTurnOn }: { me: ApprovedMe; onBack: () => void; onSignOut: () => void; onTurnOn: () => void }) {
+  const canPush = me.pushReady && pushSupported();
+  const on = me.notifyChoice === "on";
   return (
     <main style={{ flex: 1, boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 40px) 18px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 6 }}>
-        <span style={{ width: 52, height: 52, borderRadius: "50%", background: col.bg, color: col.fg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 600 }}>{initial(me.person.name)}</span>
-        <div style={{ flex: 1 }}>
-          <p style={{ margin: 0, fontSize: 20, fontWeight: 500, letterSpacing: "-0.01em" }}>{me.person.name}</p>
-          <p style={{ margin: "2px 0 0", fontSize: 13, color: C.muted }}>{[role, BRANCH[me.branch]].filter(Boolean).join(" · ")}</p>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 6 }}>
+        <button onClick={onBack} aria-label="Back" style={{ width: 44, height: 44, border: 0, borderRadius: 22, background: C.chip, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="arrow_back" size={22} /></button>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em" }}>Settings</h1>
       </div>
-      <button onClick={onSignOut} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: 0, borderRadius: 18, background: C.card, color: "#fff", fontSize: 15, fontFamily: "inherit", textAlign: "left" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, borderRadius: 18, background: C.card }}>
+        <Icon name={on ? "notifications_active" : "notifications_off"} size={22} />
+        <span style={{ flex: 1 }}>
+          <span style={{ display: "block", fontSize: 15 }}>Notifications</span>
+          <span style={{ display: "block", fontSize: 12, color: C.muted }}>{!canPush ? "Emails only on this device" : on ? "On for this phone, plus emails" : "Off. You still get emails."}</span>
+        </span>
+        {canPush && !on && <button onClick={onTurnOn} style={{ height: 36, padding: "0 14px", border: 0, borderRadius: 18, background: "#ffffff", color: C.bg, fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>Turn on</button>}
+      </div>
+      <button onClick={onSignOut} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, border: 0, borderRadius: 18, background: C.card, color: "#fff", fontSize: 15, fontFamily: "inherit", textAlign: "left", cursor: "pointer" }}>
         <Icon name="logout" size={22} />Sign out on this phone
       </button>
+      <p style={{ margin: "0 4px", fontSize: 12, color: C.muted, lineHeight: 1.5 }}>Your PIN and hours come from the clock-in app. To change your branch or email, ask a manager.</p>
     </main>
   );
 }
 
-/* ─── Bottom tabs (Calendar, Tasks and News switch on as they're built) ─── */
+/* ─── Bottom tabs: Home, Calendar, Tasks (Manage for managers), News, Me ─── */
 
-function TabBar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
-  const item = (label: string, icon: string, key?: Tab) => {
-    const current = key === tab;
-    const live = !!key;
+function TabBar({ tab, manager, onTab }: { tab: Tab; manager: boolean; onTab: (t: Tab) => void }) {
+  const item = (label: string, icon: string, key: Tab) => {
+    const current = key === tab || (key === "calendar" && tab === "rota");
     return (
-      <button
-        key={label}
-        type="button"
-        onClick={live ? () => onTab(key!) : undefined}
-        disabled={!live}
-        aria-current={current ? "page" : undefined}
-        title={live ? undefined : "Coming soon"}
-        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, border: 0, background: "transparent", padding: 0, fontSize: 11, fontFamily: "inherit", color: current ? "#fff" : C.muted, opacity: live ? 1 : 0.4 }}
-      >
+      <button key={label} type="button" onClick={() => onTab(key)} aria-current={current ? "page" : undefined} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, border: 0, background: "transparent", padding: 0, fontSize: 11, fontFamily: "inherit", color: current ? "#fff" : C.muted, cursor: "pointer", minWidth: 48 }}>
         <Icon name={icon} size={24} fill={current} />{label}
       </button>
     );
@@ -799,83 +959,11 @@ function TabBar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
   return (
     <nav aria-label="App" style={{ position: "sticky", bottom: 0, padding: "10px 22px max(26px, env(safe-area-inset-bottom))", background: C.bg, borderTop: `1px solid ${C.line}`, display: "flex", justifyContent: "space-between" }}>
       {item("Home", "home", "home")}
-      {item("Calendar", "calendar_month", "rota")}
-      {item("Tasks", "check_circle")}
-      {item("News", "campaign")}
+      {item("Calendar", "calendar_month", "calendar")}
+      {manager ? item("Manage", "admin_panel_settings", "manage") : item("Tasks", "check_circle", "tasks")}
+      {item("News", "campaign", "news")}
       {item("Me", "person", "me")}
     </nav>
-  );
-}
-
-/* ─── 30 · Manager: approve new phones ─── */
-
-type Device = { id: string; clockinId: number; staffName: string; label: string; createdAt: string };
-
-function PhoneApprovals() {
-  const [pending, setPending] = useState<Device[] | null>(null);
-  const [busyId, setBusyId] = useState("");
-  const [note, setNote] = useState("");
-
-  const load = useCallback(async () => {
-    const res = await fetch("/api/meet/devices", { cache: "no-store" }).catch(() => null);
-    if (res?.ok) setPending((await res.json()).pending || []);
-  }, []);
-
-  useEffect(() => {
-    load();
-    const t = setInterval(load, 20_000);
-    return () => clearInterval(t);
-  }, [load]);
-
-  async function decide(d: Device, action: "approve" | "decline") {
-    setBusyId(d.id);
-    setNote("");
-    const res = await fetch("/api/meet/devices", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: d.id, action }),
-    }).catch(() => null);
-    const data = await res?.json().catch(() => ({}));
-    setBusyId("");
-    if (!res?.ok) return setNote(data?.error || "Couldn't save that");
-    setNote(action === "approve" ? `${firstName(d.staffName)}'s phone is approved.` : `${firstName(d.staffName)}'s phone was declined.`);
-    load();
-  }
-
-  if (!pending || pending.length === 0) {
-    return note ? <p role="status" style={{ margin: 0, fontSize: 13, color: C.muted }}>{note}</p> : null;
-  }
-
-  return (
-    <section aria-labelledby="ph-h" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "flex", alignItems: "baseline" }}>
-        <h2 id="ph-h" style={{ margin: 0, fontSize: 20, fontWeight: 500, letterSpacing: "-0.01em" }}>Phones to approve</h2>
-        <span style={{ marginLeft: 8, fontSize: 13, color: C.muted }}>{pending.length} waiting</span>
-      </div>
-      {pending.map((d) => {
-        const col = personColour(d.clockinId);
-        return (
-          <article key={d.id} style={{ borderRadius: 22, background: C.card, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ width: 36, height: 36, flex: "none", borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(d.staffName)}</span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", fontSize: 12, color: C.muted }}>New phone · {ago(d.createdAt)}</span>
-                <span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{d.staffName} · {d.label.split(" · ")[0]}</span>
-              </span>
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={() => decide(d, "approve")} disabled={!!busyId} style={{ flex: 1, height: 40, border: 0, borderRadius: 20, background: "#fff", color: C.bg, fontSize: 14, fontWeight: 600, fontFamily: "inherit", opacity: busyId ? 0.6 : 1 }}>
-                {busyId === d.id ? "Saving…" : "Approve"}
-              </button>
-              <button onClick={() => decide(d, "decline")} disabled={!!busyId} style={{ height: 40, padding: "0 16px", border: 0, borderRadius: 20, background: "#2a2a2a", color: "#fff", fontSize: 14, fontFamily: "inherit" }}>
-                Decline
-              </button>
-            </div>
-          </article>
-        );
-      })}
-      {note && <p role="status" style={{ margin: 0, fontSize: 13, color: C.muted }}>{note}</p>}
-    </section>
   );
 }
 

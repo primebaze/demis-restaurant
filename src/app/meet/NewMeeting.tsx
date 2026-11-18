@@ -1,0 +1,169 @@
+"use client";
+
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Icon, personColourLight, initial, firstName } from "./ui";
+import { PAGE as C, postJson } from "./ManagerShell";
+
+/* 2 · New meeting (a dialog over the manager pages). Values from the design canvas. */
+
+type Person = { id: number; name: string; role: string; branch: string };
+
+const londonNow = () => {
+  const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+  const g = (t: string) => p.find((x) => x.type === t)?.value || "";
+  return { date: `${g("year")}-${g("month")}-${g("day")}`, hour: Number(g("hour")) };
+};
+const weekday = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+const LENGTHS = [15, 20, 30, 45, 60, 90, 120];
+
+const fieldWrap: CSSProperties = { position: "relative" };
+const field: CSSProperties = { width: "100%", height: 48, boxSizing: "border-box", padding: "0 12px 0 42px", border: 0, borderRadius: 16, background: C.page, fontSize: 15, fontFamily: "inherit", color: C.ink };
+const fieldIcon: CSSProperties = { position: "absolute", left: 14, top: 14, color: C.sub, pointerEvents: "none" };
+const lbl: CSSProperties = { fontSize: 13, fontWeight: 500, color: C.body };
+
+export default function NewMeeting({ onClose, onCreated, date: startDate, kind: startKind = "call" }: { onClose: () => void; onCreated: (id: string) => void; date?: string; kind?: "call" | "room" }) {
+  const now = londonNow();
+  const [people, setPeople] = useState<Person[]>([]);
+  const [meId, setMeId] = useState(0);
+  const [title, setTitle] = useState("");
+  const [kind, setKind] = useState<"call" | "room">(startKind);
+  const [date, setDate] = useState(startDate || now.date);
+  const [time, setTime] = useState(`${String(Math.min(22, now.hour + 1)).padStart(2, "0")}:00`);
+  const [minutes, setMinutes] = useState(30);
+  const [invite, setInvite] = useState<number[]>([]);
+  const [search, setSearch] = useState("");
+  const [liveNotes, setLiveNotes] = useState(true);
+  const [repeat, setRepeat] = useState(false);
+  const [priv, setPriv] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    fetch("/api/meet/team", { cache: "no-store" }).then((r) => r.json()).then((d) => {
+      const list: Person[] = (d.people || d.staff || []).filter((p: { active?: boolean }) => p.active !== false).map((p: Person & { clockinId?: number }) => ({ id: p.id ?? p.clockinId, name: p.name, role: p.role || "", branch: p.branch || "" }));
+      setPeople(list);
+    }).catch(() => {});
+    fetch("/api/meet/me", { cache: "no-store" }).then((r) => r.json()).then((d) => setMeId(d?.person?.id || 0)).catch(() => {});
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const others = people.filter((p) => p.id !== meId);
+  const add = (ids: number[]) => setInvite((cur) => Array.from(new Set([...cur, ...ids])));
+  const matches = useMemo(() => (search.trim() ? others.filter((p) => !invite.includes(p.id) && p.name.toLowerCase().includes(search.trim().toLowerCase())).slice(0, 6) : []), [search, others, invite]);
+
+  async function create() {
+    setBusy(true);
+    setErr("");
+    const r = await postJson("/api/meet/meetings", { title, kind, date, time, minutes, invite, liveNotes, repeat, private: priv });
+    setBusy(false);
+    if (!r.ok) return setErr(r.data.error || "Couldn't create the meeting");
+    onCreated(String(r.data.id));
+  }
+
+  const kindCard = (k: "call" | "room", icon: string, name: string, text: string, iconColour: string) => {
+    const on = kind === k;
+    return (
+      <label style={{ display: "flex", gap: 12, padding: 16, borderRadius: 20, background: on ? C.ink : C.page, color: on ? "#ffffff" : C.ink, cursor: "pointer", position: "relative" }}>
+        <input type="radio" name="kind" checked={on} onChange={() => setKind(k)} style={{ position: "absolute", opacity: 0, width: 1, height: 1 }} />
+        <Icon name={icon} size={24} fill={k === "call"} style={{ color: iconColour }} />
+        <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <span style={{ fontSize: 15, fontWeight: 600 }}>{name}</span>
+          <span style={{ fontSize: 13, color: on ? "#c9c3bc" : C.sub, lineHeight: 1.45 }}>{text}</span>
+        </span>
+      </label>
+    );
+  };
+  const toggle = (icon: string, text: string, on: boolean, set: (v: boolean) => void, first = false, colour = C.body, fill = false) => (
+    <label style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 48, borderTop: first ? undefined : "1px solid #ebe6e0", cursor: "pointer" }}>
+      <Icon name={icon} size={21} fill={fill} style={{ color: colour }} /><span style={{ flex: 1 }}>{text}</span>
+      <input type="checkbox" role="switch" checked={on} onChange={(e) => set(e.target.checked)} style={{ width: 20, height: 20, accentColor: "#f2643a" }} />
+    </label>
+  );
+
+  return (
+    <div onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "36px 16px", overflowY: "auto" }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="nm-title" style={{ width: "100%", maxWidth: 648, boxSizing: "border-box", background: "#ffffff", borderRadius: 28, boxShadow: "0 30px 70px -20px rgba(20,20,20,0.45)", padding: 26, display: "flex", flexDirection: "column", gap: 20, color: C.ink }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ width: 44, height: 44, borderRadius: 14, background: C.coralBg, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="event" size={24} fill style={{ color: C.accent }} /></span>
+          <div style={{ flex: 1 }}>
+            <h2 id="nm-title" style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: "-0.02em" }}>New meeting</h2>
+            <p style={{ margin: "2px 0 0", fontSize: 13, color: C.sub }}>Invites go out as a notification and an email</p>
+          </div>
+          <button aria-label="Close" onClick={onClose} style={{ width: 40, height: 40, border: 0, borderRadius: 20, background: C.page, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: C.ink }}><Icon name="close" size={20} /></button>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <label htmlFor="nm-name" style={lbl}>Title</label>
+          <input id="nm-name" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Weekly managers' catch-up" style={{ ...field, padding: "0 16px" }} />
+        </div>
+        <div role="radiogroup" aria-label="Type" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
+          {kindCard("call", "videocam", "Video call", "Everyone joins from their own phone or computer", "#ffad8c")}
+          {kindCard("room", "mic", "Room recording", "One computer records everyone in the room", "#b45309")}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label htmlFor="nm-day" style={lbl}>Date</label>
+            <div style={fieldWrap}><Icon name="calendar_today" size={19} style={fieldIcon} /><input id="nm-day" type="date" value={date} min={now.date} onChange={(e) => setDate(e.target.value)} style={field} /></div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label htmlFor="nm-time" style={lbl}>Time</label>
+            <div style={fieldWrap}><Icon name="schedule" size={19} style={fieldIcon} /><input id="nm-time" type="time" step={300} value={time} onChange={(e) => setTime(e.target.value)} style={field} /></div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label htmlFor="nm-len" style={lbl}>Length</label>
+            <div style={fieldWrap}><Icon name="timer" size={19} style={fieldIcon} />
+              <select id="nm-len" value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} style={{ ...field, appearance: "none" }}>
+                {LENGTHS.map((m) => <option key={m} value={m}>{m < 60 ? `${m} min` : `${m / 60} hour${m > 60 ? "s" : ""}`}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "baseline" }}><label htmlFor="nm-invite" style={lbl}>{kind === "room" ? "Invite (optional)" : "Invite"}</label><span style={{ marginLeft: "auto", fontSize: 12, color: C.sub }}>From the clock-in app</span></div>
+          <div style={{ position: "relative" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, minHeight: 52, boxSizing: "border-box", padding: 8, borderRadius: 16, background: C.page }}>
+              {invite.map((id) => {
+                const p = people.find((x) => x.id === id);
+                if (!p) return null;
+                const col = personColourLight(id);
+                return (
+                  <button key={id} onClick={() => setInvite(invite.filter((x) => x !== id))} aria-label={`Remove ${p.name}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 10px 0 4px", border: 0, borderRadius: 16, background: "#ffffff", fontSize: 13, whiteSpace: "nowrap", fontFamily: "inherit", color: C.ink, cursor: "pointer" }}>
+                    <span style={{ width: 24, height: 24, borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(p.name)}</span>{firstName(p.name)}
+                  </button>
+                );
+              })}
+              <input id="nm-invite" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && matches[0]) { add([matches[0].id]); setSearch(""); } }} placeholder="Add people" autoComplete="off" style={{ flex: 1, minWidth: 100, height: 32, border: 0, outline: 0, background: "transparent", fontSize: 14, fontFamily: "inherit", color: C.ink }} />
+            </div>
+            {matches.length > 0 && (
+              <div role="listbox" style={{ position: "absolute", left: 0, right: 0, top: "calc(100% + 4px)", zIndex: 5, padding: 6, borderRadius: 16, background: "#ffffff", boxShadow: "0 12px 32px rgba(20,20,20,0.16)" }}>
+                {matches.map((p) => (
+                  <button key={p.id} role="option" aria-selected="false" onClick={() => { add([p.id]); setSearch(""); }} style={{ display: "flex", width: "100%", alignItems: "center", gap: 8, height: 40, padding: "0 10px", border: 0, borderRadius: 10, background: "transparent", fontFamily: "inherit", fontSize: 14, color: C.ink, textAlign: "left", cursor: "pointer" }}>
+                    {p.name}<span style={{ marginLeft: "auto", fontSize: 12, color: C.sub }}>{p.role}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {[["+ All Cricklewood", (p: Person) => p.branch === "cricklewood" || p.branch === "both"], ["+ All Streatham", (p: Person) => p.branch === "streatham" || p.branch === "both"], ["+ Managers", (p: Person) => p.role.toLowerCase() === "manager"], ["+ Everyone", () => true]].map(([l, f]) => (
+              <button key={l as string} onClick={() => add(others.filter(f as (p: Person) => boolean).map((p) => p.id))} style={{ height: 34, padding: "0 14px", border: "1px solid #e6e1db", borderRadius: 17, background: "#ffffff", fontSize: 13, fontFamily: "inherit", whiteSpace: "nowrap", color: C.ink, cursor: "pointer" }}>{l as string}</button>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, borderRadius: 20, background: C.page, padding: "6px 16px" }}>
+          {toggle("auto_awesome", "Live notes, captions and tasks", liveNotes, setLiveNotes, true, C.accent, true)}
+          {toggle("repeat", `Repeat every ${weekday(date)}`, repeat, setRepeat)}
+          {toggle("lock", "Private (manager PIN to read notes)", priv, setPriv)}
+        </div>
+        {err && <p role="alert" style={{ margin: 0, fontSize: 13, color: "#b91c1c" }}>{err}</p>}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button onClick={onClose} style={{ height: 48, padding: "0 20px", border: 0, borderRadius: 24, background: "transparent", fontSize: 15, fontWeight: 500, fontFamily: "inherit", color: C.ink, cursor: "pointer" }}>Cancel</button>
+          <button onClick={create} disabled={busy || !title.trim() || (kind === "call" && invite.length === 0)} style={{ height: 48, display: "inline-flex", alignItems: "center", gap: 8, padding: "0 22px", border: 0, borderRadius: 24, background: C.ink, color: "#ffffff", fontSize: 15, fontWeight: 500, fontFamily: "inherit", opacity: !title.trim() || (kind === "call" && invite.length === 0) ? 0.45 : 1, cursor: "pointer" }}>
+            {busy ? "Creating…" : invite.length ? "Create and send invites" : "Create"}<Icon name="arrow_forward" size={19} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

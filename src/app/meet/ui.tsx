@@ -9,11 +9,19 @@ import type { CSSProperties } from "react";
 
 // Every Material Symbol the app uses (Google needs them sorted). Add new ones here.
 const ICONS = [
-  "add_box", "arrow_back", "auto_stories", "backspace", "badge", "calendar_month", "campaign", "check", "check_circle",
-  "chevron_right", "expand_more", "face", "flag", "groups", "home", "hourglass_top", "how_to_reg", "info", "ios_share",
-  "lock", "logout", "mail", "more_horiz", "notifications", "notifications_active", "notifications_off", "person",
-  "schedule", "search", "smartphone", "south", "storefront", "task_alt", "toggle_off", "touch_app", "videocam",
-  "view_timeline", "add", "chevron_left", "close", "content_copy", "delete", "send", "swap_horiz", "beach_access", "sync", "radio_button_checked", "arrow_forward", "warning", "cancel", "savings",
+  "record_voice_over", "assignment_late", "visibility",
+  "add", "add_photo_alternate", "add_task", "admin_panel_settings", "arrow_back", "arrow_forward", "assignment_ind",
+  "auto_awesome", "auto_stories", "backspace", "badge", "beach_access", "build", "calendar_month", "calendar_today",
+  "call", "call_end", "campaign", "cancel", "chat", "check", "check_circle", "chevron_left", "chevron_right", "cleaning_services",
+  "close", "closed_caption", "content_copy", "delete", "description", "download", "edit_note", "event", "event_busy",
+  "expand_more", "face", "flag", "folder_open", "format_quote", "front_hand", "graphic_eq", "group", "groups", "health_and_safety",
+  "history", "home", "hourglass_top", "how_to_reg", "image", "info", "inventory_2", "ios_share", "keyboard_arrow_down",
+  "link", "lock", "lock_open", "logout", "mail", "mic", "mic_off", "more_horiz", "notifications", "notifications_active",
+  "notifications_off", "open_in_full", "open_in_new", "pause", "person", "person_add", "photo_camera", "play_arrow",
+  "policy", "priority_high", "push_pin", "radio_button_checked", "radio_button_unchecked", "repeat", "report", "restaurant_menu",
+  "savings", "schedule", "screen_lock_portrait", "search", "send", "sentiment_dissatisfied", "settings", "shield_person",
+  "smartphone", "south", "speaker_phone", "stop_circle", "storefront", "swap_horiz", "sync", "task_alt", "timer", "toggle_off",
+  "touch_app", "verified_user", "videocam", "videocam_off", "view_timeline", "visibility_lock", "visibility_off", "warning",
 ].sort();
 
 export function IconFont() {
@@ -70,4 +78,37 @@ export function ago(iso: string) {
   if (h < 24) return `${h}h ago`;
   const d = Math.round(h / 24);
   return d === 1 ? "yesterday" : `${d} days ago`;
+}
+
+/** Phone photos are huge: shrink to 1600px JPEG before uploading. Other files go as they are. */
+async function shrinkPhoto(file: File): Promise<Blob> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    return await new Promise<Blob>((ok, no) => canvas.toBlob((b) => (b ? ok(b) : no(new Error("shrink"))), "image/jpeg", 0.85));
+  } catch {
+    return file;
+  }
+}
+
+/**
+ * Upload a file straight to private storage (photos are shrunk first) and return
+ * the saved path, to send with the task, report or post.
+ */
+export async function uploadFile(folder: "tasks" | "reports" | "news" | "docs", file: File): Promise<{ path: string; size: number; mime: string }> {
+  const photo = file.type.startsWith("image/") && folder !== "docs";
+  const body = photo ? await shrinkPhoto(file) : file;
+  const mime = photo ? "image/jpeg" : file.type || "application/octet-stream";
+  const ext = photo ? "jpg" : (file.name.split(".").pop() || "").toLowerCase();
+  const res = await fetch("/api/meet/upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ folder, ext }) });
+  const up = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(up.error || "Couldn't add the file");
+  const put = await fetch(up.url, { method: "PUT", headers: { "Content-Type": mime, "x-upsert": "false", "cache-control": "max-age=3600" }, body });
+  if (!put.ok) throw new Error("The upload didn't finish. Try again.");
+  return { path: up.path as string, size: body.size, mime };
 }

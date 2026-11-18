@@ -37,6 +37,8 @@ export type Notice = {
   url?: string;
   /** Same tag replaces an older notification instead of stacking. */
   tag?: string;
+  /** Material Symbol shown in the app's Notifications list (design 16). */
+  icon?: string;
 };
 
 /**
@@ -50,6 +52,13 @@ export async function notifyPeople(clockinIds: number[], notice: Notice, opts: {
   const staff = await getClockinStaff().catch(() => []);
   const active = new Map(staff.filter((s) => s.active).map((s) => [s.id, s]));
   const targets = ids.filter((id) => active.has(id));
+
+  // Every notice also lands in the person's Notifications list in the app (design 16).
+  if (targets.length) {
+    await prisma.meetAlert
+      .createMany({ data: targets.map((clockinId) => ({ clockinId, title: notice.title.slice(0, 200), body: notice.body.slice(0, 600), url: notice.url || "/meet", icon: notice.icon || "notifications" })) })
+      .catch(() => {});
+  }
 
   const subs = await prisma.meetPushSub.findMany({ where: { clockinId: { in: targets } } });
   const reached = new Set<number>();

@@ -727,3 +727,198 @@ model MeetRequest {
   @@index([clockinId])
   @@index([targetId])
 }
+
+// ─── DEMI'S MEETINGS: meetings, tasks, news, reports, hours, alerts ───
+
+model MeetMeeting {
+  id         String    @id @default(cuid())
+  title      String
+  kind       String    @default("call") // call (video call), room (one device records the room)
+  status     String    @default("scheduled") // scheduled, live, ended (notes being made), ready, failed
+  startsAt   DateTime
+  minutes    Int       @default(30) // planned length
+  repeat     String    @default("") // "", weekly
+  private    Boolean   @default(false) // notes need the manager PIN
+  liveNotes  Boolean   @default(true) // transcribe, summarise and spot tasks
+  hostId     Int // clock-in staff id of the manager who set it up
+  hostName   String    @default("")
+  startedAt  DateTime?
+  endedAt    DateTime?
+  summary    String    @default("")
+  decisions  Json      @default("[]") // ["Plantain order on Thursday", ...]
+  transcript Json      @default("[]") // [{ ms, speaker, clockinId, text }]
+  speakers   Json      @default("{}") // room recording: { "0": clockinId, ... }
+  notesBy    String    @default("") // "ai", or the manager who wrote them
+  error      String    @default("")
+  createdAt  DateTime  @default(now())
+
+  @@index([startsAt])
+  @@index([status])
+}
+
+model MeetAttendee {
+  meetingId  String
+  clockinId  Int
+  invited    Boolean   @default(true)
+  joinedAt   DateTime?
+  lastSeenAt DateTime?
+  leftAt     DateTime?
+  seconds    Int       @default(0) // time in the meeting, all joins added up
+  inRoom     Boolean   @default(false) // room recording: ticked as there
+
+  @@id([meetingId, clockinId])
+  @@index([clockinId])
+}
+
+model MeetSignal {
+  id        BigInt   @id @default(autoincrement())
+  meetingId String
+  fromPeer  String
+  toPeer    String   @default("") // "" = everyone in the call
+  kind      String // hello, offer, answer, ice, bye
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([meetingId, id])
+}
+
+model MeetRecording {
+  id        String   @id @default(cuid())
+  meetingId String
+  clockinId Int // 0 = a room device
+  seq       Int
+  startMs   Int // from the meeting start
+  path      String // storage path in the meet bucket
+  mime      String   @default("")
+  status    String   @default("uploaded") // uploaded, transcribing, done, failed
+  words     Json     @default("[]")
+  createdAt DateTime @default(now())
+
+  @@index([meetingId])
+}
+
+model MeetTask {
+  id        String    @id @default(cuid())
+  title     String
+  ownerId   Int // clock-in staff id
+  dueDate   String    @default("") // YYYY-MM-DD
+  status    String    @default("open") // suggested (from notes, not confirmed), open, help, done, dismissed
+  steps     Json      @default("[]") // [{ text, done }]
+  meetingId String?
+  quote     String    @default("") // what was said in the meeting
+  quoteBy   String    @default("")
+  quoteMs   Int?
+  note      String    @default("")
+  photoPath String    @default("")
+  helpNote  String    @default("") // "I need help or more time"
+  createdBy String    @default("")
+  doneAt    DateTime?
+  nudgedAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([ownerId, status])
+  @@index([meetingId])
+}
+
+model MeetNews {
+  id         String   @id @default(cuid())
+  title      String
+  body       String   @default("")
+  kind       String   @default("") // menu, rota, kitchen, policies
+  audience   String   @default("everyone") // everyone, cricklewood, streatham, kitchen
+  pinned     Boolean  @default(false)
+  ackBy      String   @default("") // YYYY-MM-DD: staff asked to tap "Got it" by then; "" = not asked
+  photoPath  String   @default("")
+  authorId   Int
+  authorName String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model MeetNewsRead {
+  newsId    String
+  clockinId Int
+  seenAt    DateTime  @default(now())
+  ackAt     DateTime? // tapped "Got it"
+
+  @@id([newsId, clockinId])
+}
+
+model MeetDoc {
+  id        String   @id @default(cuid())
+  title     String
+  path      String // storage path in the meet bucket
+  mime      String   @default("")
+  size      Int      @default(0)
+  addedBy   String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model MeetReport {
+  id         String    @id @default(cuid())
+  kind       String // problem, person
+  category   String    @default("") // problem: equipment, stock, safety, customer, hours; person: what it's about
+  body       String
+  urgent     Boolean   @default(false)
+  branch     String    @default("")
+  photoPath  String    @default("")
+  reporterId Int? // null when they chose to leave their name off
+  aboutId    Int? // person reports: who it's about (never shown to them)
+  happenedOn String    @default("") // person reports: YYYY-MM-DD, when it happened
+  status     String    @default("new") // new, seen, closed
+  reply      String    @default("")
+  handledBy  String    @default("")
+  handledAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([status])
+  @@index([kind])
+}
+
+model MeetHoursFix {
+  id        String    @id @default(cuid())
+  clockinId Int
+  date      String // YYYY-MM-DD, the day the shift started
+  wasStart  String    @default("") // what the clock-in app had ("" = none)
+  wasEnd    String    @default("")
+  start     String // HH:MM
+  end       String
+  reason    String    @default("")
+  status    String    @default("asked") // asked, approved, declined
+  decidedBy String    @default("")
+  decidedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([status])
+  @@index([clockinId])
+}
+
+model MeetAlert {
+  id        String    @id @default(cuid())
+  clockinId Int
+  title     String
+  body      String    @default("")
+  url       String    @default("")
+  icon      String    @default("notifications")
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([clockinId, createdAt])
+}
+
+model MeetSetting {
+  key       String   @id // e.g. manager_pin_hash
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model MeetLog {
+  id        String   @id @default(cuid())
+  action    String // e.g. private_notes_opened
+  target    String   @default("")
+  by        String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([target])
+}

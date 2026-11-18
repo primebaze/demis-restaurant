@@ -57,6 +57,7 @@ export default function RotaPage() {
   const load = useCallback(async (w?: string) => {
     const res = await fetch(`/api/meet/rota${w ? `?week=${w}` : ""}`, { cache: "no-store" }).catch(() => null);
     if (!res) return setError("Can't connect right now");
+    if (res.status === 401) { window.location.replace(`/meet?back=${encodeURIComponent(window.location.pathname)}`); return; }
     if (res.status === 401 || res.status === 403) return setError("This page is for managers.");
     const d = await res.json().catch(() => ({}));
     if (!res.ok) return setError(d.error || "Can't load the rota right now");

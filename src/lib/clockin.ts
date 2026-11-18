@@ -189,3 +189,92 @@ export async function setDayBudget(date: string, amount: number | null, actor: s
   }
   await bridgeWrite(`/rota/budgets/${date}`, "PUT", actor, { amount });
 }
+
+/* ─── Hours (clock-in and clock-out times, worked out by the clock-in app's timesheet) ─── */
+
+export type DayHours = {
+  date: string;
+  hours: number; // after any manager override
+  adjusted: boolean; // a manager set this day's hours
+  shifts: { in: string; out: string | null }[]; // HH:MM, London; out null = never clocked out
+};
+export type Timesheet = { staffId: number; name: string; role: string; rate: number; days: DayHours[]; total: number; pay: number };
+
+type RawSheet = {
+  staff_id: number; name: string; role: string; hourly_rate: number;
+  daily_hours: Record<string, number>; adjusted_dates: string[]; weekly_total: number; weekly_pay: number;
+  entries?: { action: string; captured_at: string }[];
+};
+
+/** Pair clock-ins with the clock-out after them; each shift belongs to its clock-in day. */
+function pairEntries(entries: { action: string; at: string }[]): Map<string, { in: string; out: string | null }[]> {
+  const byDay = new Map<string, { in: string; out: string | null }[]>();
+  const sorted = [...entries].sort((a, b) => a.at.localeCompare(b.at));
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].action !== "clock_in") continue;
+    const day = sorted[i].at.slice(0, 10);
+    const next = sorted[i + 1];
+    const out = next && next.action === "clock_out" ? next.at.slice(11, 16) : null;
+    if (out) i++;
+    byDay.set(day, [...(byDay.get(day) || []), { in: sorted[i - (out ? 1 : 0)].at.slice(11, 16), out }]);
+  }
+  return byDay;
+}
+
+// Local test hours: past dev rota shifts become clock-ins (a couple of minutes late, a few minutes over),
+// with Tunde forgetting to clock out on weekends so missed clock-outs can be tried.
+const devHours = ((globalThis as unknown as { __meetDevHours?: Map<string, number> }).__meetDevHours ??= new Map<string, number>());
+
+function devSheets(start: string, end: string, staffId?: number): Timesheet[] {
+  const today = new Date().toISOString().slice(0, 10);
+  return DEV_STAFF.filter((s) => s.active && (!staffId || s.id === staffId)).map((s) => {
+    const days: DayHours[] = [];
+    for (let d = start; d <= end; d = new Date(new Date(`${d}T12:00:00Z`).getTime() + 86400_000).toISOString().slice(0, 10)) {
+      const mine = devShifts.filter((x) => x.staffId === s.id && x.date === d && d < today);
+      const weekend = [0, 6].includes(new Date(`${d}T12:00:00Z`).getUTCDay());
+      const shifts = mine.map((x) => {
+        const add = (t: string, m: number) => { const v = (Number(t.slice(0, 2)) * 60 + Number(t.slice(3)) + m + 1440) % 1440; return `${String(Math.floor(v / 60)).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`; };
+        return { in: add(x.start, 2), out: s.id === 9003 && weekend ? null : add(x.end, 5) };
+      });
+      const worked = shifts.reduce((n, x) => {
+        if (!x.out) return n + 8;
+        let m = Number(x.out.slice(0, 2)) * 60 + Number(x.out.slice(3)) - (Number(x.in.slice(0, 2)) * 60 + Number(x.in.slice(3)));
+        if (m <= 0) m += 1440;
+        return n + m / 60;
+      }, 0);
+      const key = `${s.id}|${d}`;
+      days.push({ date: d, hours: devHours.has(key) ? devHours.get(key)! : Math.round(worked * 100) / 100, adjusted: devHours.has(key), shifts });
+    }
+    const total = Math.round(days.reduce((n, x) => n + x.hours, 0) * 100) / 100;
+    return { staffId: s.id, name: s.name, role: s.role, rate: DEV_RATE, days, total, pay: Math.round(total * DEV_RATE * 100) / 100 };
+  });
+}
+
+/** Everyone's hours (or one person's) between two dates, from the clock-in app. */
+export async function getTimesheets(start: string, end: string, staffId?: number): Promise<Timesheet[]> {
+  if (DEV_MOCK) return devSheets(start, end, staffId);
+  const q = `/timesheet?start=${start}&end=${end}${staffId ? `&staff_id=${staffId}` : ""}`;
+  const data = await bridge<{ timesheets: RawSheet[] }>(q);
+  return (data.timesheets || []).map((t) => {
+    const paired = pairEntries((t.entries || []).map((e) => ({ action: e.action, at: e.captured_at })));
+    const adjusted = new Set(t.adjusted_dates || []);
+    return {
+      staffId: t.staff_id,
+      name: t.name,
+      role: t.role,
+      rate: Number(t.hourly_rate) || 0,
+      days: Object.entries(t.daily_hours || {}).map(([date, hours]) => ({ date, hours: Number(hours) || 0, adjusted: adjusted.has(date), shifts: paired.get(date) || [] })),
+      total: Number(t.weekly_total) || 0,
+      pay: Number(t.weekly_pay) || 0,
+    };
+  });
+}
+
+/** Set one person's hours for a day in the clock-in app (a manager override), or clear it with null. */
+export async function setDayHours(staffId: number, date: string, hours: number | null, actor: string): Promise<void> {
+  if (DEV_MOCK) {
+    if (hours === null) devHours.delete(`${staffId}|${date}`); else devHours.set(`${staffId}|${date}`, Math.round(hours * 100) / 100);
+    return;
+  }
+  await bridgeWrite(`/hours/${staffId}/${date}`, "PUT", actor, { hours });
+}

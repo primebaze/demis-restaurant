@@ -32,6 +32,7 @@ export default function StaffPage() {
   const load = useCallback(async () => {
     const res = await fetch("/api/meet/team", { cache: "no-store" }).catch(() => null);
     if (!res) return setError((e) => e || "Can't connect right now");
+    if (res.status === 401) { window.location.replace(`/meet?back=${encodeURIComponent(window.location.pathname)}`); return; }
     if (res.status === 403 || res.status === 401) {
       try { sessionStorage.removeItem(CACHE_KEY); } catch {}
       setData(null);
