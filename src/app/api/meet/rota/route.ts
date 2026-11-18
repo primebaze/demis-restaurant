@@ -7,6 +7,7 @@ import {
   shiftHours, dayLabel, weekLabel, ALL, type RotaShift,
 } from "@/lib/meet-rota";
 import { notifyPeople } from "@/lib/meet-notify";
+import { timeOffBetween } from "@/lib/meet-requests";
 
 export const dynamic = "force-dynamic";
 
@@ -30,8 +31,13 @@ async function load(monday: string) {
     seen = await prisma.meetRotaSeen.count({ where: { publishId: last.id, clockinId: { in: Array.from(sent) } } });
   }
 
+  const timeOff = await timeOffBetween(monday, addDays(monday, 6));
+  const waitingRequests = await prisma.meetRequest.count({ where: { OR: [{ kind: "timeoff", status: "asked" }, { kind: "swap", status: "agreed", shiftDate: { gte: londonToday() } }] } });
+
   return {
     week: monday,
+    timeOff,
+    waitingRequests,
     weekLabel: weekLabel(monday),
     days: weekDays(monday),
     today: londonToday(),

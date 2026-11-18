@@ -22,7 +22,10 @@ type Week = {
   week: string; weekLabel: string; days: string[]; today: string;
   people: Person[]; shifts: (Shift & { branch: Branch })[];
   published: { at: string; by: string; changedPeople: number[]; seen: number; onRota: number } | null;
+  timeOff: { id: string; staffId: number; status: "asked" | "approved"; from: string; to: string }[];
+  waitingRequests: number;
 };
+type Waiting = { id: string; kind: "swap" | "timeoff"; by: string; target: string; date: string; start: string; end: string; from: string; to: string };
 type Edit = { id?: number; branch: Branch; person: Person; date: string; start: string; end: string; notes: string };
 
 const BRANCH_NAME = { cricklewood: "Cricklewood", streatham: "Streatham" } as const;
@@ -60,7 +63,26 @@ export default function RotaPage() {
     setData(d);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const [waiting, setWaiting] = useState<Waiting[]>([]);
+  const loadRequests = useCallback(async () => {
+    const res = await fetch("/api/meet/requests/manage", { cache: "no-store" }).catch(() => null);
+    if (res?.ok) setWaiting((await res.json()).waiting || []);
+  }, []);
+
+  useEffect(() => { load(); loadRequests(); }, [load, loadRequests]);
+
+  async function decide(id: string, action: "approve" | "decline") {
+    setBusy(id);
+    setNote("");
+    const res = await fetch("/api/meet/requests/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, action }) }).catch(() => null);
+    const d = await res?.json().catch(() => ({}));
+    setBusy("");
+    if (!res?.ok) return setNote(d?.error || "Couldn't save that");
+    setNote(action === "approve" ? "Approved and the rota is updated." : "Declined. They've been told.");
+    await Promise.all([load(data?.week), loadRequests()]);
+  }
+
+  const offOn = (staffId: number, date: string) => (data?.timeOff || []).find((t) => t.staffId === staffId && t.from <= date && t.to >= date);
 
   async function act(body: object, key: string, done?: string) {
     setBusy(key);
@@ -130,7 +152,7 @@ export default function RotaPage() {
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", maxWidth: "100vw", overflowX: "clip" }}>
       <IconFont />
       <style>{`html,body{background:${C.page};overflow-x:clip;overscroll-behavior-x:none}`}</style>
-      <Sidebar current="rota" />
+      <Sidebar current="rota" badges={{ rota: waiting.length }} />
       <TopBar />
 
       <main className="px-4 pb-6 pt-[18px] md:pl-2 md:pr-6" style={{ flex: "999 1 560px", minWidth: 0, boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 14 }}>
@@ -201,10 +223,16 @@ export default function RotaPage() {
                         {data.days.map((d) => {
                           const list = byCell.get(`${p.id}|${d}`) || [];
                           if (list.length === 0) {
+                            const off = offOn(p.id, d);
                             return (
                               <td key={d} style={{ height: 50, padding: 0 }}>
-                                <button aria-label={`Add a shift for ${p.name} on ${dayLong(d)}`} onClick={() => openEdit({ branch: branchFor(p), person: p, date: d, start: NEW_SHIFT[0], end: NEW_SHIFT[1], notes: "" })}
-                                  style={{ width: "100%", height: 50, borderRadius: 12, border: `1.5px dashed ${C.dash}`, background: "transparent", color: C.plus, fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>+</button>
+                                <button aria-label={off ? `${p.name} ${off.status === "approved" ? "has time off" : "asked for time off"} on ${dayLong(d)}. Add a shift anyway` : `Add a shift for ${p.name} on ${dayLong(d)}`}
+                                  onClick={() => openEdit({ branch: branchFor(p), person: p, date: d, start: NEW_SHIFT[0], end: NEW_SHIFT[1], notes: "" })}
+                                  style={off
+                                    ? { width: "100%", height: 50, borderRadius: 12, border: off.status === "approved" ? 0 : "1.5px dashed #f9a8d4", background: off.status === "approved" ? "#fdf2f8" : "transparent", color: "#9d174d", fontSize: 12, fontFamily: "inherit", cursor: "pointer" }
+                                    : { width: "100%", height: 50, borderRadius: 12, border: `1.5px dashed ${C.dash}`, background: "transparent", color: C.plus, fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>
+                                  {off ? (off.status === "approved" ? "Time off" : "Asked off") : "+"}
+                                </button>
                               </td>
                             );
                           }
@@ -243,8 +271,28 @@ export default function RotaPage() {
 
             <aside className="lg:sticky lg:top-[18px] lg:max-h-[calc(100dvh-36px)] lg:overflow-y-auto" style={{ flex: "1 1 260px", minWidth: 0, display: "flex", flexDirection: "column", gap: 14 }}>
               <section aria-labelledby="rq-h" style={{ ...panel, gap: 10 }}>
-                <h2 id="rq-h" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Requests</h2>
-                <p style={{ margin: 0, fontSize: 13, color: C.sub }}>Swap and time-off requests from staff phones will show here.</p>
+                <div style={{ display: "flex", alignItems: "baseline" }}>
+                  <h2 id="rq-h" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Requests</h2>
+                  <a href="/meet/rota/requests" style={{ marginLeft: "auto", fontSize: 13, color: C.sub, textDecoration: "none" }}>See all</a>
+                </div>
+                {waiting.length === 0 && <p style={{ margin: 0, fontSize: 13, color: C.sub }}>No swaps or time off waiting.</p>}
+                {waiting.slice(0, 3).map((r) => (
+                  <div key={r.id} style={{ padding: 12, borderRadius: 16, background: C.page, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: r.kind === "swap" ? "#92400e" : "#9d174d" }}>
+                      <Icon name={r.kind === "swap" ? "swap_horiz" : "beach_access"} size={16} />{r.kind === "swap" ? "Swap" : "Time off"}
+                    </p>
+                    <p style={{ margin: 0, fontSize: 13, lineHeight: 1.45 }}>
+                      {r.kind === "swap"
+                        ? <><strong style={{ fontWeight: 600 }}>{firstName(r.by)}</strong> wants to swap {dayHead(r.date)} {short(r.start)}–{short(r.end)} with <strong style={{ fontWeight: 600 }}>{firstName(r.target)}</strong>. {firstName(r.target)} has agreed.</>
+                        : <><strong style={{ fontWeight: 600 }}>{firstName(r.by)}</strong> asked for {r.from === r.to ? dayLong(r.from) : `${dayHead(r.from)} – ${dayHead(r.to)}`} off.</>}
+                    </p>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button disabled={!!busy} onClick={() => decide(r.id, "approve")} style={{ flex: 1, height: 34, border: 0, borderRadius: 17, background: C.ink, color: "#ffffff", fontSize: 13, fontWeight: 500, fontFamily: "inherit" }}>{busy === r.id ? "Saving…" : "Approve"}</button>
+                      <button disabled={!!busy} onClick={() => confirm(`Decline ${firstName(r.by)}'s request?`) && decide(r.id, "decline")} style={{ flex: 1, height: 34, border: 0, borderRadius: 17, background: "#ffffff", fontSize: 13, fontFamily: "inherit" }}>Decline</button>
+                    </div>
+                  </div>
+                ))}
+                {waiting.length > 3 && <a href="/meet/rota/requests" style={{ fontSize: 13, color: C.ink }}>{waiting.length - 3} more</a>}
               </section>
               <section aria-labelledby="wk-h" style={panel}>
                 <h2 id="wk-h" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>This week</h2>

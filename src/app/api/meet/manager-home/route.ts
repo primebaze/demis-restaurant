@@ -48,9 +48,12 @@ export async function GET() {
     const next = await weekRota(nextWeek, staff);
     const nextNotSent = !(await publishState(nextWeek, next.shifts)).last;
 
+    const requests = await prisma.meetRequest.count({ where: { OR: [{ kind: "timeoff", status: "asked" }, { kind: "swap", status: "agreed", shiftDate: { gte: today } }] } });
+
     return NextResponse.json(
       {
         today,
+        requests,
         phonesWaiting: devices.pending.length,
         locked: locks.map((l) => nameOf.get(l.clockinId) || "Someone"),
         rota: {

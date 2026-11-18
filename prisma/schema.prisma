@@ -698,3 +698,32 @@ model MeetRotaSeen {
 
   @@id([publishId, clockinId])
 }
+
+/// A staff request from the phone app: swap a shift, or time off.
+model MeetRequest {
+  id           String    @id @default(cuid())
+  kind         String // swap, timeoff
+  clockinId    Int // who asked
+  // swap: asked (waiting for the colleague), open (anyone can take it), agreed (colleague said yes,
+  // waiting for a manager), approved, declined, cancelled. timeoff: asked, approved, declined, cancelled.
+  status       String    @default("asked")
+  shiftId      Int? // swap: rota_shifts.id in the clock-in app
+  shiftDate    String    @default("")
+  shiftStart   String    @default("")
+  shiftEnd     String    @default("")
+  branch       String    @default("")
+  targetId     Int? // swap: the colleague asked, or who said yes
+  fromDate     String    @default("") // time off, YYYY-MM-DD
+  toDate       String    @default("")
+  approvedFrom String    @default("") // time off: the days a manager approved (can be part)
+  approvedTo   String    @default("")
+  reason       String    @default("") // managers only
+  answeredAt   DateTime? // colleague's answer
+  decidedBy    String    @default("")
+  decidedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([status])
+  @@index([clockinId])
+  @@index([targetId])
+}

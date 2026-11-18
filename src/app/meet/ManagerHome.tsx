@@ -16,6 +16,7 @@ const card: CSSProperties = { borderRadius: 22, background: "#ffffff", padding: 
 type Data = {
   today: string;
   phonesWaiting: number;
+  requests: number;
   locked: string[];
   rota: { thisWeekLabel: string; nextWeekLabel: string; changed: number; nextNotSent: boolean; thisNotSent: boolean; hours: number; people: number; seen: number; onRota: number };
   onToday: { name: string; start: string; end: string; branch: string }[];
@@ -45,6 +46,7 @@ export default function ManagerHome({ name }: { name: string }) {
 
   const needs: { href: string; icon: string; bg: string; fg: string; title: string; sub: string }[] = [];
   if (data) {
+    if (data.requests) needs.push({ href: "/meet/rota/requests", icon: "swap_horiz", bg: "#fff1ec", fg: "#e2552b", title: `${data.requests} request${data.requests === 1 ? "" : "s"} to approve`, sub: "Swaps and time off" });
     if (data.phonesWaiting) needs.push({ href: "/meet/staff", icon: "smartphone", bg: "#fff1ec", fg: "#e2552b", title: `${data.phonesWaiting} phone${data.phonesWaiting === 1 ? "" : "s"} to approve`, sub: "Staff signed in on a new phone" });
     if (data.rota.thisNotSent) needs.push({ href: "/meet/rota", icon: "view_timeline", bg: "#fff1ec", fg: "#e2552b", title: "This week's rota not sent", sub: data.rota.thisWeekLabel });
     if (data.rota.changed) needs.push({ href: "/meet/rota", icon: "view_timeline", bg: "#fff1ec", fg: "#e2552b", title: "Rota changes not sent", sub: `${data.rota.changed} ${data.rota.changed === 1 ? "person's" : "people's"} shifts changed · ${data.rota.thisWeekLabel}` });
@@ -62,7 +64,7 @@ export default function ManagerHome({ name }: { name: string }) {
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", overflowX: "clip" }}>
       <IconFont />
       <style>{`html,body{background:${C.page};overflow-x:clip}`}</style>
-      <Sidebar current="home" badges={{ staff: data?.phonesWaiting || 0, rota: (data?.rota.changed ? 1 : 0) }} />
+      <Sidebar current="home" badges={{ staff: data?.phonesWaiting || 0, rota: data?.requests || 0 }} />
 
       <main style={{ flex: "999 1 560px", minWidth: 0, boxSizing: "border-box", padding: "18px 24px 24px 8px", display: "flex", flexDirection: "column", gap: 18 }}>
         <header style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, padding: "4px 4px 0" }}>

@@ -322,6 +322,11 @@ function Waiting({ me, onSignOut }: { me: { state: "pending" | "declined"; name:
 
 type ApprovedMe = Extract<Me, { state: "approved" }>;
 type Tab = "home" | "rota" | "me";
+type Req = {
+  id: string; kind: "swap" | "timeoff"; status: string; shiftId: number | null; date: string; start: string; end: string; branch: string;
+  target: string; from: string; to: string; approvedFrom: string; approvedTo: string; by: string; createdAt: string;
+};
+type MyRequests = { mine: Req[]; forMe: Req[] };
 type MyShift = { id: number; date: string; start: string; end: string; notes: string | null; branch: string; hours: number };
 type TeamShift = { date: string; start: string; end: string; name: string; role: string; me: boolean; branch: string };
 type RotaWeek = { week: string; label: string; published: boolean; days: string[]; mine: MyShift[]; team: TeamShift[] };
@@ -357,11 +362,17 @@ const pushSupported = () =>
 function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => void; reload: () => void }) {
   const [tab, setTab] = useState<Tab>(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "rota" ? "rota" : "home"));
   const [rota, setRota] = useState<MyRota | null>(null);
+  const [requests, setRequests] = useState<MyRequests | null>(null);
+  const [asking, setAsking] = useState<"" | "swap" | "timeoff">("");
   const wide = useWide();
 
   const loadRota = useCallback(async () => {
-    const res = await fetch("/api/meet/my-rota", { cache: "no-store" }).catch(() => null);
-    if (res?.ok) setRota(await res.json());
+    const [r1, r2] = await Promise.all([
+      fetch("/api/meet/my-rota", { cache: "no-store" }).catch(() => null),
+      fetch("/api/meet/requests", { cache: "no-store" }).catch(() => null),
+    ]);
+    if (r1?.ok) setRota(await r1.json());
+    if (r2?.ok) setRequests(await r2.json());
   }, []);
 
   // Keep the service worker registered so notifications arrive.
@@ -390,10 +401,11 @@ function Approved({ me, onSignOut, reload }: { me: ApprovedMe; onSignOut: () => 
   if (me.notifyChoice === "" && me.pushReady && pushSupported()) return <AllowNotifications onDone={reload} />;
   // Managers on a computer get the computer Home (design 1) instead of the phone screens.
   if (me.manager && wide && tab === "home") return <ManagerHome name={me.person.name} />;
+  if (asking && rota) return <AskScreen start={asking} rota={rota} requests={requests} onClose={() => setAsking("")} onSent={() => { setAsking(""); loadRota(); }} />;
   return (
     <div style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
-      {tab === "home" ? <Home me={me} rota={rota} onRota={() => setTab("rota")} />
-        : tab === "rota" ? <RotaScreen me={me} rota={rota} onBack={() => setTab("home")} />
+      {tab === "home" ? <Home me={me} rota={rota} requests={requests} onRota={() => setTab("rota")} reload={loadRota} />
+        : tab === "rota" ? <RotaScreen me={me} rota={rota} requests={requests} onBack={() => setTab("home")} onAsk={(m) => setAsking(m)} reload={loadRota} />
         : <MeScreen me={me} onSignOut={onSignOut} />}
       <TabBar tab={tab} onTab={setTab} />
     </div>
@@ -536,7 +548,7 @@ const londonTime = (iso: string) => new Intl.DateTimeFormat("en-GB", { hour: "2-
 const shortDay = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 const dayMonth = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 
-function Home({ me, rota, onRota }: { me: ApprovedMe; rota: MyRota | null; onRota: () => void }) {
+function Home({ me, rota, requests, onRota, reload }: { me: ApprovedMe; rota: MyRota | null; requests: MyRequests | null; onRota: () => void; reload: () => void }) {
   const col = personColour(me.person.id);
   const clocked = !!me.clockedInSince;
   const mine = (rota?.weeks || []).flatMap((w) => w.mine);
@@ -593,6 +605,8 @@ function Home({ me, rota, onRota }: { me: ApprovedMe; rota: MyRota | null; onRot
         <Icon name="chevron_right" size={20} style={{ color: onToday ? "#5eead4" : C.faint }} />
       </button>
 
+      {(requests?.forMe || []).map((r) => <SwapAsk key={r.id} r={r} onDone={reload} />)}
+
       {me.manager && <PhoneApprovals />}
       {me.manager && linkRow("/meet/rota", "view_timeline", "Build the rota")}
       {me.manager && linkRow("/meet/staff", "groups", "Staff and phones")}
@@ -621,7 +635,7 @@ function BranchTag({ branch }: { branch: string }) {
 
 /* ─── 19 · Staff phone: rota ─── */
 
-function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null; onBack: () => void }) {
+function RotaScreen({ me, rota, requests, onBack, onAsk, reload }: { me: ApprovedMe; rota: MyRota | null; requests: MyRequests | null; onBack: () => void; onAsk: (m: "swap" | "timeoff") => void; reload: () => void }) {
   const [view, setView] = useState<"mine" | "team">("mine");
   const [wi, setWi] = useState(0);
   const weeks = rota?.weeks || [];
@@ -683,10 +697,12 @@ function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null;
                   <p style={{ margin: 0, fontSize: 17, fontWeight: 600, color: muted ? C.faint : "#fff" }}>{Number(d.slice(8))}</p>
                 </div>
               );
+              const off = (requests?.mine || []).find((r) => r.kind === "timeoff" && (r.status === "approved" ? r.approvedFrom <= d && r.approvedTo >= d : r.status === "asked" && r.from <= d && r.to >= d));
               if (list.length === 0) {
                 return (
                   <li key={d} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 18, background: "#161616" }}>
                     {dayCol(true)}<p style={{ margin: 0, flex: 1, fontSize: 14, color: C.faint }}>Day off</p>
+                    {off && <Pill tone={off.status === "approved" ? "pink" : "amber"}>{off.status === "approved" ? "Time off" : "Time off asked"}</Pill>}
                   </li>
                 );
               }
@@ -700,11 +716,20 @@ function RotaScreen({ me, rota, onBack }: { me: ApprovedMe; rota: MyRota | null;
                       <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 14 }}>{s.start} – {s.end}<BranchTag branch={s.branch} /></p>
                       <p style={{ margin: "2px 0 0", fontSize: 12, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{detail || BRANCH[s.branch] || ""}</p>
                     </div>
+                    {(() => {
+                      const sw = (requests?.mine || []).find((r) => r.kind === "swap" && r.shiftId === s.id && ["asked", "open", "agreed"].includes(r.status));
+                      return sw ? <Pill tone="amber">{sw.status === "agreed" ? "Swap agreed" : "Swap asked"}</Pill> : null;
+                    })()}
                   </li>
                 );
               });
             })}
           </ul>
+          <MyRequestsList requests={requests} onChange={reload} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => onAsk("swap")} style={{ flex: 1, height: 48, border: 0, borderRadius: 24, background: "#ffffff", color: C.bg, fontSize: 14, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Icon name="swap_horiz" size={19} />Ask to swap</button>
+            <button onClick={() => onAsk("timeoff")} style={{ flex: 1, height: 48, border: 0, borderRadius: 24, background: "#232323", color: "#ffffff", fontSize: 14, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Icon name="beach_access" size={19} />Ask for time off</button>
+          </div>
         </>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -851,5 +876,194 @@ function PhoneApprovals() {
       })}
       {note && <p role="status" style={{ margin: 0, fontSize: 13, color: C.muted }}>{note}</p>}
     </section>
+  );
+}
+
+/* ─── Swaps and time off (staff phone) ─── */
+
+function Pill({ tone, children }: { tone: "amber" | "pink" | "green"; children: ReactNode }) {
+  const t = { amber: ["rgba(251,191,36,0.15)", "#fcd34d"], pink: ["rgba(244,114,182,0.15)", "#f9a8d4"], green: ["rgba(52,211,153,0.15)", "#6ee7b7"] }[tone];
+  return <span style={{ height: 26, padding: "0 10px", borderRadius: 13, background: t[0], color: t[1], fontSize: 12, fontWeight: 500, display: "inline-flex", alignItems: "center", whiteSpace: "nowrap" }}>{children}</span>;
+}
+
+async function sendRequest(body: object): Promise<string | null> {
+  const res = await fetch("/api/meet/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
+  if (!res) return "Couldn't connect. Try again.";
+  if (res.ok) return null;
+  const d = await res.json().catch(() => ({}));
+  return d.error || "Couldn't send that";
+}
+
+/** A colleague is asking me to take their shift. */
+function SwapAsk({ r, onDone }: { r: Req; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function answer(accept: boolean) {
+    setBusy(true);
+    const err = await sendRequest({ action: "answer", id: r.id, accept });
+    setBusy(false);
+    if (err) return setError(err);
+    onDone();
+  }
+  return (
+    <article style={{ borderRadius: 22, background: C.card, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+      <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#fcd34d" }}><Icon name="swap_horiz" size={16} />{r.status === "open" ? "Shift up for grabs" : "Can you take a shift?"}</p>
+      <p style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>{firstName(r.by)} {r.status === "open" ? "can't do" : "asked if you can take"} {dayMonth(r.date)}</p>
+      <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 14 }}>{r.start} – {r.end}<BranchTag branch={r.branch} /></p>
+      {error && <p role="status" style={{ margin: 0, fontSize: 13, color: "#fca5a5" }}>{error}</p>}
+      <div style={{ display: "flex", gap: 6 }}>
+        <button disabled={busy} onClick={() => answer(true)} style={{ flex: 1, height: 40, border: 0, borderRadius: 20, background: "#ffffff", color: C.bg, fontSize: 14, fontWeight: 600, fontFamily: "inherit" }}>{busy ? "Sending…" : "Yes, I'll take it"}</button>
+        {r.status === "asked" && <button disabled={busy} onClick={() => answer(false)} style={{ height: 40, padding: "0 16px", border: 0, borderRadius: 20, background: "#2a2a2a", color: "#ffffff", fontSize: 14, fontFamily: "inherit" }}>Can&rsquo;t</button>}
+      </div>
+      <p style={{ margin: 0, fontSize: 12, color: C.muted }}>A manager confirms it before the shift moves to you.</p>
+    </article>
+  );
+}
+
+/** My open requests, under the rota. */
+function MyRequestsList({ requests, onChange }: { requests: MyRequests | null; onChange: () => void }) {
+  const open = (requests?.mine || []).filter((r) => ["asked", "open", "agreed"].includes(r.status));
+  if (!open.length) return null;
+  return (
+    <section aria-label="Your requests" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <h2 style={{ margin: "4px 0 0", fontSize: 15, fontWeight: 500, color: "#d4d4d4" }}>Your requests</h2>
+      {open.map((r) => (
+        <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 18, background: C.card }}>
+          <Icon name={r.kind === "swap" ? "swap_horiz" : "beach_access"} size={20} style={{ color: r.kind === "swap" ? "#fcd34d" : "#f9a8d4" }} />
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontSize: 14 }}>{r.kind === "swap" ? `Swap ${dayMonth(r.date)} ${r.start}` : r.from === r.to ? `Time off ${dayMonth(r.from)}` : `Time off ${dayMonth(r.from)} – ${dayMonth(r.to)}`}</span>
+            <span style={{ display: "block", fontSize: 12, color: C.muted }}>
+              {r.kind === "timeoff" ? "Waiting for a manager" : r.status === "agreed" ? `${firstName(r.target)} agreed · waiting for a manager` : r.status === "asked" ? `Waiting for ${firstName(r.target)}` : "Waiting for someone to take it"}
+            </span>
+          </span>
+          <button onClick={async () => { if (confirm("Cancel this request?")) { await sendRequest({ action: "cancel", id: r.id }); onChange(); } }} style={{ height: 32, padding: "0 12px", border: 0, borderRadius: 16, background: "#2a2a2a", color: "#ffffff", fontSize: 12, fontFamily: "inherit" }}>Cancel</button>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+/* ─── 35 · Staff phone: ask the managers ─── */
+
+function AskScreen({ start, rota, requests, onClose, onSent }: { start: "swap" | "timeoff"; rota: MyRota; requests: MyRequests | null; onClose: () => void; onSent: () => void }) {
+  const [mode, setMode] = useState<"swap" | "timeoff">(start);
+  const asked = new Set((requests?.mine || []).filter((r) => r.kind === "swap" && ["asked", "open", "agreed"].includes(r.status)).map((r) => r.shiftId));
+  const upcoming = rota.weeks.flatMap((w) => w.mine).filter((s) => s.date >= rota.today && !asked.has(s.id));
+  const [shiftId, setShiftId] = useState<number | null>(upcoming[0]?.id ?? null);
+  const [free, setFree] = useState<{ id: number; name: string }[] | null>(null);
+  const [target, setTarget] = useState<number | "anyone">("anyone");
+  const [reason, setReason] = useState("");
+  const [from, setFrom] = useState(rota.today);
+  const [to, setTo] = useState(rota.today);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const shift = upcoming.find((s) => s.id === shiftId);
+
+  useEffect(() => {
+    if (!shift) return setFree([]);
+    setFree(null);
+    setTarget("anyone");
+    fetch(`/api/meet/requests?free=${shift.date}`, { cache: "no-store" }).then((r) => r.json()).then((d) => setFree(d.people || [])).catch(() => setFree([]));
+  }, [shift?.date]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function send() {
+    setBusy(true);
+    setError("");
+    const err = mode === "swap"
+      ? await sendRequest({ action: "swap", shiftId, targetId: target === "anyone" ? null : target, reason })
+      : await sendRequest({ action: "timeoff", from, to, reason });
+    setBusy(false);
+    if (err) return setError(err);
+    onSent();
+  }
+
+  const tab = (key: "swap" | "timeoff", icon: string, label: string) => (
+    <button role="tab" aria-selected={mode === key} onClick={() => setMode(key)} style={{ height: 38, border: 0, borderRadius: 19, background: mode === key ? "#ffffff" : "transparent", color: mode === key ? C.bg : "#ffffff", fontSize: 14, fontWeight: mode === key ? 500 : 400, fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+      <Icon name={icon} size={18} />{label}
+    </button>
+  );
+  const dateInput: CSSProperties = { height: 48, width: "100%", boxSizing: "border-box", padding: "0 14px", border: 0, borderRadius: 16, background: C.card, color: "#fff", fontSize: 16, fontFamily: "inherit", colorScheme: "dark" };
+
+  return (
+    <main style={{ margin: "0 auto", maxWidth: 430, minHeight: "100dvh", boxSizing: "border-box", padding: "calc(env(safe-area-inset-top) + 40px) 18px calc(env(safe-area-inset-bottom) + 26px)", display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 6 }}>
+        <button onClick={onClose} aria-label="Back to rota" style={{ width: 44, height: 44, border: 0, borderRadius: 22, background: C.chip, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="arrow_back" size={22} /></button>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em" }}>Ask the managers</h1>
+      </div>
+
+      <div role="tablist" aria-label="What do you need" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 4, padding: 4, borderRadius: 22, background: C.card }}>
+        {tab("swap", "swap_horiz", "Swap a shift")}
+        {tab("timeoff", "beach_access", "Time off")}
+      </div>
+
+      {mode === "swap" ? (
+        <>
+          <section aria-labelledby="sw-1" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <h2 id="sw-1" style={{ margin: 0, fontSize: 13, fontWeight: 500, color: C.muted }}>Which shift?</h2>
+            {upcoming.length === 0 && <p style={{ margin: 0, padding: "12px 14px", borderRadius: 18, background: C.card, color: C.muted, fontSize: 14 }}>You have no upcoming shifts to swap.</p>}
+            {upcoming.slice(0, 6).map((s) => {
+              const on = s.id === shiftId;
+              return (
+                <button key={s.id} onClick={() => setShiftId(s.id)} aria-pressed={on} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", border: 0, borderRadius: 18, background: C.card, color: "#fff", textAlign: "left", fontFamily: "inherit", boxShadow: on ? "inset 0 0 0 2px #ffffff" : "none" }}>
+                  <div style={{ width: 44, textAlign: "center" }}><p style={{ margin: 0, fontSize: 11, color: C.muted }}>{shortDay(s.date)}</p><p style={{ margin: 0, fontSize: 17, fontWeight: 600 }}>{Number(s.date.slice(8))}</p></div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 14 }}>{s.start} – {s.end}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 12, color: C.muted }}>{BRANCH[s.branch]}{s.notes ? ` · ${s.notes}` : ""}</p>
+                  </div>
+                  {on && <Icon name="check_circle" size={22} fill />}
+                </button>
+              );
+            })}
+          </section>
+
+          {shift && (
+            <section aria-labelledby="sw-2" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <h2 id="sw-2" style={{ margin: 0, fontSize: 13, fontWeight: 500, color: C.muted }}>Who could take it? <span style={{ fontWeight: 400 }}>Free that day</span></h2>
+              <div className="[scrollbar-width:none]" style={{ display: "flex", gap: 10, margin: "0 -18px", padding: "4px 18px", overflowX: "auto" }}>
+                {(free || []).map((p) => {
+                  const on = target === p.id;
+                  const col = personColour(p.id);
+                  return (
+                    <button key={p.id} aria-pressed={on} onClick={() => setTarget(p.id)} style={{ flex: "none", width: 72, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, border: 0, padding: 0, background: "transparent", color: on ? "#fff" : C.muted, fontSize: 13, fontWeight: on ? 600 : 400, fontFamily: "inherit" }}>
+                      <span style={{ width: 52, height: 52, borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 20, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: on ? `0 0 0 3px ${C.bg}, 0 0 0 5px #ffffff` : "none" }}>{initial(p.name)}</span>
+                      <span style={{ maxWidth: 72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{firstName(p.name)}</span>
+                    </button>
+                  );
+                })}
+                <button aria-pressed={target === "anyone"} onClick={() => setTarget("anyone")} style={{ flex: "none", width: 72, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, border: 0, padding: 0, background: "transparent", color: target === "anyone" ? "#fff" : C.muted, fontSize: 13, fontWeight: target === "anyone" ? 600 : 400, fontFamily: "inherit" }}>
+                  <span style={{ width: 52, height: 52, borderRadius: "50%", background: "#232323", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: target === "anyone" ? `0 0 0 3px ${C.bg}, 0 0 0 5px #ffffff` : "none" }}><Icon name="groups" size={22} /></span>Anyone
+                </button>
+              </div>
+              {free === null && <p style={{ margin: 0, fontSize: 12, color: C.muted }}>Checking who&rsquo;s free…</p>}
+            </section>
+          )}
+        </>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, fontWeight: 500, color: C.muted }}>First day
+            <input type="date" min={rota.today} value={from} onChange={(e) => { setFrom(e.target.value); if (to < e.target.value) setTo(e.target.value); }} style={dateInput} />
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, fontWeight: 500, color: C.muted }}>Last day
+            <input type="date" min={from} value={to} onChange={(e) => setTo(e.target.value)} style={dateInput} />
+          </label>
+        </div>
+      )}
+
+      <label style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, fontWeight: 500, color: C.muted }}>Reason (managers only)
+        <textarea rows={3} value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} style={{ border: 0, borderRadius: 18, background: C.card, padding: "12px 14px", fontFamily: "inherit", fontSize: 16, lineHeight: 1.45, color: "#ffffff", resize: "none" }} />
+      </label>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 16, background: "#1a1a1a", fontSize: 12, color: C.muted }}>
+        <Icon name="info" size={18} />
+        {mode === "swap"
+          ? target === "anyone" ? "Everyone free that day is asked. Your shift only changes once someone agrees and a manager approves." : `${firstName((free || []).find((p) => p.id === target)?.name || "They")} is asked first. Your shift only changes once they agree and a manager approves.`
+          : "The managers are told straight away. You'll get a notification and an email when they decide."}
+      </div>
+
+      {error && <p role="status" style={{ margin: 0, fontSize: 13, color: "#fca5a5" }}>{error}</p>}
+      <button disabled={busy || (mode === "swap" && !shift)} onClick={send} style={{ marginTop: "auto", height: 52, border: 0, borderRadius: 26, background: "#ffffff", color: C.bg, fontSize: 15, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: busy || (mode === "swap" && !shift) ? 0.5 : 1 }}>
+        <Icon name="send" size={20} />{busy ? "Sending…" : "Send request"}
+      </button>
+    </main>
   );
 }
