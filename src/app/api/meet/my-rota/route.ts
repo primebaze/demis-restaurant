@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireMeet } from "@/lib/meet-auth";
 import { getClockinStaff, getShifts } from "@/lib/clockin";
-import { addDays, londonToday, mondayOf, weekDays, weekLabel, shiftHours, publishedWeeks } from "@/lib/meet-rota";
+import { addDays, londonToday, mondayOf, weekDays, weekLabel, shiftHours, publishedWeeks, shiftBranch } from "@/lib/meet-rota";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,7 @@ export async function GET() {
     const homes = await prisma.meetStaff.findMany();
     const tagOf = new Map(tags.map((t) => [t.shiftId, t.branch]));
     const homeOf = new Map(homes.map((h) => [h.clockinId, h.branch]));
-    const branchOf = (s: (typeof visible)[number]) => tagOf.get(s.id) || (["cricklewood", "streatham"].includes(homeOf.get(s.staffId) || "") ? homeOf.get(s.staffId)! : "");
+    const branchOf = (s: (typeof visible)[number]) => shiftBranch(s.id, s.staffId, tagOf, homeOf);
 
     const staff = await getClockinStaff();
     const nameOf = new Map(staff.filter((s) => s.active).map((s) => [s.id, s.name]));
@@ -39,7 +39,7 @@ export async function GET() {
       const myBranches = new Set(mine.map(branchOf).filter(Boolean));
       if (myBranches.size === 0 && (me.branch === "cricklewood" || me.branch === "streatham")) myBranches.add(me.branch);
       const team = inWeek
-        .filter((s) => nameOf.has(s.staffId) && (myBranches.size === 0 || myBranches.has(branchOf(s)) || !branchOf(s)))
+        .filter((s) => nameOf.has(s.staffId) && (myBranches.size === 0 || myBranches.has(branchOf(s))))
         .map((s) => ({ date: s.date, start: s.start, end: s.end, name: nameOf.get(s.staffId)!, role: roleOf.get(s.staffId) || "", me: s.staffId === me.person.id, branch: branchOf(s) }));
       return {
         week: monday,

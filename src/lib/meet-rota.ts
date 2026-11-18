@@ -45,8 +45,8 @@ const key = (s: ClockinShift) => `${s.staffId}|${s.date}|${s.start}|${s.end}`;
 
 /**
  * Shifts for one branch's week. A shift belongs to the branch it was given; older
- * shifts with no branch follow the person's branch (or show in both if theirs is
- * "both" or not set).
+ * shifts with no branch follow the person's branch, and go under Cricklewood when
+ * that's "both" or not set (a manager can move them in the shift box).
  */
 export async function branchWeek(branch: Branch, monday: string, staff: ClockinStaff[]) {
   const shifts = await getShifts(monday, addDays(monday, 6));
@@ -56,13 +56,7 @@ export async function branchWeek(branch: Branch, monday: string, staff: ClockinS
   const homeOf = new Map(extras.map((e) => [e.clockinId, e.branch]));
   const known = new Set(staff.map((s) => s.id));
 
-  const inBranch = shifts.filter((s) => {
-    if (!known.has(s.staffId)) return false;
-    const tag = tagOf.get(s.id);
-    if (tag) return tag === branch;
-    const home = homeOf.get(s.staffId) || "";
-    return home === branch || home === "both" || home === "";
-  });
+  const inBranch = shifts.filter((s) => known.has(s.staffId) && shiftBranch(s.id, s.staffId, tagOf, homeOf) === branch);
   return { shifts: inBranch, homeOf };
 }
 
@@ -94,4 +88,12 @@ export function weekLabel(monday: string) {
   const sameMonth = a.getUTCMonth() === b.getUTCMonth();
   const f = (d: Date, withMonth: boolean) => new Intl.DateTimeFormat("en-GB", { day: "numeric", ...(withMonth ? { month: "short" } : {}), timeZone: "UTC" }).format(d);
   return `${f(a, !sameMonth)} – ${f(b, true)}`;
+}
+
+/** Which branch a shift is at: its own tag, else the person's branch, else Cricklewood. Never both. */
+export function shiftBranch(shiftId: number, staffId: number, tagOf: Map<number, string>, homeOf: Map<number, string>): Branch {
+  const tag = tagOf.get(shiftId);
+  if (isBranch(tag)) return tag;
+  const home = homeOf.get(staffId);
+  return isBranch(home) ? home : "cricklewood";
 }

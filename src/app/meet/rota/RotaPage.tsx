@@ -23,12 +23,13 @@ const roleLabel = (r: string) => (r ? r[0].toUpperCase() + r.slice(1) : "");
 
 type Person = { id: number; name: string; role: string; branch: string };
 type Shift = { id: number; staffId: number; date: string; start: string; end: string; notes: string | null; hours: number };
-type Week = {
-  branch: "cricklewood" | "streatham"; week: string; weekLabel: string; days: string[]; today: string;
-  people: Person[]; shifts: Shift[];
+type Branch = "cricklewood" | "streatham";
+type Section = {
+  branch: Branch; people: Person[]; shifts: Shift[];
   published: { at: string; by: string; changedPeople: number[]; seen: number; onRota: number } | null;
 };
-type Edit = { id?: number; person: Person; date: string; start: string; end: string; notes: string };
+type Week = { week: string; weekLabel: string; days: string[]; today: string; sections: Section[] };
+type Edit = { id?: number; branch: Branch; person: Person; date: string; start: string; end: string; notes: string };
 
 const BRANCH_NAME = { cricklewood: "Cricklewood", streatham: "Streatham" } as const;
 // Demi's usual times: one tap under Start and Finish. A new shift starts as 11:50 – 00:00.
@@ -47,8 +48,7 @@ const btnBlack: CSSProperties = { height: 40, padding: "0 18px", border: 0, bord
 const panel: CSSProperties = { borderRadius: 24, background: "#ffffff", padding: 16, display: "flex", flexDirection: "column", gap: 8, boxShadow: "0 1px 2px rgba(20,20,20,0.05)" };
 
 export default function RotaPage() {
-  const [branch, setBranch] = useState<"cricklewood" | "streatham" | "">("");
-  const [week, setWeek] = useState("");
+  const [show, setShow] = useState<"all" | Branch>("all");
   const [data, setData] = useState<Week | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
@@ -56,22 +56,17 @@ export default function RotaPage() {
   const [edit, setEdit] = useState<Edit | null>(null);
   const openEdit = (e: Edit) => { setNote(""); setEdit(e); };
 
-  const load = useCallback(async (b = branch, w = week) => {
-    const q = new URLSearchParams();
-    if (b) q.set("branch", b);
-    if (w) q.set("week", w);
-    const res = await fetch(`/api/meet/rota?${q}`, { cache: "no-store" }).catch(() => null);
+  const load = useCallback(async (w?: string) => {
+    const res = await fetch(`/api/meet/rota${w ? `?week=${w}` : ""}`, { cache: "no-store" }).catch(() => null);
     if (!res) return setError("Can't connect right now");
     if (res.status === 401 || res.status === 403) return setError("This page is for managers.");
     const d = await res.json().catch(() => ({}));
     if (!res.ok) return setError(d.error || "Can't load the rota right now");
     setError("");
     setData(d);
-    setBranch(d.branch);
-    setWeek(d.week);
-  }, [branch, week]);
+  }, []);
 
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [load]);
 
   async function act(body: object, key: string, done?: string) {
     setBusy(key);
@@ -81,51 +76,51 @@ export default function RotaPage() {
     setBusy("");
     if (!res?.ok) { setNote(d?.error || "Couldn't save that"); return false; }
     if (done) setNote(done.replace("{n}", String(d?.copied ?? d?.people ?? "")));
-    await load();
+    await load(data?.week);
     return true;
   }
 
-  const byCell = useMemo(() => {
-    const m = new Map<string, Shift[]>();
-    for (const s of data?.shifts || []) m.set(`${s.staffId}|${s.date}`, [...(m.get(`${s.staffId}|${s.date}`) || []), s]);
-    return m;
-  }, [data]);
-
-  const totals = useMemo(() => {
-    const perPerson = new Map<number, number>();
-    const perDay = new Map<string, Set<number>>();
-    let all = 0;
-    for (const s of data?.shifts || []) {
-      perPerson.set(s.staffId, (perPerson.get(s.staffId) || 0) + s.hours);
-      perDay.set(s.date, new Set([...Array.from(perDay.get(s.date) || []), s.staffId]));
-      all += s.hours;
-    }
-    return { perPerson, perDay, all, people: perPerson.size };
-  }, [data]);
+  const sections = (data?.sections || []).filter((x) => show === "all" || x.branch === show);
+  const allShifts = sections.flatMap((x) => x.shifts);
 
   // Times already used this week, offered as one-tap choices in the editor.
   const common = useMemo(() => {
     const count = new Map<string, number>();
-    for (const s of data?.shifts || []) count.set(`${s.start}-${s.end}`, (count.get(`${s.start}-${s.end}`) || 0) + 1);
+    for (const s of allShifts) count.set(`${s.start}-${s.end}`, (count.get(`${s.start}-${s.end}`) || 0) + 1);
     return Array.from(count.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k]) => k.split("-") as [string, string]);
-  }, [data]);
+  }, [allShifts]);
 
-  const pub = data?.published;
-  const changed = pub?.changedPeople.length || 0;
+  // Overall state across the branches shown.
+  const withShifts = sections.filter((x) => x.shifts.length || x.published);
+  const unsent = withShifts.filter((x) => !x.published && x.shifts.length);
+  const changedPeople = new Set(withShifts.flatMap((x) => x.published?.changedPeople || []));
+  const sent = withShifts.filter((x) => x.published);
+  const lastSent = sent.map((x) => x.published!).sort((a, b) => b.at.localeCompare(a.at))[0];
+  const seen = sent.reduce((n, x) => n + (x.published?.seen || 0), 0);
+  const onRota = sent.reduce((n, x) => n + (x.published?.onRota || 0), 0);
   const status = !data ? null
-    : !pub ? { dot: "#f59e0b", colour: "#92400e", text: "Draft · not seen by staff yet" }
-    : changed ? { dot: "#f2643a", colour: C.coral, text: `Changed since it was sent · ${changed} ${changed === 1 ? "person" : "people"} affected` }
-    : { dot: "#16a34a", colour: "#047857", text: `Sent ${when(pub.at)}${pub.by ? ` by ${firstName(pub.by)}` : ""} · ${pub.seen} of ${pub.onRota} have seen it` };
+    : unsent.length && !sent.length ? { dot: "#f59e0b", colour: "#92400e", text: "Draft · not seen by staff yet" }
+    : unsent.length ? { dot: "#f59e0b", colour: "#92400e", text: `${unsent.map((x) => BRANCH_NAME[x.branch]).join(" and ")} not sent yet` }
+    : changedPeople.size ? { dot: "#f2643a", colour: C.coral, text: `Changed since it was sent · ${changedPeople.size} ${changedPeople.size === 1 ? "person" : "people"} affected` }
+    : lastSent ? { dot: "#16a34a", colour: "#047857", text: `Sent ${when(lastSent.at)}${lastSent.by ? ` by ${firstName(lastSent.by)}` : ""} · ${seen} of ${onRota} have seen it` }
+    : { dot: "#f59e0b", colour: "#92400e", text: "Draft · no shifts yet" };
+  const canSend = unsent.length > 0 || changedPeople.size > 0;
+  const sendLabel = unsent.length ? "Publish to staff" : changedPeople.size ? "Send changes" : sent.length ? "Sent" : "Publish to staff";
+  const shownName = show === "all" ? "both branches" : BRANCH_NAME[show];
 
   async function publish() {
     if (!data) return;
-    const n = new Set(data.shifts.map((s) => s.staffId)).size;
-    const msg = pub
-      ? `Send the changes to the ${changed} ${changed === 1 ? "person" : "people"} whose shifts changed?`
-      : `Send the ${BRANCH_NAME[data.branch]} rota for ${data.weekLabel} to ${n} ${n === 1 ? "person" : "people"}? Each gets a notification and an email with their shifts.`;
+    const people = new Set(unsent.flatMap((x) => x.shifts.map((s) => s.staffId)));
+    changedPeople.forEach((id) => people.add(id));
+    const msg = unsent.length
+      ? `Send the rota for ${data.weekLabel} (${unsent.map((x) => BRANCH_NAME[x.branch]).join(" and ")})${changedPeople.size ? " and the changes" : ""}? ${people.size} ${people.size === 1 ? "person gets" : "people get"} a notification and an email with their shifts.`
+      : `Send the changes to the ${changedPeople.size} ${changedPeople.size === 1 ? "person" : "people"} whose shifts changed?`;
     if (!confirm(msg)) return;
-    await act({ action: "publish", branch: data.branch, week: data.week }, "publish", pub ? "Changes sent to {n}." : "Rota sent to {n} people.");
+    await act({ action: "publish", branch: show, week: data.week }, "publish", unsent.length ? "Rota sent to {n} people." : "Changes sent to {n}.");
   }
+
+  const totalHours = allShifts.reduce((n, s) => n + s.hours, 0);
+  const totalPeople = new Set(allShifts.map((s) => s.staffId)).size;
 
   return (
     <div style={{ minHeight: "100dvh", background: C.page, color: C.ink, fontSize: 14, display: "flex", flexWrap: "wrap", alignContent: "flex-start", width: "100%", maxWidth: "100vw", overflowX: "clip" }}>
@@ -144,96 +139,45 @@ export default function RotaPage() {
             )}
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
               <h1 style={{ margin: 0, fontSize: 26, fontWeight: 600, letterSpacing: "-0.025em" }}>Rota · {data?.weekLabel || "…"}</h1>
-              <button aria-label="Previous week" disabled={!data || !!busy} onClick={() => data && load(data.branch, addDays(data.week, -7))} style={{ width: 32, height: 32, border: 0, borderRadius: 16, background: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)" }}><Icon name="chevron_left" size={20} /></button>
-              <button aria-label="Next week" disabled={!data || !!busy} onClick={() => data && load(data.branch, addDays(data.week, 7))} style={{ width: 32, height: 32, border: 0, borderRadius: 16, background: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)" }}><Icon name="chevron_right" size={20} /></button>
+              <button aria-label="Previous week" disabled={!data || !!busy} onClick={() => data && load(addDays(data.week, -7))} style={{ width: 32, height: 32, border: 0, borderRadius: 16, background: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)" }}><Icon name="chevron_left" size={20} /></button>
+              <button aria-label="Next week" disabled={!data || !!busy} onClick={() => data && load(addDays(data.week, 7))} style={{ width: 32, height: 32, border: 0, borderRadius: 16, background: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 2px rgba(20,20,20,0.08)" }}><Icon name="chevron_right" size={20} /></button>
             </div>
           </div>
           <label style={{ ...btnWhite, position: "relative" }}>
             <Icon name="storefront" size={19} />
-            {branch ? BRANCH_NAME[branch] : "Branch"}
+            {show === "all" ? "Both branches" : BRANCH_NAME[show]}
             <Icon name="expand_more" size={18} />
-            <select aria-label="Branch" value={branch} onChange={(e) => load(e.target.value as "cricklewood" | "streatham", week)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", fontSize: 16 }}>
+            <select aria-label="Show branch" value={show} onChange={(e) => setShow(e.target.value as "all" | Branch)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", fontSize: 16 }}>
+              <option value="all">Both branches</option>
               <option value="cricklewood">Cricklewood</option>
               <option value="streatham">Streatham</option>
             </select>
           </label>
-          <button disabled={!data || !!busy} onClick={() => data && confirm(`Copy last week's ${BRANCH_NAME[data.branch]} shifts into ${data.weekLabel}? People already working a day keep what they have.`) && act({ action: "copy_last_week", branch: data.branch, week: data.week }, "copy", "Copied {n} shifts from last week.")} style={btnWhite}>
+          <button disabled={!data || !!busy} onClick={() => data && confirm(`Copy last week's shifts (${shownName}) into ${data.weekLabel}? People already working a day keep what they have.`) && act({ action: "copy_last_week", branch: show, week: data.week }, "copy", "Copied {n} shifts from last week.")} style={btnWhite}>
             <Icon name="content_copy" size={19} />{busy === "copy" ? "Copying…" : "Copy last week"}
           </button>
-          <button disabled={!data || !!busy || (!!pub && !changed)} onClick={publish} style={{ ...btnBlack, opacity: !!pub && !changed ? 0.45 : 1 }}>
-            <Icon name="send" size={19} />{busy === "publish" ? "Sending…" : pub ? (changed ? "Send changes" : "Sent") : "Publish to staff"}
+          <button disabled={!data || !!busy || !canSend} onClick={publish} style={{ ...btnBlack, opacity: canSend ? 1 : 0.45 }}>
+            <Icon name="send" size={19} />{busy === "publish" ? "Sending…" : sendLabel}
           </button>
         </header>
 
-        {note && <p role="status" style={{ margin: "0 4px", fontSize: 13, color: C.body }}>{note}</p>}
+        {note && !edit && <p role="status" style={{ margin: "0 4px", fontSize: 13, color: C.body }}>{note}</p>}
 
         {error ? (
           <p style={{ ...panel, margin: 0, color: C.sub }}>{error}</p>
         ) : (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "flex-start" }}>
-            <section aria-label="Week grid" style={{ flex: "999 1 640px", minWidth: 0, borderRadius: 24, background: "#ffffff", padding: 10, boxShadow: "0 1px 2px rgba(20,20,20,0.05)", overflowX: "auto" }}>
+            <div style={{ flex: "999 1 640px", minWidth: 0, display: "flex", flexDirection: "column", gap: 14 }}>
               {!data ? (
-                <div aria-busy="true" style={{ height: 320, borderRadius: 16, background: "#f3f0ec" }} />
-              ) : (
-                <table style={{ width: "100%", minWidth: 720, borderCollapse: "separate", borderSpacing: 4, tableLayout: "fixed", fontSize: 12 }}>
-                  <thead>
-                    <tr style={{ color: C.sub, textAlign: "center" }}>
-                      <th scope="col" style={{ width: 120, textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>Staff</th>
-                      {data.days.map((d) => (
-                        <th key={d} scope="col" style={{ fontWeight: d === data.today ? 600 : 500, color: d === data.today ? C.coral : undefined }}>{dayHead(d)}</th>
-                      ))}
-                      <th scope="col" style={{ width: 52, textAlign: "right", fontWeight: 500, paddingRight: 8 }}>Hours</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.people.map((p) => (
-                      <tr key={p.id}>
-                        <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "4px 8px", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {firstName(p.name)}<br /><span style={{ fontWeight: 400, fontSize: 11, color: C.sub }}>{roleLabel(p.role)}</span>
-                        </th>
-                        {data.days.map((d) => {
-                          const list = byCell.get(`${p.id}|${d}`) || [];
-                          const col = roleColour(p.role);
-                          if (list.length === 0) {
-                            return (
-                              <td key={d} style={{ height: 50, padding: 0 }}>
-                                <button aria-label={`Add a shift for ${p.name} on ${dayLong(d)}`} onClick={() => openEdit({ person: p, date: d, start: NEW_SHIFT[0], end: NEW_SHIFT[1], notes: "" })}
-                                  style={{ width: "100%", height: 50, borderRadius: 12, border: `1.5px dashed ${C.dash}`, background: "transparent", color: C.plus, fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>+</button>
-                              </td>
-                            );
-                          }
-                          return (
-                            <td key={d} style={{ height: 50, padding: 0, verticalAlign: "top" }}>
-                              <div style={{ display: "flex", flexDirection: "column", gap: 3, height: "100%" }}>
-                                {list.map((s) => (
-                                  <button key={s.id} aria-label={`${p.name}, ${dayLong(d)}, ${s.start} to ${s.end}. Change`} title={s.notes || undefined}
-                                    onClick={() => openEdit({ id: s.id, person: p, date: d, start: s.start, end: s.end, notes: s.notes || "" })}
-                                    style={{ flex: 1, minHeight: list.length > 1 ? 24 : 50, borderRadius: 12, border: 0, background: col.bg, color: col.fg, textAlign: "center", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 12, cursor: "pointer" }}>
-                                    {short(s.start)}–{short(s.end)}{s.notes ? " •" : ""}
-                                  </button>
-                                ))}
-                              </div>
-                            </td>
-                          );
-                        })}
-                        <td style={{ textAlign: "right", paddingRight: 8, fontSize: 13, fontWeight: 600 }}>{fmtHours(totals.perPerson.get(p.id) || 0)}</td>
-                      </tr>
-                    ))}
-                    {data.people.length === 0 && (
-                      <tr><td colSpan={9} style={{ padding: 16, color: C.sub }}>No one is set to {BRANCH_NAME[data.branch]} yet. Set branches on the Staff page.</td></tr>
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr style={{ color: C.sub, textAlign: "center" }}>
-                      <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>On shift</th>
-                      {data.days.map((d) => <td key={d}>{totals.perDay.get(d)?.size || 0}</td>)}
-                      <td style={{ textAlign: "right", paddingRight: 8, fontWeight: 600, color: C.ink }}>{fmtHours(totals.all)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              )}
-              <p style={{ margin: "6px 8px 4px", fontSize: 12, color: C.sub }}>Click a box to add or change a shift. Colours show the role.</p>
-            </section>
+                <section aria-busy="true" style={{ borderRadius: 24, background: "#ffffff", padding: 10, boxShadow: "0 1px 2px rgba(20,20,20,0.05)" }}>
+                  <div style={{ height: 320, borderRadius: 16, background: "#f3f0ec" }} />
+                </section>
+              ) : sections.map((sec) => (
+                <BranchGrid key={sec.branch} sec={sec} days={data.days} today={data.today}
+                  onAdd={(p, d) => openEdit({ branch: sec.branch, person: p, date: d, start: NEW_SHIFT[0], end: NEW_SHIFT[1], notes: "" })}
+                  onEdit={(p, s) => openEdit({ id: s.id, branch: sec.branch, person: p, date: s.date, start: s.start, end: s.end, notes: s.notes || "" })} />
+              ))}
+            </div>
 
             <aside style={{ flex: "1 1 260px", minWidth: 0, display: "flex", flexDirection: "column", gap: 14 }}>
               <section aria-labelledby="rq-h" style={{ ...panel, gap: 10 }}>
@@ -242,9 +186,11 @@ export default function RotaPage() {
               </section>
               <section aria-labelledby="wk-h" style={panel}>
                 <h2 id="wk-h" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>This week</h2>
-                <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota hours</span><strong style={{ fontWeight: 600 }}>{fmtHours(totals.all)} h</strong></p>
-                <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>People on the rota</span><strong style={{ fontWeight: 600 }}>{totals.people}</strong></p>
-                {pub && <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Have seen it</span><strong style={{ fontWeight: 600 }}>{pub.seen} of {pub.onRota}</strong></p>}
+                <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota hours</span><strong style={{ fontWeight: 600 }}>{fmtHours(totalHours)} h</strong></p>
+                <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>People on the rota</span><strong style={{ fontWeight: 600 }}>{totalPeople}</strong></p>
+                {sections.map((x) => x.published && (
+                  <p key={x.branch} style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Seen · {BRANCH_NAME[x.branch]}</span><strong style={{ fontWeight: 600 }}>{x.published.seen} of {x.published.onRota}</strong></p>
+                ))}
               </section>
             </aside>
           </div>
@@ -260,12 +206,100 @@ export default function RotaPage() {
           common={common}
           busy={busy === "save" || busy === "delete"}
           onClose={() => setEdit(null)}
-          onSave={async (e) => { if (await act({ action: "save", branch: data.branch, id: e.id, staffId: e.person.id, date: e.date, start: e.start, end: e.end, notes: e.notes }, "save")) setEdit(null); }}
+          onSave={async (e) => { if (await act({ action: "save", branch: e.branch, id: e.id, staffId: e.person.id, date: e.date, start: e.start, end: e.end, notes: e.notes }, "save")) setEdit(null); }}
           onDelete={async (id) => { if (confirm("Remove this shift?") && (await act({ action: "delete", id }, "delete"))) setEdit(null); }}
           error={note}
         />
       )}
     </div>
+  );
+}
+
+/* One branch's week as the design's grid, with its own totals. */
+function BranchGrid({ sec, days, today, onAdd, onEdit }: {
+  sec: Section; days: string[]; today: string;
+  onAdd: (p: Person, date: string) => void; onEdit: (p: Person, s: Shift) => void;
+}) {
+  const byCell = new Map<string, Shift[]>();
+  const perPerson = new Map<number, number>();
+  const perDay = new Map<string, Set<number>>();
+  let all = 0;
+  for (const s of sec.shifts) {
+    byCell.set(`${s.staffId}|${s.date}`, [...(byCell.get(`${s.staffId}|${s.date}`) || []), s]);
+    perPerson.set(s.staffId, (perPerson.get(s.staffId) || 0) + s.hours);
+    perDay.set(s.date, new Set([...Array.from(perDay.get(s.date) || []), s.staffId]));
+    all += s.hours;
+  }
+  const pub = sec.published;
+  const changed = pub?.changedPeople.length || 0;
+  const pill = !pub
+    ? (sec.shifts.length ? { bg: "#fef3c7", fg: "#92400e", text: "Not sent" } : null)
+    : changed ? { bg: "#fff1ec", fg: C.coral, text: `${changed} changed` } : { bg: "#ecfdf5", fg: "#047857", text: "Sent" };
+
+  return (
+    <section aria-label={`${BRANCH_NAME[sec.branch]} week`} style={{ borderRadius: 24, background: "#ffffff", padding: 10, boxShadow: "0 1px 2px rgba(20,20,20,0.05)", overflowX: "auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px 2px" }}>
+        <Icon name="storefront" size={18} style={{ color: C.sub }} />
+        <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>{BRANCH_NAME[sec.branch]}</h2>
+        {pill && <span style={{ padding: "3px 9px", borderRadius: 999, background: pill.bg, color: pill.fg, fontSize: 12, fontWeight: 500 }}>{pill.text}</span>}
+      </div>
+      <table style={{ width: "100%", minWidth: 720, borderCollapse: "separate", borderSpacing: 4, tableLayout: "fixed", fontSize: 12 }}>
+        <thead>
+          <tr style={{ color: C.sub, textAlign: "center" }}>
+            <th scope="col" style={{ width: 120, textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>Staff</th>
+            {days.map((d) => (
+              <th key={d} scope="col" style={{ fontWeight: d === today ? 600 : 500, color: d === today ? C.coral : undefined }}>{dayHead(d)}</th>
+            ))}
+            <th scope="col" style={{ width: 52, textAlign: "right", fontWeight: 500, paddingRight: 8 }}>Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sec.people.map((p) => (
+            <tr key={p.id}>
+              <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "4px 8px", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {firstName(p.name)}<br /><span style={{ fontWeight: 400, fontSize: 11, color: C.sub }}>{roleLabel(p.role)}{p.branch === "both" ? " · both" : ""}</span>
+              </th>
+              {days.map((d) => {
+                const list = byCell.get(`${p.id}|${d}`) || [];
+                const col = roleColour(p.role);
+                if (list.length === 0) {
+                  return (
+                    <td key={d} style={{ height: 50, padding: 0 }}>
+                      <button aria-label={`Add a ${BRANCH_NAME[sec.branch]} shift for ${p.name} on ${dayLong(d)}`} onClick={() => onAdd(p, d)}
+                        style={{ width: "100%", height: 50, borderRadius: 12, border: `1.5px dashed ${C.dash}`, background: "transparent", color: C.plus, fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>+</button>
+                    </td>
+                  );
+                }
+                return (
+                  <td key={d} style={{ height: 50, padding: 0, verticalAlign: "top" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 3, height: "100%" }}>
+                      {list.map((s) => (
+                        <button key={s.id} aria-label={`${p.name}, ${dayLong(d)}, ${s.start} to ${s.end}. Change`} title={s.notes || undefined} onClick={() => onEdit(p, s)}
+                          style={{ flex: 1, minHeight: list.length > 1 ? 24 : 50, borderRadius: 12, border: 0, background: col.bg, color: col.fg, textAlign: "center", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace", fontSize: 12, cursor: "pointer" }}>
+                          {short(s.start)}–{short(s.end)}{s.notes ? " •" : ""}
+                        </button>
+                      ))}
+                    </div>
+                  </td>
+                );
+              })}
+              <td style={{ textAlign: "right", paddingRight: 8, fontSize: 13, fontWeight: 600 }}>{fmtHours(perPerson.get(p.id) || 0)}</td>
+            </tr>
+          ))}
+          {sec.people.length === 0 && (
+            <tr><td colSpan={9} style={{ padding: 16, color: C.sub }}>No one is set to {BRANCH_NAME[sec.branch]} yet. Set branches on the Staff page.</td></tr>
+          )}
+        </tbody>
+        <tfoot>
+          <tr style={{ color: C.sub, textAlign: "center" }}>
+            <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>On shift</th>
+            {days.map((d) => <td key={d}>{perDay.get(d)?.size || 0}</td>)}
+            <td style={{ textAlign: "right", paddingRight: 8, fontWeight: 600, color: C.ink }}>{fmtHours(all)}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <p style={{ margin: "6px 8px 4px", fontSize: 12, color: C.sub }}>Click a box to add or change a shift. Colours show the role.</p>
+    </section>
   );
 }
 
@@ -313,6 +347,13 @@ function ShiftEditor({ edit, common, busy, error, onClose, onSave, onDelete }: {
           </div>
         </div>
         {e.end && e.start && e.end < e.start && <p style={{ margin: "-6px 0 0", fontSize: 12, color: C.sub }}>Finishes after midnight.</p>}
+        <div role="group" aria-label="Branch" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, padding: 4, borderRadius: 20, background: C.page }}>
+          {(["cricklewood", "streatham"] as Branch[]).map((b) => (
+            <button key={b} type="button" aria-pressed={e.branch === b} onClick={() => setE({ ...e, branch: b })} style={{ height: 36, border: 0, borderRadius: 16, background: e.branch === b ? "#ffffff" : "transparent", color: C.ink, fontSize: 14, fontWeight: e.branch === b ? 500 : 400, fontFamily: "inherit", boxShadow: e.branch === b ? "0 1px 2px rgba(20,20,20,0.08)" : "none" }}>
+              {BRANCH_NAME[b]}
+            </button>
+          ))}
+        </div>
         <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 500, color: C.body }}>Note (optional)
           <input value={e.notes} maxLength={500} onChange={(x) => setE({ ...e, notes: x.target.value })} placeholder="e.g. close, Sunday Feast" style={input} />
         </label>

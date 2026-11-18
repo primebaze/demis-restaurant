@@ -47,17 +47,18 @@ async function load(branch: Branch, monday: string) {
   };
 }
 
-/** GET ?branch=streatham&week=YYYY-MM-DD : one branch's week. Managers only. */
+/** GET ?week=YYYY-MM-DD : both branches' week (Cricklewood and Streatham sections). Managers only. */
 export async function GET(req: Request) {
   const me = await requireMeet(true);
   if (!me) return NextResponse.json({ error: "Managers only" }, { status: 403 });
-  const url = new URL(req.url);
-  const branch = url.searchParams.get("branch");
-  const week = url.searchParams.get("week");
-  const b: Branch = isBranch(branch) ? branch : me.branch === "cricklewood" ? "cricklewood" : "streatham";
+  const week = new URL(req.url).searchParams.get("week");
   const monday = mondayOf(isDate(week) ? week : londonToday());
   try {
-    return NextResponse.json(await load(b, monday), { headers: { "Cache-Control": "no-store" } });
+    const sections = [await load("cricklewood", monday), await load("streatham", monday)];
+    return NextResponse.json(
+      { week: monday, weekLabel: weekLabel(monday), days: weekDays(monday), today: londonToday(), sections },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Can't load the rota" }, { status: 502 });
   }
@@ -100,58 +101,74 @@ export async function POST(req: Request) {
     }
 
     if (body.action === "copy_last_week") {
-      if (!isBranch(body.branch) || !isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
+      const branches = body.branch === "all" ? (["cricklewood", "streatham"] as Branch[]) : isBranch(body.branch) ? [body.branch as Branch] : [];
+      if (!branches.length || !isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
       const monday = mondayOf(body.week);
       const staff = (await getClockinStaff()).filter((s) => s.active);
-      const prev = await branchWeek(body.branch, addDays(monday, -7), staff);
       // Anyone already working that day (at either branch) keeps what they have.
       const thisWeek = await getShifts(monday, addDays(monday, 6));
       const busy = new Set(thisWeek.map((s) => `${s.staffId}|${s.date}`));
       let copied = 0;
-      for (const s of prev.shifts) {
-        const date = addDays(s.date, 7);
-        if (busy.has(`${s.staffId}|${date}`)) continue;
-        const shift = await createShift({ staffId: s.staffId, date, start: s.start, end: s.end, notes: s.notes }, actor);
-        await prisma.meetShiftBranch.create({ data: { shiftId: shift.id, branch: body.branch } });
-        busy.add(`${s.staffId}|${date}`);
-        copied++;
+      for (const branch of branches) {
+        const prev = await branchWeek(branch, addDays(monday, -7), staff);
+        for (const s of prev.shifts) {
+          const date = addDays(s.date, 7);
+          if (busy.has(`${s.staffId}|${date}`)) continue;
+          const shift = await createShift({ staffId: s.staffId, date, start: s.start, end: s.end, notes: s.notes }, actor);
+          await prisma.meetShiftBranch.create({ data: { shiftId: shift.id, branch } });
+          busy.add(`${s.staffId}|${date}`);
+          copied++;
+        }
       }
       return NextResponse.json({ ok: true, copied });
     }
 
     if (body.action === "publish") {
-      if (!isBranch(body.branch) || !isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
-      const branch: Branch = body.branch;
+      const branches = body.branch === "all" ? (["cricklewood", "streatham"] as Branch[]) : isBranch(body.branch) ? [body.branch as Branch] : [];
+      if (!branches.length || !isDate(body.week)) return NextResponse.json({ error: "Which week?" }, { status: 400 });
       const monday = mondayOf(body.week);
       const staff = (await getClockinStaff()).filter((s) => s.active);
-      const { shifts } = await branchWeek(branch, monday, staff);
-      const { last, changedPeople } = await publishState(branch, monday, shifts);
-      if (shifts.length === 0) return NextResponse.json({ error: "There are no shifts in this week yet" }, { status: 400 });
-      if (last && changedPeople.length === 0) return NextResponse.json({ error: "Nothing has changed since it was sent" }, { status: 400 });
-
-      await prisma.meetRotaPublish.create({ data: { branch, weekStart: monday, snapshot: snapshotOf(shifts), publishedBy: actor.slice(0, 80) } });
-
-      const label = weekLabel(monday);
-      const byPerson = new Map<number, ClockinShift[]>();
-      for (const s of shifts) byPerson.set(s.staffId, [...(byPerson.get(s.staffId) || []), s]);
-      const recipients = last ? changedPeople : Array.from(byPerson.keys());
-
-      let told = 0;
-      for (const id of recipients) {
-        const mine = (byPerson.get(id) || []).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
-        const list = mine.map((s) => `${dayLabel(s.date)}: ${s.start} – ${s.end}`).join("\n");
-        const title = last ? `Your shifts changed: ${label}` : `New rota: ${label}`;
-        const body = mine.length
-          ? `${last ? "Your updated shifts" : "Your shifts"} at ${BRANCH_NAME[branch]}:\n${list}`
-          : `You're no longer on the ${BRANCH_NAME[branch]} rota for ${label}.`;
-        const r = await notifyPeople([id], { title, body, url: "/meet?tab=rota", tag: `rota-${branch}-${monday}` }).catch(() => null);
-        if (r && (r.pushed || r.emailed)) told++;
+      let people = 0;
+      let sent = 0;
+      for (const branch of branches) {
+        const r = await publishBranch(branch, monday, staff, actor);
+        if (r) { people += r.people; sent++; }
       }
-      return NextResponse.json({ ok: true, told, people: recipients.length, update: !!last });
+      if (!sent) return NextResponse.json({ error: "Nothing new to send for this week" }, { status: 400 });
+      return NextResponse.json({ ok: true, people, branches: sent });
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Couldn't save that" }, { status: 502 });
   }
+}
+
+/**
+ * Send one branch's week. First time: everyone on it. After that: only the people whose
+ * shifts changed. Returns null when there's nothing to send.
+ */
+async function publishBranch(branch: Branch, monday: string, staff: Awaited<ReturnType<typeof getClockinStaff>>, actor: string) {
+  const { shifts } = await branchWeek(branch, monday, staff);
+  const { last, changedPeople } = await publishState(branch, monday, shifts);
+  if (!last && shifts.length === 0) return null;
+  if (last && changedPeople.length === 0) return null;
+
+  await prisma.meetRotaPublish.create({ data: { branch, weekStart: monday, snapshot: snapshotOf(shifts), publishedBy: actor.slice(0, 80) } });
+
+  const label = weekLabel(monday);
+  const byPerson = new Map<number, ClockinShift[]>();
+  for (const s of shifts) byPerson.set(s.staffId, [...(byPerson.get(s.staffId) || []), s]);
+  const recipients = last ? changedPeople : Array.from(byPerson.keys());
+
+  for (const id of recipients) {
+    const mine = (byPerson.get(id) || []).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+    const list = mine.map((s) => `${dayLabel(s.date)}: ${s.start} – ${s.end}`).join("\n");
+    const title = last ? `Your shifts changed: ${label}` : `New rota: ${label}`;
+    const body = mine.length
+      ? `${last ? "Your updated shifts" : "Your shifts"} at ${BRANCH_NAME[branch]}:\n${list}`
+      : `You're no longer on the ${BRANCH_NAME[branch]} rota for ${label}.`;
+    await notifyPeople([id], { title, body, url: "/meet?tab=rota", tag: `rota-${branch}-${monday}` }).catch(() => null);
+  }
+  return { people: recipients.length };
 }
