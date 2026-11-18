@@ -157,3 +157,35 @@ export async function deleteShift(id: number, actor: string): Promise<void> {
   }
   await bridgeWrite(`/rota/shifts/${id}`, "DELETE", actor);
 }
+
+/* ─── Budget and rota cost (worked out by the clock-in app: hours x hourly rate) ─── */
+
+export type RotaCosts = { days: { date: string; budget: number | null; cost: number }[]; totalCost: number };
+const devBudgets = ((globalThis as unknown as { __meetDevBudgets?: Map<string, number> }).__meetDevBudgets ??= new Map<string, number>());
+const DEV_RATE = 12.5; // made-up hourly rate for local testing
+
+export async function getRotaCosts(start: string, end: string): Promise<RotaCosts> {
+  if (DEV_MOCK) {
+    const days: RotaCosts["days"] = [];
+    for (let d = start; d <= end; d = new Date(new Date(`${d}T12:00:00Z`).getTime() + 86400_000).toISOString().slice(0, 10)) {
+      const cost = devShifts.filter((s) => s.date === d).reduce((n, s) => {
+        let m = Number(s.end.slice(0, 2)) * 60 + Number(s.end.slice(3)) - (Number(s.start.slice(0, 2)) * 60 + Number(s.start.slice(3)));
+        if (m <= 0) m += 1440;
+        return n + Math.round((m / 60) * DEV_RATE * 100) / 100;
+      }, 0);
+      days.push({ date: d, budget: devBudgets.get(d) ?? null, cost: Math.round(cost * 100) / 100 });
+    }
+    return { days, totalCost: Math.round(days.reduce((n, d) => n + d.cost, 0) * 100) / 100 };
+  }
+  const data = await bridge<{ days: { date: string; budget: number | null; cost: number }[]; total_cost: number }>(`/rota/costs?start=${start}&end=${end}`);
+  return { days: data.days || [], totalCost: data.total_cost || 0 };
+}
+
+/** Set (or clear with 0/null) one day's budget in the clock-in app. */
+export async function setDayBudget(date: string, amount: number | null, actor: string): Promise<void> {
+  if (DEV_MOCK) {
+    if (!amount) devBudgets.delete(date); else devBudgets.set(date, Math.round(amount * 100) / 100);
+    return;
+  }
+  await bridgeWrite(`/rota/budgets/${date}`, "PUT", actor, { amount });
+}

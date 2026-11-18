@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireMeet } from "@/lib/meet-auth";
-import { getClockinStaff, createShift, updateShift, deleteShift, getShifts } from "@/lib/clockin";
+import { getClockinStaff, createShift, updateShift, deleteShift, getShifts, getRotaCosts, setDayBudget } from "@/lib/clockin";
 import {
   weekRota, publishState, snapshotOf, mondayOf, weekDays, addDays, londonToday, isBranch, isDate, isTime,
   shiftHours, dayLabel, weekLabel, ALL, type RotaShift,
@@ -32,12 +32,15 @@ async function load(monday: string) {
   }
 
   const timeOff = await timeOffBetween(monday, addDays(monday, 6));
+  // Budget and cost come from the clock-in app; if that part isn't available, the rota still loads.
+  const costs = await getRotaCosts(monday, addDays(monday, 6)).catch(() => null);
   const waitingRequests = await prisma.meetRequest.count({ where: { OR: [{ kind: "timeoff", status: "asked" }, { kind: "swap", status: "agreed", shiftDate: { gte: londonToday() } }] } });
 
   return {
     week: monday,
     timeOff,
     waitingRequests,
+    costs,
     weekLabel: weekLabel(monday),
     days: weekDays(monday),
     today: londonToday(),
@@ -64,6 +67,7 @@ export async function GET(req: Request) {
  * POST
  *   { action: "save", branch, id?, staffId, date, start, end, notes? }
  *   { action: "delete", id }
+ *   { action: "budget", date, amount }   (amount null or 0 clears that day's budget)
  *   { action: "copy_last_week", week }
  *   { action: "publish", week }   (first time: everyone on it; after that: only people whose shifts changed)
  */
@@ -86,6 +90,14 @@ export async function POST(req: Request) {
       const shift = Number.isInteger(id) && id > 0 ? await updateShift(id, input, actor) : await createShift(input, actor);
       await prisma.meetShiftBranch.upsert({ where: { shiftId: shift.id }, create: { shiftId: shift.id, branch: body.branch }, update: { branch: body.branch } });
       return NextResponse.json({ ok: true, shift });
+    }
+
+    if (body.action === "budget") {
+      if (!isDate(body.date)) return NextResponse.json({ error: "Which day?" }, { status: 400 });
+      const amount = body.amount === null || body.amount === "" ? null : Number(body.amount);
+      if (amount !== null && (!Number.isFinite(amount) || amount < 0 || amount > 999999)) return NextResponse.json({ error: "Enter an amount in pounds" }, { status: 400 });
+      await setDayBudget(body.date, amount, actor);
+      return NextResponse.json({ ok: true });
     }
 
     if (body.action === "delete") {

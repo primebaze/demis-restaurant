@@ -24,6 +24,7 @@ type Week = {
   published: { at: string; by: string; changedPeople: number[]; seen: number; onRota: number } | null;
   timeOff: { id: string; staffId: number; status: "asked" | "approved"; from: string; to: string }[];
   waitingRequests: number;
+  costs: { days: { date: string; budget: number | null; cost: number }[]; totalCost: number } | null;
 };
 type Waiting = { id: string; kind: "swap" | "timeoff"; by: string; target: string; date: string; start: string; end: string; from: string; to: string };
 type Edit = { id?: number; branch: Branch; person: Person; date: string; start: string; end: string; notes: string };
@@ -37,6 +38,7 @@ const short = (t: string) => (t.endsWith(":00") ? t.slice(0, 2) : t); // 09:00 �
 const dayHead = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 const dayLong = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 const addDays = (date: string, n: number) => { const d = new Date(`${date}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const money = (n: number) => `£${n.toLocaleString("en-GB", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
 const fmtHours = (h: number) => (Number.isInteger(h) ? String(h) : h.toFixed(1));
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
 
@@ -81,6 +83,19 @@ export default function RotaPage() {
     setNote(action === "approve" ? "Approved and the rota is updated." : "Declined. They've been told.");
     await Promise.all([load(data?.week), loadRequests()]);
   }
+
+  async function setBudget(date: string, current: number | null) {
+    const v = prompt(`Budget for ${dayLong(date)} (£). Leave empty to clear.`, current != null ? String(current) : "");
+    if (v === null) return;
+    const amount = v.trim() === "" ? null : Number(v.replace(/[£,\s]/g, ""));
+    if (amount !== null && !Number.isFinite(amount)) return setNote("Enter an amount in pounds, like 450");
+    await act({ action: "budget", date, amount }, "budget", amount ? `Budget for ${dayHead(date)} set to ${money(amount)}.` : `Budget for ${dayHead(date)} cleared.`);
+  }
+
+  const costOf = (date: string) => data?.costs?.days.find((d) => d.date === date);
+  const budgetTotal = (data?.costs?.days || []).reduce((n, d) => n + (d.budget || 0), 0);
+  const costTotal = data?.costs?.totalCost || 0;
+  const hasBudget = (data?.costs?.days || []).some((d) => d.budget != null);
 
   const offOn = (staffId: number, date: string) => (data?.timeOff || []).find((t) => t.staffId === staffId && t.from <= date && t.to >= date);
 
@@ -263,6 +278,34 @@ export default function RotaPage() {
                       {data.days.map((d) => <td key={d}>{totals.perDay.get(d)?.size || 0}</td>)}
                       <td style={{ textAlign: "right", paddingRight: 8, fontWeight: 600, color: C.ink }}>{fmtHours(totals.all)}</td>
                     </tr>
+                    {data.costs && (
+                      <>
+                        <tr style={{ color: C.sub, textAlign: "center" }}>
+                          <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>Budget</th>
+                          {data.days.map((d) => {
+                            const b = costOf(d)?.budget ?? null;
+                            return (
+                              <td key={d} style={{ padding: 0 }}>
+                                <button aria-label={`Set budget for ${dayLong(d)}`} onClick={() => setBudget(d, b)} disabled={!!busy}
+                                  style={{ width: "100%", height: 30, border: 0, borderRadius: 10, background: b != null ? C.page : "transparent", color: b != null ? C.ink : C.plus, fontSize: 12, fontFamily: "inherit", cursor: "pointer", boxShadow: b != null ? "none" : `inset 0 0 0 1.5px ${C.dash}` }}>
+                                  {b != null ? money(b) : "+ £"}
+                                </button>
+                              </td>
+                            );
+                          })}
+                          <td style={{ textAlign: "right", paddingRight: 8, fontWeight: 600, color: C.ink }}>{hasBudget ? money(budgetTotal) : ""}</td>
+                        </tr>
+                        <tr style={{ color: C.sub, textAlign: "center" }}>
+                          <th scope="row" style={{ textAlign: "left", fontWeight: 500, padding: "6px 8px" }}>Cost</th>
+                          {data.days.map((d) => {
+                            const c = costOf(d);
+                            const over = c && c.budget != null && c.cost > c.budget;
+                            return <td key={d} style={{ color: over ? "#b91c1c" : undefined, fontWeight: over ? 600 : 400 }}>{c && c.cost ? money(c.cost) : "–"}</td>;
+                          })}
+                          <td style={{ textAlign: "right", paddingRight: 8, fontWeight: 600, color: hasBudget && costTotal > budgetTotal ? "#b91c1c" : C.ink }}>{money(costTotal)}</td>
+                        </tr>
+                      </>
+                    )}
                   </tfoot>
                 </table>
               )}
@@ -297,6 +340,18 @@ export default function RotaPage() {
               <section aria-labelledby="wk-h" style={panel}>
                 <h2 id="wk-h" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>This week</h2>
                 <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota hours</span><strong style={{ fontWeight: 600 }}>{fmtHours(totals.all)} h</strong></p>
+                {data?.costs && (
+                  <>
+                    <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Budget</span><strong style={{ fontWeight: 600 }}>{hasBudget ? money(budgetTotal) : "Not set"}</strong></p>
+                    <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>Rota cost</span><strong style={{ fontWeight: 600 }}>{money(costTotal)}</strong></p>
+                    {hasBudget && (
+                      <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                        <span style={{ color: C.sub }}>{costTotal > budgetTotal ? "Over budget" : "Left"}</span>
+                        <strong style={{ fontWeight: 600, color: costTotal > budgetTotal ? "#b91c1c" : "#047857" }}>{money(Math.abs(budgetTotal - costTotal))}</strong>
+                      </p>
+                    )}
+                  </>
+                )}
                 <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: 13 }}><span style={{ color: C.sub }}>People on the rota</span><strong style={{ fontWeight: 600 }}>{totals.people}</strong></p>
                 {(["cricklewood", "streatham"] as Branch[]).map((b) => {
                   const n = (data?.shifts || []).filter((s) => s.branch === b);
