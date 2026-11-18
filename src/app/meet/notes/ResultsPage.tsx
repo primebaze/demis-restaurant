@@ -64,11 +64,18 @@ export default function ResultsPage({ id }: { id: string }) {
     if (d?.meeting.status !== "ended" || !d?.me.manager) return;
     let stop = false;
     (async () => {
+      let fails = 0;
       while (!stop) {
         setProgress("Writing the notes from the recording…");
         const r = await postJson(`/api/meet/meetings/${id}`, { action: "process" });
         if (stop) return;
-        if (!r.ok) { setProgress(""); return; }
+        if (!r.ok) {
+          // A dropped connection or a slow request: keep going rather than leave the page stuck.
+          if (++fails >= 5) { setProgress("The notes are taking a while. Refresh this page in a minute."); return; }
+          await new Promise((ok) => setTimeout(ok, 5000));
+          continue;
+        }
+        fails = 0;
         if (r.data.status === "ready") { setProgress(""); refresh(); return; }
         setProgress(`Writing the notes… ${r.data.pending ? `${r.data.pending} recording piece${r.data.pending === 1 ? "" : "s"} left to transcribe` : ""}`);
         await new Promise((ok) => setTimeout(ok, 3000));

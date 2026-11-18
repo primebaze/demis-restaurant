@@ -11,6 +11,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import type { MeetMeeting } from "@prisma/client";
 import { readUrl } from "@/lib/meet-storage";
 import { activePeople, firstNameOf } from "@/lib/meet-people";
 import { notifyPeople } from "@/lib/meet-notify";
@@ -33,7 +34,8 @@ export async function transcribePieceNow(recordingId: string, room: boolean) {
   try {
     const words = await transcribe(r.path, room);
     await prisma.meetRecording.update({ where: { id: r.id }, data: { status: "done", words } });
-  } catch {
+  } catch (e) {
+    console.error(`[meet-notes] live transcription failed for ${r.id}: ${e instanceof Error ? e.message : e}`);
     await prisma.meetRecording.update({ where: { id: r.id }, data: { status: "uploaded" } }); // tried again when the notes are made
   }
 }
@@ -55,7 +57,10 @@ async function transcribe(path: string, room: boolean): Promise<Word[]> {
     body: JSON.stringify({ url }),
     signal: AbortSignal.timeout(50_000),
   });
-  if (!res.ok) throw new Error(`Transcription answered ${res.status}`);
+  if (!res.ok) {
+    const detail = await res.json().then((j) => j?.err_msg || j?.message || "").catch(() => "");
+    throw new Error(`Deepgram answered ${res.status}${res.status === 401 || res.status === 403 ? " (check DEEPGRAM_API_KEY in Vercel)" : ""}${detail ? `: ${String(detail).slice(0, 120)}` : ""}`);
+  }
   const data = await res.json();
   return (data?.results?.channels?.[0]?.alternatives?.[0]?.words || []) as Word[];
 }
@@ -123,10 +128,34 @@ async function summarise(title: string, date: string, lines: Line[], staff: { id
  * again (the results page does, until it says "ready").
  */
 export async function processNotes(meetingId: string, budgetMs = 45_000): Promise<{ status: string; pending: number; error: string }> {
-  const started = Date.now();
-  let meeting = await prisma.meetMeeting.findUnique({ where: { id: meetingId } });
+  const meeting = await prisma.meetMeeting.findUnique({ where: { id: meetingId } });
   if (!meeting) return { status: "missing", pending: 0, error: "" };
   if (meeting.status !== "ended") return { status: meeting.status, pending: 0, error: meeting.error };
+
+  // Only one request writes a meeting's notes at a time (several people may have the notes page
+  // open), so pieces aren't transcribed twice and tasks aren't made twice. A lock older than
+  // 6 minutes is from a request that died, and is taken over.
+  const lockKey = `notes_lock:${meetingId}`;
+  await prisma.meetSetting.deleteMany({ where: { key: lockKey, updatedAt: { lt: new Date(Date.now() - 6 * 60_000) } } });
+  const got = await prisma.meetSetting.create({ data: { key: lockKey, value: String(Date.now()) } }).then(() => true).catch(() => false);
+  if (!got) {
+    const pending = await prisma.meetRecording.count({ where: { meetingId, status: { in: ["uploaded", "transcribing"] } } });
+    return { status: "ended", pending, error: "" };
+  }
+  try {
+    // Read it again now the lock is ours: another request may have just finished the notes.
+    const fresh = await prisma.meetMeeting.findUnique({ where: { id: meetingId } });
+    if (!fresh || fresh.status !== "ended") return { status: fresh?.status || "missing", pending: 0, error: fresh?.error || "" };
+    return await writeNotes(fresh, budgetMs);
+  } finally {
+    await prisma.meetSetting.deleteMany({ where: { key: lockKey } }).catch(() => {});
+  }
+}
+
+async function writeNotes(start: MeetMeeting, budgetMs: number): Promise<{ status: string; pending: number; error: string }> {
+  const started = Date.now();
+  const meetingId = start.id;
+  let meeting = start;
 
   const finish = async (data: Parameters<typeof prisma.meetMeeting.update>[0]["data"]) => {
     meeting = await prisma.meetMeeting.update({ where: { id: meetingId }, data: { status: "ready", ...data } });
@@ -138,18 +167,25 @@ export async function processNotes(meetingId: string, budgetMs = 45_000): Promis
   if (!transcriptionReady()) return finish({ error: "Transcription isn't switched on yet. Add the notes by hand below." });
 
   const room = meeting.kind === "room";
+  let lastError = "";
   for (const r of recs.filter((x) => x.status === "uploaded" || x.status === "transcribing")) {
     if (Date.now() - started > budgetMs) break;
     try {
       const words = await transcribe(r.path, room);
       await prisma.meetRecording.update({ where: { id: r.id }, data: { status: "done", words } });
-    } catch {
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : String(e);
+      console.error(`[meet-notes] transcription failed for ${r.id}: ${lastError}`);
       await prisma.meetRecording.update({ where: { id: r.id }, data: { status: "failed" } });
     }
   }
   const after = await prisma.meetRecording.findMany({ where: { meetingId } });
   const pending = after.filter((x) => x.status === "uploaded" || x.status === "transcribing").length;
   if (pending) return { status: "ended", pending, error: "" };
+  if (!after.some((x) => x.status === "done")) {
+    // Every piece failed: say why, rather than "no speech was picked up".
+    return finish({ error: `The recording couldn't be turned into text${lastError ? ` (${lastError})` : ""}. Add the notes by hand below.` });
+  }
 
   const lines = mergeLines(after.filter((x) => x.status === "done").map((x) => ({ clockinId: x.clockinId, startMs: x.startMs, words: (x.words as Word[]) || [] })));
   const people = await activePeople().catch(() => []);
@@ -187,6 +223,8 @@ export async function processNotes(meetingId: string, budgetMs = 45_000): Promis
     await notifyPeople(told, { title: `Notes ready: ${meeting.title}`, body: "Summary, decisions and tasks from the meeting", url: `/meet?notes=${meetingId}`, tag: `notes-${meetingId}`, icon: "auto_awesome" }, { email: false }).catch(() => null);
     return result;
   } catch (e) {
-    return finish({ transcript: lines, error: e instanceof Error ? e.message : "The summary couldn't be written. Add the notes by hand below." });
+    console.error(`[meet-notes] summary failed for ${meetingId}: ${e instanceof Error ? e.message : e}`);
+    const why = e instanceof Error ? e.message : "";
+    return finish({ transcript: lines, error: `The summary couldn't be written${why ? ` (${why.slice(0, 160)})` : ""}. The transcript is below; add the notes by hand.` });
   }
 }

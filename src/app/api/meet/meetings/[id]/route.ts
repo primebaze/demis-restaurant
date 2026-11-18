@@ -12,7 +12,8 @@ import { processNotes, transcriptionReady, summaryReady, liveLines, type Line } 
 import type { MeetMeeting, MeetAttendee } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+// Writing the notes (transcribing the last pieces, then the summary) can take a couple of minutes for a long meeting.
+export const maxDuration = 300;
 
 type Ctx = { params: Promise<{ id: string }> };
 const PIN_KEY = "manager_pin_hash";
