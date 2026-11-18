@@ -40,6 +40,44 @@ export function isManagerRole(role: string): boolean {
   return role.trim().toLowerCase() === "manager";
 }
 
+/*
+ * The clock-in app is on separate hosting and each call takes 0.5 to 2 seconds, so reads are kept
+ * briefly per server instance (stale-while-revalidate): a fresh copy is used as is, an older one is
+ * returned straight away while a new one loads in the background, and identical reads that arrive
+ * together share one call. Any write clears the kept reads, so a manager sees their own change at once.
+ */
+type Kept = { at: number; value: unknown; loading?: Promise<unknown> };
+const kept = new Map<string, Kept>();
+const FRESH_MS = (path: string) => (path.startsWith("/staff") ? 10 * 60_000 : 20_000);
+const STALE_MS = (path: string) => (path.startsWith("/staff") ? 60 * 60_000 : path.startsWith("/clocked-in") ? 60_000 : 5 * 60_000);
+
+async function cachedRead<T>(path: string): Promise<T> {
+  const now = Date.now();
+  const hit = kept.get(path);
+  const load = () => {
+    const p = bridge<T>(path)
+      .then((value) => { kept.set(path, { at: Date.now(), value }); return value; })
+      .catch((e) => { const k = kept.get(path); if (k) k.loading = undefined; throw e; });
+    kept.set(path, { ...(kept.get(path) || { at: 0, value: undefined }), loading: p });
+    return p;
+  };
+  if (hit && hit.value !== undefined) {
+    const age = now - hit.at;
+    if (age < FRESH_MS(path)) return hit.value as T;
+    if (age < STALE_MS(path)) {
+      if (!hit.loading) load().catch(() => {}); // refresh behind the scenes
+      return hit.value as T;
+    }
+  }
+  if (hit?.loading) return hit.loading as Promise<T>;
+  return load();
+}
+
+/** Forget kept reads (after a write, so the next read is fresh). */
+export function forgetClockinReads() {
+  kept.clear();
+}
+
 async function bridge<T>(path: string, init?: RequestInit): Promise<T> {
   if (!API || KEY.length < 32) throw new Error("Clock-in link is not set up");
   const res = await fetch(`${API}${path}`, {
@@ -52,16 +90,13 @@ async function bridge<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
-// The staff list changes rarely; keep it for a minute per server instance.
-let staffCache: { at: number; staff: ClockinStaff[] } | null = null;
 
 /** Everyone on the clock-in staff list, turned-off people included (active: false). */
 export async function getClockinStaff(fresh = false): Promise<ClockinStaff[]> {
   if (DEV_MOCK) return DEV_STAFF;
-  if (!fresh && staffCache && Date.now() - staffCache.at < 60_000) return staffCache.staff;
-  const data = await bridge<{ staff: ClockinStaff[] }>("/staff");
+  if (fresh) kept.delete("/staff");
+  const data = await cachedRead<{ staff: ClockinStaff[] }>("/staff");
   const staff = (data.staff || []).map((s) => ({ ...s, role: String(s.role || "").toLowerCase(), active: !!s.active }));
-  staffCache = { at: Date.now(), staff };
   return staff;
 }
 
@@ -81,7 +116,7 @@ export async function verifyClockinPin(staffId: number, pin: string): Promise<bo
 /** Who is clocked in right now, with when they clocked in. */
 export async function getClockedIn(): Promise<Map<number, string>> {
   if (DEV_MOCK) return new Map([[9002, new Date(Date.now() - 3 * 3600_000).toISOString()]]);
-  const data = await bridge<{ clocked_in: { staff_id: number; since: string }[] }>("/clocked-in");
+  const data = await cachedRead<{ clocked_in: { staff_id: number; since: string }[] }>("/clocked-in");
   return new Map((data.clocked_in || []).map((r) => [r.staff_id, r.since]));
 }
 
@@ -102,7 +137,7 @@ const devShifts = devStore.shifts;
 /** Every shift between two dates (YYYY-MM-DD, inclusive). */
 export async function getShifts(start: string, end: string): Promise<ClockinShift[]> {
   if (DEV_MOCK) return devShifts.filter((s) => s.date >= start && s.date <= end).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
-  const data = await bridge<{ shifts: RawShift[] }>(`/rota?start=${start}&end=${end}`);
+  const data = await cachedRead<{ shifts: RawShift[] }>(`/rota?start=${start}&end=${end}`);
   return (data.shifts || []).map(fromRaw);
 }
 
@@ -110,6 +145,7 @@ export type ShiftInput = { staffId: number; date: string; start: string; end: st
 
 async function bridgeWrite<T>(path: string, method: string, actor: string, body?: object): Promise<T> {
   if (!API || KEY.length < 32) throw new Error("Clock-in link is not set up");
+  forgetClockinReads();
   const res = await fetch(`${API}${path}`, {
     method,
     headers: { Accept: "application/json", "Content-Type": "application/json", "X-Bridge-Key": KEY, "X-Bridge-Actor": actor.slice(0, 60) },
@@ -123,6 +159,7 @@ async function bridgeWrite<T>(path: string, method: string, actor: string, body?
     const first = data?.errors ? (Object.values(data.errors)[0] as string[])?.[0] : null;
     throw new Error(first || data?.message || `Clock-in link answered ${res.status}`);
   }
+  forgetClockinReads();
   return data as T;
 }
 
@@ -177,7 +214,7 @@ export async function getRotaCosts(start: string, end: string): Promise<RotaCost
     }
     return { days, totalCost: Math.round(days.reduce((n, d) => n + d.cost, 0) * 100) / 100 };
   }
-  const data = await bridge<{ days: { date: string; budget: number | null; cost: number }[]; total_cost: number }>(`/rota/costs?start=${start}&end=${end}`);
+  const data = await cachedRead<{ days: { date: string; budget: number | null; cost: number }[]; total_cost: number }>(`/rota/costs?start=${start}&end=${end}`);
   return { days: data.days || [], totalCost: data.total_cost || 0 };
 }
 
@@ -254,7 +291,7 @@ function devSheets(start: string, end: string, staffId?: number): Timesheet[] {
 export async function getTimesheets(start: string, end: string, staffId?: number): Promise<Timesheet[]> {
   if (DEV_MOCK) return devSheets(start, end, staffId);
   const q = `/timesheet?start=${start}&end=${end}${staffId ? `&staff_id=${staffId}` : ""}`;
-  const data = await bridge<{ timesheets: RawSheet[] }>(q);
+  const data = await cachedRead<{ timesheets: RawSheet[] }>(q);
   return (data.timesheets || []).map((t) => {
     const paired = pairEntries((t.entries || []).map((e) => ({ action: e.action, at: e.captured_at })));
     const adjusted = new Set(t.adjusted_dates || []);
