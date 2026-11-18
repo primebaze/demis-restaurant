@@ -31,6 +31,10 @@ type Week = {
 type Edit = { id?: number; person: Person; date: string; start: string; end: string; notes: string };
 
 const BRANCH_NAME = { cricklewood: "Cricklewood", streatham: "Streatham" } as const;
+// Demi's usual times: one tap under Start and Finish. A new shift starts as 11:50 – 00:00.
+const START_TIMES = ["10:00", "11:50"];
+const END_TIMES = ["17:00", "00:00"];
+const NEW_SHIFT: [string, string] = ["11:50", "00:00"];
 const short = (t: string) => (t.endsWith(":00") ? t.slice(0, 2) : t); // 09:00 → 09, 09:30 stays
 const dayHead = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 const dayLong = (d: string) => new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
@@ -193,7 +197,7 @@ export default function RotaPage() {
                           if (list.length === 0) {
                             return (
                               <td key={d} style={{ height: 50, padding: 0 }}>
-                                <button aria-label={`Add a shift for ${p.name} on ${dayLong(d)}`} onClick={() => openEdit({ person: p, date: d, start: common[0]?.[0] || "09:00", end: common[0]?.[1] || "17:00", notes: "" })}
+                                <button aria-label={`Add a shift for ${p.name} on ${dayLong(d)}`} onClick={() => openEdit({ person: p, date: d, start: NEW_SHIFT[0], end: NEW_SHIFT[1], notes: "" })}
                                   style={{ width: "100%", height: 50, borderRadius: 12, border: `1.5px dashed ${C.dash}`, background: "transparent", color: C.plus, fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>+</button>
                               </td>
                             );
@@ -297,12 +301,16 @@ function ShiftEditor({ edit, common, busy, error, onClose, onSave, onDelete }: {
         )}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 500, color: C.body }}>Start
-            <input type="time" step={900} value={e.start} onChange={(x) => setE({ ...e, start: x.target.value })} style={input} />
-          </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 500, color: C.body }}>Finish
-            <input type="time" step={900} value={e.end} onChange={(x) => setE({ ...e, end: x.target.value })} style={input} />
-          </label>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label htmlFor="se-start" style={{ fontSize: 13, fontWeight: 500, color: C.body }}>Start</label>
+            <input id="se-start" type="time" step={60} value={e.start} onChange={(x) => setE({ ...e, start: x.target.value })} style={input} />
+            <TimeChips times={START_TIMES} value={e.start} label="Start" onPick={(t) => setE({ ...e, start: t })} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label htmlFor="se-end" style={{ fontSize: 13, fontWeight: 500, color: C.body }}>Finish</label>
+            <input id="se-end" type="time" step={60} value={e.end} onChange={(x) => setE({ ...e, end: x.target.value })} style={input} />
+            <TimeChips times={END_TIMES} value={e.end} label="Finish" onPick={(t) => setE({ ...e, end: t })} />
+          </div>
         </div>
         {e.end && e.start && e.end < e.start && <p style={{ margin: "-6px 0 0", fontSize: 12, color: C.sub }}>Finishes after midnight.</p>}
         <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 500, color: C.body }}>Note (optional)
@@ -318,6 +326,22 @@ function ShiftEditor({ edit, common, busy, error, onClose, onSave, onDelete }: {
           <button disabled={busy || !e.start || !e.end} onClick={() => onSave(e)} style={{ flex: 1, height: 48, border: 0, borderRadius: 24, background: C.ink, color: "#ffffff", fontSize: 15, fontWeight: 500, fontFamily: "inherit" }}>{busy ? "Saving…" : "Save"}</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* One-tap usual times under Start and Finish. */
+function TimeChips({ times, value, label, onPick }: { times: string[]; value: string; label: string; onPick: (t: string) => void }) {
+  return (
+    <div role="group" aria-label={`Usual ${label.toLowerCase()} times`} style={{ display: "flex", gap: 6 }}>
+      {times.map((t) => {
+        const on = value === t;
+        return (
+          <button key={t} type="button" aria-pressed={on} onClick={() => onPick(t)} style={{ flex: 1, height: 34, border: 0, borderRadius: 17, background: on ? C.ink : C.page, color: on ? "#ffffff" : C.ink, fontSize: 13, fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace" }}>
+            {t}
+          </button>
+        );
+      })}
     </div>
   );
 }
