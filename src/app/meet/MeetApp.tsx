@@ -147,22 +147,36 @@ function Logo() {
 /* ─── 12 · Sign in ─── */
 
 function SignIn({ onDone }: { onDone: () => void }) {
+  const [query, setQuery] = useState("");
   const [people, setPeople] = useState<{ id: number; name: string }[] | null>(null);
   const [loadError, setLoadError] = useState("");
-  const [picked, setPicked] = useState<number | null>(null);
+  const [picked, setPicked] = useState<{ id: number; name: string } | null>(null);
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
 
+  // Staff type the first 3 letters of their name; only matching names come back.
+  const letters = query.replace(/[^a-zA-Z]/g, "").length;
   useEffect(() => {
-    fetch("/api/meet/staff", { cache: "no-store" })
-      .then(async (r) => {
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(d.error || "Can't load names");
-        setPeople(d.people || []);
-      })
-      .catch((e) => setLoadError(e.message));
-  }, []);
+    if (letters < 3) { setPeople(null); setLoadError(""); return; }
+    let stale = false;
+    const t = setTimeout(() => {
+      fetch(`/api/meet/staff?q=${encodeURIComponent(query.trim())}`, { cache: "no-store" })
+        .then(async (r) => {
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(d.error || "Can't load names");
+          if (stale) return;
+          const list: { id: number; name: string }[] = d.people || [];
+          setLoadError("");
+          setPeople(list);
+          // Only one person: pick them and put the keyboard away for the PIN pad.
+          if (list.length === 1) { setPicked(list[0]); setPin(""); setError(""); searchRef.current?.blur(); }
+        })
+        .catch((e) => !stale && setLoadError(e.message));
+    }, 250);
+    return () => { stale = true; clearTimeout(t); };
+  }, [query, letters]);
 
   const submit = useCallback(
     async (full: string) => {
@@ -173,7 +187,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
         const res = await fetch("/api/meet/signin", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ staffId: picked, pin: full }),
+          body: JSON.stringify({ staffId: picked.id, pin: full }),
         });
         const d = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -197,7 +211,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
   pinRef.current = pin;
   const press = (d: string) => {
     if (busy) return;
-    if (picked == null) return setError("Tap your name first");
+    if (picked == null) return setError("Type your name and tap it first");
     if (pinRef.current.length >= 4) return;
     setError("");
     const next = pinRef.current + d;
@@ -211,6 +225,7 @@ function SignIn({ onDone }: { onDone: () => void }) {
   pressRef.current = press;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement | null)?.tagName === "INPUT") return; // typing a name, not the PIN
       if (/^\d$/.test(e.key)) pressRef.current(e.key);
       if (e.key === "Backspace") setPin((p) => p.slice(0, -1));
     };
@@ -230,37 +245,44 @@ function SignIn({ onDone }: { onDone: () => void }) {
         <p style={{ margin: "6px 0 0", fontSize: 14, color: C.muted }}>Use the same PIN you clock in with</p>
       </div>
 
-      {loadError ? (
-        <p style={{ margin: 0, padding: "12px 14px", borderRadius: 16, background: C.card, textAlign: "center", color: C.muted }}>{loadError}</p>
-      ) : !people ? (
-        <div style={{ display: "flex", justifyContent: "center", height: 89, alignItems: "center" }}><Spinner /></div>
+      {picked ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 20, background: C.card }}>
+          <span style={{ width: 44, height: 44, flex: "none", borderRadius: "50%", background: personColour(picked.id).bg, color: personColour(picked.id).fg, fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(picked.name)}</span>
+          <span style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{picked.name}</span>
+          <button type="button" onClick={() => { setPicked(null); setPin(""); setError(""); setQuery(""); setPeople(null); setTimeout(() => searchRef.current?.focus(), 0); }} style={{ height: 34, padding: "0 14px", border: 0, borderRadius: 17, background: C.chip, color: "#fff", fontSize: 13, fontFamily: "inherit" }}>Not you?</button>
+        </div>
       ) : (
-        <div role="group" aria-label="Your name" className="[scrollbar-width:none]" style={{ display: "flex", gap: 10, margin: "0 -22px", padding: "6px 22px", overflowX: "auto" }}>
-          {people.map((p) => {
-            const on = p.id === picked;
-            const col = personColour(p.id);
-            return (
-              <button
-                key={p.id}
-                type="button"
-                aria-pressed={on}
-                aria-label={p.name}
-                onClick={() => { setPicked(p.id); setPin(""); setError(""); }}
-                style={{ flex: "none", width: 72, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, border: 0, padding: 0, background: "transparent", color: on ? "#fff" : C.muted, fontSize: 13, fontWeight: on ? 600 : 400, fontFamily: "inherit" }}
-              >
-                <span
-                  style={{
-                    width: 60, height: 60, borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 22, fontWeight: 600,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: on ? `0 0 0 3px ${C.bg}, 0 0 0 5px #ffffff` : "none",
-                  }}
-                >
-                  {initial(p.name)}
-                </span>
-                <span style={{ maxWidth: 72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{firstName(p.name)}</span>
-              </button>
-            );
-          })}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <label style={{ position: "relative", display: "block" }}>
+            <span className="sr-only">Your name</span>
+            <Icon name="search" size={20} style={{ position: "absolute", left: 16, top: 15, color: C.muted }} />
+            <input
+              ref={searchRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Type the first 3 letters of your name"
+              autoComplete="off" autoCorrect="off" autoCapitalize="words" spellCheck={false} enterKeyHint="search"
+              style={{ width: "100%", boxSizing: "border-box", height: 50, padding: "0 16px 0 46px", border: 0, borderRadius: 25, background: C.card, color: "#fff", fontSize: 16, fontFamily: "inherit", outline: "none" }}
+            />
+          </label>
+          {loadError ? (
+            <p style={{ margin: 0, textAlign: "center", fontSize: 13, color: C.muted }}>{loadError}</p>
+          ) : letters < 3 ? (
+            <p style={{ margin: 0, textAlign: "center", fontSize: 13, color: C.faint }}>{letters === 0 ? "First name or surname" : `${3 - letters} more letter${3 - letters === 1 ? "" : "s"}…`}</p>
+          ) : !people ? (
+            <div style={{ display: "flex", justifyContent: "center", height: 40, alignItems: "center" }}><Spinner /></div>
+          ) : people.length === 0 ? (
+            <p style={{ margin: 0, textAlign: "center", fontSize: 13, color: C.muted }}>No one starts with &ldquo;{query.trim()}&rdquo;. Check the spelling, or ask a manager.</p>
+          ) : (
+            <div role="group" aria-label="Pick your name" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {people.map((p) => (
+                <button key={p.id} type="button" onClick={() => { setPicked(p); setPin(""); setError(""); searchRef.current?.blur(); }} style={{ display: "flex", alignItems: "center", gap: 12, height: 56, padding: "0 12px", border: 0, borderRadius: 18, background: C.card, color: "#fff", fontSize: 15, fontFamily: "inherit", textAlign: "left" }}>
+                  <span style={{ width: 36, height: 36, flex: "none", borderRadius: "50%", background: personColour(p.id).bg, color: personColour(p.id).fg, fontSize: 15, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(p.name)}</span>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
