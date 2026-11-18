@@ -6,7 +6,7 @@ import { meetingFor } from "@/lib/meet-meetings";
 export const dynamic = "force-dynamic";
 
 type Ctx = { params: Promise<{ id: string }> };
-const KINDS = ["hello", "offer", "answer", "ice", "bye", "state"];
+const KINDS = ["hello", "offer", "answer", "ice", "bye", "state", "ended"];
 const PEER = /^[0-9]{1,9}-[a-z0-9]{6,16}$/; // "<clockinId>-<random>"
 
 async function allowed(id: string) {
@@ -56,6 +56,8 @@ export async function POST(req: Request, { params }: Ctx) {
   if (!PEER.test(from) || !from.startsWith(`${a.me.person.id}-`) || (to && !PEER.test(to)) || !KINDS.includes(body.kind)) {
     return NextResponse.json({ error: "Bad message" }, { status: 400 });
   }
+  // "ended": a manager ended the meeting for everyone; every phone in the call closes within a second.
+  if (body.kind === "ended" && !a.me.manager) return NextResponse.json({ error: "Managers only" }, { status: 403 });
   const data = body.data && typeof body.data === "object" ? body.data : {};
   if (JSON.stringify(data).length > 20_000) return NextResponse.json({ error: "Too big" }, { status: 413 });
   await prisma.meetSignal.create({ data: { meetingId: id, fromPeer: from, toPeer: to, kind: body.kind, data } });

@@ -167,6 +167,7 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
     publish();
   }, [publish]);
 
+  const leaveRef = useRef<() => Promise<void>>(async () => {});
   const onSignal = useCallback(async (s: Signal) => {
     const d = s.data || {};
     if (s.kind === "hello") {
@@ -174,6 +175,7 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
       return;
     }
     if (s.kind === "bye") return dropPeer(s.from);
+    if (s.kind === "ended") { leaveRef.current(); return; } // a manager ended it for everyone
     if (s.kind === "state") {
       const p = peersRef.current.get(s.from);
       if (p) { p.mic = d.mic !== false; p.cam = !!d.cam; publish(); }
@@ -251,6 +253,7 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
       const blob = new Blob(chunks, { type: rec.mimeType || mime || "audio/webm" });
       if (blob.size > 2000) {
         uploads.current.push({ blob, seq: mySeq, startMs: Math.max(0, pieceStart), mime: blob.type, tries: 0 });
+        setPending(uploads.current.length);
         flushUploads();
       }
       if (alive.current) startPiece(callStart);
@@ -391,15 +394,33 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
     setRecording(false);
   }, [dropPeer]);
 
-  const leave = useCallback(async () => {
-    await send("", "bye");
+  // Leaving is instant on screen: the call stops and shows as ended straight away; telling the
+  // server and the others, and uploading the last bit of audio, carry on in the background.
+  // Resolves once the last audio is saved (the host waits for that before opening the notes).
+  const leaving = useRef<Promise<void> | null>(null);
+  const leave = useCallback((): Promise<void> => {
+    if (leaving.current) return leaving.current;
+    alive.current = false;
     stopAll();
-    await post(base, { action: "leave" }).catch(() => {});
-    // Let the last recording piece finish uploading.
-    await new Promise((r) => setTimeout(r, 300)); // the recorder hands over its last piece
-    for (let i = 0; i < 12 && uploads.current.length; i++) { await flushUploads(); if (uploads.current.length) await new Promise((r) => setTimeout(r, 500)); }
     setStatus("ended");
+    leaving.current = (async () => {
+      await Promise.all([send("", "bye"), post(base, { action: "leave" }).catch(() => {})]);
+      await new Promise((r) => setTimeout(r, 300)); // the recorder hands over its last piece
+      for (let i = 0; i < 12 && uploads.current.length; i++) { await flushUploads(); if (uploads.current.length) await new Promise((r) => setTimeout(r, 500)); }
+    })();
+    return leaving.current;
   }, [base, send, stopAll, flushUploads]);
+
+  leaveRef.current = leave;
+
+  /** Managers: end the meeting for everyone. Others' phones close within a second. */
+  const endAll = useCallback(async () => {
+    await Promise.all([
+      send("", "ended"),
+      post(base, { action: "end" }).catch(() => {}),
+      leave(),
+    ]);
+  }, [base, send, leave]);
 
   // Closing the tab: say goodbye so others drop the tile straight away.
   useEffect(() => {
@@ -451,5 +472,5 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
     send("", "state", hello());
   }, [send, hello]);
 
-  return { status, error: error || saveError, peers, local, mic, cam, speakingSelf, startedAt, recording, pending, join, leave, toggleMic, toggleCam, myPeerId: myPeer.current };
+  return { status, error: error || saveError, peers, local, mic, cam, speakingSelf, startedAt, recording, pending, join, leave, endAll, toggleMic, toggleCam, myPeerId: myPeer.current };
 }

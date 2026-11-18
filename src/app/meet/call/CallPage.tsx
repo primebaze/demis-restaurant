@@ -121,6 +121,14 @@ export default function CallPage({ id }: { id: string }) {
     return () => clearInterval(t);
   }, [detail, load, call.status]);
 
+  // Just ended or left: refresh straight away so the screen shows the meeting's real state.
+  useEffect(() => { if (call.status === "ended") { const t = setTimeout(load, 700); return () => clearTimeout(t); } }, [call.status, load]);
+
+  // Ended by someone else (or the time limit) and the "ended" message was missed: close the call.
+  useEffect(() => {
+    if (call.status === "in" && detail && ["ended", "ready"].includes(detail.meeting.status)) call.leave();
+  }, [call, detail]);
+
   // Let in automatically when the host starts it.
   const wasScheduled = useRef(false);
   useEffect(() => {
@@ -138,7 +146,7 @@ export default function CallPage({ id }: { id: string }) {
   let screen: ReactNode;
   if (error) screen = <Light><Logo /><p style={{ margin: "40px 0 0", fontSize: 17, textAlign: "center" }}>{error}</p><a href="/meet" style={btnLightWide}>Back to the app</a></Light>;
   else if (!detail) screen = <Light><Logo /><p style={{ margin: "40px 0 0", color: L.sub, textAlign: "center" }}>Loading the meeting…</p></Light>;
-  else if (call.status === "ended" || (call.status !== "in" && ["ended", "ready"].includes(detail.meeting.status))) screen = <Ended d={detail} seconds={detail.me.seconds} onRejoin={detail.meeting.status === "live" ? () => window.location.reload() : undefined} />;
+  else if (call.status === "ended" || (call.status !== "in" && ["ended", "ready"].includes(detail.meeting.status))) screen = <Ended d={detail} seconds={detail.me.seconds} saving={call.pending > 0} onRejoin={detail.meeting.status === "live" ? () => window.location.reload() : undefined} />;
   else if (call.status === "in") screen = wide ? <ComputerCall d={detail} call={call} /> : <PhoneCall d={detail} call={call} />;
   else if (detail.meeting.status === "scheduled") screen = <Waiting d={detail} mic={wantMic} cam={wantCam} onMic={() => setWantMic(!wantMic)} onCam={() => setWantCam(!wantCam)} reload={load} />;
   else screen = <Join d={detail} mic={wantMic} cam={wantCam} onMic={() => setWantMic(!wantMic)} onCam={() => setWantCam(!wantCam)} onJoin={join} busy={call.status === "joining"} error={call.error} />;
@@ -278,7 +286,7 @@ function Waiting({ d, mic, cam, onMic, onCam, reload }: { d: Detail; mic: boolea
 }
 
 /* ─── 3c · Meeting ended ─── */
-function Ended({ d, seconds, onRejoin }: { d: Detail; seconds: number; onRejoin?: () => void }) {
+function Ended({ d, seconds, onRejoin, saving }: { d: Detail; seconds: number; onRejoin?: () => void; saving?: boolean }) {
   const came = d.attendees.filter((a) => a.joinedAt).length;
   const invited = d.attendees.filter((a) => a.invited).length;
   const mine = (d.notes?.tasks || []).filter((t) => t.ownerId === d.me.id && t.status !== "suggested");
@@ -291,6 +299,7 @@ function Ended({ d, seconds, onRejoin }: { d: Detail; seconds: number; onRejoin?
         <div>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 600, letterSpacing: "-0.025em" }}>Thanks, {firstName(d.me.name)}</h1>
           <p style={{ margin: "6px 0 0", fontSize: 14, color: L.sub }}>{d.meeting.title} {d.meeting.status === "live" ? "is still going" : "has ended"}</p>
+          {saving && <p role="status" style={{ margin: "6px 0 0", fontSize: 13, color: L.sub }}>Saving the last bit of audio… keep this open for a moment.</p>}
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
@@ -339,8 +348,7 @@ function useStage(peers: PeerView[]) {
 /* ─── 31 · In the call, phone ─── */
 /** End the meeting for everyone (managers): it ends at once, then the last bit of audio uploads. */
 async function endForEveryone(d: Detail, call: Call) {
-  await fetch(`/api/meet/meetings/${d.meeting.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "end" }) }).catch(() => {});
-  await call.leave();
+  await call.endAll(); // the call closes at once; this resolves when the last audio is saved
   window.location.href = `/meet/notes/${d.meeting.id}`;
 }
 
