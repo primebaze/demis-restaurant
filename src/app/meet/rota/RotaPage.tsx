@@ -504,7 +504,7 @@ function ShiftEditor({ edit, common, busy, error, onClose, onSave, onDelete }: {
   const [e, setE] = useState(edit);
   const input: CSSProperties = { height: 48, width: "100%", boxSizing: "border-box", padding: "0 14px", border: 0, borderRadius: 16, background: C.page, fontSize: 16, fontFamily: "inherit", color: C.ink };
   return (
-    <div role="presentation" onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <div data-overlay role="presentation" onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div role="dialog" aria-labelledby="se-title" onClick={(ev) => ev.stopPropagation()} style={{ width: "100%", maxWidth: 420, boxSizing: "border-box", background: "#ffffff", borderRadius: 28, boxShadow: "0 30px 70px -20px rgba(20,20,20,0.45)", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1 }}>

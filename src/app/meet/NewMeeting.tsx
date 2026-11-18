@@ -33,7 +33,11 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
   const [date, setDate] = useState(startDate || now.date);
   const [time, setTime] = useState(`${String(Math.min(22, now.hour + 1)).padStart(2, "0")}:00`);
   const [minutes, setMinutes] = useState(30);
-  const [invite, setInvite] = useState<number[]>([]);
+  // Invites: one group (All Cricklewood, All Streatham, Managers, Everyone) picked like a tab, plus
+  // anyone added by name. Picking another group swaps the group; people added by name stay.
+  const [group, setGroup] = useState("");
+  const [manual, setManual] = useState<number[]>([]);
+  const [removed, setRemoved] = useState<number[]>([]);
   const [search, setSearch] = useState("");
   const [liveNotes, setLiveNotes] = useState(true);
   const [repeat, setRepeat] = useState<"" | "daily" | "weekly">("");
@@ -53,10 +57,34 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
   }, [onClose]);
 
   const others = people.filter((p) => p.id !== meId);
-  const add = (ids: number[]) => setInvite((cur) => Array.from(new Set([...cur, ...ids])));
+  const GROUPS: [string, string, (p: Person) => boolean][] = [
+    ["cricklewood", "All Cricklewood", (p) => p.branch === "cricklewood" || p.branch === "both"],
+    ["streatham", "All Streatham", (p) => p.branch === "streatham" || p.branch === "both"],
+    ["managers", "Managers", (p) => p.role.toLowerCase() === "manager"],
+    ["everyone", "Everyone", () => true],
+  ];
+  const groupIds = useMemo(() => { const g = GROUPS.find(([k]) => k === group); return g ? others.filter(g[2]).map((p) => p.id) : []; },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [group, others]);
+  const invite = useMemo(() => Array.from(new Set([...groupIds.filter((id) => !removed.includes(id)), ...manual])), [groupIds, removed, manual]);
+  const add = (ids: number[]) => { setManual((cur) => Array.from(new Set([...cur, ...ids]))); setRemoved((r) => r.filter((x) => !ids.includes(x))); };
+  const removeOne = (id: number) => { setManual((cur) => cur.filter((x) => x !== id)); setRemoved((r) => [...r, id]); };
   const matches = useMemo(() => (search.trim() ? others.filter((p) => !invite.includes(p.id) && p.name.toLowerCase().includes(search.trim().toLowerCase())).slice(0, 6) : []), [search, others, invite]);
 
   async function create() {
+    // Say what's missing (and take them to it) rather than leaving a grey button.
+    if (!title.trim()) {
+      setErr("Give the meeting a title first.");
+      const t = document.getElementById("nm-name");
+      t?.scrollIntoView({ behavior: "smooth", block: "center" });
+      t?.focus({ preventScroll: true });
+      return;
+    }
+    if (kind === "call" && invite.length === 0) {
+      setErr("Invite at least one person to a video call.");
+      document.getElementById("nm-invite")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     setBusy(true);
     setErr("");
     const r = await postJson("/api/meet/meetings", { title, kind, date, time, minutes, invite, liveNotes, repeat, private: priv });
@@ -86,7 +114,7 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
   );
 
   return (
-    <div onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "36px 16px", overflowY: "auto" }}>
+    <div data-overlay onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "36px 16px", overflowY: "auto" }}>
       <div role="dialog" aria-modal="true" aria-labelledby="nm-title" style={{ width: "100%", maxWidth: 648, boxSizing: "border-box", background: "#ffffff", borderRadius: 28, boxShadow: "0 30px 70px -20px rgba(20,20,20,0.45)", padding: 26, display: "flex", flexDirection: "column", gap: 20, color: C.ink }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ width: 44, height: 44, borderRadius: 14, background: C.coralBg, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="event" size={24} fill style={{ color: C.accent }} /></span>
@@ -98,28 +126,28 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <label htmlFor="nm-name" style={lbl}>Title</label>
-          <input id="nm-name" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Weekly managers' catch-up" style={{ ...field, padding: "0 16px" }} />
+          <input id="nm-name" value={title} onChange={(e) => { setTitle(e.target.value); setErr(""); }} maxLength={120} placeholder="Weekly managers' catch-up" style={{ ...field, padding: "0 16px" }} />
         </div>
         <div role="radiogroup" aria-label="Type" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
           {kindCard("call", "videocam", "Video call", "Everyone joins from their own phone or computer", "#ffad8c")}
           {kindCard("room", "mic", "Room recording", "One computer records everyone in the room", "#b45309")}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))", gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <label htmlFor="nm-day" style={lbl}>Date</label>
               <button type="button" onClick={() => setDate(londonNow().date)} aria-pressed={date === londonNow().date} style={{ ...quick, ...(date === londonNow().date ? { background: C.ink, color: "#ffffff" } : {}) }}>Today</button>
             </div>
             <div style={fieldWrap}><Icon name="calendar_today" size={19} style={fieldIcon} /><input id="nm-day" type="date" value={date} min={now.date} onChange={(e) => setDate(e.target.value)} style={field} /></div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <label htmlFor="nm-time" style={lbl}>Time</label>
               <button type="button" onClick={() => { const n = londonNow(); setDate(n.date); setTime(n.time); }} title="Today, starting now" style={quick}>Now</button>
             </div>
             <div style={fieldWrap}><Icon name="schedule" size={19} style={fieldIcon} /><input id="nm-time" type="time" step={300} value={time} onChange={(e) => setTime(e.target.value)} style={field} /></div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <label htmlFor="nm-len" style={lbl}>Length</label>
               <span style={{ marginLeft: "auto", fontSize: 12, color: C.sub }}>Up to {kind === "room" ? "30 min" : "1 hour"}</span>
@@ -140,7 +168,7 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
                 if (!p) return null;
                 const col = personColourLight(id);
                 return (
-                  <button key={id} onClick={() => setInvite(invite.filter((x) => x !== id))} aria-label={`Remove ${p.name}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 10px 0 4px", border: 0, borderRadius: 16, background: "#ffffff", fontSize: 13, whiteSpace: "nowrap", fontFamily: "inherit", color: C.ink, cursor: "pointer" }}>
+                  <button key={id} onClick={() => removeOne(id)} aria-label={`Remove ${p.name}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 10px 0 4px", border: 0, borderRadius: 16, background: "#ffffff", fontSize: 13, whiteSpace: "nowrap", fontFamily: "inherit", color: C.ink, cursor: "pointer" }}>
                     <span style={{ width: 24, height: 24, borderRadius: "50%", background: col.bg, color: col.fg, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{initial(p.name)}</span>{firstName(p.name)}
                   </button>
                 );
@@ -158,9 +186,15 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
             )}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {[["+ All Cricklewood", (p: Person) => p.branch === "cricklewood" || p.branch === "both"], ["+ All Streatham", (p: Person) => p.branch === "streatham" || p.branch === "both"], ["+ Managers", (p: Person) => p.role.toLowerCase() === "manager"], ["+ Everyone", () => true]].map(([l, f]) => (
-              <button key={l as string} onClick={() => add(others.filter(f as (p: Person) => boolean).map((p) => p.id))} style={{ height: 34, padding: "0 14px", border: "1px solid #e6e1db", borderRadius: 17, background: "#ffffff", fontSize: 13, fontFamily: "inherit", whiteSpace: "nowrap", color: C.ink, cursor: "pointer" }}>{l as string}</button>
-            ))}
+            {GROUPS.map(([k, label, f]) => {
+              const on = group === k;
+              const n = others.filter(f).length;
+              return (
+                <button key={k} type="button" aria-pressed={on} onClick={() => { setGroup(on ? "" : k); setRemoved([]); }} style={{ height: 34, padding: "0 14px", border: on ? "1px solid transparent" : "1px solid #e6e1db", borderRadius: 17, background: on ? C.ink : "#ffffff", fontSize: 13, fontWeight: on ? 500 : 400, fontFamily: "inherit", whiteSpace: "nowrap", color: on ? "#ffffff" : C.ink, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  {on ? <Icon name="check" size={16} /> : "+"} {label}<span style={{ fontSize: 12, opacity: 0.7 }}>{n}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, borderRadius: 20, background: C.page, padding: "6px 16px" }}>
@@ -172,7 +206,7 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
         {err && <p role="alert" style={{ margin: 0, fontSize: 13, color: "#b91c1c" }}>{err}</p>}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button onClick={onClose} style={{ height: 48, padding: "0 20px", border: 0, borderRadius: 24, background: "transparent", fontSize: 15, fontWeight: 500, fontFamily: "inherit", color: C.ink, cursor: "pointer" }}>Cancel</button>
-          <button onClick={create} disabled={busy || !title.trim() || (kind === "call" && invite.length === 0)} style={{ height: 48, display: "inline-flex", alignItems: "center", gap: 8, padding: "0 22px", border: 0, borderRadius: 24, background: C.ink, color: "#ffffff", fontSize: 15, fontWeight: 500, fontFamily: "inherit", opacity: !title.trim() || (kind === "call" && invite.length === 0) ? 0.45 : 1, cursor: "pointer" }}>
+          <button onClick={create} disabled={busy} style={{ height: 48, display: "inline-flex", alignItems: "center", gap: 8, padding: "0 22px", border: 0, borderRadius: 24, background: C.ink, color: "#ffffff", fontSize: 15, fontWeight: 500, fontFamily: "inherit", opacity: !title.trim() || (kind === "call" && invite.length === 0) ? 0.55 : 1, cursor: "pointer" }}>
             {busy ? "Creating…" : invite.length ? "Create and send invites" : "Create"}<Icon name="arrow_forward" size={19} />
           </button>
         </div>

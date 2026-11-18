@@ -467,7 +467,7 @@ function PinDialog({ m, onOpen }: { m: Detail["meeting"]; onOpen: (d: Detail, pi
     if (next.every(Boolean)) open(next.join(""));
   }
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(40,32,26,0.42)", padding: 36, display: "flex", alignItems: "flex-start", justifyContent: "center", overflowY: "auto" }}>
+    <div data-overlay style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(40,32,26,0.42)", padding: 36, display: "flex", alignItems: "flex-start", justifyContent: "center", overflowY: "auto" }}>
       <div role="dialog" aria-modal="true" aria-labelledby="pv-title" style={{ width: "100%", maxWidth: 460, marginTop: 90, boxSizing: "border-box", background: "#ffffff", borderRadius: 28, boxShadow: "0 30px 70px -20px rgba(20,20,20,0.45)", padding: "28px 26px", display: "flex", flexDirection: "column", alignItems: "center", gap: 18, textAlign: "center" }}>
         <span style={{ width: 64, height: 64, borderRadius: 20, background: C.ink, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="lock" size={30} fill style={{ color: "#e8cc9c" }} /></span>
         <div>

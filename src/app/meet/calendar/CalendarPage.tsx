@@ -214,7 +214,7 @@ function MeetingSheet({ m, onClose, onChanged }: { m: Meeting; onClose: () => vo
     onChanged("Meeting cancelled. Everyone invited has been told.");
   }
   return (
-    <div onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "80px 16px" }}>
+    <div data-overlay onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "80px 16px" }}>
       <div role="dialog" aria-modal="true" aria-labelledby="ms-h" style={{ width: "100%", maxWidth: 440, background: "#ffffff", borderRadius: 28, padding: 22, display: "flex", flexDirection: "column", gap: 14, boxShadow: "0 30px 70px -20px rgba(20,20,20,0.45)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
           <span style={{ width: 44, height: 44, borderRadius: 14, background: m.kind === "room" ? "#fef3e2" : C.coralBg, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name={m.kind === "room" ? "mic" : "videocam"} size={22} fill style={{ color: m.kind === "room" ? "#b45309" : C.accent }} /></span>
