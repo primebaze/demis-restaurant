@@ -32,6 +32,8 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
   const [kind, setKind] = useState<"call" | "room">(startKind);
   const [date, setDate] = useState(startDate || now.date);
   const [time, setTime] = useState(`${String(Math.min(22, now.hour + 1)).padStart(2, "0")}:00`);
+  // "Now": the time is taken when Create is pressed, and the meeting opens straight away.
+  const [startNow, setStartNow] = useState(false);
   const [minutes, setMinutes] = useState(30);
   // Invites: one group (All Cricklewood, All Streatham, Managers, Everyone) picked like a tab, plus
   // anyone added by name. Picking another group swaps the group; people added by name stay.
@@ -87,9 +89,18 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
     }
     setBusy(true);
     setErr("");
-    const r = await postJson("/api/meet/meetings", { title, kind, date, time, minutes, invite, liveNotes, repeat, private: priv });
+    const at = startNow ? londonNow() : null;
+    const r = await postJson("/api/meet/meetings", { title, kind, date: at ? at.date : date, time: at ? at.time : time, minutes, invite, liveNotes, repeat, private: priv });
     setBusy(false);
     if (!r.ok) return setErr(r.data.error || "Couldn't create the meeting");
+    if (startNow) {
+      const id = String(r.data.id);
+      // A call goes live at once (everyone invited is told it's started); a room recording opens its
+      // screen, where Start recording asks for the microphone.
+      if (kind === "call") await postJson(`/api/meet/meetings/${id}`, { action: "start" });
+      window.location.href = `/meet/${kind === "room" ? "room" : "call"}/${id}`;
+      return;
+    }
     onCreated(String(r.data.id));
   }
 
@@ -138,14 +149,18 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
               <label htmlFor="nm-day" style={lbl}>Date</label>
               <button type="button" onClick={() => setDate(londonNow().date)} aria-pressed={date === londonNow().date} style={{ ...quick, ...(date === londonNow().date ? { background: C.ink, color: "#ffffff" } : {}) }}>Today</button>
             </div>
-            <div style={fieldWrap}><Icon name="calendar_today" size={19} style={fieldIcon} /><input id="nm-day" type="date" value={date} min={now.date} onChange={(e) => setDate(e.target.value)} style={field} /></div>
+            <div style={fieldWrap}><Icon name="calendar_today" size={19} style={fieldIcon} /><input id="nm-day" type="date" value={date} min={now.date} onChange={(e) => { setDate(e.target.value); setStartNow(false); }} style={field} /></div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <label htmlFor="nm-time" style={lbl}>Time</label>
-              <button type="button" onClick={() => { const n = londonNow(); setDate(n.date); setTime(n.time); }} title="Today, starting now" style={quick}>Now</button>
+              <button type="button" aria-pressed={startNow} onClick={() => { const n = londonNow(); if (!startNow) { setDate(n.date); setTime(n.time); } setStartNow(!startNow); }} title="Start it as soon as it's created" style={{ ...quick, ...(startNow ? { background: C.ink, color: "#ffffff" } : {}) }}>Now</button>
             </div>
-            <div style={fieldWrap}><Icon name="schedule" size={19} style={fieldIcon} /><input id="nm-time" type="time" step={300} value={time} onChange={(e) => setTime(e.target.value)} style={field} /></div>
+            <div style={fieldWrap}><Icon name="schedule" size={19} style={fieldIcon} />
+              {startNow
+                ? <button type="button" id="nm-time" onClick={() => setStartNow(false)} title="Pick a time instead" style={{ ...field, textAlign: "left", cursor: "pointer", fontWeight: 500 }}>Now</button>
+                : <input id="nm-time" type="time" step={300} value={time} onChange={(e) => setTime(e.target.value)} style={field} />}
+            </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center" }}>
@@ -207,7 +222,7 @@ export default function NewMeeting({ onClose, onCreated, date: startDate, kind: 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button onClick={onClose} style={{ height: 48, padding: "0 20px", border: 0, borderRadius: 24, background: "transparent", fontSize: 15, fontWeight: 500, fontFamily: "inherit", color: C.ink, cursor: "pointer" }}>Cancel</button>
           <button onClick={create} disabled={busy} style={{ height: 48, display: "inline-flex", alignItems: "center", gap: 8, padding: "0 22px", border: 0, borderRadius: 24, background: C.ink, color: "#ffffff", fontSize: 15, fontWeight: 500, fontFamily: "inherit", opacity: !title.trim() || (kind === "call" && invite.length === 0) ? 0.55 : 1, cursor: "pointer" }}>
-            {busy ? "Creating…" : invite.length ? "Create and send invites" : "Create"}<Icon name="arrow_forward" size={19} />
+            {busy ? (startNow ? "Starting…" : "Creating…") : startNow ? (kind === "call" ? "Start the call now" : "Create and go to recording") : invite.length ? "Create and send invites" : "Create"}<Icon name="arrow_forward" size={19} />
           </button>
         </div>
       </div>
