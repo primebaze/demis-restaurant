@@ -56,8 +56,8 @@ export function CalendarScreen({ shifts, onTask, onRota, onNotes }: { shifts: Sh
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {sel.meets.map((m) => {
           const live = m.status === "live";
-          const past = m.status === "ended" || m.status === "ready";
-          const sub = `${m.kind === "room" ? "Room recording" : "Video call"} · ${m.minutes} min${live ? " · tap to join" : past ? (m.mineJoined ? " · tap for the notes" : " · you weren't there") : m.invited.length ? ` · ${m.invited.slice(0, 2).map((p) => p.name.split(" ")[0]).join(", ")}${m.invited.length > 2 ? ` and ${m.invited.length - 2} more` : ""}` : ""}`;
+          const past = m.status === "ended" || m.status === "ready" || m.status === "missed";
+          const sub = `${m.kind === "room" ? "Room recording" : "Video call"} · ${m.minutes} min${live ? " · tap to join" : m.status === "missed" ? " · missed, not started" : past ? (m.mineJoined ? " · tap for the notes" : " · you weren't there") : m.invited.length ? ` · ${m.invited.slice(0, 2).map((p) => p.name.split(" ")[0]).join(", ")}${m.invited.length > 2 ? ` and ${m.invited.length - 2} more` : ""}` : ""}`;
           const body = (
             <>
               {live && <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600 }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ffffff" }} />Live now</span>}

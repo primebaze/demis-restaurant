@@ -47,13 +47,14 @@ export async function POST(req: Request) {
   }
 
   if (!ok) {
-    const failures = (lock?.failures ?? 0) + 1;
-    const lockedUntil = failures >= MAX_FAILURES ? new Date(Date.now() + LOCK_MINUTES * 60_000) : null;
-    await prisma.meetPinLock.upsert({
+    // Count in the database itself (not read-then-write), so many tries sent at once all count.
+    const row = await prisma.meetPinLock.upsert({
       where: { clockinId: staffId },
-      create: { clockinId: staffId, failures, lockedUntil },
-      update: { failures: lockedUntil ? 0 : failures, lockedUntil },
+      create: { clockinId: staffId, failures: 1 },
+      update: { failures: { increment: 1 } },
     });
+    const lockedUntil = row.failures >= MAX_FAILURES ? new Date(Date.now() + LOCK_MINUTES * 60_000) : null;
+    if (lockedUntil) await prisma.meetPinLock.update({ where: { clockinId: staffId }, data: { failures: 0, lockedUntil } });
     return NextResponse.json(
       { error: lockedUntil ? `Too many wrong PINs. That name is locked for ${LOCK_MINUTES} minutes.` : "That PIN isn't right", ...(lockedUntil ? { lockedUntil: lockedUntil.toISOString() } : {}) },
       { status: lockedUntil ? 423 : 401 },

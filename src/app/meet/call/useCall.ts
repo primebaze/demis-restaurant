@@ -347,7 +347,7 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
       polling = true;
       try {
         const res = await fetch(`${base}/signal?peer=${myPeer.current}&after=${last.current}`, { cache: "no-store" });
-        if (res.status === 404) { alive.current = false; setStatus("ended"); return; }
+        if (res.status === 404) { leaveRef.current(); return; } // the meeting is over: stop mic, camera and recorder properly
         const d = await res.json();
         last.current = d.last || last.current;
         for (const s of (d.signals || []) as Signal[]) await onSignal(s);
@@ -358,7 +358,7 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
     const ping = setInterval(async () => {
       try {
         const d = await post(base, { action: "here" });
-        if (d.ended) { alive.current = false; setStatus("ended"); }
+        if (d.ended) leaveRef.current(); // ended elsewhere (or the time limit): stop everything, upload the last bit
       } catch { /* retry next time */ }
       flushUploads();
     }, 30_000);
@@ -415,11 +415,12 @@ export function useCall(meetingId: string, me: { id: number; name: string }, opt
 
   /** Managers: end the meeting for everyone. Others' phones close within a second. */
   const endAll = useCallback(async () => {
-    await Promise.all([
-      send("", "ended"),
-      post(base, { action: "end" }).catch(() => {}),
-      leave(),
-    ]);
+    // The "ended" message goes first: once the meeting is ended the call channel stops accepting messages.
+    const told = send("", "ended");
+    const left = leave();
+    await told;
+    await post(base, { action: "end" }).catch(() => {});
+    await left;
   }, [base, send, leave]);
 
   // Closing the tab: say goodbye so others drop the tile straight away.

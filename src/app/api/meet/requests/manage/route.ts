@@ -95,6 +95,8 @@ export async function POST(req: Request) {
     }
 
     if (body.action === "approve") {
+      // Your own time off or swap needs another manager (you can still decline it).
+      if (r.clockinId === me.person.id || r.targetId === me.person.id) return NextResponse.json({ error: "Another manager has to approve your own request." }, { status: 403 });
       if (r.kind === "swap") {
         const res = await approveSwap(r.id, me.person.name);
         return res.ok ? NextResponse.json({ ok: true }) : NextResponse.json({ error: res.error }, { status: 400 });

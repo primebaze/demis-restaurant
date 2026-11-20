@@ -86,21 +86,49 @@ export async function endStaleMeetings() {
   const live = await prisma.meetMeeting.findMany({ where: { status: "live" } });
   for (const m of live) {
     if (await endIfOverLimit(m)) continue; // reached 30 min (room) or 1 hour (call)
-    const last = await prisma.meetAttendee.findFirst({ where: { meetingId: m.id }, orderBy: { lastSeenAt: "desc" } });
-    const lastAt = last?.lastSeenAt?.getTime() || m.startedAt?.getTime() || 0;
+    // Last sign of life: someone in the call pinging, or (room recordings, where nobody pings) a
+    // recording piece arriving. Postgres puts empty values first in a newest-first sort, so they're
+    // filtered out; before, one invited person who never joined made a call look abandoned.
+    const [ping, piece] = await Promise.all([
+      prisma.meetAttendee.findFirst({ where: { meetingId: m.id, lastSeenAt: { not: null } }, orderBy: { lastSeenAt: "desc" } }),
+      prisma.meetRecording.findFirst({ where: { meetingId: m.id }, orderBy: { createdAt: "desc" } }),
+    ]);
+    const lastAt = Math.max(ping?.lastSeenAt?.getTime() || 0, piece?.createdAt.getTime() || 0, m.startedAt?.getTime() || 0);
     if (Date.now() - lastAt > 20 * 60_000) {
-      await prisma.meetMeeting.update({ where: { id: m.id }, data: { status: "ended", endedAt: new Date(lastAt || Date.now()) } });
-      await closeAttendance(m);
-      await scheduleNext(m);
+      // Only the request that flips it to ended tidies up and makes the next one.
+      const ended = await prisma.meetMeeting.updateMany({ where: { id: m.id, status: "live" }, data: { status: "ended", endedAt: new Date(lastAt || Date.now()) } });
+      if (ended.count) {
+        await closeAttendance(m);
+        await scheduleNext(m);
+      }
     }
   }
-  const missed = await prisma.meetMeeting.findMany({
-    where: { status: "scheduled", repeat: { in: ["daily", "weekly"] }, startsAt: { lt: new Date(Date.now() - 12 * 3600_000) } },
-  });
-  for (const m of missed) await scheduleNext(m);
+  await markMissed();
+}
+
+/**
+ * Meetings nobody started by the end of their day are "missed" (a meeting can only be started on
+ * its own day), so they leave "Coming up" and show in Past. Repeating ones carry on to their next date.
+ * Pass one meeting to check just that one (opening its page); without, all of them.
+ */
+export async function markMissed(one?: MeetMeeting): Promise<MeetMeeting | undefined> {
+  const startOfToday = londonToDate(londonDate(new Date()), "00:00");
+  const due = one
+    ? one.status === "scheduled" && one.startsAt < startOfToday ? [one] : []
+    : await prisma.meetMeeting.findMany({ where: { status: "scheduled", startsAt: { lt: startOfToday } }, take: 200 });
+  let updated: MeetMeeting | undefined;
+  for (const m of due) {
+    // Only the request that flips it makes the next one (two at once can't both add it).
+    const flipped = await prisma.meetMeeting.updateMany({ where: { id: m.id, status: "scheduled" }, data: { status: "missed" } });
+    if (flipped.count) await scheduleNext(m);
+    if (one) updated = { ...m, status: "missed" };
+  }
+  return updated;
 }
 
 export const MEETING_KINDS = ["call", "room"] as const;
+/** Over and done with: no longer upcoming or live. */
+export const PAST_STATUSES = ["ended", "ready", "missed"];
 
 /** Longest a meeting can run, to keep recording and transcription costs in check. */
 export const MAX_MINUTES: Record<string, number> = { room: 30, call: 60 };

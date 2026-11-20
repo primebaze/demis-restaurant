@@ -148,6 +148,7 @@ export default function CallPage({ id }: { id: string }) {
   else if (!detail) screen = <Light><Logo /><p style={{ margin: "40px 0 0", color: L.sub, textAlign: "center" }}>Loading the meeting…</p></Light>;
   else if (call.status === "ended" || (call.status !== "in" && ["ended", "ready"].includes(detail.meeting.status))) screen = <Ended d={detail} seconds={detail.me.seconds} saving={call.pending > 0} onRejoin={detail.meeting.status === "live" ? () => window.location.reload() : undefined} />;
   else if (call.status === "in") screen = wide ? <ComputerCall d={detail} call={call} /> : <PhoneCall d={detail} call={call} />;
+  else if (detail.meeting.status === "missed") screen = <Light><Logo /><p style={{ margin: "40px 0 0", fontSize: 17, textAlign: "center" }}>{detail.meeting.title} was missed: it wasn&rsquo;t started on its day.</p><a href="/meet" style={btnLightWide}>Back to the app</a></Light>;
   else if (detail.meeting.status === "scheduled") screen = <Waiting d={detail} mic={wantMic} cam={wantCam} onMic={() => setWantMic(!wantMic)} onCam={() => setWantCam(!wantCam)} reload={load} />;
   else screen = <Join d={detail} mic={wantMic} cam={wantCam} onMic={() => setWantMic(!wantMic)} onCam={() => setWantCam(!wantCam)} onJoin={join} busy={call.status === "joining"} error={call.error} />;
 

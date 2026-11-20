@@ -89,6 +89,8 @@ export async function POST(req: Request) {
   const f = await prisma.meetHoursFix.findUnique({ where: { id: String(body.id || "") } });
   if (!f) return NextResponse.json({ error: "Fix not found" }, { status: 404 });
   if (f.status !== "asked") return NextResponse.json({ error: "Already decided" }, { status: 400 });
+  // Your own hours change your own pay: another manager has to approve them.
+  if (f.clockinId === me.person.id && body.action === "approve") return NextResponse.json({ error: "Another manager has to approve your own hours." }, { status: 403 });
   const by = me.person.name.slice(0, 80);
 
   try {

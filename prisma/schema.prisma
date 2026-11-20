@@ -734,7 +734,7 @@ model MeetMeeting {
   id         String    @id @default(cuid())
   title      String
   kind       String    @default("call") // call (video call), room (one device records the room)
-  status     String    @default("scheduled") // scheduled, live, ended (notes being made), ready, failed
+  status     String    @default("scheduled") // scheduled, live, ended (notes being made), ready, missed (its day passed unstarted), failed
   startsAt   DateTime
   minutes    Int       @default(30) // planned length
   repeat     String    @default("") // "", daily, weekly

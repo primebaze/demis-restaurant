@@ -839,10 +839,11 @@ function Home({ me, rota, requests, onRota, reload, onTask, onAlerts, onTasks, o
   const unread = useData<{ unread: number }>("/api/meet/alerts").data?.unread || 0;
 
   const live = meetings.find((m) => m.status === "live");
-  const upcoming = meetings.filter((m) => m.status === "scheduled" && m.startsAt >= new Date(Date.now() - 3600_000).toISOString());
+  // Not started yet (a late one stays here until its day is over, then it's marked missed).
+  const upcoming = meetings.filter((m) => m.status === "scheduled");
   const list = filter === "today" ? meetings.filter((m) => m.date === today && m !== live)
     : filter === "upcoming" ? upcoming
-    : filter === "past" ? meetings.filter((m) => m.status === "ended" || m.status === "ready").reverse()
+    : filter === "past" ? meetings.filter((m) => m.status === "ended" || m.status === "ready" || m.status === "missed").reverse()
     : upcoming.slice(0, 2);
   const openTasks = [...tasks].sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
 
@@ -856,13 +857,14 @@ function Home({ me, rota, requests, onRota, reload, onTask, onAlerts, onTasks, o
   ].filter(Boolean).join(" · ") || "From the rota and clock-in app";
 
   const meetingRow = (m: Meeting) => {
-    const past = m.status === "ended" || m.status === "ready";
+    const past = m.status === "ended" || m.status === "ready" || m.status === "missed";
+    const late = m.status === "scheduled" && m.date === today && m.startsAt < new Date().toISOString();
     const body = (
       <>
         <span style={{ width: 40, height: 40, borderRadius: 14, background: "#262626", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}><Icon name={m.kind === "room" ? "mic" : past ? "auto_stories" : "videocam"} size={21} /></span>
         <span style={{ flex: 1, minWidth: 0 }}>
           <span style={{ display: "block", fontSize: 15, fontWeight: 500 }}>{m.title}</span>
-          <span style={{ display: "block", marginTop: 2, fontSize: 12, color: C.muted }}>{m.date === today ? "Today" : shortDay(m.date)} {m.time} · {past ? (m.mineJoined ? "notes" : "missed") : `${m.minutes} min`}</span>
+          <span style={{ display: "block", marginTop: 2, fontSize: 12, color: C.muted }}>{m.date === today ? "Today" : shortDay(m.date)} {m.time} · {m.status === "missed" ? "missed (not started)" : past ? (m.mineJoined ? "notes" : "missed") : late ? "not started yet" : `${m.minutes} min`}</span>
         </span>
         <Icon name="chevron_right" size={20} style={{ color: C.faint }} />
       </>

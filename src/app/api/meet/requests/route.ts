@@ -138,7 +138,9 @@ export async function POST(req: Request) {
 
       if (body.accept) {
         if ((await getShifts(r.shiftDate, r.shiftDate)).some((s) => s.staffId === me.person.id)) return NextResponse.json({ error: "You already have a shift that day" }, { status: 400 });
-        await prisma.meetRequest.update({ where: { id: r.id }, data: { status: "agreed", targetId: me.person.id, answeredAt: new Date() } });
+        // Only the first "yes" gets it: two people tapping at once can't both take the shift.
+        const took = await prisma.meetRequest.updateMany({ where: { id: r.id, status: r.status }, data: { status: "agreed", targetId: me.person.id, answeredAt: new Date() } });
+        if (!took.count) return NextResponse.json({ error: "Someone else has just taken it" }, { status: 409 });
         await notifyPeople([r.clockinId], { title: "Swap agreed", body: `${firstName(myName)} can take your shift on ${when}. A manager will confirm it.`, url: "/meet?tab=rota", tag: `req-${r.id}` }).catch(() => {});
         await tellManagers("Swap to approve", `${firstName(askerName)} → ${firstName(myName)}: ${when}.`, me.person.id);
       } else if (r.status === "asked") {

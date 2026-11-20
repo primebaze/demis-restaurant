@@ -8,7 +8,7 @@
  */
 import { prisma } from "@/lib/prisma";
 import { getClockinStaff, getShifts, updateShift, type ClockinStaff } from "@/lib/clockin";
-import { addDays, mondayOf, weekRota, ALL } from "@/lib/meet-rota";
+import { addDays, mondayOf, weekRota, ALL, isBranch } from "@/lib/meet-rota";
 import { notifyPeople, managerIds } from "@/lib/meet-notify";
 
 export const OPEN_SWAP = ["asked", "open", "agreed"];
@@ -71,6 +71,11 @@ export async function approveSwap(id: string, managerName: string): Promise<{ ok
   if (!shift || shift.staffId !== r.clockinId) return { ok: false, error: "That shift has changed since the request. Decline it and ask them to send a new one." };
   if (shifts.some((s) => s.staffId === r.targetId)) return { ok: false, error: "The colleague now has a shift that day" };
 
+  // Pin the shift to its branch first: an untagged shift takes the branch of whoever works it, so a
+  // swap to someone from the other branch would otherwise quietly move the shift there.
+  if (isBranch(r.branch)) {
+    await prisma.meetShiftBranch.upsert({ where: { shiftId: shift.id }, create: { shiftId: shift.id, branch: r.branch }, update: {} });
+  }
   await updateShift(shift.id, { staffId: r.targetId, date: shift.date, start: shift.start, end: shift.end, notes: shift.notes }, managerName);
 
   // Keep the week's sent rota in step, so this isn't counted as an unsent change.
@@ -80,7 +85,7 @@ export async function approveSwap(id: string, managerName: string): Promise<{ ok
     const staff = (await getClockinStaff()).filter((s) => s.active);
     const { shifts: now } = await weekRota(monday, staff);
     const moved = now.find((s) => s.id === shift.id);
-    const oldKey = `${r.clockinId}|${shift.date}|${shift.start}|${shift.end}|${moved?.branch || r.branch}`;
+    const oldKey = `${r.clockinId}|${shift.date}|${shift.start}|${shift.end}|${r.branch || moved?.branch}`;
     const newKey = moved ? `${moved.staffId}|${moved.date}|${moved.start}|${moved.end}|${moved.branch}` : "";
     const snap = ((last.snapshot as string[]) || []).filter((k) => k !== oldKey);
     if (newKey && ((last.snapshot as string[]) || []).includes(oldKey)) snap.push(newKey);

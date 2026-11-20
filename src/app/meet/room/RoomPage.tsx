@@ -227,10 +227,12 @@ export default function RoomPage({ id }: { id: string }) {
         )}
         {(error || saveError) && <p role="alert" style={{ margin: 0, textAlign: "center", fontSize: 13, color: "#b91c1c" }}>{error || saveError}</p>}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 10 }}>
-          {state === "ready" && d?.meeting.status === "scheduled" && d.meeting.date && d.meeting.date !== new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }) ? (
+          {state === "ready" && d?.meeting.status === "missed" ? (
+            <p style={{ margin: 0, fontSize: 14, color: C.sub, textAlign: "center" }}>This meeting was missed: it wasn&rsquo;t started on its day. Set up a new one for today.</p>
+          ) : state === "ready" && d?.meeting.status === "scheduled" && d.meeting.date && d.meeting.date !== new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }) ? (
             <p style={{ margin: 0, fontSize: 14, color: C.sub, textAlign: "center" }}>This meeting is on {new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d.meeting.date}T12:00:00Z`))}. You can start recording on the day.</p>
           ) : state === "ready" ? (
-            <button onClick={start} disabled={!d || d.meeting.status === "ended" || d.meeting.status === "ready"} style={{ height: 52, padding: "0 24px", border: 0, borderRadius: 26, background: "linear-gradient(120deg, #ff7a45, #e8513a)", color: "#ffffff", fontSize: 15, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Icon name="mic" size={22} fill />{d?.meeting.status === "live" ? "Carry on recording" : "Start recording"}</button>
+            <button onClick={start} disabled={!d || d.meeting.status === "ended" || d.meeting.status === "ready" || d.meeting.status === "missed"} style={{ height: 52, padding: "0 24px", border: 0, borderRadius: 26, background: "linear-gradient(120deg, #ff7a45, #e8513a)", color: "#ffffff", fontSize: 15, fontWeight: 600, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Icon name="mic" size={22} fill />{d?.meeting.status === "live" ? "Carry on recording" : "Start recording"}</button>
           ) : (
             <>
               <button onClick={state === "paused" ? resume : pause} disabled={state === "ending"} style={{ height: 52, padding: "0 22px", border: 0, borderRadius: 26, background: C.page, fontSize: 15, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 8, color: C.ink, cursor: "pointer" }}><Icon name={state === "paused" ? "play_arrow" : "pause"} size={22} />{state === "paused" ? "Carry on" : "Pause"}</button>

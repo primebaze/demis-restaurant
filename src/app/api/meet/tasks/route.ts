@@ -80,8 +80,10 @@ export async function GET(req: Request) {
     orderBy: [{ dueDate: "asc" }, { createdAt: "asc" }],
   });
   const titles = await meetingTitles(tasks.map((t) => t.meetingId));
-  const doneThisMonth = tasks.filter((t) => t.status === "done" && t.doneAt && t.doneAt.toISOString().slice(0, 10) >= monthStart);
-  const onTime = doneThisMonth.filter((t) => !t.dueDate || (t.doneAt && t.doneAt.toISOString().slice(0, 10) <= t.dueDate)).length;
+  // London dates (not UTC), so a task ticked off just after midnight in summer counts on the right day.
+  const doneDay = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(d);
+  const doneThisMonth = tasks.filter((t) => t.status === "done" && t.doneAt && doneDay(t.doneAt) >= monthStart);
+  const onTime = doneThisMonth.filter((t) => !t.dueDate || (t.doneAt && doneDay(t.doneAt) <= t.dueDate)).length;
   const dueThisMonth = tasks.filter((t) => t.status !== "done" && t.dueDate >= monthStart).length + doneThisMonth.length;
   return NextResponse.json({
     today: londonToday(),

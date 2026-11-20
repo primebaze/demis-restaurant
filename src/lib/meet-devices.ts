@@ -53,10 +53,14 @@ export async function decideDevice(id: string, action: string, by: string): Prom
     return { ok: true };
   }
   if (action === "revoke") {
-    await prisma.meetDevice.update({
-      where: { id },
-      data: { status: "revoked", sessionUntil: null, decidedBy: by.slice(0, 80), decidedAt: new Date() },
-    });
+    await prisma.$transaction([
+      prisma.meetDevice.update({
+        where: { id },
+        data: { status: "revoked", sessionUntil: null, decidedBy: by.slice(0, 80), decidedAt: new Date() },
+      }),
+      // A signed-out phone gets no more notifications (rota, reports, swaps).
+      prisma.meetPushSub.deleteMany({ where: { deviceId: id } }),
+    ]);
     return { ok: true };
   }
   return { ok: false, error: "Unknown action" };

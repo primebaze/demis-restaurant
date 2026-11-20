@@ -47,7 +47,8 @@ export async function GET(req: Request) {
           invited: list.filter((a) => a.invited).map((a) => ({ id: a.clockinId, name: nameOf(a.clockinId) })),
           inNow: inNow.map((a) => ({ id: a.clockinId, name: nameOf(a.clockinId) })),
           came: list.filter((a) => a.joinedAt || a.inRoom).length,
-          mineInvited: !!mine?.invited, mineJoined: !!mine?.joinedAt,
+          // Room recordings: being ticked as in the room counts as being there (nobody "joins" them).
+          mineInvited: !!mine?.invited, mineJoined: !!(mine?.joinedAt || mine?.inRoom),
         };
       }),
     }, { headers: { "Cache-Control": "no-store" } });

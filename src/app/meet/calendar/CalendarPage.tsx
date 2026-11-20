@@ -9,7 +9,7 @@ import NewMeeting from "../NewMeeting";
 
 type Meeting = {
   id: string; title: string; kind: "call" | "room"; status: string; date: string; time: string; startsAt: string; minutes: number; private: boolean;
-  host: string; invited: { id: number; name: string }[]; inNow: { id: number; name: string }[]; came: number;
+  host: string; invited: { id: number; name: string }[]; inNow: { id: number; name: string }[]; came: number; repeat?: string;
 };
 type Task = { id: string; title: string; dueDate: string; status: string; owner: string; ownerId: number };
 
@@ -31,6 +31,7 @@ function rangeTitle(view: string, anchor: string) {
 
 const tone = (m: Meeting): CSSProperties =>
   m.status === "live" ? { background: "linear-gradient(120deg, #ff7a45, #e8513a)", color: "#ffffff" }
+    : m.status === "missed" ? { background: C.page, color: C.sub, textDecoration: "line-through" }
     : m.status === "ended" || m.status === "ready" ? { background: C.page, color: C.body }
     : m.kind === "room" ? { background: "#fef3e2", color: "#78350f" } : { background: C.coralBg, color: "#7c2d12" };
 
@@ -70,6 +71,7 @@ export default function CalendarPage() {
   function openMeeting(m: Meeting) {
     if (m.status === "live") window.location.href = `/meet/call/${m.id}`;
     else if (m.status === "ended" || m.status === "ready") window.location.href = `/meet/notes/${m.id}`;
+    else if (m.status === "missed") return; // nothing to open: it never started
     else setOpen(m);
   }
 
@@ -205,13 +207,17 @@ function MeetingSheet({ m, onClose, onChanged }: { m: Meeting; onClose: () => vo
     if (!r.ok) { setBusy(""); return setErr(r.data.error || "Couldn't start it"); }
     window.location.href = m.kind === "room" ? `/meet/room/${m.id}` : `/meet/call/${m.id}`;
   }
-  async function cancel() {
-    if (!confirm(`Cancel "${m.title}"? Everyone invited is told.`)) return;
+  const repeating = m.repeat === "daily" || m.repeat === "weekly";
+  async function cancel(series = false) {
+    const q = series ? `Stop "${m.title}" repeating? This one is cancelled and no more are made. Everyone invited is told.`
+      : repeating ? `Cancel just this "${m.title}"? The next one still happens. Everyone invited is told.`
+      : `Cancel "${m.title}"? Everyone invited is told.`;
+    if (!confirm(q)) return;
     setBusy("cancel");
-    const r = await postJson(`/api/meet/meetings/${m.id}`, { action: "cancel" });
+    const r = await postJson(`/api/meet/meetings/${m.id}`, { action: "cancel", series });
     setBusy("");
     if (!r.ok) return setErr(r.data.error || "Couldn't cancel it");
-    onChanged("Meeting cancelled. Everyone invited has been told.");
+    onChanged(series ? "Stopped repeating. Everyone invited has been told." : repeating ? "This one is cancelled; the next one is still on. Everyone invited has been told." : "Meeting cancelled. Everyone invited has been told.");
   }
   return (
     <div data-overlay onClick={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(40,32,26,0.42)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "80px 16px" }}>
@@ -227,7 +233,8 @@ function MeetingSheet({ m, onClose, onChanged }: { m: Meeting; onClose: () => vo
         {m.invited.length > 0 && <p style={{ margin: 0, fontSize: 13, color: C.body }}>Invited: {m.invited.map((p) => firstName(p.name)).join(", ")}</p>}
         {err && <p role="alert" style={{ margin: 0, fontSize: 13, color: "#b91c1c" }}>{err}</p>}
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={cancel} disabled={!!busy} style={{ height: 44, padding: "0 16px", border: 0, borderRadius: 22, background: C.page, color: "#b91c1c", fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>{busy === "cancel" ? "Cancelling…" : "Cancel meeting"}</button>
+          <button onClick={() => cancel()} disabled={!!busy} style={{ height: 44, padding: "0 16px", border: 0, borderRadius: 22, background: C.page, color: "#b91c1c", fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>{busy === "cancel" ? "Cancelling…" : repeating ? "Cancel this one" : "Cancel meeting"}</button>
+          {repeating && <button onClick={() => cancel(true)} disabled={!!busy} style={{ height: 44, padding: "0 14px", border: 0, borderRadius: 22, background: "transparent", color: "#b91c1c", fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>Stop repeating</button>}
           {m.date === todayLondon() ? (
             <button onClick={start} disabled={!!busy} style={{ marginLeft: "auto", height: 44, padding: "0 20px", border: 0, borderRadius: 22, background: C.ink, color: "#ffffff", fontSize: 14, fontWeight: 500, fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
               <Icon name={m.kind === "room" ? "mic" : "videocam"} size={19} fill />{busy === "start" ? "Starting…" : m.kind === "room" ? "Start recording" : "Start now"}

@@ -19,6 +19,7 @@ export type ClockinStaff = {
   active: boolean;
 };
 
+import { prisma } from "@/lib/prisma";
 const API = (process.env.CLOCKIN_API_URL || "").replace(/\/+$/, "");
 const KEY = process.env.CLOCKIN_BRIDGE_KEY || "";
 const DEV_MOCK = !API && process.env.NODE_ENV === "development";
@@ -95,9 +96,33 @@ async function bridge<T>(path: string, init?: RequestInit): Promise<T> {
 export async function getClockinStaff(fresh = false): Promise<ClockinStaff[]> {
   if (DEV_MOCK) return DEV_STAFF;
   if (fresh) kept.delete("/staff");
-  const data = await cachedRead<{ staff: ClockinStaff[] }>("/staff");
+  let data: { staff: ClockinStaff[] };
+  try {
+    // Just failed? Don't make every request wait 8 seconds again for the next minute.
+    if (Date.now() < staffDownUntil && !kept.get("/staff")?.value) throw new Error("Clock-in link is down");
+    data = await cachedRead<{ staff: ClockinStaff[] }>("/staff");
+    saveStaffCopy(data.staff || []);
+  } catch (e) {
+    if (Date.now() >= staffDownUntil) staffDownUntil = Date.now() + 60_000;
+    // The clock-in site is down or slow: use the last good list (kept in our database) so sign-in
+    // and every screen keep working. Only throw if there has never been a good list.
+    const copy = await prisma.meetSetting.findUnique({ where: { key: STAFF_COPY } }).catch(() => null);
+    if (!copy) throw e;
+    data = { staff: JSON.parse(copy.value) as ClockinStaff[] };
+  }
   const staff = (data.staff || []).map((s) => ({ ...s, role: String(s.role || "").toLowerCase(), active: !!s.active }));
   return staff;
+}
+
+const STAFF_COPY = "clockin_staff_copy";
+let staffDownUntil = 0;
+let copySavedAt = 0;
+/** Keep the last good staff list in the database (at most every 10 minutes), for when the clock-in site is down. */
+function saveStaffCopy(staff: ClockinStaff[]) {
+  if (!staff.length || Date.now() - copySavedAt < 10 * 60_000) return;
+  copySavedAt = Date.now();
+  const value = JSON.stringify(staff);
+  prisma.meetSetting.upsert({ where: { key: STAFF_COPY }, create: { key: STAFF_COPY, value }, update: { value } }).catch(() => { copySavedAt = 0; });
 }
 
 export async function getClockinPerson(id: number): Promise<ClockinStaff | null> {

@@ -7,7 +7,7 @@ import { notifyPeople } from "@/lib/meet-notify";
 import { readUrls } from "@/lib/meet-storage";
 import { getShifts } from "@/lib/clockin";
 import { dayLabel } from "@/lib/meet-rota";
-import { meetingFor, presenceOf, addedSeconds, closeAttendance, scheduleNext, londonDate, londonHM, endIfOverLimit, hardStop } from "@/lib/meet-meetings";
+import { meetingFor, presenceOf, addedSeconds, closeAttendance, scheduleNext, londonDate, londonHM, endIfOverLimit, hardStop, markMissed } from "@/lib/meet-meetings";
 import { processNotes, transcriptionReady, summaryReady, liveLines, type Line } from "@/lib/meet-notes";
 import type { MeetMeeting, MeetAttendee } from "@prisma/client";
 
@@ -50,7 +50,7 @@ async function view(m: MeetMeeting, list: MeetAttendee[], me: NonNullable<Awaite
       private: m.private, liveNotes: m.liveNotes, repeat: m.repeat, hostId: m.hostId, host: firstNameOf(m.hostName), stopsAt: hardStop(m)?.toISOString() || "",
       startedAt: m.startedAt?.toISOString() || "", endedAt: m.endedAt?.toISOString() || "",
     },
-    me: { id: me.person.id, name: me.person.name, manager: me.manager, invited: !!mine?.invited, joined: !!mine?.joinedAt, seconds: mine?.seconds || 0 },
+    me: { id: me.person.id, name: me.person.name, manager: me.manager, invited: !!mine?.invited, joined: !!(mine?.joinedAt || mine?.inRoom), seconds: mine?.seconds || 0 },
     attendees: list.map((a) => {
       const p = people.find((x) => x.id === a.clockinId);
       return {
@@ -86,6 +86,7 @@ export async function GET(_req: Request, { params }: Ctx) {
   const { id } = await params;
   const found = await meetingFor(id, me);
   if (!found) return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
+  found.meeting = (await markMissed(found.meeting)) || found.meeting; // its day passed without it starting
   if (found.meeting.private && !me.manager && ["ended", "ready"].includes(found.meeting.status)) {
     return NextResponse.json({ error: "This meeting's notes are private" }, { status: 403 });
   }
@@ -134,6 +135,7 @@ export async function POST(req: Request, { params }: Ctx) {
 
     if (body.action === "start") {
       if (m.status === "live") return NextResponse.json({ ok: true });
+      if (m.status === "missed") return NextResponse.json({ error: "This meeting was missed. Set up a new one for today." }, { status: 400 });
       if (m.status !== "scheduled") return NextResponse.json({ error: "This meeting has already happened" }, { status: 400 });
       // Only on its own day: a meeting set for another day can't be started early (or late).
       if (londonDate(m.startsAt) !== londonDate(now)) {
@@ -149,15 +151,22 @@ export async function POST(req: Request, { params }: Ctx) {
     if (body.action === "end") {
       if (m.status === "ended" || m.status === "ready") return NextResponse.json({ ok: true }); // already ended (time limit, or another manager)
       if (m.status !== "live") return NextResponse.json({ error: "It isn't live" }, { status: 400 });
-      const ended = await prisma.meetMeeting.update({ where: { id: m.id }, data: { status: "ended", endedAt: now } });
-      await closeAttendance(ended);
-      // Repeating meetings: the next one goes in the calendar straight away.
-      await scheduleNext(ended);
+      // Only the request that flips it to ended tidies up (an end racing the time limit can't do it twice).
+      const flipped = await prisma.meetMeeting.updateMany({ where: { id: m.id, status: "live" }, data: { status: "ended", endedAt: now } });
+      if (flipped.count) {
+        const ended = { ...m, status: "ended", endedAt: now };
+        await closeAttendance(ended);
+        // Repeating meetings: the next one goes in the calendar straight away.
+        await scheduleNext(ended);
+      }
       return NextResponse.json({ ok: true });
     }
     if (body.action === "cancel") {
       if (m.status !== "scheduled") return NextResponse.json({ error: "Only meetings that haven't started can be cancelled" }, { status: 400 });
       const invited = found.attendees.filter((a) => a.clockinId !== me.person.id).map((a) => a.clockinId);
+      // A repeating meeting: cancelling skips just this date (the next one goes in first, copying the
+      // invites), unless the manager chose "stop repeating" (series: true).
+      if ((m.repeat === "daily" || m.repeat === "weekly") && body.series !== true) await scheduleNext(m);
       await prisma.meetAttendee.deleteMany({ where: { meetingId: m.id } });
       await prisma.meetMeeting.delete({ where: { id: m.id } });
       await notifyPeople(invited, { title: `Cancelled: ${m.title}`, body: `${dayLabel(londonDate(m.startsAt))} at ${londonHM(m.startsAt)} is off.`, url: "/meet?tab=calendar", tag: `meet-${m.id}`, icon: "event_busy" }).catch(() => null);

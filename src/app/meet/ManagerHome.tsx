@@ -77,7 +77,7 @@ export default function ManagerHome({ name }: { name: string }) {
     if (data.overdue.total) needs.push({ href: "/meet/tasks", icon: "assignment_late", bg: "#fff1ec", fg: "#e2552b", title: `${data.overdue.total} task${data.overdue.total === 1 ? "" : "s"} overdue`, sub: data.overdue.by.map((b) => `${b.name} ${b.n}`).join(" · ") });
   }
   const live = meetings.find((m) => m.status === "live");
-  const todays = meetings.filter((m) => m.status !== "ended" && m.status !== "ready");
+  const todays = meetings.filter((m) => m.status !== "ended" && m.status !== "ready" && m.status !== "missed");
   const mins = (iso: string) => Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
   async function startRoom(m: Meeting) {
     const r = await postJson(`/api/meet/meetings/${m.id}`, { action: "start" });
