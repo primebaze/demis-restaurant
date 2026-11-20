@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  CalendarCheck, CalendarDays, ChefHat, ClipboardCheck, Clapperboard, Clock, DoorOpen, Drumstick, LayoutGrid,
-  LogOut, Menu, MailCheck, Megaphone, MousePointerClick, Settings2, Soup, Users, UtensilsCrossed, ArrowUpRight,
+  CalendarCheck, CalendarDays, ChefHat, ClipboardCheck, Clock, DoorOpen, Drumstick, LayoutGrid,
+  LogOut, Menu, MailCheck, Megaphone, MousePointerClick, Settings2, Soup, Users, UtensilsCrossed, Video, ArrowUpRight,
   type LucideIcon,
 } from "lucide-react";
 import { BottomSheet, PageHead } from "@/components/admin/ui";
@@ -31,8 +31,8 @@ const TOP: Item[] = [
 const SIDE: Item[] = [
   { href: "/admin/door/cricklewood", label: "Door", icon: DoorOpen },
   { href: "/admin/checkins", label: "Check-ins", icon: ClipboardCheck },
-  { href: "/admin/shoot-plans", label: "Weekly Plans", icon: Clapperboard },
-  // Meetings link (https://meeting.demisrestaurant.co.uk, icon Video, external: true) is left out until the meetings app is finished.
+  // Weekly Plans (/admin/shoot-plans, icon Clapperboard) is hidden from the menu; the page still works by its link.
+  { href: "https://meeting.demisrestaurant.co.uk", label: "Meetings", icon: Video, external: true },
 ];
 
 // Bottom bar on iPad portrait and phones.
