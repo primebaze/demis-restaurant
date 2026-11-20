@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback , useRef} from "react";
 import { ExternalLink, Radio, RotateCcw, Tablet, Users } from "lucide-react";
-import { OwnLayout, PageHead, PillSwitch, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, table, tableWrap, useTypedConfirm, DateField } from "@/components/admin/ui";
+import { OwnLayout, PageHead, PillSwitch, GlassStats, Sheet, SheetTitle, SheetFooter, Tag, Empty, btn, field, table, tableWrap, useTypedConfirm, WeekdayPicker, weekdayOnOrAfter } from "@/components/admin/ui";
 
 const SERVICES = [
   { href: "/admin/checkins", label: "Sunday Buffet" },
@@ -47,13 +47,14 @@ function remaining(endsAt: string, now: number): string {
 
 export default function AdminCheckinsPage() {
   const [askToType, typeDialog] = useTypedConfirm();
-  const [date, setDate] = useState(() => ukToday());
+  // Sundays only: opens on today if it's Sunday, otherwise the coming Sunday.
+  const [date, setDate] = useState(() => weekdayOnOrAfter(ukToday(), 0));
   const dateRef = useRef(date);
   dateRef.current = date;
   // Keep the chosen day in the address, so switching to the other page keeps it.
   useEffect(() => {
     const d = new URLSearchParams(window.location.search).get("date");
-    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) setDate(d);
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) setDate(weekdayOnOrAfter(d, 0));
   }, []);
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -123,7 +124,7 @@ export default function AdminCheckinsPage() {
         actions={
           <>
             <PillSwitch items={SERVICES.map((i) => ({ ...i, href: date === ukToday() ? i.href : `${i.href}?date=${date}` }))} current="/admin/checkins" label="Service" />
-            <DateField variant="glass" value={date} onChange={setDate} ariaLabel="Day" />
+            <WeekdayPicker value={date} onChange={setDate} weekday={0} ariaLabel="Sunday" />
           </>
         }
       />

@@ -347,6 +347,73 @@ function prettyDay(iso: string) {
  * `variant="glass"` sits on the photo (page headers); `variant="light"` sits on a white sheet (forms, filters).
  * Value and onChange use YYYY-MM-DD strings, like <input type="date">.
  */
+/** The given weekday (0 = Sunday … 6 = Saturday) on or after a YYYY-MM-DD date. */
+export function weekdayOnOrAfter(date: string, weekday: number): string {
+  const d = new Date(`${date}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + ((weekday - d.getUTCDay() + 7) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * For events that only run on one day of the week (the Sunday Buffet and Sunday Feast): step a week
+ * back or forward, or pick from a short list of recent and coming dates. No full calendar, so a day
+ * the event never runs can't be picked.
+ */
+export function WeekdayPicker({
+  value, onChange, weekday = 0, ariaLabel = "Day", back = 8, ahead = 4,
+}: {
+  value: string; onChange: (v: string) => void; weekday?: number; ariaLabel?: string; back?: number; ahead?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const today = londonToday();
+  const next = weekdayOnOrAfter(today, weekday); // today if it's that day
+  const step = (iso: string, weeks: number) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + weeks * 7); return d.toISOString().slice(0, 10); };
+  const list = Array.from({ length: back + ahead + 1 }, (_, i) => step(next, ahead - i)); // newest first
+  const dayName = new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" }).format(new Date(`${next}T12:00:00Z`));
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent | TouchEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("touchstart", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const arrow = "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] text-white backdrop-blur-xl hover:bg-[rgba(58,52,48,0.65)]";
+  const label = (iso: string) => (iso === next ? (iso === today ? "Today" : `This ${dayName}`) : iso === step(next, -1) ? `Last ${dayName}` : iso === step(next, 1) ? `Next ${dayName}` : "");
+  return (
+    <div ref={ref} className="relative inline-flex h-11 shrink-0 items-center gap-1.5 self-center">
+      <button type="button" onClick={() => onChange(step(value, -1))} aria-label={`Previous ${dayName}`} className={arrow}><ChevronLeft className="h-4 w-4" strokeWidth={1.75} /></button>
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open} aria-label={`${ariaLabel}: ${prettyDay(value)}`}
+        className="inline-flex h-11 items-center gap-2 rounded-full border border-white/10 bg-[rgba(58,52,48,0.48)] px-4 text-[15px] font-light text-white backdrop-blur-xl hover:bg-[rgba(58,52,48,0.65)]">
+        <CalendarDays className="h-[18px] w-[18px] shrink-0 opacity-80" strokeWidth={1.6} />
+        <span className="whitespace-nowrap">{prettyDay(value)}</span>
+        {label(value) && <span className="whitespace-nowrap text-[13px] text-white/60">· {label(value)}</span>}
+        <ChevronDown className={`h-4 w-4 shrink-0 opacity-70 transition ${open ? "rotate-180" : ""}`} strokeWidth={1.75} />
+      </button>
+      <button type="button" onClick={() => onChange(step(value, 1))} aria-label={`Next ${dayName}`} className={arrow}><ChevronRight className="h-4 w-4" strokeWidth={1.75} /></button>
+
+      {open && (
+        <div role="listbox" aria-label={ariaLabel} className="popup-dark absolute right-0 top-[calc(100%+8px)] z-[55] max-h-[360px] w-[260px] max-w-[calc(100vw-32px)] overflow-y-auto rounded-[22px] bg-sand-50 p-2 text-stone-900 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-stone-100">
+          {list.map((iso) => {
+            const sel = iso === value;
+            return (
+              <button key={iso} type="button" role="option" aria-selected={sel} onClick={() => { onChange(iso); setOpen(false); }}
+                className={`flex h-10 w-full items-center justify-between rounded-full px-3.5 text-left text-sm transition ${sel ? "bg-stone-900 font-medium text-white" : "hover:bg-sand-200"}`}>
+                <span>{prettyDay(iso)}</span>
+                {label(iso) && <span className={`text-xs ${sel ? "text-white/70" : "text-stone-500"}`}>{label(iso)}</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DateField({
   value, onChange, variant = "light", placeholder = "Pick a date", ariaLabel = "Date", allowClear = false, id, className = "", invalid = false,
 }: {
